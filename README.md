@@ -121,4 +121,4 @@ Built by a cross-functional engineering team focusing on **trust, logistics opti
 
 ## One-Line Engineering Summary
 
-> *Mealwar leverages a cross-platform mobile architecture with a scalable REST backend to deliver a secure, role-based food redistribution system prioritizing safety, accountability, and sustainability.*
+> *Ahara leverages a cross-platform mobile architecture with a scalable REST backend to deliver a secure, role-based food redistribution system prioritizing safety, accountability, and sustainability.*
