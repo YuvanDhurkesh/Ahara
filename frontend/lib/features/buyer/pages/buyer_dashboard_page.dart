@@ -3,6 +3,7 @@ import '../../../shared/styles/app_colors.dart';
 import 'buyer_home_page.dart';
 import 'buyer_browse_page.dart';
 import 'buyer_favourites_page.dart';
+import 'buyer_orders_page.dart';
 
 class BuyerDashboardPage extends StatefulWidget {
   const BuyerDashboardPage({super.key});
@@ -36,7 +37,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
         favouriteIds: _favouriteIds,
         onToggleFavourite: _toggleFavourite,
       ), // Browse
-      const Scaffold(body: Center(child: Text("Orders"))),
+      const BuyerOrdersPage(), // Orders
       BuyerFavouritesPage(
         favouriteIds: _favouriteIds,
         onToggleFavourite: _toggleFavourite,

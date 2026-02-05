@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../data/mock_stores.dart';
+import 'buyer_food_detail_page.dart';
 
 class BuyerBrowsePage extends StatefulWidget {
   final Set<String> favouriteIds;
@@ -18,176 +20,138 @@ class BuyerBrowsePage extends StatefulWidget {
 
 class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = "";
-  String? _selectedArea;
+  final DraggableScrollableController _sheetController =
+      DraggableScrollableController();
 
-  final List<Map<String, String>> _popularAreas = [
-    {
-      "name": "Koramangala",
-      "image":
-          "https://images.unsplash.com/photo-1596422846543-75c6fc183fdf?q=80&w=400&fit=crop",
-    },
-    {
-      "name": "Indiranagar",
-      "image":
-          "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=400&fit=crop",
-    },
-    {
-      "name": "HSR Layout",
-      "image":
-          "https://images.unsplash.com/photo-1590059132213-f91575ee700d?q=80&w=400&fit=crop",
-    },
-    {
-      "name": "Jayanagar",
-      "image":
-          "https://images.unsplash.com/photo-1449156001931-828320f218a4?q=80&w=400&fit=crop",
-    },
-  ];
+  // Filter States
+  String _searchQuery = "";
+  double _minRating = 0.0;
+  bool _onlyFree = false;
+
+  // Map Interaction State
+  String? _selectedStoreId;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _sheetController.dispose();
     super.dispose();
+  }
+
+  // Filter stores based on search and filters
+  List<MockStore> get _filteredStores {
+    return allMockStores.where((store) {
+      // 1. Search Query
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        if (!store.name.toLowerCase().contains(query) &&
+            !store.type.toLowerCase().contains(query)) {
+          return false;
+        }
+      }
+
+      // 2. Min Rating
+      final rating = double.tryParse(store.rating) ?? 0.0;
+      if (rating < _minRating) return false;
+
+      // 3. Price Filters
+      if (_onlyFree && !store.isFree) return false;
+
+      return true;
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    List<MockStore> featuredResults = allMockStores.where((store) {
-      bool matchesSearch =
-          store.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          store.type.toLowerCase().contains(_searchQuery.toLowerCase());
-      bool matchesArea = _selectedArea == null || store.area == _selectedArea;
-      return matchesSearch && matchesArea;
-    }).toList();
-
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildSearchHeader(),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                children: [
-                  if (_searchQuery.isEmpty && _selectedArea == null) ...[
-                    _buildSectionHeader("Popular Areas"),
-                    _buildAreaGrid(),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader("All Near You"),
-                  ] else ...[
-                    _buildActiveFilters(),
-                  ],
-                  _buildResultsList(featuredResults),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
+      body: Stack(
         children: [
-          Row(
-            children: [
-              const Icon(Icons.location_on, color: AppColors.primary, size: 24),
-              const SizedBox(width: 8),
-              const Text(
-                "Browse Bangalore",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.filter_list, color: AppColors.textDark),
-              ),
-            ],
+          // 1. Map Background
+          _buildMapBackground(),
+
+          // 2. Map Markers
+          _buildMapMarkers(),
+
+          // 3. Floating Search Header
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _buildFloatingSearchHeader(),
           ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _searchController,
-            onChanged: (value) => setState(() => _searchQuery = value),
-            decoration: InputDecoration(
-              hintText: "Search restaurants or dishes",
-              prefixIcon: const Icon(Icons.search, color: AppColors.primary),
-              fillColor: AppColors.background,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
-            ),
-          ),
+
+          // 4. Draggable Bottom Sheet
+          _buildBottomSheetList(),
+
+          // 5. Pop-out Card
+          if (_selectedStoreId != null) _buildPopOutCard(),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w800,
-          color: AppColors.textDark,
-          letterSpacing: 0.5,
-        ),
+  Widget _buildMapBackground() {
+    return GestureDetector(
+      onTap: () {
+        if (_selectedStoreId != null) {
+          setState(() => _selectedStoreId = null);
+        }
+      },
+      child: Container(
+        color: const Color(0xFFE5E5E5),
+        child: CustomPaint(painter: GridMapPainter(), child: Container()),
       ),
     );
   }
 
-  Widget _buildAreaGrid() {
-    return SizedBox(
-      height: 120,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _popularAreas.length,
-        itemBuilder: (context, index) {
-          final area = _popularAreas[index];
-          return GestureDetector(
-            onTap: () => setState(() => _selectedArea = area["name"]),
-            child: Container(
-              width: 150,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(
-                  image: NetworkImage(area["image"]!),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(0.4),
-                    BlendMode.darken,
-                  ),
+  Widget _buildMapMarkers() {
+    final List<Offset> positions = [
+      const Offset(100, 250),
+      const Offset(250, 300),
+      const Offset(150, 400),
+      const Offset(300, 200),
+      const Offset(80, 500),
+      const Offset(320, 550),
+    ];
+
+    return Stack(
+      children: List.generate(
+        _filteredStores.length.clamp(0, positions.length),
+        (index) {
+          final store = _filteredStores[index];
+          final pos = positions[index];
+          final isSelected = _selectedStoreId == store.id;
+
+          return Positioned(
+            top: pos.dy,
+            left: pos.dx,
+            child: GestureDetector(
+              onTap: () {
+                setState(() => _selectedStoreId = store.id);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
                 ),
-              ),
-              child: Center(
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.black : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: Text(
-                  area["name"]!,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  store.isFree ? "Free" : store.price,
+                  style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: isSelected ? Colors.white : Colors.black,
                   ),
                 ),
               ),
@@ -198,199 +162,544 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     );
   }
 
-  Widget _buildActiveFilters() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
+  Widget _buildFloatingSearchHeader() {
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            if (_selectedArea != null)
-              _buildFilterChip(
-                _selectedArea!,
-                () => setState(() => _selectedArea = null),
-              ),
-            if (_searchQuery.isNotEmpty)
-              _buildFilterChip("Search: $_searchQuery", () {
-                _searchController.clear();
-                setState(() => _searchQuery = "");
-              }),
+            Row(
+              children: [
+                const Icon(Icons.search, size: 24, color: Colors.black),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (val) => setState(() => _searchQuery = val),
+                    decoration: InputDecoration(
+                      hintText: "Bangalore",
+                      hintStyle: GoogleFonts.inter(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                      border: InputBorder.none,
+                      isDense: true,
+                    ),
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                if (_searchQuery.isNotEmpty || _minRating > 0 || _onlyFree)
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 16),
+                    onPressed: () => setState(() {
+                      _searchController.clear();
+                      _searchQuery = "";
+                      _minRating = 0;
+                      _onlyFree = false;
+                    }),
+                  ),
+              ],
+            ),
+            const Divider(height: 20),
+            Row(
+              children: [
+                _buildHeaderFilter("Filter", onTap: _showFilterDialog),
+                const SizedBox(width: 8),
+                if (_minRating > 0) ...[
+                  _buildActiveFilterChip("${_minRating}+ ★"),
+                  const SizedBox(width: 8),
+                ],
+                if (_onlyFree) ...[
+                  _buildActiveFilterChip("Free"),
+                  const SizedBox(width: 8),
+                ],
+                const Spacer(),
+                Text(
+                  "${_filteredStores.length} results",
+                  style: GoogleFonts.inter(
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, VoidCallback onDelete) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      child: Chip(
-        label: Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
+  Widget _buildHeaderFilter(String label, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(20),
         ),
-        backgroundColor: AppColors.primary,
-        deleteIcon: const Icon(Icons.close, size: 14, color: Colors.white),
-        onDeleted: onDelete,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.keyboard_arrow_down, size: 16),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildResultsList(List<MockStore> stores) {
-    if (stores.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.only(top: 80),
-        child: Center(child: Text("No restaurants found in this area.")),
-      );
-    }
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      itemCount: stores.length,
-      itemBuilder: (context, index) {
-        return _buildStoreCard(stores[index]);
+  Widget _buildActiveFilterChip(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  void _showFilterDialog() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Filter",
+                    style: GoogleFonts.inter(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "Rating",
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    children: [3.5, 4.0, 4.5].map((rating) {
+                      final isSelected = _minRating == rating;
+                      return ChoiceChip(
+                        label: Text("$rating+ ★"),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          setModalState(() {});
+                          setState(() => _minRating = selected ? rating : 0);
+                        },
+                        selectedColor: Colors.black,
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black,
+                        ),
+                        // Add backgroundColor if needed to ensure visibility when not selected
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    "Offers",
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  FilterChip(
+                    label: const Text("Free Food Only"),
+                    selected: _onlyFree,
+                    onSelected: (val) {
+                      setModalState(() {});
+                      setState(() => _onlyFree = val);
+                    },
+                    selectedColor: Colors.black,
+                    labelStyle: TextStyle(
+                      color: _onlyFree ? Colors.white : Colors.black,
+                    ),
+                    checkmarkColor: Colors.white,
+                    backgroundColor: Colors.grey.shade200,
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text("Apply Filters"),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
       },
+    );
+  }
+
+  Widget _buildBottomSheetList() {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.15,
+      minChildSize: 0.1,
+      maxChildSize: 0.9,
+      controller: _sheetController,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, -5),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  controller: scrollController,
+                  itemCount: _filteredStores.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 24),
+                  itemBuilder: (context, index) {
+                    return _buildStoreCard(_filteredStores[index]);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPopOutCard() {
+    final store = allMockStores.firstWhere((s) => s.id == _selectedStoreId);
+    return Positioned(
+      bottom: 150,
+      left: 20,
+      right: 20,
+      child: Material(
+        elevation: 10,
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                    child: Image.network(
+                      store.image,
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => setState(() => _selectedStoreId = null),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            store.name,
+                            style: GoogleFonts.inter(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            "${store.rating} ★ • ${store.isFree ? "Free" : store.price}",
+                            style: GoogleFonts.inter(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BuyerFoodDetailPage(store: store),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text("View"),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildStoreCard(MockStore store) {
     bool isFavourite = widget.favouriteIds.contains(store.id);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => BuyerFoodDetailPage(store: store)),
+        );
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Stack(
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
-                ),
+                borderRadius: BorderRadius.circular(20),
                 child: Image.network(
                   store.image,
-                  height: 160,
+                  height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
               ),
               Positioned(
                 top: 12,
-                left: 12,
-                child: Wrap(
-                  spacing: 6,
-                  children: [
-                    if (store.isFree) _buildTextBadge("FREE", Colors.green),
-                    _buildTextBadge(store.area, Colors.black54),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: 12,
                 right: 12,
-                child: GestureDetector(
-                  onTap: () => widget.onToggleFavourite(store.id),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      isFavourite ? Icons.favorite : Icons.favorite_outline,
-                      color: isFavourite
-                          ? Colors.red
-                          : AppColors.textLight.withOpacity(0.6),
-                      size: 20,
-                    ),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isFavourite ? Icons.favorite : Icons.favorite_border,
+                    size: 20,
+                    color: isFavourite ? Colors.red : Colors.black,
                   ),
                 ),
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        store.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textDark,
-                        ),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      store.name,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                      Text(
-                        store.type,
-                        style: TextStyle(
-                          color: AppColors.textLight.withOpacity(0.6),
-                          fontSize: 13,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.star, size: 14, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(
+                          "${store.rating} (${store.reviews.values.length * 50} reviews)",
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "1.2 miles",
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: store.isFree ? "Free" : store.price,
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        TextSpan(
+                          text: " / item",
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BuyerFoodDetailPage(store: store),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ],
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 0,
+                      ),
+                      minimumSize: const Size(0, 32),
+                    ),
+                    child: Text(
+                      "Select",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
-                Text(
-                  store.price,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: store.isFree ? Colors.green : AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildTextBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
+class GridMapPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 4
+      ..style = PaintingStyle.stroke;
+
+    double step = 80;
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += step * 0.8) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+
+    final blockPaint = Paint()..color = Colors.white;
+    canvas.drawRect(const Rect.fromLTWH(20, 20, 50, 50), blockPaint);
+    canvas.drawRect(const Rect.fromLTWH(100, 100, 120, 60), blockPaint);
+    canvas.drawRect(const Rect.fromLTWH(250, 50, 80, 80), blockPaint);
+    canvas.drawRect(const Rect.fromLTWH(20, 300, 100, 100), blockPaint);
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

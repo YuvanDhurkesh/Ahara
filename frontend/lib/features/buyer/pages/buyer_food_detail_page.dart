@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../data/mock_stores.dart';
+import 'buyer_checkout_page.dart';
 
 class BuyerFoodDetailPage extends StatelessWidget {
   final MockStore store;
@@ -36,7 +37,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _buildReserveButton(),
+      floatingActionButton: _buildReserveButton(context),
     );
   }
 
@@ -377,12 +378,19 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReserveButton() {
+  Widget _buildReserveButton(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BuyerCheckoutPage(store: store),
+            ),
+          );
+        },
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 22),
           shape: RoundedRectangleBorder(

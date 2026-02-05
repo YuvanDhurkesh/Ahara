@@ -10,6 +10,7 @@ class MockStore {
   final String? discount;
   final String rating;
   final bool isFree;
+  final bool offersDelivery;
   final String area;
   final String city;
   final String address;
@@ -28,6 +29,7 @@ class MockStore {
     this.discount,
     required this.rating,
     required this.isFree,
+    required this.offersDelivery,
     required this.area,
     required this.city,
     required this.address,
@@ -50,6 +52,7 @@ final List<MockStore> allMockStores = [
     discount: "50% OFF",
     rating: "4.8",
     isFree: false,
+    offersDelivery: true,
     area: "Koramangala",
     city: "Bangalore",
     address: "4th Block, 80 Feet Rd, Koramangala, Bengaluru, Karnataka 560034",
@@ -74,6 +77,7 @@ final List<MockStore> allMockStores = [
     discount: "50% OFF",
     rating: "4.5",
     isFree: false,
+    offersDelivery: true,
     area: "Indiranagar",
     city: "Bangalore",
     address:
@@ -104,6 +108,7 @@ final List<MockStore> allMockStores = [
     discount: "Lunch Deal",
     rating: "4.7",
     isFree: false,
+    offersDelivery: true,
     area: "HSR Layout",
     city: "Bangalore",
     address: "27th Main Rd, Sector 2, HSR Layout, Bengaluru, Karnataka 560102",
@@ -128,6 +133,7 @@ final List<MockStore> allMockStores = [
     discount: "50% OFF",
     rating: "4.9",
     isFree: false,
+    offersDelivery: true,
     area: "Koramangala",
     city: "Bangalore",
     address: "5th Block, Koramangala, Bengaluru, Karnataka 560034",
@@ -150,6 +156,7 @@ final List<MockStore> allMockStores = [
     price: "FREE",
     rating: "4.6",
     isFree: true,
+    offersDelivery: false,
     area: "Indiranagar",
     city: "Bangalore",
     address: "Double Rd, Indiranagar, Bengaluru, Karnataka 560008",
@@ -172,6 +179,7 @@ final List<MockStore> allMockStores = [
     price: "FREE",
     rating: "5.0",
     isFree: true,
+    offersDelivery: false,
     area: "HSR Layout",
     city: "Bangalore",
     address: "19th Main Rd, Sector 1, HSR Layout, Bengaluru, Karnataka 560102",
@@ -194,6 +202,7 @@ final List<MockStore> allMockStores = [
     price: "FREE",
     rating: "4.4",
     isFree: true,
+    offersDelivery: false,
     area: "Koramangala",
     city: "Bangalore",
     address: "Outer Ring Rd, Koramangala, Bengaluru, Karnataka 560037",
@@ -218,6 +227,7 @@ final List<MockStore> allMockStores = [
     discount: "80% OFF",
     rating: "4.7",
     isFree: false,
+    offersDelivery: true,
     area: "Indiranagar",
     city: "Bangalore",
     address: "100 Feet Rd, Indiranagar, Bengaluru, Karnataka 560038",
@@ -242,6 +252,7 @@ final List<MockStore> allMockStores = [
     discount: "60% OFF",
     rating: "4.3",
     isFree: false,
+    offersDelivery: true,
     area: "Jayanagar",
     city: "Bangalore",
     address: "9th Block, Jayanagar, Bengaluru, Karnataka 560069",
@@ -266,6 +277,7 @@ final List<MockStore> allMockStores = [
     discount: "Flat 50%",
     rating: "4.2",
     isFree: false,
+    offersDelivery: true,
     area: "Jayanagar",
     city: "Bangalore",
     address: "4th Block, Jayanagar, Bengaluru, Karnataka 560041",
