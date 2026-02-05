@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../buyer/pages/buyer_dashboard_page.dart';
 import 'login_page.dart';
 
 class BuyerRegisterPage extends StatefulWidget {
@@ -51,12 +51,7 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
             children: [
               Text(
                 "Join as a Buyer",
-                style: GoogleFonts.lora(
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                  letterSpacing: -0.5,
-                ),
+                style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: 12),
               Text(
@@ -77,9 +72,9 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
-                decoration: _buildInputDecoration(
-                  "E.g. Jane Doe",
-                  Icons.person_outline,
+                decoration: const InputDecoration(
+                  hintText: "E.g. Jane Doe",
+                  prefixIcon: Icon(Icons.person_outline),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -98,9 +93,9 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
-                decoration: _buildInputDecoration(
-                  "+1 (555) 000-0000",
-                  Icons.phone_outlined,
+                decoration: const InputDecoration(
+                  hintText: "+1 (555) 000-0000",
+                  prefixIcon: Icon(Icons.phone_outlined),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -119,9 +114,9 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
-                decoration: _buildInputDecoration(
-                  "name@example.com",
-                  Icons.email_outlined,
+                decoration: const InputDecoration(
+                  hintText: "name@example.com",
+                  prefixIcon: Icon(Icons.email_outlined),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -141,15 +136,14 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
                 ),
-                decoration: _buildInputDecoration(
-                  "At least 6 characters",
-                  Icons.lock_outline,
+                decoration: InputDecoration(
+                  hintText: "At least 6 characters",
+                  prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
                           ? Icons.visibility_off
                           : Icons.visibility,
-                      color: AppColors.textLight.withOpacity(0.6),
                       size: 20,
                     ),
                     onPressed: () =>
@@ -178,9 +172,9 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                       ),
-                      decoration: _buildInputDecoration(
-                        "Search your area",
-                        Icons.location_on_outlined,
+                      decoration: const InputDecoration(
+                        hintText: "Search your area",
+                        prefixIcon: Icon(Icons.location_on_outlined),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty)
@@ -208,25 +202,16 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Process registration
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BuyerDashboardPage(),
+                        ),
+                        (route) => false,
+                      );
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    "Create Account",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+                  child: const Text("Create Account"),
                 ),
               ),
               const SizedBox(height: 32),
@@ -271,59 +256,7 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
   Widget _buildLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0, left: 4.0),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: AppColors.textDark.withOpacity(0.85),
-          fontSize: 12,
-          letterSpacing: 1.1,
-        ),
-      ),
-    );
-  }
-
-  InputDecoration _buildInputDecoration(
-    String hint,
-    IconData icon, {
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(
-        color: AppColors.textLight.withOpacity(0.4),
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-      ),
-      prefixIcon: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        child: Icon(icon, color: AppColors.primary.withOpacity(0.7), size: 22),
-      ),
-      prefixIconConstraints: const BoxConstraints(minWidth: 40),
-      suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.08)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.12)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 1),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
-      ),
+      child: Text(label, style: Theme.of(context).textTheme.labelMedium),
     );
   }
 

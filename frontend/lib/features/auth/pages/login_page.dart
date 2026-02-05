@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../buyer/pages/buyer_dashboard_page.dart';
 import 'register_selection_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -107,7 +108,13 @@ class _LoginPageState extends State<LoginPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Process login
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BuyerDashboardPage(),
+                        ),
+                        (route) => false,
+                      );
                     }
                   },
                   child: const Text("Login"),

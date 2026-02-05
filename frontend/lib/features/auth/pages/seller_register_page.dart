@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
 
@@ -41,14 +40,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: AppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
         child: Form(
@@ -58,18 +50,13 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
             children: [
               Text(
                 "Join as a Seller",
-                style: GoogleFonts.lora(
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                  letterSpacing: -0.5,
-                ),
+                style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: 12),
               Text(
                 "Partner with us to reduce food waste and serve your local community.",
                 style: TextStyle(
-                  color: AppColors.textLight,
+                  color: AppColors.textLight.withOpacity(0.8),
                   fontSize: 15,
                   height: 1.5,
                 ),
@@ -80,13 +67,9 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
               _buildLabel("BUSINESS NAME"),
               TextFormField(
                 controller: _nameController,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: _buildInputDecoration(
-                  "E.g. Sunshine Delights",
-                  Icons.business_outlined,
+                decoration: const InputDecoration(
+                  hintText: "E.g. Sunshine Delights",
+                  prefixIcon: Icon(Icons.business_outlined),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -100,14 +83,9 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
               _buildLabel("BUSINESS TYPE"),
               DropdownButtonFormField<String>(
                 value: _selectedType,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textDark,
-                ),
-                decoration: _buildInputDecoration(
-                  "Select business type",
-                  Icons.category_outlined,
+                decoration: const InputDecoration(
+                  hintText: "Select business type",
+                  prefixIcon: Icon(Icons.category_outlined),
                 ),
                 items: _sellerTypes.map((type) {
                   return DropdownMenuItem(value: type, child: Text(type));
@@ -124,8 +102,6 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                   Icons.keyboard_arrow_down,
                   color: AppColors.textLight.withOpacity(0.6),
                 ),
-                dropdownColor: Colors.white,
-                borderRadius: BorderRadius.circular(18),
               ),
               const SizedBox(height: 28),
 
@@ -134,13 +110,9 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
               TextFormField(
                 controller: _fssaiController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: _buildInputDecoration(
-                  "14-digit FSSAI number",
-                  Icons.verified_outlined,
+                decoration: const InputDecoration(
+                  hintText: "14-digit FSSAI number",
+                  prefixIcon: Icon(Icons.verified_outlined),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -157,13 +129,9 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: _buildInputDecoration(
-                  "contact@business.com",
-                  Icons.email_outlined,
+                decoration: const InputDecoration(
+                  hintText: "contact@business.com",
+                  prefixIcon: Icon(Icons.email_outlined),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -179,19 +147,14 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: _buildInputDecoration(
-                  "At least 8 characters",
-                  Icons.lock_outline,
+                decoration: InputDecoration(
+                  hintText: "At least 8 characters",
+                  prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
                           ? Icons.visibility_off
                           : Icons.visibility,
-                      color: AppColors.textLight.withOpacity(0.6),
                       size: 20,
                     ),
                     onPressed: () =>
@@ -278,59 +241,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
   Widget _buildLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0, left: 4.0),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: AppColors.textDark.withOpacity(0.85),
-          fontSize: 12,
-          letterSpacing: 1.1,
-        ),
-      ),
-    );
-  }
-
-  InputDecoration _buildInputDecoration(
-    String hint,
-    IconData icon, {
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(
-        color: AppColors.textLight.withOpacity(0.4),
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-      ),
-      prefixIcon: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        child: Icon(icon, color: AppColors.primary.withOpacity(0.7), size: 22),
-      ),
-      prefixIconConstraints: const BoxConstraints(minWidth: 40),
-      suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.08)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.12)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 1),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
-      ),
+      child: Text(label, style: Theme.of(context).textTheme.labelMedium),
     );
   }
 }

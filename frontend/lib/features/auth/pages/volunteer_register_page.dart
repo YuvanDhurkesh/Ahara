@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
 
@@ -78,15 +77,7 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
         _selectedTransport != null && _selectedTransport != 'Cycle';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: AppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
         child: Form(
@@ -96,18 +87,13 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
             children: [
               Text(
                 "Join as a Volunteer",
-                style: GoogleFonts.lora(
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                  letterSpacing: -0.5,
-                ),
+                style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: 12),
               Text(
                 "Offer your time and help distribute food surplus to the neighborhood.",
                 style: TextStyle(
-                  color: AppColors.textLight,
+                  color: AppColors.textLight.withOpacity(0.8),
                   fontSize: 15,
                   height: 1.5,
                 ),
@@ -118,13 +104,9 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
               _buildLabel("FULL NAME"),
               TextFormField(
                 controller: _nameController,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: _buildInputDecoration(
-                  "Enter your full name",
-                  Icons.person_outline,
+                decoration: const InputDecoration(
+                  hintText: "Enter your full name",
+                  prefixIcon: Icon(Icons.person_outline),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -138,14 +120,9 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
               _buildLabel("MODE OF TRANSPORT"),
               DropdownButtonFormField<String>(
                 value: _selectedTransport,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textDark,
-                ),
-                decoration: _buildInputDecoration(
-                  "Select transport mode",
-                  Icons.directions_bike_outlined,
+                decoration: const InputDecoration(
+                  hintText: "Select transport mode",
+                  prefixIcon: Icon(Icons.directions_bike_outlined),
                 ),
                 items: _transportModes.map((mode) {
                   return DropdownMenuItem(value: mode, child: Text(mode));
@@ -168,8 +145,6 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
                   Icons.keyboard_arrow_down,
                   color: AppColors.textLight.withOpacity(0.6),
                 ),
-                dropdownColor: Colors.white,
-                borderRadius: BorderRadius.circular(18),
               ),
               const SizedBox(height: 28),
 
@@ -179,13 +154,9 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
                 TextFormField(
                   controller: _dobController,
                   readOnly: true,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  decoration: _buildInputDecoration(
-                    "DD/MM/YYYY",
-                    Icons.calendar_today_outlined,
+                  decoration: const InputDecoration(
+                    hintText: "DD/MM/YYYY",
+                    prefixIcon: Icon(Icons.calendar_today_outlined),
                   ),
                   onTap: () => _selectDate(context),
                   validator: (value) {
@@ -205,13 +176,9 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: _buildInputDecoration(
-                  "name@example.com",
-                  Icons.email_outlined,
+                decoration: const InputDecoration(
+                  hintText: "name@example.com",
+                  prefixIcon: Icon(Icons.email_outlined),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -227,13 +194,9 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: _buildInputDecoration(
-                  "Enter your phone number",
-                  Icons.phone_outlined,
+                decoration: const InputDecoration(
+                  hintText: "Enter your phone number",
+                  prefixIcon: Icon(Icons.phone_outlined),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -248,19 +211,14 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-                decoration: _buildInputDecoration(
-                  "At least 6 characters",
-                  Icons.lock_outline,
+                decoration: InputDecoration(
+                  hintText: "At least 6 characters",
+                  prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
                           ? Icons.visibility_off
                           : Icons.visibility,
-                      color: AppColors.textLight.withOpacity(0.6),
                       size: 20,
                     ),
                     onPressed: () =>
@@ -280,29 +238,13 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
               // Register Button
               SizedBox(
                 width: double.infinity,
-                height: 58,
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       // Process registration
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    "Create Volunteer Account",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+                  child: const Text("Create Volunteer Account"),
                 ),
               ),
               const SizedBox(height: 32),
@@ -347,59 +289,7 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
   Widget _buildLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10.0, left: 4.0),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontWeight: FontWeight.w700,
-          color: AppColors.textDark.withOpacity(0.85),
-          fontSize: 12,
-          letterSpacing: 1.1,
-        ),
-      ),
-    );
-  }
-
-  InputDecoration _buildInputDecoration(
-    String hint,
-    IconData icon, {
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: TextStyle(
-        color: AppColors.textLight.withOpacity(0.4),
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-      ),
-      prefixIcon: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        child: Icon(icon, color: AppColors.primary.withOpacity(0.7), size: 22),
-      ),
-      prefixIconConstraints: const BoxConstraints(minWidth: 40),
-      suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.08)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.12)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 1),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
-      ),
+      child: Text(label, style: Theme.of(context).textTheme.labelMedium),
     );
   }
 }
