@@ -4,6 +4,7 @@ import 'buyer_home_page.dart';
 import 'buyer_browse_page.dart';
 import 'buyer_favourites_page.dart';
 import 'buyer_orders_page.dart';
+import 'buyer_profile_page.dart';
 
 class BuyerDashboardPage extends StatefulWidget {
   const BuyerDashboardPage({super.key});
@@ -42,7 +43,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
         favouriteIds: _favouriteIds,
         onToggleFavourite: _toggleFavourite,
       ), // Favourites
-      const Scaffold(body: Center(child: Text("Profile"))),
+      const BuyerProfilePage(), // Profile
     ];
 
     return Scaffold(
