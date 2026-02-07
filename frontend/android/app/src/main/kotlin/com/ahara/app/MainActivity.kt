@@ -1,4 +1,4 @@
-package com.example.frontend
+package com.ahara.app
 
 import io.flutter.embedding.android.FlutterActivity
 
