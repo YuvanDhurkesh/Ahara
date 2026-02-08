@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'buyer_register_page.dart';
+import 'seller_register_page.dart';
+import 'volunteer_register_page.dart';
 
 class RoleSelectionPage extends StatelessWidget {
   const RoleSelectionPage({super.key});

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_register_page.dart';
 import 'login_page.dart';
+import 'seller_register_page.dart';
+import 'volunteer_register_page.dart';
+
 
 
 class RegisterSelectionPage extends StatelessWidget {
@@ -65,7 +68,7 @@ class RegisterSelectionPage extends StatelessWidget {
             const SizedBox(height: 24),
 
             /// SELLER
-            /*
+            
 
 _SelectionCard(
   title: "Register as Seller",
@@ -75,7 +78,7 @@ _SelectionCard(
   onTap: () {
     navigateWithRole(
       context,
-      SellerRegisterPage(role: "seller"),
+      BuyerRegisterPage(role: "seller")
     );
   },
 ),
@@ -90,13 +93,13 @@ _SelectionCard(
   onTap: () {
     navigateWithRole(
       context,
-      VolunteerRegisterPage(role: "volunteer"),
+      BuyerRegisterPage(role: "volunteer")
+
     );
   },
 ),
 
-*/
- 
+
             const SizedBox(height: 48),
 
             Row(
