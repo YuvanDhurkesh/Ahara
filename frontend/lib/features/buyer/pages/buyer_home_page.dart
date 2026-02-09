@@ -3,6 +3,8 @@ import '../../../shared/styles/app_colors.dart';
 import '../data/mock_stores.dart';
 import '../../common/pages/landing_page.dart';
 import 'buyer_food_detail_page.dart';
+import 'buyer_notifications_page.dart';
+import '../../../../core/utils/responsive_layout.dart';
 
 class BuyerHomePage extends StatefulWidget {
   final Set<String> favouriteIds;
@@ -54,27 +56,58 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
       return matchesMain && matchesSub;
     }).toList();
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            _buildMainCategoryTabs(),
-            const SizedBox(height: 8),
-            _buildCategoryTabs(),
-            Expanded(
-              child: filteredStores.isEmpty
-                  ? _buildEmptyState()
-                  : ListView.builder(
+    return SafeArea(
+      child: Column(
+        children: [
+          _buildHeader(),
+          _buildMainCategoryTabs(),
+          const SizedBox(height: 8),
+          _buildCategoryTabs(),
+          Expanded(
+            child: filteredStores.isEmpty
+                ? _buildEmptyState()
+                : ResponsiveLayout(
+                    mobile: ListView.builder(
                       padding: const EdgeInsets.all(20),
+                      itemCount: filteredStores.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          child: _buildRestaurantCard(filteredStores[index]),
+                        );
+                      },
+                    ),
+                    tablet: GridView.builder(
+                      padding: const EdgeInsets.all(20),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.1,
+                            crossAxisSpacing: 20,
+                            mainAxisSpacing: 20,
+                          ),
                       itemCount: filteredStores.length,
                       itemBuilder: (context, index) {
                         return _buildRestaurantCard(filteredStores[index]);
                       },
                     ),
-            ),
-          ],
-        ),
+                    desktop: GridView.builder(
+                      padding: const EdgeInsets.all(20),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            childAspectRatio: 1.0,
+                            crossAxisSpacing: 20,
+                            mainAxisSpacing: 20,
+                          ),
+                      itemCount: filteredStores.length,
+                      itemBuilder: (context, index) {
+                        return _buildRestaurantCard(filteredStores[index]);
+                      },
+                    ),
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -148,6 +181,22 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                 ),
               ],
             ),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BuyerNotificationsPage(),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: AppColors.textDark,
+              size: 22,
+            ),
+            tooltip: "Notifications",
           ),
           IconButton(
             onPressed: () {
@@ -266,7 +315,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 24),
+        // margin: const EdgeInsets.only(bottom: 24), // Managed by GridView spacing
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
@@ -293,6 +342,27 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                     height: 180,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        height: 180,
+                        color: AppColors.textLight.withOpacity(0.05),
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 180,
+                        color: AppColors.textLight.withOpacity(0.05),
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          color: AppColors.textLight.withOpacity(0.2),
+                          size: 32,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 Positioned(

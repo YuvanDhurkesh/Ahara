@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../data/mock_stores.dart';
 import 'buyer_checkout_page.dart';
+import 'buyer_address_page.dart';
+import 'buyer_payment_page.dart';
 
 class BuyerFoodDetailPage extends StatelessWidget {
   final MockStore store;
@@ -383,14 +385,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BuyerCheckoutPage(store: store),
-            ),
-          );
-        },
+        onPressed: () => _showSelectionSlide(context),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 22),
           shape: RoundedRectangleBorder(
@@ -413,6 +408,172 @@ class BuyerFoodDetailPage extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             const Icon(Icons.arrow_forward, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSelectionSlide(BuildContext context) {
+    String currentAddress = "123, Green Street, Koramangala";
+    String currentPayment = "Visa *1234";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+              ),
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Quick Checkout",
+                        style: GoogleFonts.dmSerifDisplay(
+                          fontSize: 24,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  if (store.offersDelivery) ...[
+                    _buildSelectionItem(
+                      context,
+                      icon: Icons.location_on_outlined,
+                      title: "Delivery Address",
+                      value: currentAddress,
+                      onTap: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BuyerAddressPage(),
+                          ),
+                        );
+                        if (result != null) {
+                          setModalState(() => currentAddress = result);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                  _buildSelectionItem(
+                    context,
+                    icon: Icons.credit_card_outlined,
+                    title: "Payment Method",
+                    value: currentPayment,
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BuyerPaymentPage(),
+                        ),
+                      );
+                      if (result != null) {
+                        setModalState(() => currentPayment = result);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 48),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                BuyerCheckoutPage(store: store),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        "Confirm Selection",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSelectionItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.textDark.withOpacity(0.05)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.primary),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: AppColors.textLight.withOpacity(0.6),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
           ],
         ),
       ),

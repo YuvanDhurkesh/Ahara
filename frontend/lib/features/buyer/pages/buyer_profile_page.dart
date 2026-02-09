@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../auth/pages/login_page.dart';
 import 'buyer_account_details_page.dart';
+import '../../../../core/utils/responsive_layout.dart';
 import 'buyer_notifications_page.dart';
 
 class BuyerProfilePage extends StatelessWidget {
@@ -10,78 +11,117 @@ class BuyerProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Hello, Harishree",
-                    style: GoogleFonts.lora(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+    return SafeArea(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Hello, Harishree",
+                      style: GoogleFonts.lora(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => _showManageAccountSheet(context),
+                      icon: const Icon(Icons.settings_outlined, size: 28),
                       color: AppColors.textDark,
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => _showManageAccountSheet(context),
-                    icon: const Icon(Icons.settings_outlined, size: 28),
+                  ],
+                ),
+                const SizedBox(height: 32),
+
+                // Rewards & Trust Score Cards
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInfoCard(
+                        context,
+                        title: "Rewards",
+                        value: "Gold",
+                        subtext: "2,450 pts",
+                        icon: Icons.star_outline,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildInfoCard(
+                        context,
+                        title: "Trust Score",
+                        value: "950",
+                        subtext: "Top 5% Buyer",
+                        icon: Icons.shield_outlined,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 40),
+
+                // Recent Activity or other profile content could go here
+                Text(
+                  "Your Impact",
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                     color: AppColors.textDark,
                   ),
-                ],
-              ),
-              const SizedBox(height: 32),
-
-              // Rewards & Trust Score Cards
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildInfoCard(
-                      context,
-                      title: "Rewards",
-                      value: "Gold",
-                      subtext: "2,450 pts",
-                      icon: Icons.star_outline,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildInfoCard(
-                      context,
-                      title: "Trust Score",
-                      value: "950",
-                      subtext: "Top 5% Buyer",
-                      icon: Icons.shield_outlined,
-                      color: AppColors.secondary,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 40),
-
-              // Recent Activity or other profile content could go here
-              Text(
-                "Your Impact",
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
                 ),
-              ),
-              const SizedBox(height: 16),
-              _buildImpactStat("Meals Saved", "12", Icons.lunch_dining),
-              _buildImpactStat("CO2 Saved", "4.5 kg", Icons.co2),
-              _buildImpactStat("Money Saved", "₹1,200", Icons.savings_outlined),
-            ],
+                const SizedBox(height: 16),
+                ResponsiveLayout(
+                  mobile: Column(
+                    children: [
+                      _buildImpactStat("Meals Saved", "12", Icons.lunch_dining),
+                      _buildImpactStat("CO2 Saved", "4.5 kg", Icons.co2),
+                      _buildImpactStat(
+                        "Money Saved",
+                        "₹1,200",
+                        Icons.savings_outlined,
+                      ),
+                    ],
+                  ),
+                  desktop: Row(
+                    children: [
+                      Expanded(
+                        child: _buildImpactStat(
+                          "Meals Saved",
+                          "12",
+                          Icons.lunch_dining,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildImpactStat(
+                          "CO2 Saved",
+                          "4.5 kg",
+                          Icons.co2,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildImpactStat(
+                          "Money Saved",
+                          "₹1,200",
+                          Icons.savings_outlined,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -190,6 +230,9 @@ class BuyerProfilePage extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxWidth: ResponsiveLayout.isDesktop(context) ? 500 : double.infinity,
+      ),
       backgroundColor: Colors.transparent,
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.9,

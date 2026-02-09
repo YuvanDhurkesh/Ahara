@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 
 class AppAuthProvider extends ChangeNotifier {
-
   final AuthService _service = AuthService();
 
   bool loading = false;
@@ -11,23 +10,29 @@ class AppAuthProvider extends ChangeNotifier {
   Stream<User?> get authState => FirebaseAuth.instance.authStateChanges();
 
   /// LOGIN
-  Future<User?> login(String email, String password) async {
-
+  Future<Map<String, dynamic>?> login(String email, String password) async {
     loading = true;
     notifyListeners();
 
     try {
-
       final user = await _service.login(email, password);
-      return user;
-
+      if (user != null) {
+        final userData = await _service.getUserData(user.uid);
+        return userData;
+      }
+      return null;
     } catch (e) {
       rethrow;
     } finally {
-
       loading = false;
       notifyListeners();
     }
+  }
+
+  /// FETCH ROLE
+  Future<String?> getUserRole(String uid) async {
+    final data = await _service.getUserData(uid);
+    return data?['role'];
   }
 
   /// REGISTER (ROLE BASED)
@@ -39,12 +44,10 @@ class AppAuthProvider extends ChangeNotifier {
     required String password,
     required String location,
   }) async {
-
     loading = true;
     notifyListeners();
 
     try {
-
       final user = await _service.registerUser(
         role: role,
         name: name,
@@ -55,11 +58,9 @@ class AppAuthProvider extends ChangeNotifier {
       );
 
       return user;
-
     } catch (e) {
       rethrow;
     } finally {
-
       loading = false;
       notifyListeners();
     }

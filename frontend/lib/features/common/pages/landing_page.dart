@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../auth/pages/register_selection_page.dart';
 import '../../auth/pages/login_page.dart';
+import '../../../../core/utils/responsive_layout.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -196,7 +197,7 @@ class HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isMobile = MediaQuery.of(context).size.width < 800;
+    final bool isMobile = ResponsiveLayout.isMobile(context);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
@@ -327,29 +328,46 @@ class HowItWorks extends StatelessWidget {
         children: [
           const SectionTitle("How It Works"),
           const SizedBox(height: 40),
-          Row(
-            children: const [
-              Expanded(
-                child: FeatureCard(
+          ResponsiveLayout(
+            mobile: Column(
+              children: const [
+                FeatureCard(
                   title: "Give Food",
                   icon: Icons.shopping_basket_outlined,
                 ),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: FeatureCard(
-                  title: "Volunteer",
-                  icon: Icons.people_outline,
-                ),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: FeatureCard(
+                SizedBox(height: 16),
+                FeatureCard(title: "Volunteer", icon: Icons.people_outline),
+                SizedBox(height: 16),
+                FeatureCard(
                   title: "Find a meal",
                   icon: Icons.restaurant_outlined,
                 ),
-              ),
-            ],
+              ],
+            ),
+            desktop: Row(
+              children: const [
+                Expanded(
+                  child: FeatureCard(
+                    title: "Give Food",
+                    icon: Icons.shopping_basket_outlined,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: FeatureCard(
+                    title: "Volunteer",
+                    icon: Icons.people_outline,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: FeatureCard(
+                    title: "Find a meal",
+                    icon: Icons.restaurant_outlined,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -373,26 +391,46 @@ class TrustSection extends StatelessWidget {
         children: const [
           SectionTitle("Why Trust Us"),
           SizedBox(height: 40),
-          Row(
-            children: [
-              Expanded(
-                child: FeatureCard(title: "Food Safety", icon: Icons.security),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: FeatureCard(
+          ResponsiveLayout(
+            mobile: Column(
+              children: const [
+                FeatureCard(title: "Food Safety", icon: Icons.security),
+                SizedBox(height: 16),
+                FeatureCard(
                   title: "Verified Staff",
                   icon: Icons.verified_user_outlined,
                 ),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: FeatureCard(
+                SizedBox(height: 16),
+                FeatureCard(
                   title: "Transparency",
                   icon: Icons.visibility_outlined,
                 ),
-              ),
-            ],
+              ],
+            ),
+            desktop: Row(
+              children: [
+                Expanded(
+                  child: FeatureCard(
+                    title: "Food Safety",
+                    icon: Icons.security,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: FeatureCard(
+                    title: "Verified Staff",
+                    icon: Icons.verified_user_outlined,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: FeatureCard(
+                    title: "Transparency",
+                    icon: Icons.visibility_outlined,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -425,32 +463,47 @@ class ImpactSection extends StatelessWidget {
           const SizedBox(height: 48),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              children: const [
-                Expanded(
-                  child: ImpactCard(
-                    "5,000+",
-                    "Meals Saved",
-                    Icons.eco_outlined,
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: ImpactCard(
+            child: ResponsiveLayout(
+              mobile: Column(
+                children: const [
+                  ImpactCard("5,000+", "Meals Saved", Icons.eco_outlined),
+                  SizedBox(height: 16),
+                  ImpactCard(
                     "1.2 Tons",
                     "Waste Reduced",
                     Icons.recycling_outlined,
                   ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: ImpactCard(
-                    "150+",
-                    "Partners",
-                    Icons.handshake_outlined,
+                  SizedBox(height: 16),
+                  ImpactCard("150+", "Partners", Icons.handshake_outlined),
+                ],
+              ),
+              desktop: Row(
+                children: const [
+                  Expanded(
+                    child: ImpactCard(
+                      "5,000+",
+                      "Meals Saved",
+                      Icons.eco_outlined,
+                    ),
                   ),
-                ),
-              ],
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: ImpactCard(
+                      "1.2 Tons",
+                      "Waste Reduced",
+                      Icons.recycling_outlined,
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: ImpactCard(
+                      "150+",
+                      "Partners",
+                      Icons.handshake_outlined,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

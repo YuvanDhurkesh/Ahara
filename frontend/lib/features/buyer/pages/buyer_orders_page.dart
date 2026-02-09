@@ -19,36 +19,30 @@ class BuyerOrdersPage extends StatelessWidget {
 
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: Text(
-            "My Orders",
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+      child: Column(
+        children: [
+          Container(
+            color: Colors.white,
+            child: TabBar(
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Colors.black,
+              labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              tabs: const [
+                Tab(text: "Active"),
+                Tab(text: "History"),
+              ],
             ),
           ),
-          bottom: TabBar(
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.black,
-            labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
-            tabs: const [
-              Tab(text: "Active"),
-              Tab(text: "History"),
-            ],
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildOrderList(context, activeOrders),
+                _buildOrderList(context, historicalOrders),
+              ],
+            ),
           ),
-        ),
-        body: TabBarView(
-          children: [
-            _buildOrderList(context, activeOrders),
-            _buildOrderList(context, historicalOrders),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -110,6 +104,29 @@ class BuyerOrdersPage extends StatelessWidget {
                     width: 60,
                     height: 60,
                     fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        width: 60,
+                        height: 60,
+                        color: Colors.grey.shade100,
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 60,
+                        height: 60,
+                        color: Colors.grey.shade100,
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          color: Colors.grey.shade400,
+                          size: 20,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),
