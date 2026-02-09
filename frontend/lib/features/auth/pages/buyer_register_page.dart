@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
+import '../../../shared/widgets/phone_input_field.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
@@ -203,11 +204,16 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
 
                   const SizedBox(height: 28),
 
-                  _buildLabel("PHONE NUMBER"),
-                  _buildTextField(
-                    _phoneController,
-                    "+1 (555) 000-0000",
-                    Icons.phone_outlined,
+                  PhoneInputField(
+                    controller: _phoneController,
+                    label: "PHONE NUMBER",
+                    hintText: "12345 67890",
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please enter your number";
+                      }
+                      return null;
+                    },
                   ),
 
                   const SizedBox(height: 28),

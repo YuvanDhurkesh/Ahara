@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../data/models/listing_model.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'create_listing_page.dart';
@@ -73,9 +74,9 @@ class SellerListingsPage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: const Text(
+          title: Text(
             "My Listings",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+            style: GoogleFonts.lora(fontWeight: FontWeight.bold, fontSize: 20),
           ),
           backgroundColor: Colors.white,
           elevation: 0,
@@ -92,10 +93,35 @@ class SellerListingsPage extends StatelessWidget {
             ],
           ),
           actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateListingPage(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text("New Listing"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  foregroundColor: AppColors.primary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                ),
+              ),
+            ),
             IconButton(
               onPressed: () {},
               icon: const Icon(Icons.filter_list_rounded),
             ),
+            const SizedBox(width: 8),
           ],
         ),
         body: Center(
@@ -108,22 +134,6 @@ class SellerListingsPage extends StatelessWidget {
                 _buildListingList(context, mockListings, ListingStatus.expired),
               ],
             ),
-          ),
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const CreateListingPage(),
-              ),
-            );
-          },
-          backgroundColor: AppColors.primary,
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text(
-            "New Listing",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
       ),

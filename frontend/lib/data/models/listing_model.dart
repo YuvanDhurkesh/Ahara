@@ -33,6 +33,7 @@ class Listing {
   final DateTime expiryTime;
   final HygieneStatus hygieneStatus;
   final String locationAddress;
+  final String? pincode;
   final double latitude;
   final double longitude;
   final String imageUrl;
@@ -52,6 +53,7 @@ class Listing {
     required this.expiryTime,
     required this.hygieneStatus,
     required this.locationAddress,
+    this.pincode,
     required this.latitude,
     required this.longitude,
     required this.imageUrl,
@@ -73,6 +75,7 @@ class Listing {
       'expiryTime': expiryTime.toIso8601String(),
       'hygieneStatus': hygieneStatus.name,
       'locationAddress': locationAddress,
+      'pincode': pincode,
       'latitude': latitude,
       'longitude': longitude,
       'imageUrl': imageUrl,
@@ -97,6 +100,7 @@ class Listing {
       expiryTime: DateTime.parse(json['expiryTime']),
       hygieneStatus: HygieneStatus.values.byName(json['hygieneStatus']),
       locationAddress: json['locationAddress'],
+      pincode: json['pincode'],
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
       imageUrl: json['imageUrl'],

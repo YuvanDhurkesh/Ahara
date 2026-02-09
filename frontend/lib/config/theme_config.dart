@@ -5,6 +5,7 @@ import '../shared/styles/app_colors.dart';
 class ThemeConfig {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
+    fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
     scaffoldBackgroundColor: AppColors.background,
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
@@ -14,28 +15,28 @@ class ThemeConfig {
       onSurface: AppColors.textDark,
       background: AppColors.background,
     ),
-    textTheme: GoogleFonts.interTextTheme().copyWith(
-      displayLarge: GoogleFonts.inter(
+    textTheme: GoogleFonts.plusJakartaSansTextTheme().copyWith(
+      displayLarge: GoogleFonts.lora(
         fontWeight: FontWeight.w800,
         color: AppColors.textDark,
         letterSpacing: -0.5,
       ),
-      headlineLarge: GoogleFonts.inter(
+      headlineLarge: GoogleFonts.lora(
         fontWeight: FontWeight.bold,
         color: AppColors.textDark,
         fontSize: 24,
       ),
-      headlineMedium: GoogleFonts.inter(
+      headlineMedium: GoogleFonts.plusJakartaSans(
         fontWeight: FontWeight.bold,
         color: AppColors.textDark,
         fontSize: 20,
       ),
-      titleLarge: GoogleFonts.inter(
+      titleLarge: GoogleFonts.plusJakartaSans(
         fontWeight: FontWeight.w700,
         color: AppColors.textDark,
         fontSize: 16,
       ),
-      labelMedium: const TextStyle(
+      labelMedium: GoogleFonts.plusJakartaSans(
         fontWeight: FontWeight.w700,
         color: AppColors.textDark,
         fontSize: 11,
@@ -75,7 +76,7 @@ class ThemeConfig {
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      hintStyle: TextStyle(
+      hintStyle: GoogleFonts.plusJakartaSans(
         color: AppColors.textLight.withOpacity(0.4),
         fontSize: 14,
         fontWeight: FontWeight.w400,

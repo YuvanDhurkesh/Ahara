@@ -27,7 +27,7 @@ class SellerProfilePage extends StatelessWidget {
                     Text(
                       "Hello, Green Kitchen",
                       style: GoogleFonts.lora(
-                        fontSize: 28,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textDark,
                       ),

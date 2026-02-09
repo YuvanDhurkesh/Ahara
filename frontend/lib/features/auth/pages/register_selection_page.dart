@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_register_page.dart';
+import 'seller_register_page.dart';
+import 'volunteer_register_page.dart';
 import 'login_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
 
@@ -120,7 +122,7 @@ class RegisterSelectionPage extends StatelessWidget {
       description: "List your surplus food and help reduce local waste.",
       icon: Icons.storefront_outlined,
       onTap: () {
-        navigateWithRole(context, const BuyerRegisterPage(role: "seller"));
+        navigateWithRole(context, const SellerRegisterPage());
       },
     );
   }
@@ -131,7 +133,7 @@ class RegisterSelectionPage extends StatelessWidget {
       description: "Lend a hand in distributing food to those who need it.",
       icon: Icons.volunteer_activism_outlined,
       onTap: () {
-        navigateWithRole(context, const BuyerRegisterPage(role: "volunteer"));
+        navigateWithRole(context, const VolunteerRegisterPage());
       },
     );
   }

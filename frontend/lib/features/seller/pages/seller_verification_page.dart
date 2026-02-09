@@ -1,17 +1,85 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../shared/styles/app_colors.dart';
 
-class SellerVerificationPage extends StatelessWidget {
+class SellerVerificationPage extends StatefulWidget {
   const SellerVerificationPage({super.key});
+
+  @override
+  State<SellerVerificationPage> createState() => _SellerVerificationPageState();
+}
+
+class _SellerVerificationPageState extends State<SellerVerificationPage> {
+  File? _frontImage;
+  File? _backImage;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickIdImage(bool isFront) async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text("Take a photo"),
+              onTap: () async {
+                Navigator.pop(context);
+                final XFile? image = await _picker.pickImage(
+                  source: ImageSource.camera,
+                  imageQuality: 70,
+                );
+                if (image != null) {
+                  setState(() {
+                    if (isFront) {
+                      _frontImage = File(image.path);
+                    } else {
+                      _backImage = File(image.path);
+                    }
+                  });
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text("Choose from gallery"),
+              onTap: () async {
+                Navigator.pop(context);
+                final XFile? image = await _picker.pickImage(
+                  source: ImageSource.gallery,
+                  imageQuality: 70,
+                );
+                if (image != null) {
+                  setState(() {
+                    if (isFront) {
+                      _frontImage = File(image.path);
+                    } else {
+                      _backImage = File(image.path);
+                    }
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Account Verification",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: GoogleFonts.lora(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -25,10 +93,10 @@ class SellerVerificationPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Get Verified",
-                  style: TextStyle(
-                    fontSize: 22,
+                  style: GoogleFonts.lora(
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textDark,
                   ),
@@ -52,13 +120,26 @@ class SellerVerificationPage extends StatelessWidget {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: (_frontImage != null && _backImage != null)
+                        ? () {
+                            // TODO: Implement submission logic
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Verification submitted!"),
+                              ),
+                            );
+                            Navigator.pop(context);
+                          }
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 0,
+                      disabledBackgroundColor: AppColors.textLight.withOpacity(
+                        0.1,
+                      ),
                     ),
                     child: const Text(
                       "Submit for Verification",
@@ -122,6 +203,8 @@ class SellerVerificationPage extends StatelessWidget {
                 child: _buildUploadBox(
                   "Front Side",
                   Icons.add_photo_alternate_outlined,
+                  _frontImage,
+                  () => _pickIdImage(true),
                 ),
               ),
               const SizedBox(width: 12),
@@ -129,6 +212,8 @@ class SellerVerificationPage extends StatelessWidget {
                 child: _buildUploadBox(
                   "Back Side",
                   Icons.add_photo_alternate_outlined,
+                  _backImage,
+                  () => _pickIdImage(false),
                 ),
               ),
             ],
@@ -138,31 +223,56 @@ class SellerVerificationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildUploadBox(String label, IconData icon) {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: AppColors.background.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.textLight.withOpacity(0.1),
-          style: BorderStyle.solid,
+  Widget _buildUploadBox(
+    String label,
+    IconData icon,
+    File? image,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: AppColors.background.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.textLight.withOpacity(0.1)),
+          image: image != null
+              ? DecorationImage(image: FileImage(image), fit: BoxFit.cover)
+              : null,
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: AppColors.primary.withOpacity(0.5), size: 32),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textLight.withOpacity(0.6),
-            ),
-          ),
-        ],
+        child: image == null
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    color: AppColors.primary.withOpacity(0.5),
+                    size: 32,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textLight.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+              )
+            : Align(
+                alignment: Alignment.topRight,
+                child: Container(
+                  margin: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.edit, color: Colors.white, size: 12),
+                ),
+              ),
       ),
     );
   }
