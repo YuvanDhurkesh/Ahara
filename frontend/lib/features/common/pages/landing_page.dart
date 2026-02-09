@@ -23,11 +23,18 @@ class _LandingPageState extends State<LandingPage> {
     setState(() {
       _activeSection = sectionName;
     });
-    Scrollable.ensureVisible(
-      key.currentContext!,
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeInOutCubic,
-    );
+
+    // Slight delay to allow the drawer to close fully before scrolling starts
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (key.currentContext != null) {
+        Scrollable.ensureVisible(
+          key.currentContext!,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOutCubic,
+          alignment: 0.0, // Ensures the section moves to the TOP of the screen
+        );
+      }
+    });
   }
 
   @override

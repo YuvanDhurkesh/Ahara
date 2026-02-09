@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
+import 'seller_notifications_page.dart';
+import '../../common/pages/landing_page.dart';
 
 class SellerOverviewPage extends StatelessWidget {
   const SellerOverviewPage({super.key});
@@ -30,25 +32,75 @@ class SellerOverviewPage extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         "Seller Dashboard",
-                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                          fontSize: 28,
-                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineLarge?.copyWith(fontSize: 28),
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const SellerNotificationsPage(),
+                            ),
+                          );
+                        },
+                        icon: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.notifications_outlined,
+                            color: AppColors.textDark,
+                            size: 20,
+                          ),
                         ),
-                      ],
-                    ),
-                    child: const Icon(Icons.notifications_outlined, color: AppColors.textDark),
+                        tooltip: "Notifications",
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LandingPage(),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                        icon: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.logout,
+                            color: AppColors.textDark,
+                            size: 20,
+                          ),
+                        ),
+                        tooltip: "Logout",
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -95,15 +147,15 @@ class SellerOverviewPage extends StatelessWidget {
               ),
 
               const SizedBox(height: 32),
-              
+
               Text(
                 "Recent Orders",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              
+
               // PLACEHOLDER FOR ORDERS
               Container(
                 width: double.infinity,
@@ -111,11 +163,17 @@ class SellerOverviewPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.textLight.withOpacity(0.1)),
+                  border: Border.all(
+                    color: AppColors.textLight.withOpacity(0.1),
+                  ),
                 ),
                 child: Column(
                   children: [
-                    Icon(Icons.receipt_long_outlined, size: 48, color: AppColors.textLight.withOpacity(0.2)),
+                    Icon(
+                      Icons.receipt_long_outlined,
+                      size: 48,
+                      color: AppColors.textLight.withOpacity(0.2),
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       "No new orders today",
@@ -134,7 +192,13 @@ class SellerOverviewPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(BuildContext context, String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
