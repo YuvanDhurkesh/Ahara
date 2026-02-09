@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 
-class VolunteerVerificationPage extends StatelessWidget {
-  const VolunteerVerificationPage({super.key});
+class SellerVerificationPage extends StatelessWidget {
+  const SellerVerificationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class VolunteerVerificationPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "Verified volunteers get priority access to delivery requests.",
+                  "Upload your documents to increase your trust score and reach more buyers.",
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textLight.withOpacity(0.6),
@@ -44,9 +44,8 @@ class VolunteerVerificationPage extends StatelessWidget {
                 const SizedBox(height: 32),
                 _buildUploadCard(
                   context,
-                  title: "Aadhar Card",
-                  description:
-                      "Upload photos of your Aadhar card for identity verification.",
+                  title: "Aadhar Card Verification",
+                  description: "Please upload clear photos of both sides.",
                 ),
                 const SizedBox(height: 48),
                 SizedBox(
@@ -61,7 +60,14 @@ class VolunteerVerificationPage extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text('Submit Documents'),
+                    child: const Text(
+                      "Submit for Verification",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -83,7 +89,11 @@ class VolunteerVerificationPage extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 15),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
         ],
       ),
       child: Column(
@@ -91,7 +101,11 @@ class VolunteerVerificationPage extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textDark,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -106,14 +120,14 @@ class VolunteerVerificationPage extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildUploadBox(
-                  "Front",
+                  "Front Side",
                   Icons.add_photo_alternate_outlined,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildUploadBox(
-                  "Back",
+                  "Back Side",
                   Icons.add_photo_alternate_outlined,
                 ),
               ),
@@ -130,7 +144,10 @@ class VolunteerVerificationPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background.withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.textLight.withOpacity(0.1)),
+        border: Border.all(
+          color: AppColors.textLight.withOpacity(0.1),
+          style: BorderStyle.solid,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -141,6 +158,7 @@ class VolunteerVerificationPage extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 11,
+              fontWeight: FontWeight.w500,
               color: AppColors.textLight.withOpacity(0.6),
             ),
           ),

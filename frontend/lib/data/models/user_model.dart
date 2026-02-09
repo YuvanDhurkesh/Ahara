@@ -8,6 +8,14 @@ class UserModel {
   final String location;
   final String role;
   final DateTime? createdAt;
+  final String? businessName;
+  final String? fssaiNumber;
+  final String? officeAddress;
+  final String? contactNumber;
+  final String? operatingHours;
+  final String? aadharFrontUrl;
+  final String? aadharBackUrl;
+  final bool isVerified;
 
   UserModel({
     required this.uid,
@@ -17,6 +25,14 @@ class UserModel {
     required this.location,
     required this.role,
     this.createdAt,
+    this.businessName,
+    this.fssaiNumber,
+    this.officeAddress,
+    this.contactNumber,
+    this.operatingHours,
+    this.aadharFrontUrl,
+    this.aadharBackUrl,
+    this.isVerified = false,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -29,6 +45,14 @@ class UserModel {
       location: data['location'] ?? '',
       role: data['role'] ?? 'buyer',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
+      businessName: data['businessName'],
+      fssaiNumber: data['fssaiNumber'],
+      officeAddress: data['officeAddress'],
+      contactNumber: data['contactNumber'],
+      operatingHours: data['operatingHours'],
+      aadharFrontUrl: data['aadharFrontUrl'],
+      aadharBackUrl: data['aadharBackUrl'],
+      isVerified: data['isVerified'] ?? false,
     );
   }
 
@@ -41,6 +65,14 @@ class UserModel {
       'location': location,
       'role': role,
       'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
+      'businessName': businessName,
+      'fssaiNumber': fssaiNumber,
+      'officeAddress': officeAddress,
+      'contactNumber': contactNumber,
+      'operatingHours': operatingHours,
+      'aadharFrontUrl': aadharFrontUrl,
+      'aadharBackUrl': aadharBackUrl,
+      'isVerified': isVerified,
     };
   }
 }

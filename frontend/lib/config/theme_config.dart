@@ -14,26 +14,32 @@ class ThemeConfig {
       onSurface: AppColors.textDark,
       background: AppColors.background,
     ),
-    textTheme: GoogleFonts.outfitTextTheme().copyWith(
-      displayLarge: GoogleFonts.lora(
+    textTheme: GoogleFonts.interTextTheme().copyWith(
+      displayLarge: GoogleFonts.inter(
         fontWeight: FontWeight.w800,
         color: AppColors.textDark,
-        letterSpacing: -1.0,
+        letterSpacing: -0.5,
       ),
-      headlineLarge: GoogleFonts.lora(
+      headlineLarge: GoogleFonts.inter(
         fontWeight: FontWeight.bold,
         color: AppColors.textDark,
-        fontSize: 32,
+        fontSize: 24,
       ),
-      titleLarge: GoogleFonts.lora(
+      headlineMedium: GoogleFonts.inter(
         fontWeight: FontWeight.bold,
         color: AppColors.textDark,
+        fontSize: 20,
       ),
-      labelMedium: TextStyle(
+      titleLarge: GoogleFonts.inter(
         fontWeight: FontWeight.w700,
-        color: AppColors.textDark.withOpacity(0.85),
-        fontSize: 12,
-        letterSpacing: 1.1,
+        color: AppColors.textDark,
+        fontSize: 16,
+      ),
+      labelMedium: const TextStyle(
+        fontWeight: FontWeight.w700,
+        color: AppColors.textDark,
+        fontSize: 11,
+        letterSpacing: 0.5,
       ),
     ),
     appBarTheme: const AppBarTheme(
@@ -48,9 +54,9 @@ class ThemeConfig {
         foregroundColor: Colors.white,
         elevation: 2,
         shadowColor: AppColors.primary.withOpacity(0.3),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -68,23 +74,23 @@ class ThemeConfig {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       hintStyle: TextStyle(
         color: AppColors.textLight.withOpacity(0.4),
         fontSize: 14,
         fontWeight: FontWeight.w400,
       ),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.12)),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.08)),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.12)),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AppColors.primary.withOpacity(0.08)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(18),
@@ -99,7 +105,7 @@ class ThemeConfig {
       color: Colors.white,
       elevation: 0,
       shadowColor: Colors.black.withOpacity(0.04),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
   );
 }

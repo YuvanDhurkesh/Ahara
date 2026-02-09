@@ -16,44 +16,97 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1000),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Hi, Demo Volunteer',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            "Hi, Harishree",
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                          ),
+                          Text(
+                            'Volunteer Portal',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Availability Toggle & Profile
+                      Row(
+                        children: [
+                          _availabilityToggle(),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: () {
+                              // Access parent dashboard state to switch tabs
+                              final dashboard = context
+                                  .findAncestorStateOfType<
+                                    State<StatefulWidget>
+                                  >();
+                              if (dashboard != null &&
+                                  dashboard.widget.runtimeType.toString() ==
+                                      'VolunteerDashboardPage') {
+                                (dashboard as dynamic).setState(() {
+                                  (dashboard as dynamic)._selectedIndex = 3;
+                                });
+                              }
+                            },
+                            icon: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10,
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.person_outline,
+                                color: AppColors.textDark,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
 
-                  // Availability Toggle
-                  _availabilityToggle(),
+                  const SizedBox(height: 20),
+
+                  // 🚫 If NOT available
+                  if (!isAvailable) _inactiveState(),
+
+                  // ✅ If available
+                  if (isAvailable) ...[
+                    _dashboardCards(),
+                    const SizedBox(height: 20),
+                    _badgeSection(),
+                    const SizedBox(height: 24),
+                    _alertBanner(),
+                    const SizedBox(height: 24),
+                    _quickActions(),
+                  ],
                 ],
               ),
-
-              const SizedBox(height: 20),
-
-              // 🚫 If NOT available
-              if (!isAvailable) _inactiveState(),
-
-              // ✅ If available
-              if (isAvailable) ...[
-                _dashboardCards(),
-                const SizedBox(height: 20),
-                _badgeSection(),
-                const SizedBox(height: 24),
-                _alertBanner(),
-                const SizedBox(height: 24),
-                _quickActions(),
-              ],
-            ],
+            ),
           ),
         ),
       ),
@@ -107,14 +160,23 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
   }
 
   Widget _dashboardCards() {
-    return Row(
-      children: const [
-        _StatCard(title: 'Total Deliveries', value: '47', color: Colors.blue),
-        SizedBox(width: 12),
-        _StatCard(title: 'Today', value: '3', color: Colors.green),
-        SizedBox(width: 12),
-        _StatCard(title: 'Rating', value: '4.8', color: Colors.orange),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isWide = constraints.maxWidth > 600;
+        return GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: isWide ? 3 : 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: isWide ? 2.5 : 1.5,
+          children: const [
+            _StatCard(title: 'Deliveries', value: '47', color: Colors.blue),
+            _StatCard(title: 'Today', value: '3', color: Colors.green),
+            _StatCard(title: 'Rating', value: '4.8', color: Colors.orange),
+          ],
+        );
+      },
     );
   }
 
@@ -202,31 +264,39 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.circle, size: 10, color: color),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.circle, size: 8, color: color),
+              const SizedBox(width: 6),
+              Text(
+                title,
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
-            ),
-            Text(
-              title,
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
-        ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
@@ -244,9 +314,7 @@ class _BadgeChip extends StatelessWidget {
       avatar: Icon(icon, size: 18, color: AppColors.primary),
       label: Text(label),
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 }
@@ -270,10 +338,7 @@ class _QuickAction extends StatelessWidget {
           children: [
             Icon(icon, color: AppColors.primary),
             const SizedBox(height: 6),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 12),
-            ),
+            Text(label, style: const TextStyle(fontSize: 12)),
           ],
         ),
       ),

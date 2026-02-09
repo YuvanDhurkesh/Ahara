@@ -59,9 +59,14 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
           ),
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [_newRequestsTab(), _activeTab(), _completedTab()],
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: TabBarView(
+            controller: _tabController,
+            children: [_newRequestsTab(), _activeTab(), _completedTab()],
+          ),
+        ),
       ),
     );
   }
