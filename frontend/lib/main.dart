@@ -9,7 +9,6 @@ import 'data/providers/app_auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'features/buyer/pages/buyer_dashboard_page.dart';
-import 'features/seller/pages/seller_dashboard_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,10 +93,6 @@ class AuthWrapper extends StatelessWidget {
 
             if (role == "buyer") {
               return const BuyerDashboardPage();
-            }
-
-            if (role == "seller") {
-              return const SellerDashboardPage();
             }
 
             /// Temporarily route others to landing

@@ -1,41 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
+import '../services/google_auth_service.dart';
 
 class AppAuthProvider extends ChangeNotifier {
-  final AuthService _service = AuthService();
 
-  bool loading = false;
+  //---------------------------------------------------------
+  /// SERVICES
+  //---------------------------------------------------------
 
-  Stream<User?> get authState => FirebaseAuth.instance.authStateChanges();
+  final AuthService _authService = AuthService();
+  final GoogleAuthService _googleService = GoogleAuthService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  /// LOGIN
-  Future<Map<String, dynamic>?> login(String email, String password) async {
-    loading = true;
-    notifyListeners();
+  //---------------------------------------------------------
+  /// STATE
+  //---------------------------------------------------------
+
+  bool _loading = false;
+
+  bool get loading => _loading;
+
+  Stream<User?> get authState => _auth.authStateChanges();
+
+  User? get currentUser => _auth.currentUser;
+
+  //---------------------------------------------------------
+  /// EMAIL LOGIN
+  /// 🔥 IMPORTANT:
+  /// Mongo sync SHOULD NOT happen here.
+  /// Only Firebase authentication.
+  //---------------------------------------------------------
+
+  Future<User?> login(String email, String password) async {
+
+    _setLoading(true);
 
     try {
-      final user = await _service.login(email, password);
-      if (user != null) {
-        final userData = await _service.getUserData(user.uid);
-        return userData;
-      }
-      return null;
+      final user = await _authService.login(email, password);
+      return user;
+
     } catch (e) {
       rethrow;
+
     } finally {
-      loading = false;
-      notifyListeners();
+      _setLoading(false);
     }
   }
 
-  /// FETCH ROLE
-  Future<String?> getUserRole(String uid) async {
-    final data = await _service.getUserData(uid);
-    return data?['role'];
-  }
+  //---------------------------------------------------------
+  /// REGISTER USER
+  /// ✅ Mongo sync happens INSIDE AuthService
+  //---------------------------------------------------------
 
-  /// REGISTER (ROLE BASED)
   Future<User?> registerUser({
     required String role,
     required String name,
@@ -44,11 +61,12 @@ class AppAuthProvider extends ChangeNotifier {
     required String password,
     required String location,
   }) async {
-    loading = true;
-    notifyListeners();
+
+    _setLoading(true);
 
     try {
-      final user = await _service.registerUser(
+
+      final user = await _authService.registerUser(
         role: role,
         name: name,
         phone: phone,
@@ -58,11 +76,54 @@ class AppAuthProvider extends ChangeNotifier {
       );
 
       return user;
+
     } catch (e) {
       rethrow;
+
     } finally {
-      loading = false;
-      notifyListeners();
+      _setLoading(false);
     }
+  }
+
+  //---------------------------------------------------------
+  /// GOOGLE SIGN-IN
+  /// 🔥 DO NOT sync Mongo here.
+  /// Google users should complete profile first.
+  //---------------------------------------------------------
+
+  Future<User?> signInWithGoogle() async {
+
+    _setLoading(true);
+
+    try {
+
+      final user = await _googleService.signInWithGoogle();
+
+      return user;
+
+    } catch (e) {
+      rethrow;
+
+    } finally {
+      _setLoading(false);
+    }
+  }
+  //---------------------------------------------------------
+  /// LOGOUT
+  //---------------------------------------------------------
+
+  Future<void> logout() async {
+    await _auth.signOut();
+    notifyListeners();
+  }
+
+  
+  //---------------------------------------------------------
+  /// INTERNAL LOADING HANDLER
+  //---------------------------------------------------------
+
+  void _setLoading(bool value) {
+    _loading = value;
+    notifyListeners();
   }
 }

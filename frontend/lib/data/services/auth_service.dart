@@ -1,12 +1,24 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class AuthService {
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  /// LOGIN
+  /// 🔥 USE IPV4 WHEN TESTING ON PHONE
+  //static const String backendBaseUrl = "http://10.12.249.12:5000/api";
+  static const String backendBaseUrl = "http://localhost:5000/api";
+
+
+  //---------------------------------------------------------
+  /// LOGIN (NO MONGO CALL)
+  //---------------------------------------------------------
+
   Future<User?> login(String email, String password) async {
+
     final cred = await _auth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -15,7 +27,10 @@ class AuthService {
     return cred.user;
   }
 
-  /// REGISTER USER (ROLE BASED)
+  //---------------------------------------------------------
+  /// REGISTER (ONLY PLACE WE CREATE MONGO USER)
+  //---------------------------------------------------------
+
   Future<User?> registerUser({
     required String role,
     required String name,
@@ -24,29 +39,105 @@ class AuthService {
     required String password,
     required String location,
   }) async {
-    /// Create Auth Account
+
+    //-----------------------------------------------------
+    /// CREATE FIREBASE USER
+    //-----------------------------------------------------
+
     final cred = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
 
-    /// Store User Metadata in Firestore
-    await _db.collection('users').doc(cred.user!.uid).set({
-      "uid": cred.user!.uid,
+    final user = cred.user!;
+
+    await user.updateDisplayName(name);
+
+    //-----------------------------------------------------
+    /// FIRESTORE (optional but fine)
+    //-----------------------------------------------------
+
+    await _db.collection('users')
+        .doc(user.uid)
+        .set({
+
+      "uid": user.uid,
       "name": name,
       "phone": phone,
       "email": email,
       "location": location,
       "role": role,
       "createdAt": Timestamp.now(),
+
     });
 
-    return cred.user;
+    //-----------------------------------------------------
+    /// 🔥 MONGO SYNC
+    //-----------------------------------------------------
+
+    await syncUserWithBackend(
+      user: user,
+      role: role,
+      name: name,
+      phone: phone,
+      location: location,
+    );
+
+    return user;
   }
 
-  /// FETCH USER DATA (ROLE/METADATA)
-  Future<Map<String, dynamic>?> getUserData(String uid) async {
-    final doc = await _db.collection('users').doc(uid).get();
-    return doc.data();
+  //---------------------------------------------------------
+  /// GOOGLE LOGIN (AUTH ONLY)
+  //---------------------------------------------------------
+
+  Future<User?> handleGoogleLogin(User user) async {
+
+    /// DO NOT CREATE MONGO USER HERE
+    /// Instead redirect user to profile completion screen.
+
+    return user;
+  }
+
+  //---------------------------------------------------------
+  /// BACKEND SYNC
+  //---------------------------------------------------------
+
+  Future<void> syncUserWithBackend({
+    required User user,
+    required String role,
+    required String name,
+    required String phone,
+    required String location,
+  }) async {
+
+    try {
+
+      final token = await user.getIdToken();
+
+      final response = await http.post(
+        Uri.parse("$backendBaseUrl/users/create"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "firebaseUid": user.uid,
+          "email": user.email,
+          "name": name,
+          "role": role,
+          "phone": phone,
+          "location": location,
+        }),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw Exception("Backend sync failed: ${response.body}");
+      }
+
+    } catch (e) {
+
+      /// NEVER crash signup
+      print("⚠️ Mongo sync failed: $e");
+    }
   }
 }
