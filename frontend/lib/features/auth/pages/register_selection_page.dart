@@ -25,20 +25,20 @@ class RegisterSelectionPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Choose your path\nwith Ahara",
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  "How would you like\nto join us?",
+                  style: GoogleFonts.dmSerifDisplay(
+                    fontSize: 40,
                     height: 1.1,
-                    fontSize: 32,
-                    letterSpacing: -1,
+                    color: AppColors.textDark,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
-                  "Join our community and help transform local surplus into meaningful impact.",
+                  "Select your role to get started with the community and help reduce food waste.",
                   style: TextStyle(
                     color: AppColors.textLight.withOpacity(0.6),
-                    fontSize: 15,
-                    height: 1.4,
+                    fontSize: 16,
+                    height: 1.5,
                   ),
                 ),
                 const SizedBox(height: 48),
@@ -46,21 +46,21 @@ class RegisterSelectionPage extends StatelessWidget {
                 ResponsiveLayout(
                   mobile: Column(
                     children: [
+                      _buildBuyerCard(context),
+                      const SizedBox(height: 20),
                       _buildSellerCard(context),
                       const SizedBox(height: 20),
                       _buildVolunteerCard(context),
-                      const SizedBox(height: 20),
-                      _buildBuyerCard(context),
                     ],
                   ),
                   desktop: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _buildSellerCard(context)),
-                      const SizedBox(width: 20),
-                      Expanded(child: _buildVolunteerCard(context)),
-                      const SizedBox(width: 20),
                       Expanded(child: _buildBuyerCard(context)),
+                      const SizedBox(width: 24),
+                      Expanded(child: _buildSellerCard(context)),
+                      const SizedBox(width: 24),
+                      Expanded(child: _buildVolunteerCard(context)),
                     ],
                   ),
                 ),
@@ -105,9 +105,9 @@ class RegisterSelectionPage extends StatelessWidget {
 
   Widget _buildBuyerCard(BuildContext context) {
     return _SelectionCard(
-      title: "Find a meal",
-      description: "Discover surpus meals",
-      icon: Icons.restaurant_menu_rounded,
+      title: "Register as Buyer",
+      description: "Find and purchase surplus meals near you at great prices.",
+      icon: Icons.shopping_basket_outlined,
       onTap: () {
         navigateWithRole(context, const BuyerRegisterPage(role: "buyer"));
       },
@@ -116,9 +116,9 @@ class RegisterSelectionPage extends StatelessWidget {
 
   Widget _buildSellerCard(BuildContext context) {
     return _SelectionCard(
-      title: "Give Food",
-      description: "Share your surplus",
-      icon: Icons.shopping_basket_rounded,
+      title: "Register as Seller",
+      description: "List your surplus food and help reduce local waste.",
+      icon: Icons.storefront_outlined,
       onTap: () {
         navigateWithRole(context, const BuyerRegisterPage(role: "seller"));
       },
@@ -127,9 +127,9 @@ class RegisterSelectionPage extends StatelessWidget {
 
   Widget _buildVolunteerCard(BuildContext context) {
     return _SelectionCard(
-      title: "Volunteer",
-      description: "Help distribute",
-      icon: Icons.groups_rounded,
+      title: "Register as Volunteer",
+      description: "Lend a hand in distributing food to those who need it.",
+      icon: Icons.volunteer_activism_outlined,
       onTap: () {
         navigateWithRole(context, const BuyerRegisterPage(role: "volunteer"));
       },
@@ -155,12 +155,12 @@ class _SelectionCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textDark.withOpacity(0.03),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+            color: AppColors.textDark.withOpacity(0.04),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -168,40 +168,50 @@ class _SelectionCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(28),
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+            padding: const EdgeInsets.all(24),
+            child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.08),
+                    color: AppColors.primary.withOpacity(0.06),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: AppColors.primary, size: 32),
+                  child: Icon(icon, color: AppColors.primary, size: 28),
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textDark,
-                    letterSpacing: -0.5,
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.dmSerifDisplay(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.textDark,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: AppColors.textLight.withOpacity(0.5),
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    color: AppColors.textLight.withOpacity(0.5),
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
+                const SizedBox(width: 12),
+                Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textLight.withOpacity(0.2),
+                  size: 18,
                 ),
               ],
             ),
