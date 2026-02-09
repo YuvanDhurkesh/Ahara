@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
-import '../../buyer/pages/buyer_dashboard_page.dart';
 import 'login_page.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
@@ -11,10 +10,7 @@ import 'package:geocoding/geocoding.dart';
 class BuyerRegisterPage extends StatefulWidget {
   final String role;
 
-  const BuyerRegisterPage({
-    super.key,
-    required this.role,
-  });
+  const BuyerRegisterPage({super.key, required this.role});
 
   @override
   State<BuyerRegisterPage> createState() => _BuyerRegisterPageState();
@@ -79,7 +75,8 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-                "Location permanently denied. Enable from device settings."),
+              "Location permanently denied. Enable from device settings.",
+            ),
           ),
         );
         return;
@@ -135,11 +132,15 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
       if (!mounted) return;
 
       if (user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Registration successful! Please login."),
+            backgroundColor: Colors.green,
+          ),
+        );
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(
-            builder: (_) => const BuyerDashboardPage(),
-          ),
+          MaterialPageRoute(builder: (_) => const LoginPage()),
           (route) => false,
         );
       }
@@ -168,151 +169,171 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Join as a ${widget.role[0].toUpperCase()}${widget.role.substring(1)}",
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                "Create your account to start finding local surplus meals and help reduce waste.",
-                style: TextStyle(
-                  color: AppColors.textLight,
-                  fontSize: 15,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 48),
-
-              _buildLabel("FULL NAME"),
-              _buildTextField(_nameController, "E.g. Jane Doe", Icons.person_outline),
-
-              const SizedBox(height: 28),
-
-              _buildLabel("PHONE NUMBER"),
-              _buildTextField(_phoneController, "+1 (555) 000-0000", Icons.phone_outlined),
-
-              const SizedBox(height: 28),
-
-              _buildLabel("EMAIL ADDRESS"),
-              _buildTextField(_emailController, "name@example.com", Icons.email_outlined),
-
-              const SizedBox(height: 28),
-
-              //-------------------------------------------------
-              /// PASSWORD
-              //-------------------------------------------------
-
-              _buildLabel("PASSWORD"),
-
-              TextFormField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  hintText: "At least 6 characters",
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter a password";
-                  }
-                  if (value.length < 6) {
-                    return "Password must be at least 6 characters";
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 28),
-
-              //-------------------------------------------------
-              /// 🔥 LOCATION WITH AUTO DETECT BUTTON
-              //-------------------------------------------------
-
-              _buildLabel("LOCATION"),
-
-              TextFormField(
-                controller: _locationController,
-                decoration: InputDecoration(
-                  hintText: "Search your area",
-                  prefixIcon: const Icon(Icons.location_on_outlined),
-                  suffixIcon: IconButton(
-                    icon: _isDetectingLocation
-                        ? const Padding(
-                            padding: EdgeInsets.all(12),
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.my_location),
-                    onPressed: _isDetectingLocation ? null : _detectLocation,
-                  ),
-                ),
-                validator: (value) =>
-                    value == null || value.isEmpty
-                        ? "Please specify your location"
-                        : null,
-              ),
-
-              const SizedBox(height: 48),
-
-              //-------------------------------------------------
-              /// REGISTER BUTTON
-              //-------------------------------------------------
-
-              SizedBox(
-                width: double.infinity,
-                height: 58,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _registerUser,
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Create Account"),
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Already registered? ",
+                    "Join as a ${widget.role[0].toUpperCase()}${widget.role.substring(1)}",
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Create your account to start finding local surplus meals and help reduce waste.",
                     style: TextStyle(
-                      color: AppColors.textLight.withOpacity(0.8),
+                      color: AppColors.textLight,
+                      fontSize: 15,
+                      height: 1.5,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginPage()),
-                      );
-                    },
-                    child: const Text(
-                      "Login",
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
+                  const SizedBox(height: 48),
+
+                  _buildLabel("FULL NAME"),
+                  _buildTextField(
+                    _nameController,
+                    "E.g. Jane Doe",
+                    Icons.person_outline,
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  _buildLabel("PHONE NUMBER"),
+                  _buildTextField(
+                    _phoneController,
+                    "+1 (555) 000-0000",
+                    Icons.phone_outlined,
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  _buildLabel("EMAIL ADDRESS"),
+                  _buildTextField(
+                    _emailController,
+                    "name@example.com",
+                    Icons.email_outlined,
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  //-------------------------------------------------
+                  /// PASSWORD
+                  //-------------------------------------------------
+                  _buildLabel("PASSWORD"),
+
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      hintText: "At least 6 characters",
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please enter a password";
+                      }
+                      if (value.length < 6) {
+                        return "Password must be at least 6 characters";
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  //-------------------------------------------------
+                  /// 🔥 LOCATION WITH AUTO DETECT BUTTON
+                  //-------------------------------------------------
+                  _buildLabel("LOCATION"),
+
+                  TextFormField(
+                    controller: _locationController,
+                    decoration: InputDecoration(
+                      hintText: "Search your area",
+                      prefixIcon: const Icon(Icons.location_on_outlined),
+                      suffixIcon: IconButton(
+                        icon: _isDetectingLocation
+                            ? const Padding(
+                                padding: EdgeInsets.all(12),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.my_location),
+                        onPressed: _isDetectingLocation
+                            ? null
+                            : _detectLocation,
+                      ),
+                    ),
+                    validator: (value) => value == null || value.isEmpty
+                        ? "Please specify your location"
+                        : null,
+                  ),
+
+                  const SizedBox(height: 48),
+
+                  //-------------------------------------------------
+                  /// REGISTER BUTTON
+                  //-------------------------------------------------
+                  SizedBox(
+                    width: double.infinity,
+                    height: 58,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _registerUser,
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text("Create Account"),
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Already registered? ",
+                        style: TextStyle(
+                          color: AppColors.textLight.withOpacity(0.8),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginPage(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "Login",
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -331,16 +352,13 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
   //---------------------------------------------------------
 
   Widget _buildTextField(
-      TextEditingController controller,
-      String hint,
-      IconData icon,
-      ) {
+    TextEditingController controller,
+    String hint,
+    IconData icon,
+  ) {
     return TextFormField(
       controller: controller,
-      decoration: InputDecoration(
-        hintText: hint,
-        prefixIcon: Icon(icon),
-      ),
+      decoration: InputDecoration(hintText: hint, prefixIcon: Icon(icon)),
       validator: (value) =>
           value == null || value.isEmpty ? "This field is required" : null,
     );

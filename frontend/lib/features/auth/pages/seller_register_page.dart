@@ -41,197 +41,221 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Join as a Seller",
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                "Partner with us to reduce food waste and serve your local community.",
-                style: TextStyle(
-                  color: AppColors.textLight.withOpacity(0.8),
-                  fontSize: 15,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 48),
-
-              // Business Name Field
-              _buildLabel("BUSINESS NAME"),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  hintText: "E.g. Sunshine Delights",
-                  prefixIcon: Icon(Icons.business_outlined),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return "Please enter business name";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 28),
-
-              // Business Type Dropdown
-              _buildLabel("BUSINESS TYPE"),
-              DropdownButtonFormField<String>(
-                value: _selectedType,
-                decoration: const InputDecoration(
-                  hintText: "Select business type",
-                  prefixIcon: Icon(Icons.category_outlined),
-                ),
-                items: _sellerTypes.map((type) {
-                  return DropdownMenuItem(value: type, child: Text(type));
-                }).toList(),
-                onChanged: (value) {
-                  setState(() => _selectedType = value);
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return "Please select business type";
-                  return null;
-                },
-                icon: Icon(
-                  Icons.keyboard_arrow_down,
-                  color: AppColors.textLight.withOpacity(0.6),
-                ),
-              ),
-              const SizedBox(height: 28),
-
-              // FSSAI Number Field
-              _buildLabel("FSSAI NUMBER"),
-              TextFormField(
-                controller: _fssaiController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  hintText: "14-digit FSSAI number",
-                  prefixIcon: Icon(Icons.verified_outlined),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return "Please enter FSSAI number";
-                  if (value.length != 14)
-                    return "FSSAI number must be 14 digits";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 28),
-
-              // Email Field
-              _buildLabel("BUSINESS EMAIL"),
-              TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: "contact@business.com",
-                  prefixIcon: Icon(Icons.email_outlined),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return "Please enter email";
-                  if (!value.contains('@')) return "Please enter a valid email";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 28),
-
-              // Password Field
-              _buildLabel("PASSWORD"),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  hintText: "At least 8 characters",
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      size: 20,
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return "Please enter a password";
-                  if (value.length < 8)
-                    return "Password must be at least 8 characters";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 48),
-
-              // Register Button
-              SizedBox(
-                width: double.infinity,
-                height: 58,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // Process registration
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    "Create Seller Account",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Already registered? ",
+                    "Join as a Seller",
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    "Partner with us to reduce food waste and serve your local community.",
                     style: TextStyle(
                       color: AppColors.textLight.withOpacity(0.8),
-                      fontSize: 14,
+                      fontSize: 15,
+                      height: 1.5,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
-                        ),
-                      );
+                  const SizedBox(height: 48),
+
+                  // Business Name Field
+                  _buildLabel("BUSINESS NAME"),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      hintText: "E.g. Sunshine Delights",
+                      prefixIcon: Icon(Icons.business_outlined),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return "Please enter business name";
+                      return null;
                     },
-                    child: const Text(
-                      "Login",
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Business Type Dropdown
+                  _buildLabel("BUSINESS TYPE"),
+                  DropdownButtonFormField<String>(
+                    value: _selectedType,
+                    decoration: const InputDecoration(
+                      hintText: "Select business type",
+                      prefixIcon: Icon(Icons.category_outlined),
+                    ),
+                    items: _sellerTypes.map((type) {
+                      return DropdownMenuItem(value: type, child: Text(type));
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() => _selectedType = value);
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return "Please select business type";
+                      return null;
+                    },
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      color: AppColors.textLight.withOpacity(0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // FSSAI Number Field
+                  _buildLabel("FSSAI NUMBER"),
+                  TextFormField(
+                    controller: _fssaiController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      hintText: "14-digit FSSAI number",
+                      prefixIcon: Icon(Icons.verified_outlined),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return "Please enter FSSAI number";
+                      if (value.length != 14)
+                        return "FSSAI number must be 14 digits";
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Email Field
+                  _buildLabel("BUSINESS EMAIL"),
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      hintText: "contact@business.com",
+                      prefixIcon: Icon(Icons.email_outlined),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return "Please enter email";
+                      if (!value.contains('@'))
+                        return "Please enter a valid email";
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Password Field
+                  _buildLabel("PASSWORD"),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      hintText: "At least 8 characters",
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          size: 20,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return "Please enter a password";
+                      if (value.length < 8)
+                        return "Password must be at least 8 characters";
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 48),
+
+                  // Register Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 58,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Registration successful! Please login.",
+                              ),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Text(
+                        "Create Seller Account",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ),
+                  const SizedBox(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Already registered? ",
+                        style: TextStyle(
+                          color: AppColors.textLight.withOpacity(0.8),
+                          fontSize: 14,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "Login",
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
                 ],
               ),
-              const SizedBox(height: 40),
-            ],
+            ),
           ),
         ),
       ),

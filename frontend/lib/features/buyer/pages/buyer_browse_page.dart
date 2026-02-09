@@ -63,30 +63,28 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // 1. Map Background
-          _buildMapBackground(),
+    return Stack(
+      children: [
+        // 1. Map Background
+        _buildMapBackground(),
 
-          // 2. Map Markers
-          _buildMapMarkers(),
+        // 2. Map Markers
+        _buildMapMarkers(),
 
-          // 3. Floating Search Header
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: _buildFloatingSearchHeader(),
-          ),
+        // 3. Floating Search Header
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: _buildFloatingSearchHeader(),
+        ),
 
-          // 4. Draggable Bottom Sheet
-          _buildBottomSheetList(),
+        // 4. Draggable Bottom Sheet
+        _buildBottomSheetList(),
 
-          // 5. Pop-out Card
-          if (_selectedStoreId != null) _buildPopOutCard(),
-        ],
-      ),
+        // 5. Pop-out Card
+        if (_selectedStoreId != null) _buildPopOutCard(),
+      ],
     );
   }
 
@@ -105,13 +103,14 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   }
 
   Widget _buildMapMarkers() {
+    // Fixed positions for mock stores on our grid map
     final List<Offset> positions = [
-      const Offset(100, 250),
-      const Offset(250, 300),
-      const Offset(150, 400),
-      const Offset(300, 200),
-      const Offset(80, 500),
-      const Offset(320, 550),
+      const Offset(80, 220),
+      const Offset(240, 310),
+      const Offset(180, 420),
+      const Offset(310, 210),
+      const Offset(70, 480),
+      const Offset(330, 520),
     ];
 
     return Stack(
@@ -129,29 +128,34 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
               onTap: () {
                 setState(() => _selectedStoreId = store.id);
               },
-              child: AnimatedContainer(
+              child: AnimatedScale(
+                scale: isSelected ? 1.1 : 1.0,
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.black : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.primary : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.12),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    store.isFree
+                        ? "Free"
+                        : "₹${store.price.replaceAll(RegExp(r'[^0-9]'), '')}",
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: isSelected ? Colors.white : AppColors.textDark,
                     ),
-                  ],
-                ),
-                child: Text(
-                  store.isFree ? "Free" : store.price,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: isSelected ? Colors.white : Colors.black,
                   ),
                 ),
               ),
@@ -459,6 +463,27 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                       height: 150,
                       width: double.infinity,
                       fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          height: 150,
+                          color: AppColors.textLight.withOpacity(0.05),
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 150,
+                          color: AppColors.textLight.withOpacity(0.05),
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            color: AppColors.textLight.withOpacity(0.2),
+                            size: 32,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   Positioned(
@@ -542,6 +567,27 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 200,
+                      color: AppColors.textLight.withOpacity(0.05),
+                      child: const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 200,
+                      color: AppColors.textLight.withOpacity(0.05),
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        color: AppColors.textLight.withOpacity(0.2),
+                        size: 32,
+                      ),
+                    );
+                  },
                 ),
               ),
               Positioned(
@@ -680,24 +726,40 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
 class GridMapPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 4
+    final linePaint = Paint()
+      ..color = Colors.grey.withOpacity(0.2)
+      ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
-    double step = 80;
+    const double step = 60;
     for (double x = 0; x < size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
     }
-    for (double y = 0; y < size.height; y += step * 0.8) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
     }
 
-    final blockPaint = Paint()..color = Colors.white;
-    canvas.drawRect(const Rect.fromLTWH(20, 20, 50, 50), blockPaint);
-    canvas.drawRect(const Rect.fromLTWH(100, 100, 120, 60), blockPaint);
-    canvas.drawRect(const Rect.fromLTWH(250, 50, 80, 80), blockPaint);
-    canvas.drawRect(const Rect.fromLTWH(20, 300, 100, 100), blockPaint);
+    final buildingPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    // Stylized Building Blocks
+    final List<Rect> buildings = [
+      const Rect.fromLTWH(0, 80, 80, 120),
+      const Rect.fromLTWH(120, 0, 100, 60),
+      const Rect.fromLTWH(240, 100, 80, 80),
+      const Rect.fromLTWH(60, 240, 120, 140),
+      const Rect.fromLTWH(260, 320, 100, 100),
+      const Rect.fromLTWH(40, 480, 160, 80),
+      const Rect.fromLTWH(240, 520, 120, 160),
+    ];
+
+    for (var rect in buildings) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(rect, const Radius.circular(4)),
+        buildingPaint,
+      );
+    }
   }
 
   @override

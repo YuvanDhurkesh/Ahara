@@ -2,13 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   /// LOGIN
   Future<User?> login(String email, String password) async {
-
     final cred = await _auth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -26,7 +24,6 @@ class AuthService {
     required String password,
     required String location,
   }) async {
-
     /// Create Auth Account
     final cred = await _auth.createUserWithEmailAndPassword(
       email: email,
@@ -34,10 +31,7 @@ class AuthService {
     );
 
     /// Store User Metadata in Firestore
-    await _db.collection('users')
-        .doc(cred.user!.uid)
-        .set({
-
+    await _db.collection('users').doc(cred.user!.uid).set({
       "uid": cred.user!.uid,
       "name": name,
       "phone": phone,
@@ -45,9 +39,14 @@ class AuthService {
       "location": location,
       "role": role,
       "createdAt": Timestamp.now(),
-
     });
 
     return cred.user;
+  }
+
+  /// FETCH USER DATA (ROLE/METADATA)
+  Future<Map<String, dynamic>?> getUserData(String uid) async {
+    final doc = await _db.collection('users').doc(uid).get();
+    return doc.data();
   }
 }

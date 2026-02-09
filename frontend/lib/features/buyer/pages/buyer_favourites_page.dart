@@ -18,30 +18,15 @@ class BuyerFavouritesPage extends StatelessWidget {
         .where((store) => favouriteIds.contains(store.id))
         .toList();
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(
-          "My Favourites",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: favouriteStores.isEmpty
-          ? _buildEmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: favouriteStores.length,
-              itemBuilder: (context, index) {
-                return _buildFavouriteCard(favouriteStores[index]);
-              },
-            ),
-    );
+    return favouriteStores.isEmpty
+        ? _buildEmptyState()
+        : ListView.builder(
+            padding: const EdgeInsets.all(20),
+            itemCount: favouriteStores.length,
+            itemBuilder: (context, index) {
+              return _buildFavouriteCard(favouriteStores[index]);
+            },
+          );
   }
 
   Widget _buildEmptyState() {
@@ -101,6 +86,29 @@ class BuyerFavouritesPage extends StatelessWidget {
               height: 100,
               width: 100,
               fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  height: 100,
+                  width: 100,
+                  color: AppColors.textLight.withOpacity(0.05),
+                  child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 100,
+                  width: 100,
+                  color: AppColors.textLight.withOpacity(0.05),
+                  child: Icon(
+                    Icons.image_not_supported_outlined,
+                    color: AppColors.textLight.withOpacity(0.2),
+                    size: 24,
+                  ),
+                );
+              },
             ),
           ),
           Expanded(
