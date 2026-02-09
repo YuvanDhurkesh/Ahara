@@ -1,3 +1,10 @@
+// Ahara Flutter App
+//
+// Authentication: Uses Firebase Auth for secure client login.
+// User roles/trustScore: Fetched from backend (Node.js + MongoDB) after login.
+//
+// SECURITY: No backend logic or secrets in Flutter. No Firebase Admin or DB access here.
+// See backend/README.md for more details.
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -7,8 +14,8 @@ import 'package:provider/provider.dart';
 import 'data/providers/app_auth_provider.dart';
 import 'data/providers/app_auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'features/buyer/pages/buyer_dashboard_page.dart';
+import 'data/services/api_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,15 +52,15 @@ class MyApp extends StatelessWidget {
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
-  Future<String?> getUserRole(String uid) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .get();
 
-    if (!doc.exists) return null;
-
-    return doc['role'];
+  /// Fetch user profile from backend (roles, trustScore, etc)
+  Future<Map<String, dynamic>?> getUserProfile() async {
+    try {
+      final profile = await ApiService.loginWithBackend();
+      return profile;
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
@@ -74,18 +81,18 @@ class AuthWrapper extends StatelessWidget {
           return const LandingPage();
         }
 
-        /// LOGGED IN → FETCH ROLE
-        return FutureBuilder<String?>(
-          future: getUserRole(snapshot.data!.uid),
-          builder: (context, roleSnap) {
-
-            if (roleSnap.connectionState == ConnectionState.waiting) {
+        /// LOGGED IN → FETCH PROFILE FROM BACKEND
+        return FutureBuilder<Map<String, dynamic>?>(
+          future: getUserProfile(),
+          builder: (context, profileSnap) {
+            if (profileSnap.connectionState == ConnectionState.waiting) {
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-
-            final role = roleSnap.data;
+            final profile = profileSnap.data;
+            final roles = profile?['roles'] as List?;
+            final role = (roles != null && roles.isNotEmpty) ? roles.first : null;
 
             //------------------------------------------------
             // ROLE ROUTING
