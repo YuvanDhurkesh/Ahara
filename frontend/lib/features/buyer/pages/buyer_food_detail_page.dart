@@ -5,6 +5,7 @@ import '../data/mock_stores.dart';
 import 'buyer_checkout_page.dart';
 import 'buyer_address_page.dart';
 import 'buyer_payment_page.dart';
+import '../../../../core/utils/responsive_layout.dart';
 
 class BuyerFoodDetailPage extends StatelessWidget {
   final MockStore store;
@@ -28,7 +29,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
                   const SizedBox(height: 32),
                   _buildDirectionsButton(),
                   const SizedBox(height: 48),
-                  _buildReviewSection(),
+                  _buildReviewSection(context),
                   const SizedBox(height: 48),
                   _buildIngredientsSection(),
                   const SizedBox(height: 120), // Bottom padding for FAB
@@ -177,89 +178,35 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReviewSection() {
+  Widget _buildReviewSection(BuildContext context) {
+    final bool isMobile = ResponsiveLayout.isMobile(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: Column(
+        isMobile
+            ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Overall Ratings",
-                    style: GoogleFonts.dmSerifDisplay(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textDark,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          "Verified Reviews",
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.secondary,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        "from the community",
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          color: AppColors.textLight.withOpacity(0.4),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildRatingsTitle(),
+                  const SizedBox(height: 16),
+                  _buildLargeRating(store.rating),
+                ],
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(child: _buildRatingsTitle()),
+                  _buildLargeRating(store.rating),
                 ],
               ),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  store.rating,
-                  style: GoogleFonts.inter(
-                    fontSize: 52,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.textDark,
-                    height: 1,
-                    letterSpacing: -2,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                const Icon(Icons.star_rounded, color: Colors.amber, size: 32),
-              ],
-            ),
-          ],
-        ),
         const SizedBox(height: 32),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 2.2,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: isMobile ? 1 : 2,
+            childAspectRatio: isMobile ? 4.0 : 2.2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
           ),
@@ -270,6 +217,76 @@ class BuyerFoodDetailPage extends StatelessWidget {
             return _buildReviewCard(category, score);
           },
         ),
+      ],
+    );
+  }
+
+  Widget _buildRatingsTitle() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Overall Ratings",
+          style: GoogleFonts.dmSerifDisplay(
+            fontSize: 26,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textDark,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.secondary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                "Verified Reviews",
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.secondary,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            Text(
+              "from the community",
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: AppColors.textLight.withOpacity(0.4),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLargeRating(String rating) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          rating,
+          style: GoogleFonts.inter(
+            fontSize: 52,
+            fontWeight: FontWeight.w900,
+            color: AppColors.textDark,
+            height: 1,
+            letterSpacing: -2,
+          ),
+        ),
+        const SizedBox(width: 6),
+        const Icon(Icons.star_rounded, color: Colors.amber, size: 32),
       ],
     );
   }

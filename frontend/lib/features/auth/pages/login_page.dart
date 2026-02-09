@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../buyer/pages/buyer_dashboard_page.dart';
 import '../../volunteer/pages/volunteer_dashboard_page.dart';
+import '../../seller/pages/seller_dashboard_page.dart';
 import 'register_selection_page.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
@@ -50,25 +51,31 @@ class _LoginPageState extends State<LoginPage> {
         final role = userData['role'] ?? 'buyer';
 
         if (role == 'buyer') {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const BuyerDashboardPage()),
-            (route) => false,
-          );
-        } else if (role == 'volunteer') {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const VolunteerDashboardPage()),
-            (route) => false,
-          );
-        } else {
-          // Placeholder for other roles (Seller)
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Logged in as $role. Dashboard coming soon!"),
-            ),
-          );
-        }
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (_) => const BuyerDashboardPage()),
+    (route) => false,
+  );
+} else if (role == 'volunteer') {
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (_) => const VolunteerDashboardPage()),
+    (route) => false,
+  );
+} else if (role == 'seller') {
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (_) => const SellerDashboardPage()),
+    (route) => false,
+  );
+} else {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text("Logged in as $role. Dashboard coming soon!"),
+    ),
+  );
+}
+
       }
     } on fb.FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_register_page.dart';
 import 'login_page.dart';
-import 'seller_register_page.dart';
-import 'volunteer_register_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
 
 class RegisterSelectionPage extends StatelessWidget {
@@ -27,15 +26,17 @@ class RegisterSelectionPage extends StatelessWidget {
               children: [
                 Text(
                   "How would you like\nto join us?",
-                  style: Theme.of(
-                    context,
-                  ).textTheme.headlineLarge?.copyWith(height: 1.2),
+                  style: GoogleFonts.dmSerifDisplay(
+                    fontSize: 40,
+                    height: 1.1,
+                    color: AppColors.textDark,
+                  ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
                   "Select your role to get started with the community and help reduce food waste.",
                   style: TextStyle(
-                    color: AppColors.textLight.withOpacity(0.8),
+                    color: AppColors.textLight.withOpacity(0.6),
                     fontSize: 16,
                     height: 1.5,
                   ),
@@ -46,9 +47,9 @@ class RegisterSelectionPage extends StatelessWidget {
                   mobile: Column(
                     children: [
                       _buildBuyerCard(context),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       _buildSellerCard(context),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       _buildVolunteerCard(context),
                     ],
                   ),
@@ -106,7 +107,7 @@ class RegisterSelectionPage extends StatelessWidget {
     return _SelectionCard(
       title: "Register as Buyer",
       description: "Find and purchase surplus meals near you at great prices.",
-      icon: Icons.shopping_bag_outlined,
+      icon: Icons.shopping_basket_outlined,
       onTap: () {
         navigateWithRole(context, const BuyerRegisterPage(role: "buyer"));
       },
@@ -154,7 +155,7 @@ class _SelectionCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
             color: AppColors.textDark.withOpacity(0.04),
@@ -163,64 +164,54 @@ class _SelectionCard extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+      child: Material(
+        color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
+          borderRadius: BorderRadius.circular(28),
           child: Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              border: Border(
-                left: BorderSide(
-                  color: AppColors.primary.withOpacity(0.3),
-                  width: 4,
-                ),
-              ),
-            ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withOpacity(0.06),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, color: AppColors.primary, size: 28),
                 ),
-
                 const SizedBox(width: 20),
-
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleLarge?.copyWith(fontSize: 18),
+                        style: GoogleFonts.dmSerifDisplay(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.textDark,
+                          letterSpacing: 0.2,
+                        ),
                       ),
-
-                      const SizedBox(height: 6),
-
+                      const SizedBox(height: 4),
                       Text(
                         description,
-                        style: TextStyle(
+                        style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: AppColors.textLight.withOpacity(0.7),
-                          height: 1.4,
+                          color: AppColors.textLight.withOpacity(0.5),
+                          height: 1.3,
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 const SizedBox(width: 12),
-
                 Icon(
                   Icons.chevron_right,
-                  color: AppColors.textLight.withOpacity(0.3),
-                  size: 20,
+                  color: AppColors.textLight.withOpacity(0.2),
+                  size: 18,
                 ),
               ],
             ),

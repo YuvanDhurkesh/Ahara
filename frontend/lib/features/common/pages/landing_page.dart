@@ -23,16 +23,31 @@ class _LandingPageState extends State<LandingPage> {
     setState(() {
       _activeSection = sectionName;
     });
-    Scrollable.ensureVisible(
-      key.currentContext!,
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeInOutCubic,
-    );
+
+    // Slight delay to allow the drawer to close fully before scrolling starts
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (key.currentContext != null) {
+        Scrollable.ensureVisible(
+          key.currentContext!,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOutCubic,
+          alignment: 0.0, // Ensures the section moves to the TOP of the screen
+        );
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = ResponsiveLayout.isMobile(context);
+
     return Scaffold(
+      key:
+          GlobalKey<
+            ScaffoldState
+          >(), // Helpful for programmatic access if needed
+      backgroundColor: AppColors.background,
+      endDrawer: isMobile ? _buildMobileDrawer() : null,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -59,31 +74,46 @@ class _LandingPageState extends State<LandingPage> {
           ],
         ),
         actions: [
-          _NavBarItem(
-            "How it works",
-            isActive: _activeSection == "howitworks",
-            onTap: () => _scrollToSection(_howItWorksKey, "howitworks"),
-          ),
-          _NavBarItem(
-            "Trust",
-            isActive: _activeSection == "trust",
-            onTap: () => _scrollToSection(_trustKey, "trust"),
-          ),
-          _NavBarItem(
-            "Impact",
-            isActive: _activeSection == "impact",
-            onTap: () => _scrollToSection(_impactKey, "impact"),
-          ),
-          const SizedBox(width: 12),
+          if (!isMobile) ...[
+            _NavBarItem(
+              "How it works",
+              isActive: _activeSection == "howitworks",
+              onTap: () => _scrollToSection(_howItWorksKey, "howitworks"),
+            ),
+            _NavBarItem(
+              "Trust",
+              isActive: _activeSection == "trust",
+              onTap: () => _scrollToSection(_trustKey, "trust"),
+            ),
+            _NavBarItem(
+              "Impact",
+              isActive: _activeSection == "impact",
+              onTap: () => _scrollToSection(_impactKey, "impact"),
+            ),
+          ],
+          const SizedBox(width: 8),
           ElevatedButton(
             onPressed: () => _showAuthOptions(context),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 16 : 20,
+                vertical: 0,
+              ),
               minimumSize: const Size(0, 40),
             ),
-            child: const Text("Join Us", style: TextStyle(fontSize: 13)),
+            child: Text(
+              "Join Us",
+              style: TextStyle(fontSize: isMobile ? 12 : 13),
+            ),
           ),
-          const SizedBox(width: 16),
+          if (isMobile)
+            Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu_rounded, color: AppColors.textDark),
+                onPressed: () => Scaffold.of(context).openEndDrawer(),
+              ),
+            ),
+          SizedBox(width: isMobile ? 8 : 16),
         ],
       ),
       body: SingleChildScrollView(
@@ -105,6 +135,73 @@ class _LandingPageState extends State<LandingPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMobileDrawer() {
+    return Drawer(
+      backgroundColor: AppColors.background,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                "Menu",
+                style: GoogleFonts.lora(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+              ),
+            ),
+            _buildDrawerItem("How it works", () {
+              Navigator.pop(context);
+              _scrollToSection(_howItWorksKey, "howitworks");
+            }),
+            _buildDrawerItem("Trust", () {
+              Navigator.pop(context);
+              _scrollToSection(_trustKey, "trust");
+            }),
+            _buildDrawerItem("Impact", () {
+              Navigator.pop(context);
+              _scrollToSection(_impactKey, "impact");
+            }),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                "Ahara v1.0",
+                style: TextStyle(
+                  color: AppColors.textLight.withOpacity(0.5),
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(String title, VoidCallback onTap) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+      title: Text(
+        title,
+        style: GoogleFonts.inter(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textDark,
+        ),
+      ),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 14,
+        color: AppColors.primary,
+      ),
+      onTap: onTap,
     );
   }
 

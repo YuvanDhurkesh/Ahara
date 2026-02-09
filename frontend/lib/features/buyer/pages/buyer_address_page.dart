@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 
+import 'buyer_add_address_page.dart';
+
 class BuyerAddressPage extends StatefulWidget {
   const BuyerAddressPage({super.key});
 
@@ -113,7 +115,21 @@ class _BuyerAddressPageState extends State<BuyerAddressPage> {
             child: Column(
               children: [
                 OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final newAddress = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BuyerAddAddressPage(),
+                      ),
+                    );
+
+                    if (newAddress != null && newAddress is String) {
+                      setState(() {
+                        _addresses.add(newAddress);
+                        _selectedAddress = newAddress;
+                      });
+                    }
+                  },
                   icon: const Icon(Icons.add_rounded),
                   label: const Text("Add New Address"),
                   style: OutlinedButton.styleFrom(
