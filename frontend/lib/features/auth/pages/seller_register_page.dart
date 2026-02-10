@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
+import '../../../shared/widgets/phone_input_field.dart';
 
 class SellerRegisterPage extends StatefulWidget {
   const SellerRegisterPage({super.key});
@@ -14,6 +16,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
   final _nameController = TextEditingController();
   final _fssaiController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
   String? _selectedType;
@@ -21,10 +24,11 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
 
   final List<String> _sellerTypes = [
     'Restaurant',
-    'Cloud Kitchen',
     'Cafe',
+    'Cloud Kitchen',
+    'Pet Shop',
     'Event Management',
-    'Catering Service',
+    'Cafeteria',
   ];
 
   @override
@@ -32,6 +36,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
     _nameController.dispose();
     _fssaiController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -89,12 +94,25 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                   _buildLabel("BUSINESS TYPE"),
                   DropdownButtonFormField<String>(
                     value: _selectedType,
-                    decoration: const InputDecoration(
-                      hintText: "Select business type",
-                      prefixIcon: Icon(Icons.category_outlined),
+                    hint: Text(
+                      "Select business type",
+                      style: GoogleFonts.plusJakartaSans(
+                        color: AppColors.textLight.withOpacity(0.4),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                     items: _sellerTypes.map((type) {
-                      return DropdownMenuItem(value: type, child: Text(type));
+                      return DropdownMenuItem(
+                        value: type,
+                        child: Text(
+                          type,
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                        ),
+                      );
                     }).toList(),
                     onChanged: (value) {
                       setState(() => _selectedType = value);
@@ -125,6 +143,18 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                         return "Please enter FSSAI number";
                       if (value.length != 14)
                         return "FSSAI number must be 14 digits";
+                      return null;
+                    },
+                  ),
+                  // Contact Number Field
+                  PhoneInputField(
+                    controller: _phoneController,
+                    label: "CONTACT NUMBER",
+                    hintText: "12345 67890",
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Please enter your number";
+                      }
                       return null;
                     },
                   ),

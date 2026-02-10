@@ -28,64 +28,16 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            "Hi, Harishree",
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                          ),
-                          Text(
-                            'Volunteer Portal',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                      const Text(
+                        'Hi, Demo Volunteer',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
 
-                      // Availability Toggle & Profile
-                      Row(
-                        children: [
-                          _availabilityToggle(),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            onPressed: () {
-                              // Access parent dashboard state to switch tabs
-                              final dashboard = context
-                                  .findAncestorStateOfType<
-                                    State<StatefulWidget>
-                                  >();
-                              if (dashboard != null &&
-                                  dashboard.widget.runtimeType.toString() ==
-                                      'VolunteerDashboardPage') {
-                                (dashboard as dynamic).setState(() {
-                                  (dashboard as dynamic)._selectedIndex = 3;
-                                });
-                              }
-                            },
-                            icon: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 10,
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.person_outline,
-                                color: AppColors.textDark,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Availability Toggle
+                      _availabilityToggle(),
                     ],
                   ),
 

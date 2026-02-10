@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
+import '../../../shared/widgets/phone_input_field.dart';
 
 class VolunteerRegisterPage extends StatefulWidget {
   const VolunteerRegisterPage({super.key});
@@ -21,7 +23,7 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
   DateTime? _selectedDate;
   bool _obscurePassword = true;
 
-  final List<String> _transportModes = ['Bike', 'Cycle', 'Car', 'Van', 'Other'];
+  final List<String> _transportModes = ['Car', 'Bike', 'Cycle', 'Walk'];
 
   @override
   void dispose() {
@@ -72,9 +74,9 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Show DOB field for everything except 'Cycle'
+    // Show DOB field for everything except 'Cycle' and 'Walk'
     final bool showDOB =
-        _selectedTransport != null && _selectedTransport != 'Cycle';
+        _selectedTransport == 'Car' || _selectedTransport == 'Bike';
 
     return Scaffold(
       appBar: AppBar(),
@@ -126,12 +128,25 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
                   _buildLabel("MODE OF TRANSPORT"),
                   DropdownButtonFormField<String>(
                     value: _selectedTransport,
-                    decoration: const InputDecoration(
-                      hintText: "Select transport mode",
-                      prefixIcon: Icon(Icons.directions_bike_outlined),
+                    hint: Text(
+                      "Select transport mode",
+                      style: GoogleFonts.plusJakartaSans(
+                        color: AppColors.textLight.withOpacity(0.4),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
                     items: _transportModes.map((mode) {
-                      return DropdownMenuItem(value: mode, child: Text(mode));
+                      return DropdownMenuItem(
+                        value: mode,
+                        child: Text(
+                          mode,
+                          style: GoogleFonts.plusJakartaSans(
+                            color: AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                        ),
+                      );
                     }).toList(),
                     onChanged: (value) {
                       setState(() {
@@ -198,17 +213,14 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
                   const SizedBox(height: 28),
 
                   // Contact Number Field
-                  _buildLabel("CONTACT NUMBER"),
-                  TextFormField(
+                  PhoneInputField(
                     controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      hintText: "Enter your phone number",
-                      prefixIcon: Icon(Icons.phone_outlined),
-                    ),
+                    label: "CONTACT NUMBER",
+                    hintText: "12345 67890",
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return "Please enter your number";
+                      }
                       return null;
                     },
                   ),

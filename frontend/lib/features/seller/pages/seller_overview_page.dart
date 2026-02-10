@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'seller_notifications_page.dart';
 import '../../common/pages/landing_page.dart';
 import 'create_listing_page.dart';
-import 'seller_profile_page.dart';
 
 class SellerOverviewPage extends StatelessWidget {
   const SellerOverviewPage({super.key});
@@ -30,19 +30,20 @@ class SellerOverviewPage extends StatelessWidget {
                           children: [
                             Text(
                               "Welcome back,",
-                              style: TextStyle(
+                              style: GoogleFonts.plusJakartaSans(
                                 color: AppColors.textLight.withOpacity(0.7),
-                                fontSize: 16,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               "Seller Dashboard",
-                              style: Theme.of(context).textTheme.headlineMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textDark,
-                                  ),
+                              style: GoogleFonts.lora(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textDark,
+                                fontSize: 20,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
@@ -79,36 +80,6 @@ class SellerOverviewPage extends StatelessWidget {
                               ),
                             ),
                             tooltip: "Notifications",
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const SellerProfilePage(),
-                                ),
-                              );
-                            },
-                            icon: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 10,
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.person_outline,
-                                color: AppColors.textDark,
-                                size: 20,
-                              ),
-                            ),
-                            tooltip: "Profile",
                           ),
                           IconButton(
                             onPressed: () {
@@ -201,9 +172,10 @@ class SellerOverviewPage extends StatelessWidget {
 
                   Text(
                     "Recent Activity",
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    style: GoogleFonts.lora(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textDark,
+                      fontSize: 18,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -295,10 +267,10 @@ class SellerOverviewPage extends StatelessWidget {
                   children: [
                     Text(
                       activity['title'],
-                      style: const TextStyle(
+                      style: GoogleFonts.plusJakartaSans(
                         fontWeight: FontWeight.w700,
                         color: AppColors.textDark,
-                        fontSize: 14,
+                        fontSize: 13,
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -400,8 +372,8 @@ class SellerOverviewPage extends StatelessWidget {
                   children: [
                     Text(
                       value,
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
                         fontWeight: FontWeight.w800,
                         color: AppColors.textDark,
                         letterSpacing: -0.2,

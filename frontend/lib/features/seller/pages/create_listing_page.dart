@@ -1,5 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import '../../location/pages/location_picker_page.dart';
 import '../../../data/models/listing_model.dart';
 import '../../../shared/styles/app_colors.dart';
 
@@ -26,6 +30,10 @@ class _CreateListingPageState extends State<CreateListingPage> {
   HygieneStatus _hygieneStatus = HygieneStatus.excellent;
   DateTime _preparedAt = DateTime.now();
   BusinessType _businessType = BusinessType.restaurant;
+  File? _pickedImage;
+  final ImagePicker _picker = ImagePicker();
+
+  final TextEditingController _pincodeController = TextEditingController();
 
   final List<String> _units = ['kg', 'portions', 'pieces', 'liters'];
 
@@ -38,6 +46,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
       _quantityController.text = l.quantityValue.toString();
       _priceController.text = l.price?.toString() ?? "";
       _locationController.text = l.locationAddress;
+      _pincodeController.text = l.pincode ?? "";
       _descriptionController.text = l.description;
       _selectedFoodType = l.foodType;
       _selectedUnit = l.quantityUnit;
@@ -56,6 +65,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
     _quantityController.dispose();
     _priceController.dispose();
     _locationController.dispose();
+    _pincodeController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
@@ -66,11 +76,17 @@ class _CreateListingPageState extends State<CreateListingPage> {
       initialDate: _preparedAt,
       firstDate: DateTime.now().subtract(const Duration(days: 7)),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Transform.scale(scale: 0.9, child: child);
+      },
     );
     if (date != null) {
       final TimeOfDay? time = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(_preparedAt),
+        builder: (context, child) {
+          return Transform.scale(scale: 0.9, child: child);
+        },
       );
       if (time != null) {
         setState(() {
@@ -84,6 +100,50 @@ class _CreateListingPageState extends State<CreateListingPage> {
         });
       }
     }
+  }
+
+  Future<void> _pickImage() async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text("Take a photo"),
+              onTap: () async {
+                Navigator.pop(context);
+                final XFile? image = await _picker.pickImage(
+                  source: ImageSource.camera,
+                  imageQuality: 70,
+                );
+                if (image != null) {
+                  setState(() => _pickedImage = File(image.path));
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text("Choose from gallery"),
+              onTap: () async {
+                Navigator.pop(context);
+                final XFile? image = await _picker.pickImage(
+                  source: ImageSource.gallery,
+                  imageQuality: 70,
+                );
+                if (image != null) {
+                  setState(() => _pickedImage = File(image.path));
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _submitForm() {
@@ -107,6 +167,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
         expiryTime: expiryTime,
         hygieneStatus: _hygieneStatus,
         locationAddress: _locationController.text,
+        pincode: _pincodeController.text,
         latitude: 0.0, // Default for now
         longitude: 0.0, // Default for now
         imageUrl: 'https://via.placeholder.com/150', // Default placeholder
@@ -132,7 +193,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
       appBar: AppBar(
         title: Text(
           widget.listing != null ? "Edit Listing" : "Create Listing",
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: GoogleFonts.lora(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -301,7 +362,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: GoogleFonts.lora(
         fontSize: 16,
         fontWeight: FontWeight.bold,
         color: AppColors.textDark,
@@ -505,38 +566,71 @@ class _CreateListingPageState extends State<CreateListingPage> {
 
   Widget _buildImagePicker() {
     return GestureDetector(
-      onTap: () {
-        // TODO: Implement image picker
-      },
+      onTap: _pickImage,
       child: Container(
-        height: 160,
+        height: 180,
         width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppColors.textLight.withOpacity(0.1),
-            style: BorderStyle.solid,
-          ),
+          border: Border.all(color: AppColors.textLight.withOpacity(0.1)),
+          image: _pickedImage != null
+              ? DecorationImage(
+                  image: FileImage(_pickedImage!),
+                  fit: BoxFit.cover,
+                )
+              : null,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_a_photo_outlined,
-              size: 40,
-              color: AppColors.primary.withOpacity(0.5),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "Add food pictures",
-              style: TextStyle(
-                color: AppColors.textLight.withOpacity(0.6),
-                fontWeight: FontWeight.w500,
+        child: _pickedImage == null
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_a_photo_outlined,
+                    size: 40,
+                    color: AppColors.primary.withOpacity(0.5),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Add food pictures",
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Capture or upload from gallery",
+                    style: TextStyle(
+                      color: AppColors.textLight.withOpacity(0.5),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              )
+            : Stack(
+                children: [
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: GestureDetector(
+                      onTap: () => setState(() => _pickedImage = null),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -636,46 +730,124 @@ class _CreateListingPageState extends State<CreateListingPage> {
   }
 
   Widget _buildMapPicker() {
-    return InkWell(
-      onTap: () {
-        // TODO: Implement map selection
-      },
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.textLight.withOpacity(0.1)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.location_on_rounded,
-                size: 20,
-                color: Colors.redAccent,
+    return Column(
+      children: [
+        TextFormField(
+          controller: _locationController,
+          decoration: InputDecoration(
+            hintText: "Enter your full address",
+            hintStyle: TextStyle(color: AppColors.textLight.withOpacity(0.4)),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: AppColors.textLight.withOpacity(0.1),
               ),
             ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                "Pin exact location on map",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textDark,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: AppColors.textLight.withOpacity(0.1),
+              ),
+            ),
+          ),
+          maxLines: 2,
+          validator: (value) =>
+              value == null || value.isEmpty ? "Required" : null,
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: _pincodeController,
+          decoration: InputDecoration(
+            hintText: "Pincode",
+            hintStyle: TextStyle(color: AppColors.textLight.withOpacity(0.4)),
+            prefixIcon: const Icon(Icons.pin_drop_outlined, size: 20),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: AppColors.textLight.withOpacity(0.1),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: AppColors.textLight.withOpacity(0.1),
+              ),
+            ),
+          ),
+          keyboardType: TextInputType.number,
+          validator: (value) =>
+              value == null || value.isEmpty ? "Required" : null,
+        ),
+        const SizedBox(height: 16),
+        InkWell(
+          onTap: () async {
+            final result = await Navigator.push<LocationResult>(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LocationPickerPage(
+                  initialAddress: _locationController.text,
+                  initialPincode: _pincodeController.text,
                 ),
               ),
+            );
+
+            if (result != null) {
+              setState(() {
+                _locationController.text = result.address;
+                _pincodeController.text = result.pincode;
+              });
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.textLight.withOpacity(0.1)),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textLight),
-          ],
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.location_on_rounded,
+                    size: 20,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    "Pin exact location on map",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.textLight),
+              ],
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
