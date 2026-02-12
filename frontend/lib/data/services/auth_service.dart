@@ -38,6 +38,11 @@ class AuthService {
     required String email,
     required String password,
     required String location,
+    String? businessName,
+    String? businessType,
+    String? fssaiNumber,
+    String? transportMode,
+    String? dateOfBirth,
   }) async {
 
     //-----------------------------------------------------
@@ -81,6 +86,11 @@ class AuthService {
       name: name,
       phone: phone,
       location: location,
+      businessName: businessName,
+      businessType: businessType,
+      fssaiNumber: fssaiNumber,
+      transportMode: transportMode,
+      dateOfBirth: dateOfBirth,
     );
 
     return user;
@@ -108,6 +118,11 @@ class AuthService {
     required String name,
     required String phone,
     required String location,
+    String? businessName,
+    String? businessType,
+    String? fssaiNumber,
+    String? transportMode,
+    String? dateOfBirth,
   }) async {
 
     try {
@@ -127,6 +142,11 @@ class AuthService {
           "role": role,
           "phone": phone,
           "location": location,
+          if (businessName != null) "businessName": businessName,
+          if (businessType != null) "businessType": businessType,
+          if (fssaiNumber != null) "fssaiNumber": fssaiNumber,
+          if (transportMode != null) "transportMode": transportMode,
+          if (dateOfBirth != null) "dateOfBirth": dateOfBirth,
         }),
       );
 

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
 import '../../../shared/widgets/phone_input_field.dart';
+import '../../../data/providers/app_auth_provider.dart';
 
 class SellerRegisterPage extends StatefulWidget {
   const SellerRegisterPage({super.key});
@@ -18,9 +21,11 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _locationController = TextEditingController();
 
   String? _selectedType;
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   final List<String> _sellerTypes = [
     'Restaurant',
@@ -38,6 +43,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
 
@@ -179,6 +185,17 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                   ),
                   const SizedBox(height: 28),
 
+                  // Location Field
+                  _buildLabel("LOCATION (OPTIONAL)"),
+                  TextFormField(
+                    controller: _locationController,
+                    decoration: const InputDecoration(
+                      hintText: "E.g. Bangalore, Karnataka",
+                      prefixIcon: Icon(Icons.location_on_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+
                   // Password Field
                   _buildLabel("PASSWORD"),
                   TextFormField(
@@ -214,23 +231,48 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                     width: double.infinity,
                     height: 58,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: _isLoading ? null : () async {
                         if (_formKey.currentState!.validate()) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                "Registration successful! Please login.",
+                          setState(() => _isLoading = true);
+                          
+                          final auth = context.read<AppAuthProvider>();
+                          
+                          try {
+                            await auth.registerUser(
+                              role: 'seller',
+                              name: _nameController.text.trim(),
+                              phone: _phoneController.text.trim(),
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text.trim(),
+                              location: _locationController.text.trim().isEmpty 
+                                  ? 'Not specified' 
+                                  : _locationController.text.trim(),
+                              businessName: _nameController.text.trim(),
+                              businessType: _selectedType,
+                              fssaiNumber: _fssaiController.text.trim(),
+                            );
+                            
+                            if (!mounted) return;
+                            
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Registration successful! Please login."),
+                                backgroundColor: Colors.green,
                               ),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginPage(),
-                            ),
-                            (route) => false,
-                          );
+                            );
+                            
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (_) => const LoginPage()),
+                              (route) => false,
+                            );
+                          } on fb.FirebaseAuthException catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.message ?? "Registration failed")),
+                            );
+                          } finally {
+                            if (mounted) setState(() => _isLoading = false);
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -241,14 +283,16 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      child: const Text(
-                        "Create Seller Account",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              "Create Seller Account",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 32),

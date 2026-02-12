@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../buyer/pages/buyer_dashboard_page.dart';
+import '../../seller/pages/seller_dashboard_page.dart';
+import '../../volunteer/pages/volunteer_dashboard_page.dart';
+import 'register_selection_page.dart';
+import 'package:provider/provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'register_selection_page.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
@@ -49,11 +56,29 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       if (user != null) {
+        // Fetch user role from Firestore
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        
+        final role = doc.data()?['role'] as String? ?? 'buyer';
+        
+        Widget dashboard;
+        switch (role) {
+          case 'seller':
+            dashboard = const SellerDashboardPage();
+            break;
+          case 'volunteer':
+            dashboard = const VolunteerDashboardPage();
+            break;
+          default:
+            dashboard = const BuyerDashboardPage();
+        }
+        
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(
-            builder: (_) => const BuyerDashboardPage(),
-          ),
+          MaterialPageRoute(builder: (_) => dashboard),
           (route) => false,
         );
       }
@@ -243,11 +268,29 @@ SizedBox(
         final user = await auth.signInWithGoogle();
 
         if (user != null && context.mounted) {
+          // Fetch user role from Firestore
+          final doc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+          
+          final role = doc.data()?['role'] as String? ?? 'buyer';
+          
+          Widget dashboard;
+          switch (role) {
+            case 'seller':
+              dashboard = const SellerDashboardPage();
+              break;
+            case 'volunteer':
+              dashboard = const VolunteerDashboardPage();
+              break;
+            default:
+              dashboard = const BuyerDashboardPage();
+          }
+          
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (_) => const BuyerDashboardPage(),
-            ),
+            MaterialPageRoute(builder: (_) => dashboard),
           );
         }
 

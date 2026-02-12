@@ -1,19 +1,74 @@
 const mongoose = require("mongoose");
+const { GeoPointSchema } = require("./_shared");
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
+    firebaseUid: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true
+    },
 
-  firebaseUid: {
-    type: String,
-    required: true,
-    unique: true,
+    role: {
+      type: String,
+      enum: ["buyer", "seller", "volunteer"],
+      required: true,
+      index: true
+    },
+
+    name: { type: String, required: true },
+    phone: { type: String, required: true, index: true },
+    email: { type: String },
+
+    phoneVerified: { type: Boolean, default: false },
+    emailVerified: { type: Boolean, default: false },
+
+    // Location
+    geo: GeoPointSchema,
+    addressText: String,
+    city: String,
+    state: String,
+    pincode: String,
+
+    // Trust system (seller + volunteer only)
+    trustScore: {
+      type: Number,
+      min: 10,
+      max: 100,
+      validate: {
+        validator: function (v) {
+          if (this.role === "buyer") return v === undefined;
+          return true;
+        },
+        message: "Buyers should not have trustScore"
+      }
+    },
+
+    accountStatus: {
+      type: String,
+      enum: ["active", "warned", "locked"],
+      default: "active"
+    },
+
+    profilePictureUrl: String,
+
+    // Notifications
+    fcmTokens: [{ type: String }],
+
+    isActive: { type: Boolean, default: true },
+
+    // Soft delete
+    deletedAt: {
+      type: Date,
+      default: null,
+      index: true
+    }
   },
+  { timestamps: true }
+);
 
-  name: String,
-  email: String,
-  role: String,
-  phone: String,
-  location: String,
-
-}, { timestamps: true });
+// Geo index for proximity search
+userSchema.index({ geo: "2dsphere" });
 
 module.exports = mongoose.model("User", userSchema);
