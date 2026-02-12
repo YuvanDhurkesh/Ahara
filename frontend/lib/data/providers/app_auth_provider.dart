@@ -93,21 +93,34 @@ class AppAuthProvider extends ChangeNotifier {
 
   Future<User?> signInWithGoogle() async {
 
-    _setLoading(true);
+  _setLoading(true);
 
-    try {
+  try {
 
-      final user = await _googleService.signInWithGoogle();
+    final user = await _googleService.signInWithGoogle();
 
-      return user;
+    if (user != null) {
 
-    } catch (e) {
-      rethrow;
-
-    } finally {
-      _setLoading(false);
+      /// 🔥 THIS IS THE MAGIC LINE
+      await _authService.registerUser(
+        role: "buyer", // later make dynamic
+        name: user.displayName ?? "Google User",
+        phone: "",
+        email: user.email!,
+        password: "google-auth", // dummy, not used
+        location: "",
+      );
     }
+
+    return user;
+
+  } catch (e) {
+    rethrow;
+  } finally {
+    _setLoading(false);
   }
+}
+
   //---------------------------------------------------------
   /// LOGOUT
   //---------------------------------------------------------
