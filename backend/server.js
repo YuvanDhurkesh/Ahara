@@ -5,6 +5,7 @@ require("dotenv").config();
 const app = express();
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
@@ -18,6 +19,7 @@ app.use(express.json());
 
 /// ✅ THEN ROUTES
 app.use("/api/users", userRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/gamification_service.dart';
 
 class VolunteerHomePage extends StatefulWidget {
   const VolunteerHomePage({super.key});
@@ -10,6 +13,30 @@ class VolunteerHomePage extends StatefulWidget {
 
 class _VolunteerHomePageState extends State<VolunteerHomePage> {
   bool isAvailable = true;
+  int _points = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPoints();
+  }
+
+  Future<void> _fetchPoints() async {
+    try {
+      final user = context.read<AppAuthProvider>().currentUser;
+      if (user != null) {
+        final profile =
+            await GamificationService().getGamificationProfile(user.uid);
+        if (mounted) {
+          setState(() {
+            _points = profile['points'] ?? 0;
+          });
+        }
+      }
+    } catch (e) {
+      print("Error fetching points: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,21 +55,24 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            "Hi, Harishree",
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
-                          ),
-                          Text(
-                            'Volunteer Portal',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "Hi, Harishree",
+                              style: TextStyle(color: Colors.grey, fontSize: 14),
                             ),
-                          ),
-                        ],
+                            Text(
+                              'Volunteer Portal',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
 
                       // Availability Toggle & Profile
@@ -170,9 +200,9 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
           childAspectRatio: isWide ? 2.5 : 1.5,
-          children: const [
+          children: [
             _StatCard(title: 'Deliveries', value: '47', color: Colors.blue),
-            _StatCard(title: 'Today', value: '3', color: Colors.green),
+            _StatCard(title: 'Points', value: '$_points', color: Colors.purple), // New Points Card
             _StatCard(title: 'Rating', value: '4.8', color: Colors.orange),
           ],
         );

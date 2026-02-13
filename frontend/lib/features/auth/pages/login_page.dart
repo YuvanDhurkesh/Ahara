@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../buyer/pages/buyer_dashboard_page.dart';
+import '../../volunteer/pages/volunteer_dashboard_page.dart';
+import '../../../data/services/auth_service.dart';
 import 'register_selection_page.dart';
+import '../../seller/pages/seller_dashboard_page.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
@@ -49,13 +52,37 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       if (user != null) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const BuyerDashboardPage(),
-          ),
-          (route) => false,
-        );
+        // Fetch Role
+        final role = await AuthService().getUserRole(user.uid);
+
+        if (!mounted) return;
+
+        if (role == 'volunteer') {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const VolunteerDashboardPage(),
+            ),
+            (route) => false,
+          );
+        } else if (role == 'seller') {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const SellerDashboardPage(),
+            ),
+            (route) => false,
+          );
+        } else {
+          // Default to Buyer
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const BuyerDashboardPage(),
+            ),
+            (route) => false,
+          );
+        }
       }
 
     } on fb.FirebaseAuthException catch (e) {
@@ -243,12 +270,24 @@ SizedBox(
         final user = await auth.signInWithGoogle();
 
         if (user != null && context.mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const BuyerDashboardPage(),
-            ),
-          );
+          final role = await AuthService().getUserRole(user.uid);
+          
+          if (role == 'volunteer') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const VolunteerDashboardPage()),
+            );
+          } else if (role == 'seller') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const SellerDashboardPage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const BuyerDashboardPage()),
+            );
+          }
         }
 
       } catch (e) {

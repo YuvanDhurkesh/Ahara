@@ -46,28 +46,16 @@ class SellerOrdersPage extends StatelessWidget {
       ),
     ];
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(
-          "My Orders",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textDark,
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: mockOrders.length,
-            itemBuilder: (context, index) {
-              final order = mockOrders[index];
-              return _buildOrderCard(context, order);
-            },
-          ),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 900),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: mockOrders.length,
+          itemBuilder: (context, index) {
+            final order = mockOrders[index];
+            return _buildOrderCard(context, order);
+          },
         ),
       ),
     );

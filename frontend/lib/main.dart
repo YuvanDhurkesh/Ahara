@@ -5,10 +5,11 @@ import 'config/theme_config.dart';
 import 'features/common/pages/landing_page.dart';
 import 'package:provider/provider.dart';
 import 'data/providers/app_auth_provider.dart';
-import 'data/providers/app_auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'features/buyer/pages/buyer_dashboard_page.dart';
+import 'features/seller/pages/seller_dashboard_page.dart';
+import 'features/volunteer/pages/volunteer_dashboard_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -93,9 +94,12 @@ class AuthWrapper extends StatelessWidget {
 
             if (role == "buyer") {
               return const BuyerDashboardPage();
+            } else if (role == "seller") {
+              return const SellerDashboardPage();
+            } else if (role == "volunteer") {
+              return const VolunteerDashboardPage();
             }
 
-            /// Temporarily route others to landing
             return const LandingPage();
           },
         );

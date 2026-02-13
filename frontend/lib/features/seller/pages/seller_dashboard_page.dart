@@ -4,6 +4,8 @@ import 'seller_overview_page.dart';
 import 'seller_listings_page.dart';
 import 'seller_orders_page.dart';
 import 'seller_profile_page.dart';
+import 'create_donation_page.dart';
+import 'create_listing_page.dart';
 
 class SellerDashboardPage extends StatefulWidget {
   final int initialIndex;
@@ -33,6 +35,17 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: Text(
+          _selectedIndex == 0 ? "Dashboard" :
+          _selectedIndex == 1 ? "My Listings" :
+          _selectedIndex == 2 ? "My Orders" : "My Profile",
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: AppColors.textDark,
+      ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -119,6 +132,27 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
             ),
           ),
         ),
+      ),
+      floatingActionButton: _selectedIndex == 1 ? FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreateListingPage()),
+          );
+        },
+        label: const Text("New Listing"),
+        icon: const Icon(Icons.add),
+        backgroundColor: AppColors.primary,
+      ) : FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CreateDonationPage()),
+          );
+        },
+        label: const Text("Donate Food"),
+        icon: const Icon(Icons.volunteer_activism),
+        backgroundColor: AppColors.primary,
       ),
     );
   }

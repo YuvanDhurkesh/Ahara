@@ -16,6 +16,7 @@ class MockOrder {
   // Delivery Specifics
   final String? deliveryTime;
   final String? volunteerName;
+  final String? volunteerId; // Added for gamification
   final double? volunteerRating;
   final int? currentStep; // 0: Confirmed, 1: Preparing, 2: Out, 3: Arrived
 
@@ -29,6 +30,7 @@ class MockOrder {
     required this.itemsSummary,
     this.deliveryTime,
     this.volunteerName,
+    this.volunteerId,
     this.volunteerRating,
     this.currentStep,
   });
@@ -46,6 +48,7 @@ final List<MockOrder> mockOrders = [
     itemsSummary: "1x Special Pastry Box",
     deliveryTime: "1:15 PM",
     volunteerName: "Ramesh K.",
+    volunteerId: "test_volunteer_123", // Mock ID
     volunteerRating: 4.8,
     currentStep: 2, // Out for delivery
   ),

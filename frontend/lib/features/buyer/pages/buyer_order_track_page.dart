@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../data/services/gamification_service.dart';
+import '../../../../data/services/order_service.dart';
+import 'package:provider/provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
 import '../data/mock_orders.dart';
 
 class BuyerOrderTrackPage extends StatelessWidget {
@@ -182,6 +186,83 @@ class BuyerOrderTrackPage extends StatelessWidget {
                       ],
                     ),
                   ),
+
+                  const SizedBox(height: 32),
+
+                  // Confirm Delivery Button
+                  if (order.currentStep == 2) // Only show if "Out for Delivery"
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          try {
+                            final user = context.read<AppAuthProvider>().currentUser;
+                            if (user == null) {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("You must be logged in to confirm orders.")),
+                              );
+                              return;
+                            }
+
+                            // 1. Get the real active order for this buyer
+                            final orders = await OrderService().getUserOrders(user.uid, "buyer");
+                            
+                            // Find the first order that is 'ACCEPTED' or 'PICKED_UP' (not completed)
+                            // For this demo, we assume the top one is the one we want to close if it's not completed.
+                            if (orders.isNotEmpty) {
+                              final orderId = orders[0]['_id'];
+                              final status = orders[0]['status'];
+
+                              if (status == 'COMPLETED') {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Order already completed!")),
+                                  );
+                                }
+                                return;
+                              }
+
+                              // 2. Confirm it
+                              await OrderService().confirmDelivery(orderId);
+
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Delivery Confirmed! Points awarded to Volunteer.')),
+                                );
+                                Navigator.pop(context); // Go back
+                              }
+                            } else {
+                               if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("No active real orders found to confirm.")),
+                                );
+                              }
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error: $e')),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          "Confirm & Rate Delivery",
+                          style: GoogleFonts.inter(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

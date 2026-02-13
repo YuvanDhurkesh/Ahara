@@ -2,15 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../config/api_config.dart';
 
 class AuthService {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  /// 🔥 USE IPV4 WHEN TESTING ON PHONE
-  //static const String backendBaseUrl = "http://10.12.249.12:5000/api";
-  static const String backendBaseUrl = "http://localhost:5000/api";
+  static const String backendBaseUrl = ApiConfig.baseUrl;
 
 
   //---------------------------------------------------------
@@ -139,5 +138,20 @@ class AuthService {
       /// NEVER crash signup
       print("⚠️ Mongo sync failed: $e");
     }
+  }
+  //---------------------------------------------------------
+  /// GET USER ROLE
+  //---------------------------------------------------------
+
+  Future<String?> getUserRole(String uid) async {
+    try {
+      final doc = await _db.collection('users').doc(uid).get();
+      if (doc.exists) {
+        return doc.data()?['role'] as String?;
+      }
+    } catch (e) {
+      print("Error fetching user role: $e");
+    }
+    return null;
   }
 }

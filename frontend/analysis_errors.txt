@@ -1,0 +1,279 @@
+﻿Analyzing frontend...                                           
+
+   info - Don't invoke 'print' in production code - integration_test\app_test.dart:22:9 - avoid_print
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\config\theme_config.dart:15:7 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\config\theme_config.dart:56:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\config\theme_config.dart:79:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\config\theme_config.dart:85:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\config\theme_config.dart:89:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\config\theme_config.dart:107:33 - deprecated_member_use
+   info - The constant name 'prepared_meal' isn't a lowerCamelCase identifier - lib\data\models\listing_model.dart:2:3 - constant_identifier_names
+   info - The constant name 'fresh_produce' isn't a lowerCamelCase identifier - lib\data\models\listing_model.dart:3:3 - constant_identifier_names
+   info - The constant name 'packaged_food' isn't a lowerCamelCase identifier - lib\data\models\listing_model.dart:4:3 - constant_identifier_names
+   info - The constant name 'bakery_item' isn't a lowerCamelCase identifier - lib\data\models\listing_model.dart:5:3 - constant_identifier_names
+   info - The constant name 'dairy_product' isn't a lowerCamelCase identifier - lib\data\models\listing_model.dart:6:3 - constant_identifier_names
+   info - The constant name 'cloud_kitchen' isn't a lowerCamelCase identifier - lib\data\models\listing_model.dart:18:3 - constant_identifier_names
+   info - The constant name 'pet_shop' isn't a lowerCamelCase identifier - lib\data\models\listing_model.dart:19:3 - constant_identifier_names
+   info - The constant name 'event_management' isn't a lowerCamelCase identifier - lib\data\models\listing_model.dart:20:3 - constant_identifier_names
+   info - The constant name 'picked_up' isn't a lowerCamelCase identifier - lib\data\models\order_model.dart:1:40 - constant_identifier_names
+   info - Don't invoke 'print' in production code - lib\data\services\auth_service.dart:140:7 - avoid_print
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\pages\buyer_register_page.dart:55:30 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\pages\buyer_register_page.dart:67:32 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\pages\buyer_register_page.dart:75:30 - use_build_context_synchronously
+   info - 'desiredAccuracy' is deprecated and shouldn't be used. use settings parameter with AndroidSettings, AppleSettings, WebSettings, or LocationSettings - lib\features\auth\pages\buyer_register_page.dart:87:9 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\pages\buyer_register_page.dart:103:28 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\buyer_register_page.dart:312:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\login_page.dart:105:46 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\features\auth\pages\login_page.dart:255:30 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\login_page.dart:275:50 - deprecated_member_use
+warning - Unused import: 'seller_register_page.dart' - lib\features\auth\pages\register_selection_page.dart:5:8 - unused_import
+warning - Unused import: 'volunteer_register_page.dart' - lib\features\auth\pages\register_selection_page.dart:6:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\register_selection_page.dart:46:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\register_selection_page.dart:111:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\register_selection_page.dart:165:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\register_selection_page.dart:180:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\register_selection_page.dart:191:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\register_selection_page.dart:218:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\register_selection_page.dart:230:46 - deprecated_member_use
+warning - Unused import: 'seller_register_page.dart' - lib\features\auth\pages\role_selection_page.dart:3:8 - unused_import
+warning - Unused import: 'volunteer_register_page.dart' - lib\features\auth\pages\role_selection_page.dart:4:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\seller_register_page.dart:65:50 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\seller_register_page.dart:82:25 - curly_braces_in_flow_control_structures
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\auth\pages\seller_register_page.dart:91:21 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\seller_register_page.dart:104:25 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\seller_register_page.dart:109:50 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\seller_register_page.dart:125:25 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\seller_register_page.dart:127:25 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\seller_register_page.dart:144:25 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\seller_register_page.dart:146:25 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\seller_register_page.dart:174:25 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\seller_register_page.dart:176:25 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\seller_register_page.dart:231:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\volunteer_register_page.dart:102:50 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\volunteer_register_page.dart:119:25 - curly_braces_in_flow_control_structures
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\auth\pages\volunteer_register_page.dart:128:21 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\volunteer_register_page.dart:147:25 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\volunteer_register_page.dart:152:50 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\volunteer_register_page.dart:170:27 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\volunteer_register_page.dart:192:25 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\volunteer_register_page.dart:194:25 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\volunteer_register_page.dart:211:25 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\volunteer_register_page.dart:239:25 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\features\auth\pages\volunteer_register_page.dart:241:25 - curly_braces_in_flow_control_structures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\pages\volunteer_register_page.dart:280:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_account_details_page.dart:121:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_account_details_page.dart:135:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_account_details_page.dart:140:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_account_details_page.dart:173:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_account_details_page.dart:195:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_account_details_page.dart:228:42 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\features\buyer\pages\buyer_add_address_page.dart:65:7 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_add_address_page.dart:102:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_add_address_page.dart:164:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_add_address_page.dart:166:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_add_address_page.dart:196:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_add_address_page.dart:218:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_add_address_page.dart:319:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_add_address_page.dart:389:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_add_address_page.dart:400:53 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\buyer\pages\buyer_address_page.dart:54:37 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_address_page.dart:74:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_address_page.dart:140:63 - deprecated_member_use
+warning - Unused import: '../../../shared/styles/app_colors.dart' - lib\features\buyer\pages\buyer_browse_page.dart:3:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_browse_page.dart:143:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_browse_page.dart:175:35 - deprecated_member_use
+   info - Unnecessary braces in a string interpolation - lib\features\buyer\pages\buyer_browse_page.dart:226:43 - unnecessary_brace_in_string_interps
+   info - Unnecessary use of multiple underscores - lib\features\buyer\pages\buyer_browse_page.dart:420:41 - unnecessary_underscores
+warning - The value of the local variable 'isValid' isn't used - lib\features\buyer\pages\buyer_checkout_page.dart:650:14 - unused_local_variable
+   info - Unnecessary 'this.' qualifier - lib\features\buyer\pages\buyer_checkout_page.dart:759:15 - unnecessary_this
+   info - The local variable '_pages' starts with an underscore - lib\features\buyer\pages\buyer_dashboard_page.dart:43:24 - no_leading_underscores_for_local_identifiers
+  error - The argument for the named parameter 'backgroundColor' was already specified - lib\features\buyer\pages\buyer_dashboard_page.dart:62:7 - duplicate_named_argument
+   info - Don't use 'BuildContext's across async gaps - lib\features\buyer\pages\buyer_dashboard_page.dart:85:34 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\features\buyer\pages\buyer_dashboard_page.dart:89:34 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_dashboard_page.dart:103:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_dashboard_page.dart:123:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_favourites_page.dart:40:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_favourites_page.dart:46:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_favourites_page.dart:55:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_favourites_page.dart:72:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_favourites_page.dart:94:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_favourites_page.dart:104:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_favourites_page.dart:107:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_favourites_page.dart:131:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:56:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:74:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:76:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:97:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:147:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:171:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:246:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:263:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:300:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:303:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:321:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:340:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:370:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:383:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:412:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:564:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_food_detail_page.dart:578:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:123:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:129:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:160:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:236:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:245:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:289:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:324:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:349:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:358:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:361:54 - deprecated_member_use
+   info - Unnecessary use of 'toList' in a spread - lib\features\buyer\pages\buyer_home_page.dart:381:28 - unnecessary_to_list_in_spreads
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:397:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:407:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:469:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:530:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:566:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_home_page.dart:572:40 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\buyer\pages\buyer_notifications_page.dart:72:31 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_notifications_page.dart:82:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_notifications_page.dart:94:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_notifications_page.dart:143:54 - deprecated_member_use
+  error - Undefined class 'MockOrder' - lib\features\buyer\pages\buyer_order_track_page.dart:9:9 - undefined_class
+   info - Unnecessary use of multiple underscores - lib\features\buyer\pages\buyer_orders_page.dart:62:29 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_orders_page.dart:92:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_orders_page.dart:195:22 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\features\buyer\pages\buyer_payment_page.dart:56:37 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_payment_page.dart:77:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_payment_page.dart:89:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_payment_page.dart:90:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_payment_page.dart:109:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_profile_page.dart:146:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\buyer\pages\buyer_profile_page.dart:158:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:62:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:177:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:225:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:242:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:341:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:369:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:387:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:405:61 - deprecated_member_use
+   info - Unnecessary 'const' keyword - lib\features\common\pages\landing_page.dart:493:25 - unnecessary_const
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:629:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:648:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:678:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:704:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\common\pages\landing_page.dart:747:43 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\features\seller\pages\create_listing_page.dart:72:9 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:328:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:339:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:349:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:355:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:386:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:395:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:429:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:469:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:480:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:518:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:528:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:534:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:553:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:574:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\create_listing_page.dart:648:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_business_details_page.dart:150:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_business_details_page.dart:155:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_business_details_page.dart:180:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_business_details_page.dart:194:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_business_details_page.dart:201:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_business_details_page.dart:221:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_business_details_page.dart:234:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_business_details_page.dart:248:45 - deprecated_member_use
+   info - The local variable '_pages' starts with an underscore - lib\features\seller\pages\seller_dashboard_page.dart:27:24 - no_leading_underscores_for_local_identifiers
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_dashboard_page.dart:42:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_dashboard_page.dart:62:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_listings_page.dart:165:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_listings_page.dart:180:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_listings_page.dart:195:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_listings_page.dart:214:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_listings_page.dart:231:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_listings_page.dart:232:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_listings_page.dart:299:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_listings_page.dart:305:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_listings_page.dart:313:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_listings_page.dart:339:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_notifications_page.dart:86:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_notifications_page.dart:120:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_notifications_page.dart:128:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_notifications_page.dart:151:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_notifications_page.dart:159:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:79:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:97:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:118:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:165:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:225:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:231:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:243:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:256:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:268:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:295:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:312:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:358:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_order_detail_page.dart:385:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_orders_page.dart:84:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_orders_page.dart:113:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_orders_page.dart:134:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_orders_page.dart:141:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_orders_page.dart:157:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_orders_page.dart:200:22 - deprecated_member_use
+warning - Unused import: 'create_listing_page.dart' - lib\features\seller\pages\seller_overview_page.dart:5:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:34:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:70:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:100:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:130:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:263:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:268:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:309:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:323:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:332:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:356:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:370:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:390:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_overview_page.dart:415:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_profile_page.dart:112:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_profile_page.dart:124:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_verification_page.dart:41:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_verification_page.dart:93:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_verification_page.dart:115:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_verification_page.dart:145:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_verification_page.dart:148:38 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_verification_page.dart:155:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\seller\pages\seller_verification_page.dart:162:42 - deprecated_member_use
+warning - Unused import: 'volunteer_notifications_page.dart' - lib\features\volunteer\pages\volunteer_dashboard_page.dart:6:8 - unused_import
+   info - The local variable '_pages' starts with an underscore - lib\features\volunteer\pages\volunteer_dashboard_page.dart:32:24 - no_leading_underscores_for_local_identifiers
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_dashboard_page.dart:91:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_dashboard_page.dart:115:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_home_page.dart:75:57 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\volunteer\pages\volunteer_home_page.dart:128:11 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_home_page.dart:274:33 - deprecated_member_use
+warning - The value of the field '_mapController' isn't used - lib\features\volunteer\pages\volunteer_order_detail_page.dart:14:28 - unused_field
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_order_detail_page.dart:216:39 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\features\volunteer\pages\volunteer_orders_page.dart:118:42 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_orders_page.dart:220:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_orders_page.dart:260:41 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\volunteer\pages\volunteer_personal_details_page.dart:63:21 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_personal_details_page.dart:118:41 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\volunteer\pages\volunteer_profile_page.dart:57:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_profile_page.dart:99:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_profile_page.dart:198:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_profile_page.dart:210:28 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_ratings_page.dart:121:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_ratings_page.dart:151:42 - deprecated_member_use
+warning - The declaration '_ReviewTile' isn't referenced - lib\features\volunteer\pages\volunteer_ratings_page.dart:358:7 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_verification_page.dart:41:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_verification_page.dart:86:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_verification_page.dart:101:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_verification_page.dart:131:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_verification_page.dart:133:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_verification_page.dart:138:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\volunteer\pages\volunteer_verification_page.dart:144:42 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\volunteer\widgets\availability_toggle.dart:12:7 - deprecated_member_use
+

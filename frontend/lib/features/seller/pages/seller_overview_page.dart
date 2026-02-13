@@ -4,15 +4,14 @@ import 'seller_notifications_page.dart';
 import '../../common/pages/landing_page.dart';
 import 'create_listing_page.dart';
 import 'seller_profile_page.dart';
+import 'create_donation_page.dart';
 
 class SellerOverviewPage extends StatelessWidget {
   const SellerOverviewPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
+    return SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1200),
@@ -213,7 +212,6 @@ class SellerOverviewPage extends StatelessWidget {
               ),
             ),
           ),
-        ),
       ),
     );
   }
@@ -371,10 +369,10 @@ class SellerOverviewPage extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -407,15 +405,15 @@ class SellerOverviewPage extends StatelessWidget {
                         letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(height: 2),
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         color: AppColors.textLight.withOpacity(0.6),
                         fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),

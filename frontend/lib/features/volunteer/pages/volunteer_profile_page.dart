@@ -5,9 +5,63 @@ import 'volunteer_personal_details_page.dart';
 import 'volunteer_verification_page.dart';
 import 'volunteer_notifications_page.dart';
 import '../../common/pages/landing_page.dart';
+import '../../../data/services/gamification_service.dart';
+import 'package:provider/provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
 
-class VolunteerProfilePage extends StatelessWidget {
+class VolunteerProfilePage extends StatefulWidget {
   const VolunteerProfilePage({super.key});
+
+  @override
+  State<VolunteerProfilePage> createState() => _VolunteerProfilePageState();
+}
+
+class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
+  // Test ID matching the one used in MockOrders and Verification Script
+  final String testUserId = "test_volunteer_123"; 
+  
+  bool isLoading = true;
+  int points = 0;
+  int level = 1;
+  int trustScore = 50;
+  List<dynamic> badges = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Defer the call to access context safely
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchGamificationProfile();
+    });
+  }
+
+  Future<void> _fetchGamificationProfile() async {
+    try {
+      final user = context.read<AppAuthProvider>().currentUser;
+      if (user == null) {
+         setState(() { isLoading = false; });
+         return;
+      }
+
+      final data = await GamificationService().getGamificationProfile(user.uid);
+      if (mounted) {
+        setState(() {
+          points = data['points'] ?? 0;
+          level = data['level'] ?? 1;
+          trustScore = data['trustScore'] ?? 50;
+          badges = data['badges'] ?? [];
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error fetching profile: $e");
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +69,9 @@ class VolunteerProfilePage extends StatelessWidget {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
-          child: SingleChildScrollView(
+          child: isLoading 
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,13 +80,35 @@ class VolunteerProfilePage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Hello, Volunteer",
-                      style: GoogleFonts.lora(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Hello, Volunteer",
+                          style: GoogleFonts.lora(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                        if (badges.isNotEmpty)
+                          Container(
+                            margin: const EdgeInsets.only(top: 4),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              badges.last, // Show latest badge
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     IconButton(
                       onPressed: () => _showManageAccountSheet(context),
@@ -48,8 +126,8 @@ class VolunteerProfilePage extends StatelessWidget {
                       child: _buildInfoCard(
                         context,
                         title: "Trust Score",
-                        value: "850",
-                        subtext: "Bronze Member",
+                        value: "$trustScore", 
+                        subtext: trustScore > 80 ? "Gold Member" : "Standard Member",
                         icon: Icons.shield_outlined,
                         color: AppColors.secondary,
                       ),
@@ -58,9 +136,9 @@ class VolunteerProfilePage extends StatelessWidget {
                     Expanded(
                       child: _buildInfoCard(
                         context,
-                        title: "Level",
-                        value: "Silver",
-                        subtext: "15 deliveries to Gold",
+                        title: "Level $level",
+                        value: "$points Pts",
+                        subtext: "Keep going!",
                         icon: Icons.workspace_premium_outlined,
                         color: AppColors.primary,
                       ),
@@ -83,15 +161,15 @@ class VolunteerProfilePage extends StatelessWidget {
                   children: [
                     _buildImpactStat(
                       "Deliveries Done",
-                      "47",
+                      "${(points / 200).floor()}", // Estimate based on points
                       Icons.local_shipping_outlined,
                     ),
                     _buildImpactStat(
-                      "Hours Volunteered",
-                      "120",
-                      Icons.timer_outlined,
+                      "Badges Earned",
+                      "${badges.length}",
+                      Icons.star_outline,
                     ),
-                    _buildImpactStat("Top Rating", "4.9/5", Icons.star_outline),
+                    _buildImpactStat("Top Rating", "4.9/5", Icons.thumb_up_alt_outlined),
                   ],
                 ),
               ],

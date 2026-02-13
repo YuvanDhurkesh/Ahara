@@ -5,6 +5,9 @@ import 'buyer_browse_page.dart';
 import 'buyer_favourites_page.dart';
 import 'buyer_orders_page.dart';
 import 'buyer_profile_page.dart';
+import '../../../data/services/order_service.dart';
+import 'package:provider/provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
 
 class BuyerDashboardPage extends StatefulWidget {
   final int initialIndex;
@@ -56,7 +59,9 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
+
       body: _pages[_selectedIndex],
+
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,

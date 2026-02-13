@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'buyer_dashboard_page.dart';
 import '../data/mock_stores.dart';
+import 'package:provider/provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/order_service.dart';
 
 class BuyerCheckoutPage extends StatefulWidget {
   final MockStore store;
@@ -236,15 +239,67 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Navigate to Dashboard and clear stack
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BuyerDashboardPage(),
-                      ),
-                      (route) => false,
-                    );
+                  onPressed: () async {
+                    if (_selectedAddress == "Add shipping address") {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Please select a delivery address")),
+                      );
+                      return;
+                    }
+
+                    final user = context.read<AppAuthProvider>().currentUser;
+                    if (user == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text(
+                                "You need to be logged in to place an order")),
+                      );
+                      return;
+                    }
+
+                    final orderData = {
+                      "buyerId": user.uid,
+                      "storeId": widget.store.id,
+                      "items": [
+                        {
+                          "name": widget.store.name,
+                          "quantity": 1,
+                          "price": _price
+                        }
+                      ],
+                      "totalAmount": _total,
+                      "deliveryAddress": _selectedAddress,
+                      "paymentMethod": _selectedPayment,
+                    };
+
+                    try {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Placing order...")),
+                      );
+
+                      await OrderService().createOrder(orderData);
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text("Order Placed Successfully!")),
+                        );
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BuyerDashboardPage(),
+                          ),
+                          (route) => false,
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Failed to place order: $e")),
+                        );
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,

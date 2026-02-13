@@ -1,0 +1,4007 @@
+﻿[+1078 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[   +3 ms] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[   +1 ms] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[   +2 ms] executing: [C:\flutter/] git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[ +152 ms] Exit code 0 from: git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[        ] 2026-01-28 13:43:12 -0800
+[  +30 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[   +5 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[  +85 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[   +4 ms] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[ +173 ms] Skipping pub get: version match.
+[  +69 ms] Found plugin integration_test at C:\flutter\packages\integration_test\
+[ +169 ms] Found plugin url_launcher at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher-6.3.2\
+[   +4 ms] Found plugin url_launcher_windows at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_windows-3.1.5\
+[  +13 ms] Found plugin url_launcher_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_web-2.4.2\
+[  +11 ms] Found plugin url_launcher_macos at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_macos-3.2.5\
+[   +7 ms] Found plugin url_launcher_linux at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_linux-3.2.2\
+[   +6 ms] Found plugin url_launcher_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_ios-6.3.6\
+[   +4 ms] Found plugin url_launcher_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_android-6.3.28\
+[  +27 ms] Found plugin google_sign_in at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in-6.3.0\
+[   +7 ms] Found plugin google_sign_in_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_web-0.12.4+4\
+[  +12 ms] Found plugin google_sign_in_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_ios-5.9.0\
+[   +4 ms] Found plugin google_sign_in_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_android-6.2.1\
+[   +7 ms] Found plugin google_maps_flutter at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter-2.14.0\
+[   +7 ms] Found plugin google_maps_flutter_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_web-0.5.14+3\
+[  +33 ms] Found plugin google_maps_flutter_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_ios-2.17.1\
+[   +7 ms] Found plugin google_maps_flutter_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.18.12\
+[   +6 ms] Found plugin flutter_plugin_android_lifecycle at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\flutter_plugin_android_lifecycle-2.0.33\
+[  +10 ms] Found plugin path_provider at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider-2.1.5\
+[   +3 ms] Found plugin path_provider_windows at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_windows-2.3.0\
+[  +12 ms] Found plugin path_provider_linux at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_linux-2.2.1\
+[   +8 ms] Found plugin path_provider_foundation at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_foundation-2.6.0\
+[  +32 ms] Found plugin path_provider_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_android-2.2.22\
+[   +4 ms] Found plugin geolocator at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator-14.0.2\
+[   +3 ms] Found plugin geolocator_windows at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_windows-0.2.5\
+[   +6 ms] Found plugin geolocator_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_web-4.1.3\
+[   +3 ms] Found plugin geolocator_linux at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_linux-0.2.4\
+[   +4 ms] Found plugin package_info_plus at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\package_info_plus-9.0.0\
+[  +38 ms] Found plugin geolocator_apple at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_apple-2.3.13\
+[   +5 ms] Found plugin geolocator_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_android-5.0.2\
+[  +10 ms] Found plugin geocoding at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geocoding-4.0.0\
+[   +7 ms] Found plugin geocoding_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geocoding_ios-3.1.0\
+[   +4 ms] Found plugin geocoding_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geocoding_android-4.0.1\
+[   +4 ms] Found plugin firebase_core at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core-4.4.0\
+[   +3 ms] Found plugin firebase_core_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core_web-3.4.0\
+[   +6 ms] Found plugin firebase_auth at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth-6.1.4\
+[   +4 ms] Found plugin firebase_auth_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth_web-6.1.2\
+[  +15 ms] Found plugin cloud_firestore at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore-6.1.2\
+[   +5 ms] Found plugin cloud_firestore_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore_web-5.1.2\
+[  +87 ms] Found plugin integration_test at C:\flutter\packages\integration_test\
+[ +108 ms] Found plugin url_launcher at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher-6.3.2\
+[   +3 ms] Found plugin url_launcher_windows at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_windows-3.1.5\
+[   +8 ms] Found plugin url_launcher_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_web-2.4.2\
+[   +7 ms] Found plugin url_launcher_macos at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_macos-3.2.5\
+[   +3 ms] Found plugin url_launcher_linux at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_linux-3.2.2\
+[   +5 ms] Found plugin url_launcher_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_ios-6.3.6\
+[   +4 ms] Found plugin url_launcher_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_android-6.3.28\
+[  +20 ms] Found plugin google_sign_in at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in-6.3.0\
+[   +4 ms] Found plugin google_sign_in_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_web-0.12.4+4\
+[  +10 ms] Found plugin google_sign_in_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_ios-5.9.0\
+[   +3 ms] Found plugin google_sign_in_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_android-6.2.1\
+[   +3 ms] Found plugin google_maps_flutter at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter-2.14.0\
+[   +3 ms] Found plugin google_maps_flutter_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_web-0.5.14+3\
+[  +17 ms] Found plugin google_maps_flutter_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_ios-2.17.1\
+[   +3 ms] Found plugin google_maps_flutter_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.18.12\
+[   +3 ms] Found plugin flutter_plugin_android_lifecycle at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\flutter_plugin_android_lifecycle-2.0.33\
+[   +8 ms] Found plugin path_provider at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider-2.1.5\
+[   +3 ms] Found plugin path_provider_windows at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_windows-2.3.0\
+[   +7 ms] Found plugin path_provider_linux at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_linux-2.2.1\
+[   +6 ms] Found plugin path_provider_foundation at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_foundation-2.6.0\
+[  +30 ms] Found plugin path_provider_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_android-2.2.22\
+[   +2 ms] Found plugin geolocator at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator-14.0.2\
+[   +3 ms] Found plugin geolocator_windows at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_windows-0.2.5\
+[   +6 ms] Found plugin geolocator_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_web-4.1.3\
+[   +4 ms] Found plugin geolocator_linux at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_linux-0.2.4\
+[   +3 ms] Found plugin package_info_plus at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\package_info_plus-9.0.0\
+[  +26 ms] Found plugin geolocator_apple at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_apple-2.3.13\
+[   +3 ms] Found plugin geolocator_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_android-5.0.2\
+[   +8 ms] Found plugin geocoding at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geocoding-4.0.0\
+[   +5 ms] Found plugin geocoding_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geocoding_ios-3.1.0\
+[   +3 ms] Found plugin geocoding_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geocoding_android-4.0.1\
+[   +3 ms] Found plugin firebase_core at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core-4.4.0\
+[   +7 ms] Found plugin firebase_core_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core_web-3.4.0\
+[   +7 ms] Found plugin firebase_auth at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth-6.1.4\
+[   +3 ms] Found plugin firebase_auth_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth_web-6.1.2\
+[  +12 ms] Found plugin cloud_firestore at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore-6.1.2\
+[   +3 ms] Found plugin cloud_firestore_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore_web-5.1.2\
+[  +27 ms] Skipping generating web_plugin_registrant.dart because it is up-to-date.
+[  +18 ms] Found plugin integration_test at C:\flutter\packages\integration_test\
+[  +87 ms] Found plugin url_launcher at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher-6.3.2\
+[   +3 ms] Found plugin url_launcher_windows at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_windows-3.1.5\
+[   +8 ms] Found plugin url_launcher_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_web-2.4.2\
+[   +7 ms] Found plugin url_launcher_macos at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_macos-3.2.5\
+[   +3 ms] Found plugin url_launcher_linux at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_linux-3.2.2\
+[   +2 ms] Found plugin url_launcher_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_ios-6.3.6\
+[   +2 ms] Found plugin url_launcher_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\url_launcher_android-6.3.28\
+[  +17 ms] Found plugin google_sign_in at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in-6.3.0\
+[   +4 ms] Found plugin google_sign_in_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_web-0.12.4+4\
+[   +8 ms] Found plugin google_sign_in_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_ios-5.9.0\
+[   +2 ms] Found plugin google_sign_in_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_sign_in_android-6.2.1\
+[   +2 ms] Found plugin google_maps_flutter at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter-2.14.0\
+[   +3 ms] Found plugin google_maps_flutter_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_web-0.5.14+3\
+[  +19 ms] Found plugin google_maps_flutter_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_ios-2.17.1\
+[   +3 ms] Found plugin google_maps_flutter_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\google_maps_flutter_android-2.18.12\
+[   +2 ms] Found plugin flutter_plugin_android_lifecycle at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\flutter_plugin_android_lifecycle-2.0.33\
+[   +5 ms] Found plugin path_provider at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider-2.1.5\
+[   +3 ms] Found plugin path_provider_windows at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_windows-2.3.0\
+[   +8 ms] Found plugin path_provider_linux at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_linux-2.2.1\
+[   +7 ms] Found plugin path_provider_foundation at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_foundation-2.6.0\
+[  +29 ms] Found plugin path_provider_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\path_provider_android-2.2.22\
+[   +4 ms] Found plugin geolocator at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator-14.0.2\
+[   +3 ms] Found plugin geolocator_windows at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_windows-0.2.5\
+[   +6 ms] Found plugin geolocator_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_web-4.1.3\
+[   +3 ms] Found plugin geolocator_linux at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_linux-0.2.4\
+[   +3 ms] Found plugin package_info_plus at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\package_info_plus-9.0.0\
+[  +21 ms] Found plugin geolocator_apple at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_apple-2.3.13\
+[   +3 ms] Found plugin geolocator_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geolocator_android-5.0.2\
+[   +7 ms] Found plugin geocoding at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geocoding-4.0.0\
+[   +6 ms] Found plugin geocoding_ios at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geocoding_ios-3.1.0\
+[   +3 ms] Found plugin geocoding_android at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\geocoding_android-4.0.1\
+[   +4 ms] Found plugin firebase_core at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core-4.4.0\
+[   +3 ms] Found plugin firebase_core_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_core_web-3.4.0\
+[   +5 ms] Found plugin firebase_auth at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth-6.1.4\
+[   +2 ms] Found plugin firebase_auth_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\firebase_auth_web-6.1.2\
+[   +9 ms] Found plugin cloud_firestore at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore-6.1.2\
+[   +3 ms] Found plugin cloud_firestore_web at C:\Users\yuvan\AppData\Local\Pub\Cache\hosted\pub.dev\cloud_firestore_web-5.1.2\
+[  +20 ms] Generating C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android\app\src\main\java\io\flutter\plugins\GeneratedPluginRegistrant.java
+[   +4 ms] Skipping generating GeneratedPluginRegistrant.java because it is up-to-date.
+[  +13 ms] Skipping generating generated_plugin_registrant.h because it is up-to-date.
+[   +3 ms] Skipping generating generated_plugin_registrant.cc because it is up-to-date.
+[   +4 ms] Skipping generating generated_plugins.cmake because it is up-to-date.
+[   +6 ms] Skipping generating generated_plugin_registrant.h because it is up-to-date.
+[   +3 ms] Skipping generating generated_plugin_registrant.cc because it is up-to-date.
+[   +4 ms] Skipping generating generated_plugins.cmake because it is up-to-date.
+[   +6 ms] Skipping generating GeneratedPluginRegistrant.h because it is up-to-date.
+[   +4 ms] Skipping generating GeneratedPluginRegistrant.m because it is up-to-date.
+[   +4 ms] Skipping generating GeneratedPluginRegistrant.swift because it is up-to-date.
+[ +147 ms] executing: C:\Program Files\Android\Android Studio3\jbr\bin\java -version
+[ +283 ms] Exit code 0 from: C:\Program Files\Android\Android Studio3\jbr\bin\java -version
+[        ] openjdk version "21.0.8" 2025-07-15
+           OpenJDK Runtime Environment (build 21.0.8+-14196175-b1038.72)
+           OpenJDK 64-Bit Server VM (build 21.0.8+-14196175-b1038.72, mixed mode)
+[  +16 ms] Top-level Gradle build file not found, skipping migration of task "clean".
+[   +4 ms] executing: C:\Program Files\Android\Android Studio3\jbr\bin\java --version
+[ +289 ms] Exit code 0 from: C:\Program Files\Android\Android Studio3\jbr\bin\java --version
+[        ] openjdk 21.0.8 2025-07-15
+           OpenJDK Runtime Environment (build 21.0.8+-14196175-b1038.72)
+           OpenJDK 64-Bit Server VM (build 21.0.8+-14196175-b1038.72, mixed mode)
+[   +3 ms] Version of Java is different than impacted version, no migration attempted.
+[  +27 ms] CMake project not found, skipping support Android 15 16k page size migration.
+[   +8 ms] Using gradle from C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android\gradlew.bat.
+[  +31 ms] LocalFile: 'C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android\build.gradle.kts' provides AGP version from plugin id: 8.3.2
+[   +6 ms] Running Gradle task 'assembleDebug'...
+[   +2 ms] executing: [C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android/] C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android\gradlew.bat --full-stacktrace --info -Pverbose=true -Ptarget-platform=android-arm,android-arm64,android-x64 -Ptarget=lib\main.dart -Pbase-application-name=android.app.Application -Pdart-defines=RkxVVFRFUl9WRVJTSU9OPTMuMzguOQ==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049NjczMjNkZTI4NQ==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NTg3YzE4Zjg3Mw==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMC44 -Pdart-obfuscation=false -Ptrack-widget-creation=true -Ptree-shake-icons=false assembleDebug
+[+1828 ms] Initialized native services in: C:\Users\yuvan\.gradle\native
+[   +1 ms] Initialized jansi services in: C:\Users\yuvan\.gradle\native
+[ +133 ms] Welcome to Gradle 8.4!
+[        ] Here are the highlights of this release:
+[        ]  - Compiling and testing with Java 21
+[        ]  - Faster Java compilation on Windows
+[        ]  - Role focused dependency configurations creation
+[        ] For more details see https://docs.gradle.org/8.4/release-notes.html
+[ +200 ms] Received JVM installation metadata from 'C:\Program Files\Android\Android Studio3\jbr': {JAVA_HOME=C:\Program Files\Android\Android Studio3\jbr, JAVA_VERSION=21.0.8, JAVA_VENDOR=JetBrains s.r.o., RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.8+-14196175-b1038.72, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.8+-14196175-b1038.72, VM_VENDOR=JetBrains s.r.o., OS_ARCH=amd64}
+[ +498 ms] The client will now receive all logging from the daemon (pid: 2920). The daemon log file: C:\Users\yuvan\.gradle\daemon\8.4\daemon-2920.out.log
+[        ] Starting 3rd build in daemon [uptime: 15 mins 6.17 secs, performance: 99%, GC rate: 0.00/s, heap usage: 0% of 8 GiB, non-heap usage: 2% of 4 GiB]
+[        ] Using 12 worker leases.
+[        ] Now considering [C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android, C:\flutter\packages\flutter_tools\gradle] as hierarchies to watch
+[        ] Watching the file system is configured to be enabled if available
+[        ] File system watching is active
+[ +106 ms] Starting Build
+[        ] Now considering [C:\flutter\packages\flutter_tools\gradle, C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android] as hierarchies to watch
+[ +396 ms] > Configure project :gradle
+[        ] Evaluating project ':gradle' using build file 'C:\flutter\packages\flutter_tools\gradle\build.gradle.kts'.
+[        ] Using Kotlin Gradle Plugin gradle81 variant
+[        ] kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+[        ] kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+[        ] WARNING: Unsupported Kotlin plugin version.
+[        ] The `embedded-kotlin` and `kotlin-dsl` plugins rely on features of Kotlin `1.9.10` that might work differently than in the requested version `1.9.20`.
+[        ] file or directory 'C:\flutter\packages\flutter_tools\gradle\src\main\java', not found
+[        ] Caching disabled for Kotlin DSL accessors for project ':gradle' because:
+[        ]   Build cache is disabled
+[        ] Skipping Kotlin DSL accessors for project ':gradle' as it is up-to-date.
+[  +86 ms] Resolve mutations for :gradle:checkKotlinGradlePluginConfigurationErrors (Thread[#244,Execution worker,5,main]) started.
+[        ] :gradle:checkKotlinGradlePluginConfigurationErrors (Thread[#244,Execution worker,5,main]) started.
+[   +1 ms] > Task :gradle:checkKotlinGradlePluginConfigurationErrors
+[        ] Caching disabled for task ':gradle:checkKotlinGradlePluginConfigurationErrors' because:
+[        ]   Build cache is disabled
+[        ] Task ':gradle:checkKotlinGradlePluginConfigurationErrors' is not up-to-date because:
+[        ]   Task has not declared any outputs despite executing actions.
+[        ] Resolve mutations for :gradle:compileKotlin (Thread[#244,Execution worker,5,main]) started.
+[        ] :gradle:compileKotlin (Thread[#244,Execution worker,5,main]) started.
+[ +199 ms] > Task :gradle:compileKotlin UP-TO-DATE
+[        ] Transforming gradle-api-8.4.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-ant-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-astbuilder-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-console-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-datetime-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-dateutil-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-groovydoc-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-json-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-nio-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-sql-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-templates-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-test-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming groovy-xml-3.0.17.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming javaparser-core-3.17.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-stdlib-1.9.10.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-stdlib-common-1.9.10.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-reflect-1.9.10.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-installation-beacon-8.4.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-kotlin-dsl-extensions-8.4.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-kotlin-dsl-8.4.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-kotlin-dsl-tooling-models-8.4.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming annotation-jvm-1.9.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-reflect-1.9.10.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlinx-serialization-json-jvm-1.4.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlinx-serialization-core-jvm-1.4.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-stdlib-jdk8-1.9.10.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-stdlib-jdk7-1.9.10.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-stdlib-1.9.24.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-gradle-plugin-1.8.0-gradle76.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming builder-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming builder-model-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming gradle-api-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-gradle-plugin-model-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-gradle-plugin-api-1.8.0-gradle76.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-gradle-plugin-api-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-tooling-core-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming annotations-13.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming manifest-merger-31.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming zipflinger-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming apksig-8.11.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming apkzlib-8.11.1.jar with ClasspathEntrySnapshotTransform
+[   +2 ms] Transforming javawriter-2.5.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming asm-9.7.1.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-native-utils-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-project-model-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Transforming kotlin-util-io-1.8.0.jar with ClasspathEntrySnapshotTransform
+[        ] Caching disabled for task ':gradle:compileKotlin' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':gradle:compileKotlin' as it is up-to-date.
+[        ] Resolve mutations for :gradle:compileJava (Thread[#244,Execution worker,5,main]) started.
+[        ] :gradle:compileJava (Thread[#244,Execution worker,5,main]) started.
+[  +83 ms] > Task :gradle:compileJava NO-SOURCE
+[        ] Skipping task ':gradle:compileJava' as it has no source files and no previous output files.
+[        ] Resolve mutations for :gradle:compileGroovy (Thread[#244,Execution worker,5,main]) started.
+[        ] :gradle:compileGroovy (Thread[#244,Execution worker,5,main]) started.
+[        ] > Task :gradle:compileGroovy NO-SOURCE
+[        ] Skipping task ':gradle:compileGroovy' as it has no source files and no previous output files.
+[        ] Resolve mutations for :gradle:pluginDescriptors (Thread[#244,Execution worker,5,main]) started.
+[        ] :gradle:pluginDescriptors (Thread[#244,Execution worker,5,main]) started.
+[        ] > Task :gradle:pluginDescriptors UP-TO-DATE
+[        ] Caching disabled for task ':gradle:pluginDescriptors' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':gradle:pluginDescriptors' as it is up-to-date.
+[        ] Resolve mutations for :gradle:processResources (Thread[#243,included builds,5,main]) started.
+[        ] :gradle:processResources (Thread[#243,included builds,5,main]) started.
+[        ] > Task :gradle:processResources UP-TO-DATE
+[        ] Caching disabled for task ':gradle:processResources' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':gradle:processResources' as it is up-to-date.
+[        ] Resolve mutations for :gradle:classes (Thread[#243,included builds,5,main]) started.
+[        ] :gradle:classes (Thread[#243,included builds,5,main]) started.
+[        ] > Task :gradle:classes UP-TO-DATE
+[        ] Skipping task ':gradle:classes' as it has no actions.
+[        ] Resolve mutations for :gradle:jar (Thread[#243,included builds,5,main]) started.
+[        ] :gradle:jar (Thread[#243,included builds,5,main]) started.
+[        ] > Task :gradle:jar UP-TO-DATE
+[        ] Caching disabled for task ':gradle:jar' because:
+[        ]   Build cache is disabled
+[        ] Skipping task ':gradle:jar' as it is up-to-date.
+[ +588 ms] Settings evaluated using settings file 'C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android\settings.gradle.kts'.
+[        ] Projects loaded. Root project using build file 'C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android\build.gradle.kts'.
+[        ] Included projects: [root project 'android', project ':app', project ':cloud_firestore', project ':firebase_auth', project ':firebase_core', project ':flutter_plugin_android_lifecycle', project ':geocoding_android', project ':geolocator_android', project ':google_maps_flutter_android', project ':google_sign_in_android', project ':integration_test', project ':package_info_plus', project ':path_provider_android', project ':url_launcher_android']
+[ +498 ms] > Configure project :app
+[        ] Evaluating project ':app' using build file 'C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android\app\build.gradle.kts'.
+[        ] Using default execution profile
+[        ] Build bc4d0700-d444-48e9-83d0-ee7a4d5dee0e is started
+[        ] Using Kotlin Gradle Plugin gradle82 variant
+flutter : [   +1 ms] 
+Warning: Flutter 
+support for your 
+project's Gradle 
+version (8.4.0) will 
+soon be dropped. 
+Please upgrade your 
+Gradle version to a 
+version of at least 
+8.7.0 soon.
+At line:1 char:1
++ flutter build apk 
+--debug --verbose 
+2>&1 | Out-File 
+-Encoding utf8 bu ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: ([   +1    
+ ms] Warn...ast 8    
+.7.0 soon.:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+[   +4 ms] 
+Alternatively, use 
+the flag "--android-s
+kip-build-dependency-
+validation" to 
+bypass this check.
+[        ] Potential 
+fix: Your project's 
+gradle version is 
+typically defined in 
+the gradle wrapper 
+file. By default, 
+this can be found at 
+C:\Users\yuvan\OneDri
+ve\Desktop\ahara_test
+\Ahara\frontend\andro
+id/gradle/wrapper/gra
+dle-wrapper.propertie
+s. 
+[        ] For more 
+information, see http
+s://docs.gradle.org/c
+urrent/userguide/grad
+le_wrapper.html.
+[        ] Warning: 
+Flutter support for 
+your project's 
+Android Gradle 
+Plugin version 
+(Android Gradle 
+Plugin version 
+8.3.2) will soon be 
+dropped. Please 
+upgrade your Android 
+Gradle Plugin 
+version to a version 
+of at least Android 
+Gradle Plugin 
+version 8.6.0 soon.
+[        ] 
+Alternatively, use 
+the flag "--android-s
+kip-build-dependency-
+validation" to 
+bypass this check.
+[        ] Potential 
+fix: Your project's 
+AGP version is 
+typically defined in 
+the plugins block of 
+the 
+`settings.gradle` 
+file (C:\Users\yuvan\
+OneDrive\Desktop\ahar
+a_test\Ahara\frontend
+\android/settings.gra
+dle), by a plugin 
+with the id of com.an
+droid.application. 
+[        ] If you 
+don't see a plugins 
+block, your project 
+was likely created 
+with an older 
+template version. In 
+this case it is most 
+likely defined in 
+the top-level 
+build.gradle file (C:
+\Users\yuvan\OneDrive
+\Desktop\ahara_test\A
+hara\frontend\android
+/build.gradle) by 
+the following line 
+in the dependencies 
+block of the 
+buildscript: 
+"classpath 'com.andro
+id.tools.build:gradle
+:<version>'".
+[        ] Caching disabled for Kotlin DSL accessors for project ':app' because:
+[        ]   Build cache is disabled
+[        ] Skipping Kotlin DSL accessors for project ':app' as it is up-to-date.
+[        ] C/C++: android.ndkVersion from module build.gradle is [28.2.13676358]
+[        ] C/C++: android.ndkPath from module build.gradle is not set
+[        ] C/C++: ndk.dir in local.properties is not set
+[        ] C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+[        ] C/C++: sdkFolder is C:\Users\yuvan\AppData\Local\Android\Sdk\cmdline-tools
+[        ] > Configure project :
+[        ] Evaluating root project 'android' using build file 'C:\Users\yuvan\OneDrive\Desktop\ahara_test\Ahara\frontend\android\build.gradle.kts'.
+[        ] Caching disabled for Kotlin DSL accessors for root project 'android' because:
+[        ]   Build cache is disabled
+[        ] Skipping Kotlin DSL accessors for root project 'android' as it is up-to-date.
+[        ] Build bc4d0700-d444-48e9-83d0-ee7a4d5dee0e is closed
+[  +77 ms] FAILURE: 
+Build failed with an 
+exception.
+[        ] * Where:
+[        ] Build 
+file 'C:\Users\yuvan\
+OneDrive\Desktop\ahar
+a_test\Ahara\frontend
+\android\build.gradle
+.kts' line: 33
+[        ] * What 
+went wrong:
+[        ] A problem 
+occurred configuring 
+project ':app'.
+[        ] > 
+[CXX1101] NDK at C:\U
+sers\yuvan\AppData\Lo
+cal\Android\Sdk\cmdli
+ne-tools\ndk\28.2.136
+76358 did not have a 
+source.properties 
+file
+[        ] * Try:
+[        ] > Run 
+with --debug option 
+to get more log 
+output.
+[        ] > Run 
+with --scan to get 
+full insights.
+[        ] > Get 
+more help at https://
+help.gradle.org.
+[        ] * 
+Exception is:
+[        ] org.gradle
+.api.ProjectConfigura
+tionException: A 
+problem occurred 
+configuring project 
+':app'.
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator.wrapExcept
+ion(LifecycleProjectE
+valuator.java:84)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator.addConfigu
+rationFailure(Lifecyc
+leProjectEvaluator.ja
+va:77)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator.access$400
+(LifecycleProjectEval
+uator.java:55)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$NotifyAfte
+rEvaluate.run(Lifecyc
+leProjectEvaluator.ja
+va:255)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[   +2 ms] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$EvaluatePr
+oject.lambda$run$0(Li
+fecycleProjectEvaluat
+or.java:114)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.lambda$applyT
+oMutableState$1(Defau
+ltProjectStateRegistr
+y.java:406)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.fromMutableSt
+ate(DefaultProjectSta
+teRegistry.java:424)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.applyToMutabl
+eState(DefaultProject
+StateRegistry.java:40
+5)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$EvaluatePr
+oject.run(LifecyclePr
+ojectEvaluator.java:1
+00)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator.evaluate(L
+ifecycleProjectEvalua
+tor.java:72)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuate(DefaultProjec
+t.java:788)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuate(DefaultProjec
+t.java:156)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.ProjectLifecycle
+Controller.lambda$ens
+ureSelfConfigured$2(P
+rojectLifecycleContro
+ller.java:84)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$doTransiti
+on$14(StateTransition
+Controller.java:255)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:266)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:254)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$maybeTrans
+itionIfNotCurrentlyTr
+ansitioning$10(StateT
+ransitionController.j
+ava:199)
+[        ] 	at org.gr
+adle.internal.work.De
+faultSynchronizer.wit
+hLock(DefaultSynchron
+izer.java:34)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.maybeTransitionIf
+NotCurrentlyTransitio
+ning(StateTransitionC
+ontroller.java:195)
+[   +1 ms] 	at org.gr
+adle.api.internal.pro
+ject.ProjectLifecycle
+Controller.ensureSelf
+Configured(ProjectLif
+ecycleController.java
+:84)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.ensureConfigu
+red(DefaultProjectSta
+teRegistry.java:380)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuationDependsOn(De
+faultProject.java:866
+)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuationDependsOn(De
+faultProject.java:858
+)
+[        ] 	at Build_
+gradle$2.execute(buil
+d.gradle.kts:33)
+[        ] 	at Build_
+gradle$2.execute(buil
+d.gradle.kts:19)
+[        ] 	at org.gr
+adle.api.internal.Def
+aultMutationGuard$1.e
+xecute(DefaultMutatio
+nGuard.java:45)
+[        ] 	at org.gr
+adle.internal.Actions
+.with(Actions.java:20
+6)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r$1.run(BuildOperatio
+nCrossProjectConfigur
+ator.java:69)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[   +1 ms] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r.lambda$runProjectCo
+nfigureAction$0(Build
+OperationCrossProject
+Configurator.java:66)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.lambda$applyT
+oMutableState$1(Defau
+ltProjectStateRegistr
+y.java:406)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.fromMutableSt
+ate(DefaultProjectSta
+teRegistry.java:424)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.applyToMutabl
+eState(DefaultProject
+StateRegistry.java:40
+5)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r.runProjectConfigure
+Action(BuildOperation
+CrossProjectConfigura
+tor.java:66)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r.access$100(BuildOpe
+rationCrossProjectCon
+figurator.java:32)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r$BlockConfigureBuild
+Operation.run(BuildOp
+erationCrossProjectCo
+nfigurator.java:111)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r.runBlockConfigureAc
+tion(BuildOperationCr
+ossProjectConfigurato
+r.java:62)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r.subprojects(BuildOp
+erationCrossProjectCo
+nfigurator.java:48)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.s
+ubprojects(DefaultPro
+ject.java:754)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.s
+ubprojects(DefaultPro
+ject.java:749)
+[        ] 	at Build_
+gradle.<init>(build.g
+radle.kts:19)
+[        ] 	at Progra
+m.execute(Unknown 
+Source)
+[   +1 ms] 	at org.gr
+adle.kotlin.dsl.execu
+tion.Interpreter$Prog
+ramHost.eval(Interpre
+ter.kt:518)
+[        ] 	at org.gr
+adle.kotlin.dsl.execu
+tion.Interpreter$Prog
+ramHost.evaluateSecon
+dStageOf(Interpreter.
+kt:429)
+[        ] 	at Progra
+m.execute(Unknown 
+Source)
+[        ] 	at org.gr
+adle.kotlin.dsl.execu
+tion.Interpreter$Prog
+ramHost.eval(Interpre
+ter.kt:518)
+[        ] 	at org.gr
+adle.kotlin.dsl.execu
+tion.Interpreter.eval
+(Interpreter.kt:195)
+[        ] 	at org.gr
+adle.kotlin.dsl.provi
+der.StandardKotlinScr
+iptEvaluator.evaluate
+(KotlinScriptEvaluato
+r.kt:121)
+[        ] 	at org.gr
+adle.kotlin.dsl.provi
+der.KotlinScriptPlugi
+nFactory$create$1.inv
+oke(KotlinScriptPlugi
+nFactory.kt:51)
+[        ] 	at org.gr
+adle.kotlin.dsl.provi
+der.KotlinScriptPlugi
+nFactory$create$1.inv
+oke(KotlinScriptPlugi
+nFactory.kt:48)
+[        ] 	at org.gr
+adle.kotlin.dsl.provi
+der.KotlinScriptPlugi
+n.apply(KotlinScriptP
+lugin.kt:35)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildOperationScriptPlu
+gin$1.run(BuildOperat
+ionScriptPlugin.java:
+65)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[   +2 ms] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildOperationScriptPlu
+gin.lambda$apply$0(Bu
+ildOperationScriptPlu
+gin.java:62)
+[        ] 	at org.gr
+adle.configuration.in
+ternal.DefaultUserCod
+eApplicationContext.a
+pply(DefaultUserCodeA
+pplicationContext.jav
+a:44)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildOperationScriptPlu
+gin.apply(BuildOperat
+ionScriptPlugin.java:
+62)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.lambda$applyT
+oMutableState$1(Defau
+ltProjectStateRegistr
+y.java:406)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.fromMutableSt
+ate(DefaultProjectSta
+teRegistry.java:424)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.applyToMutabl
+eState(DefaultProject
+StateRegistry.java:40
+5)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.BuildScriptProc
+essor.execute(BuildSc
+riptProcessor.java:46
+)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.BuildScriptProc
+essor.execute(BuildSc
+riptProcessor.java:27
+)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.ConfigureAction
+sProjectEvaluator.eva
+luate(ConfigureAction
+sProjectEvaluator.jav
+a:35)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$EvaluatePr
+oject.lambda$run$0(Li
+fecycleProjectEvaluat
+or.java:109)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.lambda$applyT
+oMutableState$1(Defau
+ltProjectStateRegistr
+y.java:406)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.lambda$fromMu
+tableState$2(DefaultP
+rojectStateRegistry.j
+ava:429)
+[        ] 	at org.gr
+adle.internal.work.De
+faultWorkerLeaseServi
+ce.withReplacedLocks(
+DefaultWorkerLeaseSer
+vice.java:360)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.fromMutableSt
+ate(DefaultProjectSta
+teRegistry.java:429)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.applyToMutabl
+eState(DefaultProject
+StateRegistry.java:40
+5)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$EvaluatePr
+oject.run(LifecyclePr
+ojectEvaluator.java:1
+00)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator.evaluate(L
+ifecycleProjectEvalua
+tor.java:72)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuate(DefaultProjec
+t.java:788)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuate(DefaultProjec
+t.java:156)
+[   +6 ms] 	at org.gr
+adle.api.internal.pro
+ject.ProjectLifecycle
+Controller.lambda$ens
+ureSelfConfigured$2(P
+rojectLifecycleContro
+ller.java:84)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$doTransiti
+on$14(StateTransition
+Controller.java:255)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:266)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:254)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$maybeTrans
+itionIfNotCurrentlyTr
+ansitioning$10(StateT
+ransitionController.j
+ava:199)
+[        ] 	at org.gr
+adle.internal.work.De
+faultSynchronizer.wit
+hLock(DefaultSynchron
+izer.java:34)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.maybeTransitionIf
+NotCurrentlyTransitio
+ning(StateTransitionC
+ontroller.java:195)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.ProjectLifecycle
+Controller.ensureSelf
+Configured(ProjectLif
+ecycleController.java
+:84)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.ensureConfigu
+red(DefaultProjectSta
+teRegistry.java:380)
+[        ] 	at org.gr
+adle.execution.TaskPa
+thProjectEvaluator.co
+nfigure(TaskPathProje
+ctEvaluator.java:34)
+[        ] 	at org.gr
+adle.execution.TaskPa
+thProjectEvaluator.co
+nfigureHierarchy(Task
+PathProjectEvaluator.
+java:48)
+[        ] 	at org.gr
+adle.configuration.De
+faultProjectsPreparer
+.prepareProjects(Defa
+ultProjectsPreparer.j
+ava:42)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildTreePreparingProje
+ctsPreparer.preparePr
+ojects(BuildTreePrepa
+ringProjectsPreparer.
+java:65)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildOperationFiringPro
+jectsPreparer$Configu
+reBuild.run(BuildOper
+ationFiringProjectsPr
+eparer.java:52)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildOperationFiringPro
+jectsPreparer.prepare
+Projects(BuildOperati
+onFiringProjectsPrepa
+rer.java:40)
+[        ] 	at org.gr
+adle.initialization.V
+intageBuildModelContr
+oller.lambda$prepareP
+rojects$2(VintageBuil
+dModelController.java
+:84)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$doTransiti
+on$14(StateTransition
+Controller.java:255)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:266)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:254)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$transition
+IfNotPreviously$11(St
+ateTransitionControll
+er.java:213)
+[        ] 	at org.gr
+adle.internal.work.De
+faultSynchronizer.wit
+hLock(DefaultSynchron
+izer.java:34)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.transitionIfNotPr
+eviously(StateTransit
+ionController.java:20
+9)
+[        ] 	at org.gr
+adle.initialization.V
+intageBuildModelContr
+oller.prepareProjects
+(VintageBuildModelCon
+troller.java:84)
+[        ] 	at org.gr
+adle.initialization.V
+intageBuildModelContr
+oller.prepareToSchedu
+leTasks(VintageBuildM
+odelController.java:7
+1)
+[        ] 	at org.gr
+adle.internal.build.D
+efaultBuildLifecycleC
+ontroller.lambda$prep
+areToScheduleTasks$6(
+DefaultBuildLifecycle
+Controller.java:175)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$doTransiti
+on$14(StateTransition
+Controller.java:255)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:266)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:254)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$maybeTrans
+ition$9(StateTransiti
+onController.java:190
+)
+[        ] 	at org.gr
+adle.internal.work.De
+faultSynchronizer.wit
+hLock(DefaultSynchron
+izer.java:34)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.maybeTransition(S
+tateTransitionControl
+ler.java:186)
+[        ] 	at org.gr
+adle.internal.build.D
+efaultBuildLifecycleC
+ontroller.prepareToSc
+heduleTasks(DefaultBu
+ildLifecycleControlle
+r.java:173)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeWo
+rkPreparer.scheduleRe
+questedTasks(DefaultB
+uildTreeWorkPreparer.
+java:36)
+[        ] 	at org.gr
+adle.configurationcac
+he.VintageBuildTreeWo
+rkController$schedule
+AndRunRequestedTasks$
+1.apply(VintageBuildT
+reeWorkController.kt:
+36)
+[        ] 	at org.gr
+adle.configurationcac
+he.VintageBuildTreeWo
+rkController$schedule
+AndRunRequestedTasks$
+1.apply(VintageBuildT
+reeWorkController.kt:
+35)
+[        ] 	at org.gr
+adle.composite.intern
+al.DefaultIncludedBui
+ldTaskGraph.withNewWo
+rkGraph(DefaultInclud
+edBuildTaskGraph.java
+:112)
+[        ] 	at org.gr
+adle.configurationcac
+he.VintageBuildTreeWo
+rkController.schedule
+AndRunRequestedTasks(
+VintageBuildTreeWorkC
+ontroller.kt:35)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeLi
+fecycleController.lam
+bda$scheduleAndRunTas
+ks$1(DefaultBuildTree
+LifecycleController.j
+ava:68)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeLi
+fecycleController.lam
+bda$runBuild$4(Defaul
+tBuildTreeLifecycleCo
+ntroller.java:98)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$transition
+$6(StateTransitionCon
+troller.java:169)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:266)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$transition
+$7(StateTransitionCon
+troller.java:169)
+[        ] 	at org.gr
+adle.internal.work.De
+faultSynchronizer.wit
+hLock(DefaultSynchron
+izer.java:44)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.transition(StateT
+ransitionController.j
+ava:169)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeLi
+fecycleController.run
+Build(DefaultBuildTre
+eLifecycleController.
+java:95)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeLi
+fecycleController.sch
+eduleAndRunTasks(Defa
+ultBuildTreeLifecycle
+Controller.java:68)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeLi
+fecycleController.sch
+eduleAndRunTasks(Defa
+ultBuildTreeLifecycle
+Controller.java:63)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.ExecuteBuil
+dActionRunner.run(Exe
+cuteBuildActionRunner
+.java:31)
+[        ] 	at org.gr
+adle.launcher.exec.Ch
+ainingBuildActionRunn
+er.run(ChainingBuildA
+ctionRunner.java:35)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.ProblemReportingBu
+ildActionRunner.run(P
+roblemReportingBuildA
+ctionRunner.java:49)
+[        ] 	at org.gr
+adle.launcher.exec.Bu
+ildOutcomeReportingBu
+ildActionRunner.run(B
+uildOutcomeReportingB
+uildActionRunner.java
+:65)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.FileSystemW
+atchingBuildActionRun
+ner.run(FileSystemWat
+chingBuildActionRunne
+r.java:140)
+[        ] 	at org.gr
+adle.launcher.exec.Bu
+ildCompletionNotifyin
+gBuildActionRunner.ru
+n(BuildCompletionNoti
+fyingBuildActionRunne
+r.java:41)
+[        ] 	at org.gr
+adle.launcher.exec.Ro
+otBuildLifecycleBuild
+ActionExecutor.lambda
+$execute$0(RootBuildL
+ifecycleBuildActionEx
+ecutor.java:40)
+[        ] 	at org.gr
+adle.composite.intern
+al.DefaultRootBuildSt
+ate.run(DefaultRootBu
+ildState.java:123)
+[        ] 	at org.gr
+adle.launcher.exec.Ro
+otBuildLifecycleBuild
+ActionExecutor.execut
+e(RootBuildLifecycleB
+uildActionExecutor.ja
+va:40)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.InitDeprecationLog
+gingActionExecutor.ex
+ecute(InitDeprecation
+LoggingActionExecutor
+.java:62)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.InitProblems.execu
+te(InitProblems.java:
+38)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeCo
+ntext.execute(Default
+BuildTreeContext.java
+:40)
+[        ] 	at org.gr
+adle.launcher.exec.Bu
+ildTreeLifecycleBuild
+ActionExecutor.lambda
+$execute$0(BuildTreeL
+ifecycleBuildActionEx
+ecutor.java:65)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.BuildTreeState.run
+(BuildTreeState.java:
+58)
+[   +1 ms] 	at org.gr
+adle.launcher.exec.Bu
+ildTreeLifecycleBuild
+ActionExecutor.execut
+e(BuildTreeLifecycleB
+uildActionExecutor.ja
+va:65)
+[        ] 	at org.gr
+adle.launcher.exec.Ru
+nAsBuildOperationBuil
+dActionExecutor$3.cal
+l(RunAsBuildOperation
+BuildActionExecutor.j
+ava:61)
+[        ] 	at org.gr
+adle.launcher.exec.Ru
+nAsBuildOperationBuil
+dActionExecutor$3.cal
+l(RunAsBuildOperation
+BuildActionExecutor.j
+ava:57)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$CallableBu
+ildOperationWorker.ex
+ecute(DefaultBuildOpe
+rationRunner.java:204
+)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$CallableBu
+ildOperationWorker.ex
+ecute(DefaultBuildOpe
+rationRunner.java:199
+)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.call(Defau
+ltBuildOperationRunne
+r.java:53)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.call(Def
+aultBuildOperationExe
+cutor.java:78)
+[        ] 	at org.gr
+adle.launcher.exec.Ru
+nAsBuildOperationBuil
+dActionExecutor.execu
+te(RunAsBuildOperatio
+nBuildActionExecutor.
+java:57)
+[        ] 	at org.gr
+adle.launcher.exec.Ru
+nAsWorkerThreadBuildA
+ctionExecutor.lambda$
+execute$0(RunAsWorker
+ThreadBuildActionExec
+utor.java:36)
+[        ] 	at org.gr
+adle.internal.work.De
+faultWorkerLeaseServi
+ce.withLocks(DefaultW
+orkerLeaseService.jav
+a:264)
+[        ] 	at org.gr
+adle.internal.work.De
+faultWorkerLeaseServi
+ce.runAsWorkerThread(
+DefaultWorkerLeaseSer
+vice.java:128)
+[        ] 	at org.gr
+adle.launcher.exec.Ru
+nAsWorkerThreadBuildA
+ctionExecutor.execute
+(RunAsWorkerThreadBui
+ldActionExecutor.java
+:36)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.continuous.
+ContinuousBuildAction
+Executor.execute(Cont
+inuousBuildActionExec
+utor.java:110)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.Subscribabl
+eBuildActionExecutor.
+execute(SubscribableB
+uildActionExecutor.ja
+va:64)
+[        ] 	at org.gr
+adle.internal.session
+.DefaultBuildSessionC
+ontext.execute(Defaul
+tBuildSessionContext.
+java:46)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.BuildSessio
+nLifecycleBuildAction
+Executer$ActionImpl.a
+pply(BuildSessionLife
+cycleBuildActionExecu
+ter.java:92)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.BuildSessio
+nLifecycleBuildAction
+Executer$ActionImpl.a
+pply(BuildSessionLife
+cycleBuildActionExecu
+ter.java:80)
+[        ] 	at org.gr
+adle.internal.session
+.BuildSessionState.ru
+n(BuildSessionState.j
+ava:69)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.BuildSessio
+nLifecycleBuildAction
+Executer.execute(Buil
+dSessionLifecycleBuil
+dActionExecuter.java:
+62)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.BuildSessio
+nLifecycleBuildAction
+Executer.execute(Buil
+dSessionLifecycleBuil
+dActionExecuter.java:
+41)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.StartParams
+ValidatingActionExecu
+ter.execute(StartPara
+msValidatingActionExe
+cuter.java:64)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.StartParams
+ValidatingActionExecu
+ter.execute(StartPara
+msValidatingActionExe
+cuter.java:32)
+[   +1 ms] 	at org.gr
+adle.tooling.internal
+.provider.SessionFail
+ureReportingActionExe
+cuter.execute(Session
+FailureReportingActio
+nExecuter.java:51)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.SessionFail
+ureReportingActionExe
+cuter.execute(Session
+FailureReportingActio
+nExecuter.java:39)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.SetupLoggin
+gActionExecuter.execu
+te(SetupLoggingAction
+Executer.java:47)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.SetupLoggin
+gActionExecuter.execu
+te(SetupLoggingAction
+Executer.java:31)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.ExecuteBu
+ild.doBuild(ExecuteBu
+ild.java:65)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.BuildComm
+andOnly.execute(Build
+CommandOnly.java:37)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.WatchForD
+isconnection.execute(
+WatchForDisconnection
+.java:39)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.ResetDepr
+ecationLogger.execute
+(ResetDeprecationLogg
+er.java:29)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.RequestSt
+opIfSingleUsedDaemon.
+execute(RequestStopIf
+SingleUsedDaemon.java
+:35)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.ForwardCl
+ientInput$2.create(Fo
+rwardClientInput.java
+:78)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.ForwardCl
+ientInput$2.create(Fo
+rwardClientInput.java
+:75)
+[        ] 	at org.gr
+adle.util.internal.Sw
+apper.swap(Swapper.ja
+va:38)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.ForwardCl
+ientInput.execute(For
+wardClientInput.java:
+75)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.LogAndChe
+ckHealth.execute(LogA
+ndCheckHealth.java:64
+)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.LogToClie
+nt.doBuild(LogToClien
+t.java:63)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.BuildComm
+andOnly.execute(Build
+CommandOnly.java:37)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.Establish
+BuildEnvironment.doBu
+ild(EstablishBuildEnv
+ironment.java:84)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.BuildComm
+andOnly.execute(Build
+CommandOnly.java:37)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.StartBuil
+dOrRespondWithBusy$1.
+run(StartBuildOrRespo
+ndWithBusy.java:52)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.DaemonStateCoo
+rdinator$1.run(Daemon
+StateCoordinator.java
+:297)
+[        ] 	at org.gr
+adle.internal.concurr
+ent.ExecutorPolicy$Ca
+tchAndRecordFailures.
+onExecute(ExecutorPol
+icy.java:64)
+[        ] 	at org.gr
+adle.internal.concurr
+ent.AbstractManagedEx
+ecutor$1.run(Abstract
+ManagedExecutor.java:
+47)
+[        ] 	at java.b
+ase/java.util.concurr
+ent.ThreadPoolExecuto
+r.runWorker(Unknown 
+Source)
+[        ] 	at java.b
+ase/java.util.concurr
+ent.ThreadPoolExecuto
+r$Worker.run(Unknown 
+Source)
+[        ] 	at java.b
+ase/java.lang.Thread.
+run(Unknown Source)
+[        ] Caused 
+by: com.android.build
+er.errors.EvalIssueEx
+ception: [CXX1101] 
+NDK at C:\Users\yuvan
+\AppData\Local\Androi
+d\Sdk\cmdline-tools\n
+dk\28.2.13676358 did 
+not have a 
+source.properties 
+file
+[        ] 	at com.an
+droid.builder.errors.
+IssueReporter.reportE
+rror(IssueReporter.kt
+:114)
+[        ] 	at com.an
+droid.builder.errors.
+IssueReporter.reportE
+rror$default(IssueRep
+orter.kt:110)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.logging.Is
+sueReporterLoggingEnv
+ironment.log(IssueRep
+orterLoggingEnvironme
+nt.kt:113)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.logging.Th
+readLoggingEnvironmen
+t$Companion.reportFor
+mattedErrorToCurrentL
+ogger(LoggingEnvironm
+ent.kt:230)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.logging.Lo
+ggingEnvironmentKt.er
+rorln(LoggingEnvironm
+ent.kt:62)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.configure.
+NdkLocatorKt.getNdkVe
+rsionInfo(NdkLocator.
+kt:362)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.configure.
+NdkLocator$findNdkPat
+h$1.invoke(NdkLocator
+.kt:431)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.configure.
+NdkLocator$findNdkPat
+h$1.invoke(NdkLocator
+.kt:431)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.configure.
+NdkLocatorKt.getNdkFo
+lderParsedRevision(Nd
+kLocator.kt:268)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.configure.
+NdkLocatorKt.findNdkP
+athImpl$getNdkFolderR
+evision(NdkLocator.kt
+:87)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.configure.
+NdkLocatorKt.findNdkP
+athImpl(NdkLocator.kt
+:223)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.configure.
+NdkLocator.findNdkPat
+h(NdkLocator.kt:425)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.ndk.NdkHandler
+.getNdkStatus(NdkHand
+ler.kt:83)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.ndk.NdkHandler
+.getNdkPlatform(NdkHa
+ndler.kt:96)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.gradle.gen
+erator.CxxConfigurati
+onModelKt.tryCreateCo
+nfigurationParameters
+(CxxConfigurationMode
+l.kt:214)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.cxx.configure.
+CxxCreateGradleTasksK
+t.createCxxTasks(CxxC
+reateGradleTasks.kt:8
+9)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.VariantTaskMan
+ager.createTopLevelTa
+sks(VariantTaskManage
+r.kt:210)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.VariantTaskMan
+ager.createTasks(Vari
+antTaskManager.kt:133
+)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.plugins.BasePl
+ugin.createAndroidTas
+ks(BasePlugin.kt:722)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.plugins.BasePl
+ugin$createTasks$2$1.
+call(BasePlugin.kt:59
+7)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.profile.NoOpAn
+alyticsConfiguratorSe
+rvice.recordBlock(NoO
+pAnalyticsConfigurato
+rService.kt:53)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.plugins.BasePl
+ugin$createTasks$2.ac
+cept(BasePlugin.kt:59
+2)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.plugins.BasePl
+ugin$createTasks$2.ac
+cept(BasePlugin.kt:58
+9)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.crash.CrashRep
+orting$afterEvaluate$
+1.execute(crash_repor
+ting.kt:37)
+[        ] 	at com.an
+droid.build.gradle.in
+ternal.crash.CrashRep
+orting$afterEvaluate$
+1.execute(crash_repor
+ting.kt:35)
+[        ] 	at org.gr
+adle.configuration.in
+ternal.DefaultUserCod
+eApplicationContext$C
+urrentApplication$1.e
+xecute(DefaultUserCod
+eApplicationContext.j
+ava:123)
+[        ] 	at org.gr
+adle.configuration.in
+ternal.DefaultListene
+rBuildOperationDecora
+tor$BuildOperationEmi
+ttingAction$1.run(Def
+aultListenerBuildOper
+ationDecorator.java:1
+71)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[   +1 ms] 	at org.gr
+adle.configuration.in
+ternal.DefaultListene
+rBuildOperationDecora
+tor$BuildOperationEmi
+ttingAction.execute(D
+efaultListenerBuildOp
+erationDecorator.java
+:168)
+[        ] 	at org.gr
+adle.internal.event.B
+roadcastDispatch$Acti
+onInvocationHandler.d
+ispatch(BroadcastDisp
+atch.java:99)
+[        ] 	at org.gr
+adle.internal.event.B
+roadcastDispatch$Acti
+onInvocationHandler.d
+ispatch(BroadcastDisp
+atch.java:87)
+[        ] 	at org.gr
+adle.internal.event.A
+bstractBroadcastDispa
+tch.dispatch(Abstract
+BroadcastDispatch.jav
+a:43)
+[        ] 	at org.gr
+adle.internal.event.B
+roadcastDispatch$Sing
+letonDispatch.dispatc
+h(BroadcastDispatch.j
+ava:268)
+[        ] 	at org.gr
+adle.internal.event.B
+roadcastDispatch$Sing
+letonDispatch.dispatc
+h(BroadcastDispatch.j
+ava:170)
+[        ] 	at org.gr
+adle.internal.event.A
+bstractBroadcastDispa
+tch.dispatch(Abstract
+BroadcastDispatch.jav
+a:83)
+[        ] 	at org.gr
+adle.internal.event.A
+bstractBroadcastDispa
+tch.dispatch(Abstract
+BroadcastDispatch.jav
+a:69)
+[        ] 	at org.gr
+adle.internal.event.B
+roadcastDispatch$Comp
+ositeDispatch.dispatc
+h(BroadcastDispatch.j
+ava:381)
+[        ] 	at org.gr
+adle.internal.event.B
+roadcastDispatch$Comp
+ositeDispatch.dispatc
+h(BroadcastDispatch.j
+ava:272)
+[        ] 	at org.gr
+adle.internal.event.L
+istenerBroadcast.disp
+atch(ListenerBroadcas
+t.java:148)
+[        ] 	at org.gr
+adle.internal.event.L
+istenerBroadcast.disp
+atch(ListenerBroadcas
+t.java:37)
+[        ] 	at org.gr
+adle.internal.dispatc
+h.ProxyDispatchAdapte
+r$DispatchingInvocati
+onHandler.invoke(Prox
+yDispatchAdapter.java
+:94)
+[        ] 	at jdk.pr
+oxy1/jdk.proxy1.$Prox
+y51.afterEvaluate(Unk
+nown Source)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$NotifyAfte
+rEvaluate$1.execute(L
+ifecycleProjectEvalua
+tor.java:247)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$NotifyAfte
+rEvaluate$1.execute(L
+ifecycleProjectEvalua
+tor.java:244)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.s
+tepEvaluationListener
+(DefaultProject.java:
+1495)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$NotifyAfte
+rEvaluate.run(Lifecyc
+leProjectEvaluator.ja
+va:253)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$EvaluatePr
+oject.lambda$run$0(Li
+fecycleProjectEvaluat
+or.java:114)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.lambda$applyT
+oMutableState$1(Defau
+ltProjectStateRegistr
+y.java:406)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.fromMutableSt
+ate(DefaultProjectSta
+teRegistry.java:424)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.applyToMutabl
+eState(DefaultProject
+StateRegistry.java:40
+5)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$EvaluatePr
+oject.run(LifecyclePr
+ojectEvaluator.java:1
+00)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[   +3 ms] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator.evaluate(L
+ifecycleProjectEvalua
+tor.java:72)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuate(DefaultProjec
+t.java:788)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuate(DefaultProjec
+t.java:156)
+[   +1 ms] 	at org.gr
+adle.api.internal.pro
+ject.ProjectLifecycle
+Controller.lambda$ens
+ureSelfConfigured$2(P
+rojectLifecycleContro
+ller.java:84)
+[   +2 ms] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$doTransiti
+on$14(StateTransition
+Controller.java:255)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:266)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:254)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$maybeTrans
+itionIfNotCurrentlyTr
+ansitioning$10(StateT
+ransitionController.j
+ava:199)
+[        ] 	at org.gr
+adle.internal.work.De
+faultSynchronizer.wit
+hLock(DefaultSynchron
+izer.java:34)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.maybeTransitionIf
+NotCurrentlyTransitio
+ning(StateTransitionC
+ontroller.java:195)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.ProjectLifecycle
+Controller.ensureSelf
+Configured(ProjectLif
+ecycleController.java
+:84)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.ensureConfigu
+red(DefaultProjectSta
+teRegistry.java:380)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuationDependsOn(De
+faultProject.java:866
+)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuationDependsOn(De
+faultProject.java:858
+)
+[        ] 	at Build_
+gradle$2.execute(buil
+d.gradle.kts:33)
+[        ] 	at Build_
+gradle$2.execute(buil
+d.gradle.kts:19)
+[        ] 	at org.gr
+adle.api.internal.Def
+aultMutationGuard$1.e
+xecute(DefaultMutatio
+nGuard.java:45)
+[        ] 	at org.gr
+adle.internal.Actions
+.with(Actions.java:20
+6)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r$1.run(BuildOperatio
+nCrossProjectConfigur
+ator.java:69)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r.lambda$runProjectCo
+nfigureAction$0(Build
+OperationCrossProject
+Configurator.java:66)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.lambda$applyT
+oMutableState$1(Defau
+ltProjectStateRegistr
+y.java:406)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.fromMutableSt
+ate(DefaultProjectSta
+teRegistry.java:424)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.applyToMutabl
+eState(DefaultProject
+StateRegistry.java:40
+5)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r.runProjectConfigure
+Action(BuildOperation
+CrossProjectConfigura
+tor.java:66)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r.access$100(BuildOpe
+rationCrossProjectCon
+figurator.java:32)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r$BlockConfigureBuild
+Operation.run(BuildOp
+erationCrossProjectCo
+nfigurator.java:111)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r.runBlockConfigureAc
+tion(BuildOperationCr
+ossProjectConfigurato
+r.java:62)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.BuildOperationCr
+ossProjectConfigurato
+r.subprojects(BuildOp
+erationCrossProjectCo
+nfigurator.java:48)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.s
+ubprojects(DefaultPro
+ject.java:754)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.s
+ubprojects(DefaultPro
+ject.java:749)
+[        ] 	at Build_
+gradle.<init>(build.g
+radle.kts:19)
+[        ] 	at Progra
+m.execute(Unknown 
+Source)
+[        ] 	at org.gr
+adle.kotlin.dsl.execu
+tion.Interpreter$Prog
+ramHost.eval(Interpre
+ter.kt:518)
+[        ] 	at org.gr
+adle.kotlin.dsl.execu
+tion.Interpreter$Prog
+ramHost.evaluateSecon
+dStageOf(Interpreter.
+kt:429)
+[        ] 	at Progra
+m.execute(Unknown 
+Source)
+[        ] 	at org.gr
+adle.kotlin.dsl.execu
+tion.Interpreter$Prog
+ramHost.eval(Interpre
+ter.kt:518)
+[   +1 ms] 	at org.gr
+adle.kotlin.dsl.execu
+tion.Interpreter.eval
+(Interpreter.kt:195)
+[        ] 	at org.gr
+adle.kotlin.dsl.provi
+der.StandardKotlinScr
+iptEvaluator.evaluate
+(KotlinScriptEvaluato
+r.kt:121)
+[        ] 	at org.gr
+adle.kotlin.dsl.provi
+der.KotlinScriptPlugi
+nFactory$create$1.inv
+oke(KotlinScriptPlugi
+nFactory.kt:51)
+[        ] 	at org.gr
+adle.kotlin.dsl.provi
+der.KotlinScriptPlugi
+nFactory$create$1.inv
+oke(KotlinScriptPlugi
+nFactory.kt:48)
+[   +1 ms] 	at org.gr
+adle.kotlin.dsl.provi
+der.KotlinScriptPlugi
+n.apply(KotlinScriptP
+lugin.kt:35)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildOperationScriptPlu
+gin$1.run(BuildOperat
+ionScriptPlugin.java:
+65)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildOperationScriptPlu
+gin.lambda$apply$0(Bu
+ildOperationScriptPlu
+gin.java:62)
+[        ] 	at org.gr
+adle.configuration.in
+ternal.DefaultUserCod
+eApplicationContext.a
+pply(DefaultUserCodeA
+pplicationContext.jav
+a:44)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildOperationScriptPlu
+gin.apply(BuildOperat
+ionScriptPlugin.java:
+62)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.lambda$applyT
+oMutableState$1(Defau
+ltProjectStateRegistr
+y.java:406)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.fromMutableSt
+ate(DefaultProjectSta
+teRegistry.java:424)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.applyToMutabl
+eState(DefaultProject
+StateRegistry.java:40
+5)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.BuildScriptProc
+essor.execute(BuildSc
+riptProcessor.java:46
+)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.BuildScriptProc
+essor.execute(BuildSc
+riptProcessor.java:27
+)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.ConfigureAction
+sProjectEvaluator.eva
+luate(ConfigureAction
+sProjectEvaluator.jav
+a:35)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$EvaluatePr
+oject.lambda$run$0(Li
+fecycleProjectEvaluat
+or.java:109)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.lambda$applyT
+oMutableState$1(Defau
+ltProjectStateRegistr
+y.java:406)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.lambda$fromMu
+tableState$2(DefaultP
+rojectStateRegistry.j
+ava:429)
+[        ] 	at org.gr
+adle.internal.work.De
+faultWorkerLeaseServi
+ce.withReplacedLocks(
+DefaultWorkerLeaseSer
+vice.java:360)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.fromMutableSt
+ate(DefaultProjectSta
+teRegistry.java:429)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.applyToMutabl
+eState(DefaultProject
+StateRegistry.java:40
+5)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator$EvaluatePr
+oject.run(LifecyclePr
+ojectEvaluator.java:1
+00)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.configuration.pr
+oject.LifecycleProjec
+tEvaluator.evaluate(L
+ifecycleProjectEvalua
+tor.java:72)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuate(DefaultProjec
+t.java:788)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProject.e
+valuate(DefaultProjec
+t.java:156)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.ProjectLifecycle
+Controller.lambda$ens
+ureSelfConfigured$2(P
+rojectLifecycleContro
+ller.java:84)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$doTransiti
+on$14(StateTransition
+Controller.java:255)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:266)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:254)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$maybeTrans
+itionIfNotCurrentlyTr
+ansitioning$10(StateT
+ransitionController.j
+ava:199)
+[        ] 	at org.gr
+adle.internal.work.De
+faultSynchronizer.wit
+hLock(DefaultSynchron
+izer.java:34)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.maybeTransitionIf
+NotCurrentlyTransitio
+ning(StateTransitionC
+ontroller.java:195)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.ProjectLifecycle
+Controller.ensureSelf
+Configured(ProjectLif
+ecycleController.java
+:84)
+[        ] 	at org.gr
+adle.api.internal.pro
+ject.DefaultProjectSt
+ateRegistry$ProjectSt
+ateImpl.ensureConfigu
+red(DefaultProjectSta
+teRegistry.java:380)
+[        ] 	at org.gr
+adle.execution.TaskPa
+thProjectEvaluator.co
+nfigure(TaskPathProje
+ctEvaluator.java:34)
+[        ] 	at org.gr
+adle.execution.TaskPa
+thProjectEvaluator.co
+nfigureHierarchy(Task
+PathProjectEvaluator.
+java:48)
+[        ] 	at org.gr
+adle.configuration.De
+faultProjectsPreparer
+.prepareProjects(Defa
+ultProjectsPreparer.j
+ava:42)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildTreePreparingProje
+ctsPreparer.preparePr
+ojects(BuildTreePrepa
+ringProjectsPreparer.
+java:65)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildOperationFiringPro
+jectsPreparer$Configu
+reBuild.run(BuildOper
+ationFiringProjectsPr
+eparer.java:52)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:29)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$1.execute(
+DefaultBuildOperation
+Runner.java:26)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.run(Defaul
+tBuildOperationRunner
+.java:47)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.run(Defa
+ultBuildOperationExec
+utor.java:73)
+[        ] 	at org.gr
+adle.configuration.Bu
+ildOperationFiringPro
+jectsPreparer.prepare
+Projects(BuildOperati
+onFiringProjectsPrepa
+rer.java:40)
+[        ] 	at org.gr
+adle.initialization.V
+intageBuildModelContr
+oller.lambda$prepareP
+rojects$2(VintageBuil
+dModelController.java
+:84)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$doTransiti
+on$14(StateTransition
+Controller.java:255)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:266)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:254)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$transition
+IfNotPreviously$11(St
+ateTransitionControll
+er.java:213)
+[        ] 	at org.gr
+adle.internal.work.De
+faultSynchronizer.wit
+hLock(DefaultSynchron
+izer.java:34)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.transitionIfNotPr
+eviously(StateTransit
+ionController.java:20
+9)
+[        ] 	at org.gr
+adle.initialization.V
+intageBuildModelContr
+oller.prepareProjects
+(VintageBuildModelCon
+troller.java:84)
+[        ] 	at org.gr
+adle.initialization.V
+intageBuildModelContr
+oller.prepareToSchedu
+leTasks(VintageBuildM
+odelController.java:7
+1)
+[        ] 	at org.gr
+adle.internal.build.D
+efaultBuildLifecycleC
+ontroller.lambda$prep
+areToScheduleTasks$6(
+DefaultBuildLifecycle
+Controller.java:175)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$doTransiti
+on$14(StateTransition
+Controller.java:255)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:266)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:254)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$maybeTrans
+ition$9(StateTransiti
+onController.java:190
+)
+[        ] 	at org.gr
+adle.internal.work.De
+faultSynchronizer.wit
+hLock(DefaultSynchron
+izer.java:34)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.maybeTransition(S
+tateTransitionControl
+ler.java:186)
+[  +16 ms] 	at org.gr
+adle.internal.build.D
+efaultBuildLifecycleC
+ontroller.prepareToSc
+heduleTasks(DefaultBu
+ildLifecycleControlle
+r.java:173)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeWo
+rkPreparer.scheduleRe
+questedTasks(DefaultB
+uildTreeWorkPreparer.
+java:36)
+[        ] 	at org.gr
+adle.configurationcac
+he.VintageBuildTreeWo
+rkController$schedule
+AndRunRequestedTasks$
+1.apply(VintageBuildT
+reeWorkController.kt:
+36)
+[        ] 	at org.gr
+adle.configurationcac
+he.VintageBuildTreeWo
+rkController$schedule
+AndRunRequestedTasks$
+1.apply(VintageBuildT
+reeWorkController.kt:
+35)
+[        ] 	at org.gr
+adle.composite.intern
+al.DefaultIncludedBui
+ldTaskGraph.withNewWo
+rkGraph(DefaultInclud
+edBuildTaskGraph.java
+:112)
+[        ] 	at org.gr
+adle.configurationcac
+he.VintageBuildTreeWo
+rkController.schedule
+AndRunRequestedTasks(
+VintageBuildTreeWorkC
+ontroller.kt:35)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeLi
+fecycleController.lam
+bda$scheduleAndRunTas
+ks$1(DefaultBuildTree
+LifecycleController.j
+ava:68)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeLi
+fecycleController.lam
+bda$runBuild$4(Defaul
+tBuildTreeLifecycleCo
+ntroller.java:98)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$transition
+$6(StateTransitionCon
+troller.java:169)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.doTransition(Stat
+eTransitionController
+.java:266)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.lambda$transition
+$7(StateTransitionCon
+troller.java:169)
+[        ] 	at org.gr
+adle.internal.work.De
+faultSynchronizer.wit
+hLock(DefaultSynchron
+izer.java:44)
+[        ] 	at org.gr
+adle.internal.model.S
+tateTransitionControl
+ler.transition(StateT
+ransitionController.j
+ava:169)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeLi
+fecycleController.run
+Build(DefaultBuildTre
+eLifecycleController.
+java:95)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeLi
+fecycleController.sch
+eduleAndRunTasks(Defa
+ultBuildTreeLifecycle
+Controller.java:68)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeLi
+fecycleController.sch
+eduleAndRunTasks(Defa
+ultBuildTreeLifecycle
+Controller.java:63)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.ExecuteBuil
+dActionRunner.run(Exe
+cuteBuildActionRunner
+.java:31)
+[        ] 	at org.gr
+adle.launcher.exec.Ch
+ainingBuildActionRunn
+er.run(ChainingBuildA
+ctionRunner.java:35)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.ProblemReportingBu
+ildActionRunner.run(P
+roblemReportingBuildA
+ctionRunner.java:49)
+[        ] 	at org.gr
+adle.launcher.exec.Bu
+ildOutcomeReportingBu
+ildActionRunner.run(B
+uildOutcomeReportingB
+uildActionRunner.java
+:65)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.FileSystemW
+atchingBuildActionRun
+ner.run(FileSystemWat
+chingBuildActionRunne
+r.java:140)
+[        ] 	at org.gr
+adle.launcher.exec.Bu
+ildCompletionNotifyin
+gBuildActionRunner.ru
+n(BuildCompletionNoti
+fyingBuildActionRunne
+r.java:41)
+[        ] 	at org.gr
+adle.launcher.exec.Ro
+otBuildLifecycleBuild
+ActionExecutor.lambda
+$execute$0(RootBuildL
+ifecycleBuildActionEx
+ecutor.java:40)
+[        ] 	at org.gr
+adle.composite.intern
+al.DefaultRootBuildSt
+ate.run(DefaultRootBu
+ildState.java:123)
+[        ] 	at org.gr
+adle.launcher.exec.Ro
+otBuildLifecycleBuild
+ActionExecutor.execut
+e(RootBuildLifecycleB
+uildActionExecutor.ja
+va:40)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.InitDeprecationLog
+gingActionExecutor.ex
+ecute(InitDeprecation
+LoggingActionExecutor
+.java:62)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.InitProblems.execu
+te(InitProblems.java:
+38)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.DefaultBuildTreeCo
+ntext.execute(Default
+BuildTreeContext.java
+:40)
+[        ] 	at org.gr
+adle.launcher.exec.Bu
+ildTreeLifecycleBuild
+ActionExecutor.lambda
+$execute$0(BuildTreeL
+ifecycleBuildActionEx
+ecutor.java:65)
+[        ] 	at org.gr
+adle.internal.buildtr
+ee.BuildTreeState.run
+(BuildTreeState.java:
+58)
+[        ] 	at org.gr
+adle.launcher.exec.Bu
+ildTreeLifecycleBuild
+ActionExecutor.execut
+e(BuildTreeLifecycleB
+uildActionExecutor.ja
+va:65)
+[        ] 	at org.gr
+adle.launcher.exec.Ru
+nAsBuildOperationBuil
+dActionExecutor$3.cal
+l(RunAsBuildOperation
+BuildActionExecutor.j
+ava:61)
+[  +10 ms] 	at org.gr
+adle.launcher.exec.Ru
+nAsBuildOperationBuil
+dActionExecutor$3.cal
+l(RunAsBuildOperation
+BuildActionExecutor.j
+ava:57)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$CallableBu
+ildOperationWorker.ex
+ecute(DefaultBuildOpe
+rationRunner.java:204
+)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$CallableBu
+ildOperationWorker.ex
+ecute(DefaultBuildOpe
+rationRunner.java:199
+)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:66)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner$2.execute(
+DefaultBuildOperation
+Runner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:157)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.execute(De
+faultBuildOperationRu
+nner.java:59)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionRunner.call(Defau
+ltBuildOperationRunne
+r.java:53)
+[        ] 	at org.gr
+adle.internal.operati
+ons.DefaultBuildOpera
+tionExecutor.call(Def
+aultBuildOperationExe
+cutor.java:78)
+[        ] 	at org.gr
+adle.launcher.exec.Ru
+nAsBuildOperationBuil
+dActionExecutor.execu
+te(RunAsBuildOperatio
+nBuildActionExecutor.
+java:57)
+[        ] 	at org.gr
+adle.launcher.exec.Ru
+nAsWorkerThreadBuildA
+ctionExecutor.lambda$
+execute$0(RunAsWorker
+ThreadBuildActionExec
+utor.java:36)
+[        ] 	at org.gr
+adle.internal.work.De
+faultWorkerLeaseServi
+ce.withLocks(DefaultW
+orkerLeaseService.jav
+a:264)
+[        ] 	at org.gr
+adle.internal.work.De
+faultWorkerLeaseServi
+ce.runAsWorkerThread(
+DefaultWorkerLeaseSer
+vice.java:128)
+[        ] 	at org.gr
+adle.launcher.exec.Ru
+nAsWorkerThreadBuildA
+ctionExecutor.execute
+(RunAsWorkerThreadBui
+ldActionExecutor.java
+:36)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.continuous.
+ContinuousBuildAction
+Executor.execute(Cont
+inuousBuildActionExec
+utor.java:110)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.Subscribabl
+eBuildActionExecutor.
+execute(SubscribableB
+uildActionExecutor.ja
+va:64)
+[        ] 	at org.gr
+adle.internal.session
+.DefaultBuildSessionC
+ontext.execute(Defaul
+tBuildSessionContext.
+java:46)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.BuildSessio
+nLifecycleBuildAction
+Executer$ActionImpl.a
+pply(BuildSessionLife
+cycleBuildActionExecu
+ter.java:92)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.BuildSessio
+nLifecycleBuildAction
+Executer$ActionImpl.a
+pply(BuildSessionLife
+cycleBuildActionExecu
+ter.java:80)
+[        ] 	at org.gr
+adle.internal.session
+.BuildSessionState.ru
+n(BuildSessionState.j
+ava:69)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.BuildSessio
+nLifecycleBuildAction
+Executer.execute(Buil
+dSessionLifecycleBuil
+dActionExecuter.java:
+62)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.BuildSessio
+nLifecycleBuildAction
+Executer.execute(Buil
+dSessionLifecycleBuil
+dActionExecuter.java:
+41)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.StartParams
+ValidatingActionExecu
+ter.execute(StartPara
+msValidatingActionExe
+cuter.java:64)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.StartParams
+ValidatingActionExecu
+ter.execute(StartPara
+msValidatingActionExe
+cuter.java:32)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.SessionFail
+ureReportingActionExe
+cuter.execute(Session
+FailureReportingActio
+nExecuter.java:51)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.SessionFail
+ureReportingActionExe
+cuter.execute(Session
+FailureReportingActio
+nExecuter.java:39)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.SetupLoggin
+gActionExecuter.execu
+te(SetupLoggingAction
+Executer.java:47)
+[        ] 	at org.gr
+adle.tooling.internal
+.provider.SetupLoggin
+gActionExecuter.execu
+te(SetupLoggingAction
+Executer.java:31)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.ExecuteBu
+ild.doBuild(ExecuteBu
+ild.java:65)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.BuildComm
+andOnly.execute(Build
+CommandOnly.java:37)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[   +6 ms] 	at org.gr
+adle.launcher.daemon.
+server.exec.WatchForD
+isconnection.execute(
+WatchForDisconnection
+.java:39)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.ResetDepr
+ecationLogger.execute
+(ResetDeprecationLogg
+er.java:29)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.RequestSt
+opIfSingleUsedDaemon.
+execute(RequestStopIf
+SingleUsedDaemon.java
+:35)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.ForwardCl
+ientInput$2.create(Fo
+rwardClientInput.java
+:78)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.ForwardCl
+ientInput$2.create(Fo
+rwardClientInput.java
+:75)
+[        ] 	at org.gr
+adle.util.internal.Sw
+apper.swap(Swapper.ja
+va:38)
+[        ] 5 actionable tasks: 1 executed, 4 up-to-date
+[        ] Watched directory hierarchies: [C:\flutter\packages\flutter_tools\gradle]
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.ForwardCl
+ientInput.execute(For
+wardClientInput.java:
+75)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.LogAndChe
+ckHealth.execute(LogA
+ndCheckHealth.java:64
+)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.LogToClie
+nt.doBuild(LogToClien
+t.java:63)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.BuildComm
+andOnly.execute(Build
+CommandOnly.java:37)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.Establish
+BuildEnvironment.doBu
+ild(EstablishBuildEnv
+ironment.java:84)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.BuildComm
+andOnly.execute(Build
+CommandOnly.java:37)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.api.DaemonComm
+andExecution.proceed(
+DaemonCommandExecutio
+n.java:104)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.exec.StartBuil
+dOrRespondWithBusy$1.
+run(StartBuildOrRespo
+ndWithBusy.java:52)
+[        ] 	at org.gr
+adle.launcher.daemon.
+server.DaemonStateCoo
+rdinator$1.run(Daemon
+StateCoordinator.java
+:297)
+[        ] 	at org.gr
+adle.internal.concurr
+ent.ExecutorPolicy$Ca
+tchAndRecordFailures.
+onExecute(ExecutorPol
+icy.java:64)
+[        ] 	at org.gr
+adle.internal.concurr
+ent.AbstractManagedEx
+ecutor$1.run(Abstract
+ManagedExecutor.java:
+47)
+[        ] 	at java.b
+ase/java.util.concurr
+ent.ThreadPoolExecuto
+r.runWorker(Unknown 
+Source)
+[        ] 	at java.b
+ase/java.util.concurr
+ent.ThreadPoolExecuto
+r$Worker.run(Unknown 
+Source)
+[        ] 	at java.b
+ase/java.lang.Thread.
+run(Unknown Source)
+[        ] BUILD 
+FAILED in 4s
+[ +555 ms] Running Gradle task 'assembleDebug'... (completed in 5.5s)
+[  +12 ms] 
+           ΓöîΓöÇ Flutter Fix ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+           Γöé     [!] This is likely due to a malformed download of the NDK.               Γöé
+           Γöé     This can be fixed by deleting the local NDK copy at:                     Γöé
+           Γöé     C:\Users\yuvan\AppData\Local\Android\Sdk\cmdline-tools\ndk\28.2.13676358 Γöé
+           Γöé     and allowing the Android Gradle Plugin to automatically re-download it.  Γöé
+           Γöé                                                                              Γöé
+           ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+
+[  +29 ms] "flutter apk" took 8,218ms.
+[ +138 ms] Gradle 
+task assembleDebug 
+failed with exit 
+code 1
+[   +1 ms] 
+           #0      
+throwToolExit (packag
+e:flutter_tools/src/b
+ase/common.dart:34:3)
+           #1      An
+droidGradleBuilder.bu
+ildGradleApp (package
+:flutter_tools/src/an
+droid/gradle.dart:592
+:7)
+           
+<asynchronous 
+suspension>
+           #2      An
+droidGradleBuilder.bu
+ildApk (package:flutt
+er_tools/src/android/
+gradle.dart:234:5)
+           
+<asynchronous 
+suspension>
+           #3      Bu
+ildApkCommand.runComm
+and (package:flutter_
+tools/src/commands/bu
+ild_apk.dart:131:5)
+           
+<asynchronous 
+suspension>
+           #4      Fl
+utterCommand.run.<ano
+nymous closure> (pack
+age:flutter_tools/src
+/runner/flutter_comma
+nd.dart:1559:27)
+           
+<asynchronous 
+suspension>
+           #5      Ap
+pContext.run.<anonymo
+us closure> (package:
+flutter_tools/src/bas
+e/context.dart:154:19
+)
+           
+<asynchronous 
+suspension>
+           #6      Co
+mmandRunner.runComman
+d (package:args/comma
+nd_runner.dart:212:13
+)
+           
+<asynchronous 
+suspension>
+           #7      Fl
+utterCommandRunner.ru
+nCommand.<anonymous 
+closure> (package:flu
+tter_tools/src/runner
+/flutter_command_runn
+er.dart:487:9)
+           
+<asynchronous 
+suspension>
+           #8      Ap
+pContext.run.<anonymo
+us closure> (package:
+flutter_tools/src/bas
+e/context.dart:154:19
+)
+           
+<asynchronous 
+suspension>
+           #9      Fl
+utterCommandRunner.ru
+nCommand (package:flu
+tter_tools/src/runner
+/flutter_command_runn
+er.dart:422:5)
+           
+<asynchronous 
+suspension>
+           #10     
+run.<anonymous 
+closure>.<anonymous 
+closure> (package:flu
+tter_tools/runner.dar
+t:104:11)
+           
+<asynchronous 
+suspension>
+           #11     Ap
+pContext.run.<anonymo
+us closure> (package:
+flutter_tools/src/bas
+e/context.dart:154:19
+)
+           
+<asynchronous 
+suspension>
+           #12     
+main (package:flutter
+_tools/executable.dar
+t:103:3)
+           
+<asynchronous 
+suspension>
+
+
+[        ] Running 1 shutdown hook
+[   +4 ms] Shutdown hooks complete
+[ +200 ms] exiting with code 1

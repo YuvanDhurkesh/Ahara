@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/order_service.dart';
 import 'volunteer_order_detail_page.dart';
 
 class VolunteerOrdersPage extends StatefulWidget {
@@ -73,40 +76,126 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
 
   // ---------------- TABS ----------------
 
+  // ---------------- TABS ----------------
+
   Widget _newRequestsTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: const [
-        _DeliveryCard(
-          title: 'Main Street Bakery → Sarah Johnson',
-          pickup: '123 Bakers St',
-          drop: '456 Oak Ave',
-          actionLabel: 'Accept Delivery (2.3 km)',
-          showAccept: true,
-        ),
-      ],
+    return FutureBuilder<List<dynamic>>(
+      future: OrderService().getOpenOrders(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        final orders = snapshot.data ?? [];
+        if (orders.isEmpty) {
+          return const Center(child: Text('No new requests'));
+        }
+        return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: orders.length,
+            itemBuilder: (context, index) {
+              final order = orders[index];
+              return _DeliveryCard(
+                title: 'Order #${order['_id'].substring(0, 6)}',
+                pickup: 'Store Address (TODO)', // Store address might need to be fetched
+                drop: order['deliveryAddress'] ?? 'Unknown',
+                actionLabel: 'Accept Delivery',
+                showAccept: true,
+                onAccept: () async {
+                  try {
+                    final user = context.read<AppAuthProvider>().currentUser;
+                    if (user == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('You need to be logged in')),
+                      );
+                      return;
+                    }
+                    await OrderService().acceptOrder(order['_id'], user.uid);
+                    setState(() {}); // Refresh list
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed: $e')),
+                    );
+                  }
+                },
+              );
+            });
+      },
     );
   }
 
   Widget _activeTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: const [
-        _DeliveryCard(
-          title: 'Sunshine Delights',
-          status: 'In Progress',
-          actionLabel: 'View Details',
-        ),
-      ],
+    final user = context.read<AppAuthProvider>().currentUser;
+    if (user == null) {
+      return const Center(child: Text("Please log in to view active orders"));
+    }
+    return FutureBuilder<List<dynamic>>(
+      future: OrderService().getUserOrders(user.uid, 'volunteer'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        final orders =
+            (snapshot.data ?? []).where((o) => o['status'] == 'ACCEPTED').toList();
+        if (orders.isEmpty) {
+          return const Center(child: Text('No active orders'));
+        }
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: orders.length,
+          itemBuilder: (context, index) {
+            final order = orders[index];
+            return _DeliveryCard(
+              title: 'Order #${order['_id'].substring(0, 6)}',
+              status: order['status'],
+              pickup: 'Store Address', 
+              drop: order['deliveryAddress'],
+              actionLabel: 'View Details',
+            );
+          },
+        );
+      },
     );
   }
 
   Widget _completedTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: const [
-        _DeliveryCard(title: 'Downtown Cafe → Emma Davis', status: 'Completed'),
-      ],
+    final user = context.read<AppAuthProvider>().currentUser;
+    if (user == null) {
+      return const Center(child: Text("Please log in to view completed orders"));
+    }
+    return FutureBuilder<List<dynamic>>(
+      future: OrderService().getUserOrders(user.uid, 'volunteer'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        final orders =
+            (snapshot.data ?? []).where((o) => o['status'] == 'COMPLETED').toList();
+        if (orders.isEmpty) {
+          return const Center(child: Text('No completed orders'));
+        }
+         return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: orders.length,
+          itemBuilder: (context, index) {
+            final order = orders[index];
+            return _DeliveryCard(
+              title: 'Order #${order['_id'].substring(0, 6)}',
+              status: order['status'],
+              // pickup: 'Store Address', // Optional for completed
+              // drop: order['deliveryAddress'],
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -147,6 +236,7 @@ class _DeliveryCard extends StatelessWidget {
   final String? status;
   final String? actionLabel;
   final bool showAccept;
+  final VoidCallback? onAccept; // New callback
 
   const _DeliveryCard({
     required this.title,
@@ -155,6 +245,7 @@ class _DeliveryCard extends StatelessWidget {
     this.status,
     this.actionLabel,
     this.showAccept = false,
+    this.onAccept,
   });
 
   @override
@@ -207,7 +298,7 @@ class _DeliveryCard extends StatelessWidget {
                 if (showAccept)
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: onAccept,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(

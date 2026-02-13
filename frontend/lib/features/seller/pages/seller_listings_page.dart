@@ -70,37 +70,23 @@ class SellerListingsPage extends StatelessWidget {
 
     return DefaultTabController(
       length: 3,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: AppBar(
-          title: const Text(
-            "My Listings",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-          ),
-          backgroundColor: Colors.white,
-          elevation: 0,
-          foregroundColor: AppColors.textDark,
-          bottom: const TabBar(
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.textLight,
-            indicatorColor: AppColors.primary,
-            indicatorWeight: 3,
-            tabs: [
-              Tab(text: "Active"),
-              Tab(text: "Completed"),
-              Tab(text: "Expired"),
-            ],
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.filter_list_rounded),
+      child: Column(
+        children: [
+          Container(
+            color: Colors.white,
+            child: const TabBar(
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textLight,
+              indicatorColor: AppColors.primary,
+              indicatorWeight: 3,
+              tabs: [
+                Tab(text: "Active"),
+                Tab(text: "Completed"),
+                Tab(text: "Expired"),
+              ],
             ),
-          ],
-        ),
-        body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 900),
+          ),
+          Expanded(
             child: TabBarView(
               children: [
                 _buildListingList(context, mockListings, ListingStatus.active),
@@ -109,23 +95,7 @@ class SellerListingsPage extends StatelessWidget {
               ],
             ),
           ),
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const CreateListingPage(),
-              ),
-            );
-          },
-          backgroundColor: AppColors.primary,
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text(
-            "New Listing",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-        ),
+        ],
       ),
     );
   }
