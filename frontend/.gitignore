@@ -13,6 +13,9 @@
 migrate_working_dir/
 .env
 
+#files
+lib/firebase_options.dart
+
 # IntelliJ related
 *.iml
 *.ipr
