@@ -1,10 +1,15 @@
-import 'dart:io';
+import 'dart:convert';
+import 'dart:io' as io;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../location/pages/location_picker_page.dart';
 import '../../../data/models/listing_model.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 
 class CreateListingPage extends StatefulWidget {
@@ -30,8 +35,9 @@ class _CreateListingPageState extends State<CreateListingPage> {
   HygieneStatus _hygieneStatus = HygieneStatus.excellent;
   DateTime _preparedAt = DateTime.now();
   BusinessType _businessType = BusinessType.restaurant;
-  File? _pickedImage;
+  XFile? _pickedXFile;
   final ImagePicker _picker = ImagePicker();
+  String _dietaryType = "vegetarian";
 
   final TextEditingController _pincodeController = TextEditingController();
 
@@ -122,7 +128,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
                   imageQuality: 70,
                 );
                 if (image != null) {
-                  setState(() => _pickedImage = File(image.path));
+                  setState(() => _pickedXFile = image);
                 }
               },
             ),
@@ -136,7 +142,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
                   imageQuality: 70,
                 );
                 if (image != null) {
-                  setState(() => _pickedImage = File(image.path));
+                  setState(() => _pickedXFile = image);
                 }
               },
             ),
@@ -146,43 +152,87 @@ class _CreateListingPageState extends State<CreateListingPage> {
     );
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final expiryTime = Listing.calculateExpiryTime(
-        _selectedFoodType,
-        _preparedAt,
-      );
+      try {
+        final expiryTime = Listing.calculateExpiryTime(
+          _selectedFoodType,
+          _preparedAt,
+        );
 
-      final newListing = Listing(
-        id: DateTime.now().millisecondsSinceEpoch.toString(), // Temporary ID
-        foodName: _foodNameController.text,
-        foodType: _selectedFoodType,
-        quantityValue: double.parse(_quantityController.text),
-        quantityUnit: _selectedUnit,
-        redistributionMode: _redistributionMode,
-        price: _redistributionMode == RedistributionMode.discounted
-            ? double.tryParse(_priceController.text)
-            : null,
-        preparedAt: _preparedAt,
-        expiryTime: expiryTime,
-        hygieneStatus: _hygieneStatus,
-        locationAddress: _locationController.text,
-        pincode: _pincodeController.text,
-        latitude: 0.0, // Default for now
-        longitude: 0.0, // Default for now
-        imageUrl: 'https://via.placeholder.com/150', // Default placeholder
-        description: _descriptionController.text,
-        status: ListingStatus.active,
-        businessType: _businessType,
-      );
+        // 1. Get real user IDs
+        final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+        final firebaseUser = authProvider.currentUser;
+        if (firebaseUser == null) throw Exception("User not logged in");
 
-      // TODO: Call service to save listing
-      debugPrint('New Listing Created: ${newListing.foodName}');
+        final profileData = await BackendService.getUserProfile(firebaseUser.uid);
+        final realSellerId = profileData['user']['_id'];
+        final realSellerProfileId = profileData['profile']['_id'];
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Listing created successfully!')),
-      );
-      Navigator.pop(context);
+        final listingMap = {
+          "sellerId": realSellerId,
+          "sellerProfileId": realSellerProfileId,
+          "foodName": _foodNameController.text,
+          "foodType": _selectedFoodType.name,
+          "dietaryType": _dietaryType,
+          "category": "cooked", 
+          "quantityText": "${_quantityController.text} ${_selectedUnit}",
+          "totalQuantity": double.parse(_quantityController.text),
+          "description": _descriptionController.text,
+          "pricing": {
+            "discountedPrice": _redistributionMode == RedistributionMode.discounted 
+                ? double.tryParse(_priceController.text) ?? 0 
+                : 0,
+            "isFree": _redistributionMode == RedistributionMode.free,
+          },
+          "pickupWindow": {
+            "from": _preparedAt.toIso8601String(),
+            "to": expiryTime.toIso8601String(),
+          },
+          "pickupAddressText": _locationController.text,
+        };
+
+        debugPrint('--- SUBMIT FORM ---');
+        debugPrint('Initial listingMap: ${jsonEncode(listingMap)}');
+        debugPrint('_pickedXFile status: ${_pickedXFile != null ? "HAS IMAGE" : "NO IMAGE"}');
+
+        // 2. Upload image if picked
+        if (_pickedXFile != null) {
+          debugPrint('Uploading image: ${_pickedXFile!.name}...');
+          try {
+            final bytes = await _pickedXFile!.readAsBytes();
+            final imageUrl = await BackendService.uploadImage(bytes, _pickedXFile!.name);
+            debugPrint('Upload success! URL: $imageUrl');
+            listingMap["images"] = [imageUrl];
+          } catch (e) {
+            debugPrint('!!! IMAGE UPLOAD FAILED: $e');
+            rethrow;
+          }
+        } else if (widget.listing != null && widget.listing!.imageUrl.isNotEmpty) {
+          debugPrint('Keeping existing image: ${widget.listing!.imageUrl}');
+          listingMap["images"] = [widget.listing!.imageUrl];
+        }
+
+        debugPrint('Final listingMap being sent: ${jsonEncode(listingMap)}');
+
+        if (widget.listing != null) {
+          await BackendService.updateListing(widget.listing!.id, listingMap);
+        } else {
+          await BackendService.createListing(listingMap);
+        }
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(widget.listing != null ? 'Listing updated successfully!' : 'Listing created successfully!')),
+        );
+        Navigator.pop(context);
+      } catch (e) {
+        debugPrint('Error creating listing: $e');
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -311,8 +361,13 @@ class _CreateListingPageState extends State<CreateListingPage> {
                           "e.g. Ingredients, allergens, or special instructions",
                       maxLines: 3,
                     ),
-                    const SizedBox(height: 24),
-                    _buildSectionTitle("Location"),
+                    const SizedBox(height: 20),
+                    _buildSectionTitle("Food Diet"),
+                    const SizedBox(height: 12),
+                    _buildDietarySelector(),
+
+                    const SizedBox(height: 20),
+                    _buildSectionTitle("Logistics"),
                     const SizedBox(height: 12),
                     _buildTextField(
                       controller: _locationController,
@@ -356,6 +411,46 @@ class _CreateListingPageState extends State<CreateListingPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildDietarySelector() {
+    final diets = [
+      {"label": "Veg", "value": "vegetarian", "icon": Icons.eco_outlined, "color": Colors.green},
+      {"label": "Non-Veg", "value": "non_veg", "icon": Icons.kebab_dining_outlined, "color": Colors.red},
+      {"label": "Vegan", "value": "vegan", "icon": Icons.grass_outlined, "color": Colors.teal},
+      {"label": "Jain", "icon": Icons.spa_outlined, "value": "jain", "color": Colors.orange},
+    ];
+
+    return Wrap(
+      spacing: 12,
+      children: diets.map((diet) {
+        final isSelected = _dietaryType == diet['value'];
+        return ChoiceChip(
+          label: Text(diet['label'] as String),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) setState(() => _dietaryType = diet['value'] as String);
+          },
+          avatar: Icon(
+            diet['icon'] as IconData, 
+            size: 16, 
+            color: isSelected ? Colors.white : (diet['color'] as Color),
+          ),
+          selectedColor: diet['color'] as Color,
+          backgroundColor: Colors.white,
+          labelStyle: TextStyle(
+            color: isSelected ? Colors.white : AppColors.textDark,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: isSelected ? (diet['color'] as Color) : AppColors.textLight.withOpacity(0.2),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -574,14 +669,16 @@ class _CreateListingPageState extends State<CreateListingPage> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.textLight.withOpacity(0.1)),
-          image: _pickedImage != null
+          image: _pickedXFile != null
               ? DecorationImage(
-                  image: FileImage(_pickedImage!),
+                  image: kIsWeb 
+                    ? NetworkImage(_pickedXFile!.path) as ImageProvider
+                    : FileImage(io.File(_pickedXFile!.path)),
                   fit: BoxFit.cover,
                 )
               : null,
         ),
-        child: _pickedImage == null
+        child: _pickedXFile == null
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -614,7 +711,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     top: 12,
                     right: 12,
                     child: GestureDetector(
-                      onTap: () => setState(() => _pickedImage = null),
+                      onTap: () => setState(() => _pickedXFile = null),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(

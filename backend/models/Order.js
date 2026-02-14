@@ -6,6 +6,7 @@ const orderSchema = new mongoose.Schema(
         listingId: { type: mongoose.Schema.Types.ObjectId, ref: "Listing", required: true, index: true },
         sellerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
         buyerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
+        quantityOrdered: { type: Number, required: true },
 
         fulfillment: { type: String, enum: ["self_pickup", "volunteer_delivery"], required: true },
 

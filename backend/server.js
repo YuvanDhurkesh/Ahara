@@ -1,16 +1,25 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
+const listingRoutes = require("./routes/listingRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
 
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
 }
 
-/// ✅ ALWAYS FIRST
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// Middleware
 app.use(cors());
 
 /// ✅ THEN JSON
@@ -18,6 +27,21 @@ app.use(express.json());
 
 /// ✅ THEN ROUTES
 app.use("/api/users", userRoutes);
+app.use("/api/listings", listingRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/upload", uploadRoutes);
+
+// Serve static uploads with ngrok bypass header (best effort)
+app.use("/uploads", (req, res, next) => {
+  res.set("ngrok-skip-browser-warning", "true");
+  next();
+}, express.static(path.join(__dirname, "uploads")));
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error("!!! SERVER ERROR !!!", err);
+  res.status(500).json({ error: "Internal Server Error", details: err.message });
+});
 
 app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
@@ -26,8 +50,8 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
 }
 

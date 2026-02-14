@@ -7,10 +7,16 @@ const listingSchema = new mongoose.Schema(
         sellerProfileId: { type: mongoose.Schema.Types.ObjectId, ref: "SellerProfile", required: true },
 
         foodName: { type: String, required: true },
-        foodType: { type: String, enum: ["vegetarian", "vegan", "non_veg", "jain"], required: true },
-        category: { type: String, enum: ["cooked", "raw", "packaged", "bakery", "other"], default: "other" },
+        // Dietary restriction (Veg, Non-Veg, etc.)
+        dietaryType: { type: String, enum: ["vegetarian", "vegan", "non_veg", "jain", "not_specified"], default: "not_specified" },
+        // Nature of food (Meal, Produce, etc.) - Matches frontend FoodType enum
+        foodType: { type: String, required: true },
+        // Broad category - Matches frontend Category grouping
+        category: { type: String, default: "other" },
 
         quantityText: { type: String, required: true }, // "Serves 10", "5 kg"
+        totalQuantity: { type: Number, required: true },
+        remainingQuantity: { type: Number, required: true },
         description: String,
         images: [String],
 
@@ -33,12 +39,16 @@ const listingSchema = new mongoose.Schema(
         options: {
             selfPickupAvailable: { type: Boolean, default: true },
             deliveryAvailable: { type: Boolean, default: true }
-        },
-
-        activeOrderId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", default: null }
+        }
     },
     { timestamps: true }
 );
+
+listingSchema.pre("validate", function () {
+    if (this.isNew && this.totalQuantity !== undefined && this.remainingQuantity === undefined) {
+        this.remainingQuantity = this.totalQuantity;
+    }
+});
 
 listingSchema.index({ pickupGeo: "2dsphere" });
 listingSchema.index({ status: 1, "pickupWindow.to": 1 });

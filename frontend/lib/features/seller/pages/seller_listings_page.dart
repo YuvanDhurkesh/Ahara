@@ -1,74 +1,75 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../data/models/listing_model.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'create_listing_page.dart';
 
-class SellerListingsPage extends StatelessWidget {
+class SellerListingsPage extends StatefulWidget {
   const SellerListingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Mock Data for demonstration
-    final List<Listing> mockListings = [
-      Listing(
-        id: "1",
-        foodName: "Mixed Veg Curry",
-        foodType: FoodType.prepared_meal,
-        quantityValue: 5,
-        quantityUnit: "portions",
-        redistributionMode: RedistributionMode.free,
-        preparedAt: DateTime.now().subtract(const Duration(hours: 2)),
-        expiryTime: DateTime.now().add(const Duration(hours: 4)),
-        hygieneStatus: HygieneStatus.excellent,
-        locationAddress: "123 Green Lane, Eco City",
-        latitude: 0,
-        longitude: 0,
-        imageUrl:
-            "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80",
-        description:
-            "Freshly prepared mixed vegetable curry with aromatic spices.",
-        status: ListingStatus.active,
-      ),
-      Listing(
-        id: "2",
-        foodName: "Organic Carrots",
-        foodType: FoodType.fresh_produce,
-        quantityValue: 2,
-        quantityUnit: "kg",
-        redistributionMode: RedistributionMode.discounted,
-        price: 45.0,
-        preparedAt: DateTime.now().subtract(const Duration(days: 1)),
-        expiryTime: DateTime.now().add(const Duration(days: 1)),
-        hygieneStatus: HygieneStatus.good,
-        locationAddress: "Farm Stand 5, Rural Road",
-        latitude: 0,
-        longitude: 0,
-        imageUrl:
-            "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=500&q=80",
-        description: "Crunchy organic carrots from local farm.",
-        status: ListingStatus.active,
-      ),
-      Listing(
-        id: "3",
-        foodName: "Whole Wheat Bread",
-        foodType: FoodType.bakery_item,
-        quantityValue: 3,
-        quantityUnit: "pieces",
-        redistributionMode: RedistributionMode.free,
-        preparedAt: DateTime.now().subtract(const Duration(hours: 5)),
-        expiryTime: DateTime.now().add(const Duration(hours: 19)),
-        hygieneStatus: HygieneStatus.excellent,
-        locationAddress: "Village Bakery, Main St",
-        latitude: 0,
-        longitude: 0,
-        imageUrl:
-            "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&q=80",
-        description: "Freshly baked whole wheat bread loaf.",
-        status: ListingStatus.active,
-      ),
-    ];
+  State<SellerListingsPage> createState() => _SellerListingsPageState();
+}
 
+class _SellerListingsPageState extends State<SellerListingsPage> {
+  List<Listing> _activeListings = [];
+  List<Listing> _completedListings = [];
+  List<Listing> _expiredListings = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchListings();
+  }
+
+  Future<void> _fetchListings() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+      final firebaseUser = authProvider.currentUser;
+
+      if (firebaseUser == null) {
+        throw Exception("No user logged in");
+      }
+
+      // 1. Get Mongo Seller ID
+      final profileData = await BackendService.getUserProfile(firebaseUser.uid);
+      final mongoSellerId = profileData['user']['_id'];
+
+      // 2. Fetch all statuses
+      final activeJson = await BackendService.getSellerListings(mongoSellerId, 'active');
+      final completedJson = await BackendService.getSellerListings(mongoSellerId, 'completed');
+      final expiredJson = await BackendService.getSellerListings(mongoSellerId, 'expired');
+
+      if (mounted) {
+        setState(() {
+          _activeListings = activeJson.map((j) => Listing.fromJson(j)).toList();
+          _completedListings = completedJson.map((j) => Listing.fromJson(j)).toList();
+          _expiredListings = expiredJson.map((j) => Listing.fromJson(j)).toList();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = e.toString();
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -96,13 +97,14 @@ class SellerListingsPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
+                onPressed: () async {
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const CreateListingPage(),
                     ),
                   );
+                  _fetchListings(); // Refresh after return
                 },
                 icon: const Icon(Icons.add, size: 18),
                 label: const Text("New Listing"),
@@ -118,24 +120,28 @@ class SellerListingsPage extends StatelessWidget {
               ),
             ),
             IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.filter_list_rounded),
+              onPressed: _fetchListings,
+              icon: const Icon(Icons.refresh),
             ),
             const SizedBox(width: 8),
           ],
         ),
-        body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 900),
-            child: TabBarView(
-              children: [
-                _buildListingList(context, mockListings, ListingStatus.active),
-                _buildListingList(context, mockListings, ListingStatus.claimed),
-                _buildListingList(context, mockListings, ListingStatus.expired),
-              ],
-            ),
-          ),
-        ),
+        body: _isLoading 
+            ? const Center(child: CircularProgressIndicator())
+            : _errorMessage != null
+                ? Center(child: Text("Error: $_errorMessage"))
+                : Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 900),
+                      child: TabBarView(
+                        children: [
+                          _buildListingList(context, _activeListings, ListingStatus.active),
+                          _buildListingList(context, _completedListings, ListingStatus.claimed), // Backend uses 'completed' or remainingQuantity: 0
+                          _buildListingList(context, _expiredListings, ListingStatus.expired),
+                        ],
+                      ),
+                    ),
+                  ),
       ),
     );
   }
@@ -145,18 +151,19 @@ class SellerListingsPage extends StatelessWidget {
     List<Listing> listings,
     ListingStatus status,
   ) {
-    final filteredListings = listings.where((l) => l.status == status).toList();
-
-    if (filteredListings.isEmpty) {
+    if (listings.isEmpty) {
       return _buildEmptyState(context, status);
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(24),
-      itemCount: filteredListings.length,
-      itemBuilder: (context, index) {
-        return _buildListingCard(context, filteredListings[index]);
-      },
+    return RefreshIndicator(
+      onRefresh: _fetchListings,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(24),
+        itemCount: listings.length,
+        itemBuilder: (context, index) {
+          return _buildListingCard(context, listings[index]);
+        },
+      ),
     );
   }
 
@@ -194,6 +201,17 @@ class SellerListingsPage extends StatelessWidget {
     );
   }
 
+  Widget _buildImagePlaceholder() {
+    return Container(
+      color: AppColors.textLight.withOpacity(0.1),
+      child: const Icon(
+        Icons.image_not_supported_outlined,
+        size: 40,
+        color: AppColors.textLight,
+      ),
+    );
+  }
+
   Widget _buildListingCard(BuildContext context, Listing listing) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -210,23 +228,20 @@ class SellerListingsPage extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Stack(
             children: [
-              Image.network(
-                listing.imageUrl,
+              SizedBox(
                 height: 160,
                 width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: 160,
-                  color: AppColors.textLight.withOpacity(0.1),
-                  child: const Icon(
-                    Icons.image_not_supported_outlined,
-                    size: 40,
-                  ),
-                ),
+                child: listing.imageUrl.isNotEmpty 
+                  ? Image.network(
+                      BackendService.formatImageUrl(listing.imageUrl),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => _buildImagePlaceholder(),
+                    )
+                  : _buildImagePlaceholder(),
               ),
               Positioned(
                 top: 16,
@@ -237,20 +252,43 @@ class SellerListingsPage extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: listing.redistributionMode == RedistributionMode.free
-                        ? Colors.green.withOpacity(0.9)
-                        : AppColors.primary.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    listing.redistributionMode == RedistributionMode.free
-                        ? "FREE"
-                        : "₹${listing.price?.toStringAsFixed(0)}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                    gradient: LinearGradient(
+                      colors: listing.redistributionMode == RedistributionMode.free
+                          ? [Colors.green.shade400, Colors.green.shade600]
+                          : [AppColors.primary, AppColors.primary.withOpacity(0.8)],
                     ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        listing.redistributionMode == RedistributionMode.free 
+                          ? Icons.volunteer_activism_outlined 
+                          : Icons.currency_rupee_outlined,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        listing.redistributionMode == RedistributionMode.free
+                            ? "FREE"
+                            : listing.price?.toStringAsFixed(0) ?? "0",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -324,9 +362,11 @@ class SellerListingsPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      "Expires in ${_formatDuration(listing.expiryTime.difference(DateTime.now()))}",
+                      listing.expiryTime.isAfter(DateTime.now())
+                        ? "Expires in ${_formatDuration(listing.expiryTime.difference(DateTime.now()))}"
+                        : "Expired",
                       style: TextStyle(
-                        color: Colors.orange.shade700,
+                        color: listing.expiryTime.isAfter(DateTime.now()) ? Colors.orange.shade700 : Colors.red,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),
@@ -366,18 +406,19 @@ class SellerListingsPage extends StatelessWidget {
                     Row(
                       children: [
                         TextButton(
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
                                     CreateListingPage(listing: listing),
                               ),
                             );
+                            _fetchListings();
                           },
                           child: const Text("Edit"),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 4),
                         ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(

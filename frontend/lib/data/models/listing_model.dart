@@ -86,30 +86,77 @@ class Listing {
   }
 
   factory Listing.fromJson(Map<String, dynamic> json) {
+    final pricing = json['pricing'] as Map<String, dynamic>?;
+    final pickupWindow = json['pickupWindow'] as Map<String, dynamic>?;
+
     return Listing(
-      id: json['id'],
-      foodName: json['foodName'],
-      foodType: FoodType.values.byName(json['foodType']),
-      quantityValue: (json['quantityValue'] as num).toDouble(),
-      quantityUnit: json['quantityUnit'],
-      redistributionMode: RedistributionMode.values.byName(
-        json['redistributionMode'],
-      ),
-      price: json['price'] != null ? (json['price'] as num).toDouble() : null,
-      preparedAt: DateTime.parse(json['preparedAt']),
-      expiryTime: DateTime.parse(json['expiryTime']),
-      hygieneStatus: HygieneStatus.values.byName(json['hygieneStatus']),
-      locationAddress: json['locationAddress'],
-      pincode: json['pincode'],
-      latitude: (json['latitude'] as num).toDouble(),
-      longitude: (json['longitude'] as num).toDouble(),
-      imageUrl: json['imageUrl'],
+      id: json['_id'] ?? json['id'] ?? '',
+      foodName: json['foodName'] ?? 'Unknown',
+      foodType: _parseFoodType(json['foodType']),
+      quantityValue: (json['totalQuantity'] as num?)?.toDouble() ?? 0.0,
+      quantityUnit: _extractUnit(json['quantityText'] ?? ''),
+      redistributionMode: (pricing?['isFree'] == false)
+          ? RedistributionMode.discounted
+          : RedistributionMode.free,
+      price: (pricing?['discountedPrice'] as num?)?.toDouble(),
+      preparedAt: DateTime.tryParse(pickupWindow?['from'] ?? '') ?? DateTime.now(),
+      expiryTime: DateTime.tryParse(pickupWindow?['to'] ?? '') ?? DateTime.now(),
+      hygieneStatus: _parseHygieneStatus(json['hygieneStatus']),
+      locationAddress: json['pickupAddressText'] ?? json['locationAddress'] ?? '',
+      pincode: json['pincode']?.toString(),
+      latitude: 0.0, // Default for now
+      longitude: 0.0, // Default for now
+      imageUrl: (json['images'] != null && (json['images'] as List).isNotEmpty)
+          ? json['images'][0].toString()
+          : '',
       description: json['description'] ?? "",
-      status: ListingStatus.values.byName(json['status']),
-      businessType: json['businessType'] != null
-          ? BusinessType.values.byName(json['businessType'])
-          : null,
+      status: _parseStatus(json['status']),
+      businessType: _parseBusinessType(json['businessType']),
     );
+  }
+
+  static FoodType _parseFoodType(dynamic value) {
+    if (value == null) return FoodType.prepared_meal;
+    try {
+      return FoodType.values.byName(value.toString());
+    } catch (_) {
+      return FoodType.prepared_meal;
+    }
+  }
+
+  static HygieneStatus _parseHygieneStatus(dynamic value) {
+    if (value == null) return HygieneStatus.excellent;
+    try {
+      return HygieneStatus.values.byName(value.toString());
+    } catch (_) {
+      return HygieneStatus.excellent;
+    }
+  }
+
+  static ListingStatus _parseStatus(dynamic value) {
+    if (value == null) return ListingStatus.active;
+    try {
+      if (value == 'completed') return ListingStatus.claimed; // Map backend completed to claimed
+      return ListingStatus.values.byName(value.toString());
+    } catch (_) {
+      return ListingStatus.active;
+    }
+  }
+
+  static BusinessType? _parseBusinessType(dynamic value) {
+    if (value == null) return null;
+    try {
+      return BusinessType.values.byName(value.toString());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String _extractUnit(String quantityText) {
+    if (quantityText.isEmpty) return 'portions';
+    final parts = quantityText.split(' ');
+    if (parts.length > 1) return parts.last;
+    return 'portions';
   }
 
   static DateTime calculateExpiryTime(FoodType type, DateTime preparedAt) {

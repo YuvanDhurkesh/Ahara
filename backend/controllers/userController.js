@@ -165,3 +165,28 @@ exports.createUser = async (req, res) => {
     });
   }
 };
+
+exports.getUserByFirebaseUid = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const user = await User.findOne({ firebaseUid: uid });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Also find their profile
+    let profile = null;
+    if (user.role === 'seller') {
+      profile = await SellerProfile.findOne({ userId: user._id });
+    } else if (user.role === 'buyer') {
+      profile = await BuyerProfile.findOne({ userId: user._id });
+    } else if (user.role === 'volunteer') {
+      profile = await VolunteerProfile.findOne({ userId: user._id });
+    }
+
+    res.status(200).json({ user, profile });
+  } catch (error) {
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+};
