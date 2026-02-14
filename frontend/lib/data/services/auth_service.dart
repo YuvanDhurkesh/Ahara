@@ -3,14 +3,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class AuthService {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   /// 🔥 USE IPV4 WHEN TESTING ON PHONE
-  //static const String backendBaseUrl = "http://10.12.249.12:5000/api";
-  static const String backendBaseUrl = "http://localhost:5000/api";
+  
+  //static const String backendBaseUrl = "http://localhost:5000/api";
+  //static const String backendBaseUrl = "http://IP:5000/api";
+  static String backendBaseUrl = dotenv.env['BACKEND_URL']!;
+  
+
 
 
   //---------------------------------------------------------
