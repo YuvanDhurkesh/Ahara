@@ -5,6 +5,7 @@ import '../../common/pages/landing_page.dart';
 import 'buyer_food_detail_page.dart';
 import 'buyer_notifications_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class BuyerHomePage extends StatefulWidget {
   final Set<String> favouriteIds;
@@ -238,7 +239,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                 ),
                 child: Center(
                   child: Text(
-                    category,
+                    AppLocalizations.of(context)!.translate(category.toLowerCase()),
                     style: TextStyle(
                       color: isSelected
                           ? Colors.white
@@ -282,7 +283,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                 ),
                 child: Center(
                   child: Text(
-                    category,
+                    AppLocalizations.of(context)!.translate(category.toLowerCase().replaceAll(" & ", "_")),
                     style: TextStyle(
                       color: isSelected
                           ? Colors.white
@@ -487,7 +488,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      _buildIconLabel(Icons.timer_outlined, "Ends in 2h"),
+                      _buildIconLabel(Icons.timer_outlined, "${AppLocalizations.of(context)!.translate("ends_in")}2h"),
                       const SizedBox(width: 16),
                       _buildIconLabel(Icons.directions_walk, "1.2 km"),
                       const Spacer(),
@@ -503,7 +504,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          store.isFree ? "Claim Now" : "Reserve",
+                          store.isFree 
+                              ? AppLocalizations.of(context)!.translate("claim_now")
+                              : AppLocalizations.of(context)!.translate("reserve"),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,

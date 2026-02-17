@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/auth_service.dart';
 import '../services/google_auth_service.dart';
 import '../services/backend_service.dart';
@@ -52,7 +53,38 @@ class AppAuthProvider extends ChangeNotifier {
       _mongoProfile = data['profile'];
       notifyListeners();
     } catch (e) {
-      debugPrint("Error refreshing mongo user: $e");
+      debugPrint("Error fetching mongo user: $e. Checking Firestore for auto-sync...");
+      
+      try {
+        // SELF-HEALING: If not in Mongo, check Firestore
+        final firestoreDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser!.uid)
+            .get();
+
+        if (firestoreDoc.exists) {
+          final userData = firestoreDoc.data()!;
+          debugPrint("Found Firestore data, attempting auto-sync to Mongo...");
+          
+          await BackendService.createUser(
+            firebaseUid: currentUser!.uid,
+            name: userData['name'] ?? currentUser!.displayName ?? "User",
+            email: userData['email'] ?? currentUser!.email ?? "",
+            role: userData['role'] ?? "buyer",
+            phone: userData['phone'] ?? "",
+            location: userData['location'] ?? "",
+          );
+
+          // Retry fetching profile
+          final data = await BackendService.getUserProfile(currentUser!.uid);
+          _mongoUser = data['user'];
+          _mongoProfile = data['profile'];
+          notifyListeners();
+          debugPrint("Auto-sync successful ✅");
+        }
+      } catch (innerError) {
+        debugPrint("Auto-sync failed: $innerError");
+      }
     }
   }
 
@@ -99,6 +131,7 @@ class AppAuthProvider extends ChangeNotifier {
     String? fssaiNumber,
     String? transportMode,
     String? dateOfBirth,
+    String? language,
   }) async {
 
     _setLoading(true);
@@ -117,6 +150,7 @@ class AppAuthProvider extends ChangeNotifier {
         fssaiNumber: fssaiNumber,
         transportMode: transportMode,
         dateOfBirth: dateOfBirth,
+        language: language,
       );
 
       if (user != null) {

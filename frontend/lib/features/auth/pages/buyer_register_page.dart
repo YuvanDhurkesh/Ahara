@@ -7,6 +7,7 @@ import '../../../data/providers/app_auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import '../../../core/localization/language_provider.dart';
 
 class BuyerRegisterPage extends StatefulWidget {
   final String role;
@@ -128,6 +129,7 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
         location: _locationController.text.trim(),
+        language: context.read<LanguageProvider>().locale.languageCode,
       );
 
       if (!mounted) return;

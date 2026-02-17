@@ -3,18 +3,20 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import '../../config/api_config.dart';
 
 class BackendService {
   /// ⚠️ UPDATED: Added /api and removed trailing slash
-  static const String baseUrl = "https://52d6-2405-201-e015-e079-552b-9e41-e783-debe.ngrok-free.app/api";
+  static String get baseUrl => ApiConfig.baseUrl;
 
   static Future<void> createUser({
-    required String firebaseUID,
+    required String firebaseUid,
     required String name,
     required String email,
     required String role,
     required String phone,
     required String location,
+    String? language,
   }) async {
     final url = Uri.parse("$baseUrl/users/create");
 
@@ -25,12 +27,13 @@ class BackendService {
         "ngrok-skip-browser-warning": "true", // Required for ngrok
       },
       body: jsonEncode({
-        "firebaseUID": firebaseUID,
+        "firebaseUid": firebaseUid,
         "name": name,
         "email": email,
         "role": role,
         "phone": phone,
         "location": location,
+        if (language != null) "language": language,
       }),
     );
 

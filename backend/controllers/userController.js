@@ -62,6 +62,7 @@ exports.createUser = async (req, res) => {
       name,
       role,
       phone,
+      language: req.body.language || "en",
       addressText: addressText || "Not specified",
       emailVerified: false,
       phoneVerified: false

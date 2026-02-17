@@ -3,35 +3,90 @@
 # ===============================
 .env
 *.env
+.env.*
 
 # ===============================
-# NODE
+# DEPENDENCIES
 # ===============================
 node_modules/
-npm-debug.log*
-
-# ===============================
-# FLUTTER / DART
-# ===============================
+.pub-cache/
+.packages
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .pub/
+
+# ===============================
+# BUILD OUTPUTS
+# ===============================
 build/
+dist/
+target/
+*.apk
+*.aab
+*.ipa
+*.app
+
+# ===============================
+# LOGS AND TEMP FILES
+# ===============================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.txt
+tmp/
 
 # ===============================
 # OS FILES
 # ===============================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
 # ===============================
-# IDE
+# IDE AND EDITORS
 # ===============================
 .vscode/
 .idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
 
 # ===============================
-# LOG FILES
+# AHARA SPECIFIC JUNK
 # ===============================
-*.log
+analyze_output
+lib_analyze.txt
+lib_errors.txt
+build_logs.txt
+build_web_logs.txt
+analyze_utf8.txt
+lib_analyze_utf8.txt
+uploads/
+*.lock
+.pub-cache/
+.flutter-plugins*
+!pubspec.lock
+!package-lock.json
+
+# ===============================
+# PLATFORM SPECIFIC
+# ===============================
+**/ephemeral/
+**/generated_plugin_registrant.cc
+**/generated_plugins.cmake
+**/GeneratedPluginRegistrant.swift
+android/app/debug
+android/app/profile
+android/app/release

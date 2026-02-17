@@ -6,6 +6,7 @@ import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
 import '../../../shared/widgets/phone_input_field.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../core/localization/language_provider.dart';
 
 class VolunteerRegisterPage extends StatefulWidget {
   const VolunteerRegisterPage({super.key});
@@ -295,6 +296,7 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
                                   : _locationController.text.trim(),
                               transportMode: _selectedTransport,
                               dateOfBirth: _selectedDate?.toIso8601String(),
+                              language: context.read<LanguageProvider>().locale.languageCode,
                             );
                             
                             if (!mounted) return;

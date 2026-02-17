@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
+import 'package:provider/provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
 
 class VolunteerHomePage extends StatefulWidget {
   const VolunteerHomePage({super.key});
@@ -28,9 +31,9 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Hi, Demo Volunteer',
-                        style: TextStyle(
+                      Text(
+                        '${AppLocalizations.of(context)!.translate("welcome_back_user")}${Provider.of<AppAuthProvider>(context).mongoUser?['name'] ?? "Volunteer"}',
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
                         ),
@@ -70,9 +73,9 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
   Widget _availabilityToggle() {
     return Row(
       children: [
-        const Text(
-          'Availability',
-          style: TextStyle(fontWeight: FontWeight.w500),
+        Text(
+          AppLocalizations.of(context)!.translate("availability"),
+          style: const TextStyle(fontWeight: FontWeight.w500),
         ),
         const SizedBox(width: 8),
         Switch(
@@ -122,10 +125,10 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
           childAspectRatio: isWide ? 2.5 : 1.5,
-          children: const [
-            _StatCard(title: 'Deliveries', value: '47', color: Colors.blue),
-            _StatCard(title: 'Today', value: '3', color: Colors.green),
-            _StatCard(title: 'Rating', value: '4.8', color: Colors.orange),
+          children: [
+            _StatCard(title: AppLocalizations.of(context)!.translate("deliveries"), value: '47', color: Colors.blue),
+            _StatCard(title: AppLocalizations.of(context)!.translate("today"), value: '3', color: Colors.green),
+            _StatCard(title: AppLocalizations.of(context)!.translate("ratings"), value: '4.8', color: Colors.orange),
           ],
         );
       },
@@ -136,9 +139,9 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Your Badges',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        Text(
+          AppLocalizations.of(context)!.translate("your_badges"),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
         Wrap(
@@ -182,18 +185,18 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Quick Actions',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        Text(
+          AppLocalizations.of(context)!.translate("quick_actions"),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
         Row(
-          children: const [
-            _QuickAction(icon: Icons.list_alt, label: 'View Orders'),
-            SizedBox(width: 12),
-            _QuickAction(icon: Icons.verified_user, label: 'Verification'),
-            SizedBox(width: 12),
-            _QuickAction(icon: Icons.star, label: 'Ratings'),
+          children: [
+            _QuickAction(icon: Icons.list_alt, label: AppLocalizations.of(context)!.translate("view_orders")),
+            const SizedBox(width: 12),
+            _QuickAction(icon: Icons.verified_user, label: AppLocalizations.of(context)!.translate("verification")),
+            const SizedBox(width: 12),
+            _QuickAction(icon: Icons.star, label: AppLocalizations.of(context)!.translate("ratings")),
           ],
         ),
       ],

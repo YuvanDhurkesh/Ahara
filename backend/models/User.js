@@ -52,6 +52,11 @@ const userSchema = new mongoose.Schema(
     },
 
     profilePictureUrl: String,
+    language: {
+      type: String,
+      enum: ["en", "hi", "ta", "te"],
+      default: "en"
+    },
 
     // Notifications
     fcmTokens: [{ type: String }],

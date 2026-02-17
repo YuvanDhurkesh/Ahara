@@ -4,6 +4,10 @@ import '../../../shared/styles/app_colors.dart';
 import '../../auth/pages/register_selection_page.dart';
 import '../../auth/pages/login_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
+import '../../../core/localization/language_selection_page.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/localization/language_provider.dart';
+import 'package:provider/provider.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -74,19 +78,29 @@ class _LandingPageState extends State<LandingPage> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: AppColors.textDark),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LanguageSelectionPage()),
+              );
+            },
+            tooltip: "Change Language",
+          ),
           if (!isMobile) ...[
             _NavBarItem(
-              "How it works",
+              AppLocalizations.of(context)!.translate("how_it_works"),
               isActive: _activeSection == "howitworks",
               onTap: () => _scrollToSection(_howItWorksKey, "howitworks"),
             ),
             _NavBarItem(
-              "Trust",
+              AppLocalizations.of(context)!.translate("trust"),
               isActive: _activeSection == "trust",
               onTap: () => _scrollToSection(_trustKey, "trust"),
             ),
             _NavBarItem(
-              "Impact",
+              AppLocalizations.of(context)!.translate("impact"),
               isActive: _activeSection == "impact",
               onTap: () => _scrollToSection(_impactKey, "impact"),
             ),
@@ -102,7 +116,7 @@ class _LandingPageState extends State<LandingPage> {
               minimumSize: const Size(0, 40),
             ),
             child: Text(
-              "Join Us",
+              AppLocalizations.of(context)!.translate("join_us"),
               style: TextStyle(fontSize: isMobile ? 12 : 13),
             ),
           ),

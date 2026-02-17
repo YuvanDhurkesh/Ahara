@@ -2,22 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../../config/api_config.dart';
 
 class AuthService {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  /// 🔥 USE IPV4 WHEN TESTING ON PHONE
+  static String get backendBaseUrl => ApiConfig.baseUrl;
   
-  //static const String backendBaseUrl = "http://localhost:5000/api";
-  //static const String backendBaseUrl = "http://IP:5000/api";
-  static String backendBaseUrl = dotenv.env['BACKEND_URL']!;
-  
-
-
 
   //---------------------------------------------------------
   /// LOGIN (NO MONGO CALL)
@@ -49,6 +42,7 @@ class AuthService {
     String? fssaiNumber,
     String? transportMode,
     String? dateOfBirth,
+    String? language,
   }) async {
 
     //-----------------------------------------------------
@@ -78,6 +72,7 @@ class AuthService {
       "email": email,
       "location": location,
       "role": role,
+      "language": language ?? "en",
       "createdAt": Timestamp.now(),
 
     });
@@ -97,6 +92,7 @@ class AuthService {
       fssaiNumber: fssaiNumber,
       transportMode: transportMode,
       dateOfBirth: dateOfBirth,
+      language: language,
     );
 
     return user;
@@ -129,6 +125,7 @@ class AuthService {
     String? fssaiNumber,
     String? transportMode,
     String? dateOfBirth,
+    String? language,
   }) async {
 
     try {
@@ -148,6 +145,7 @@ class AuthService {
           "role": role,
           "phone": phone,
           "location": location,
+          if (language != null) "language": language,
           if (businessName != null) "businessName": businessName,
           if (businessType != null) "businessType": businessType,
           if (fssaiNumber != null) "fssaiNumber": fssaiNumber,
