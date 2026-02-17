@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../buyer/pages/buyer_dashboard_page.dart';
+import '../../seller/pages/seller_dashboard_page.dart';
+import '../../volunteer/pages/volunteer_dashboard_page.dart';
 import 'register_selection_page.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
-import '../../seller/pages/seller_dashboard_page.dart';
-import '../../volunteer/pages/volunteer_dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,7 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
-  bool _isLoading = false; // ⭐ prevents button spam
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -30,6 +30,8 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  //-------------------------------------------------------------
+  /// LOGIN
   //-------------------------------------------------------------
 
   Future<void> _login() async {
@@ -48,13 +50,12 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       if (user != null) {
-        // Fetch user role from Firestore
         final role = await auth.getUserRole(user.uid);
 
         if (!mounted) return;
 
-        // Route based on role
         Widget destination;
+
         switch (role?.toLowerCase()) {
           case 'seller':
             destination = const SellerDashboardPage();
@@ -75,13 +76,55 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } on fb.FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.message ?? "Login failed")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? "Login failed")),
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  //-------------------------------------------------------------
+  /// GOOGLE SIGN IN
+  //-------------------------------------------------------------
+
+  Future<void> _handleGoogleSignIn() async {
+    final auth = context.read<AppAuthProvider>();
+
+    try {
+      final user = await auth.signInWithGoogle();
+
+      if (user != null && mounted) {
+        final role = await auth.getUserRole(user.uid);
+
+        if (!mounted) return;
+
+        Widget destination;
+
+        switch (role?.toLowerCase()) {
+          case 'seller':
+            destination = const SellerDashboardPage();
+            break;
+          case 'volunteer':
+            destination = const VolunteerDashboardPage();
+            break;
+          case 'buyer':
+          default:
+            destination = const BuyerDashboardPage();
+            break;
+        }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => destination),
+        );
+      }
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Google Sign-In Failed")),
+      );
     }
   }
 
@@ -93,10 +136,8 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-
         child: Form(
           key: _formKey,
-
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -104,9 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                 "Welcome Back",
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-
               const SizedBox(height: 12),
-
               Text(
                 "Login to continue your journey with Ahara and help the community.",
                 style: TextStyle(
@@ -115,7 +154,6 @@ class _LoginPageState extends State<LoginPage> {
                   height: 1.5,
                 ),
               ),
-
               const SizedBox(height: 48),
 
               //-------------------------------------------------------------
@@ -159,7 +197,6 @@ class _LoginPageState extends State<LoginPage> {
                       _obscurePassword
                           ? Icons.visibility_off
                           : Icons.visibility,
-                      size: 20,
                     ),
                     onPressed: () {
                       setState(() {
@@ -176,16 +213,6 @@ class _LoginPageState extends State<LoginPage> {
                 },
               ),
 
-              const SizedBox(height: 8),
-
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text("Forgot Password?"),
-                ),
-              ),
-
               const SizedBox(height: 32),
 
               //-------------------------------------------------------------
@@ -195,7 +222,6 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _login,
-
                   child: _isLoading
                       ? const SizedBox(
                           height: 22,
@@ -211,13 +237,14 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 32),
 
-              const SizedBox(height: 20),
-
+              //-------------------------------------------------------------
+              // OR DIVIDER
+              //-------------------------------------------------------------
               Row(
-                children: [
+                children: const [
                   Expanded(child: Divider()),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Text("OR"),
                   ),
                   Expanded(child: Divider()),
@@ -226,6 +253,9 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 20),
 
+              //-------------------------------------------------------------
+              // GOOGLE BUTTON
+              //-------------------------------------------------------------
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -238,46 +268,11 @@ class _LoginPageState extends State<LoginPage> {
                     "Sign in with Google",
                     style: TextStyle(fontSize: 16),
                   ),
-                  onPressed: () async {
-                    final auth = context.read<AppAuthProvider>();
-
-                    try {
-                      final user = await auth.signInWithGoogle();
-
-                      if (user != null && context.mounted) {
-                        // Fetch user role from Firestore
-                        final role = await auth.getUserRole(user.uid);
-
-                        if (!context.mounted) return;
-
-                        // Route based on role
-                        Widget destination;
-                        switch (role?.toLowerCase()) {
-                          case 'seller':
-                            destination = const SellerDashboardPage();
-                            break;
-                          case 'volunteer':
-                            destination = const VolunteerDashboardPage();
-                            break;
-                          case 'buyer':
-                          default:
-                            destination = const BuyerDashboardPage();
-                            break;
-                        }
-
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => destination),
-                        );
-                      }
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Google Sign-In Failed")),
-                      );
-                    }
-                  },
+                  onPressed: _handleGoogleSignIn,
                 ),
               ),
+
+              const SizedBox(height: 32),
 
               //-------------------------------------------------------------
               // REGISTER
@@ -292,7 +287,6 @@ class _LoginPageState extends State<LoginPage> {
                       fontSize: 14,
                     ),
                   ),
-
                   GestureDetector(
                     onTap: () {
                       Navigator.pushReplacement(
@@ -302,7 +296,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       );
                     },
-
                     child: const Text(
                       "Register",
                       style: TextStyle(

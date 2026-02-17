@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
 import '../../../shared/widgets/phone_input_field.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../core/localization/language_provider.dart';
 
 class SellerRegisterPage extends StatefulWidget {
   const SellerRegisterPage({super.key});
@@ -71,6 +73,8 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
         businessName: _nameController.text.trim(),
         businessType: _selectedType,
         fssaiNumber: _fssaiController.text.trim(),
+        language:
+            context.read<LanguageProvider>().locale.languageCode,
       );
 
       if (!mounted) return;
@@ -82,6 +86,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
             backgroundColor: Colors.green,
           ),
         );
+
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -99,6 +104,8 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
     }
   }
 
+  //---------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,10 +122,8 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: Form(
               key: _formKey,
               child: Column(
@@ -139,7 +144,6 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                   ),
                   const SizedBox(height: 48),
 
-                  // Business Name Field
                   _buildLabel("BUSINESS NAME"),
                   TextFormField(
                     controller: _nameController,
@@ -149,41 +153,34 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                       prefixIcon: Icon(Icons.business_outlined),
                       counterText: '',
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return "Please enter business name";
-                      return null;
-                    },
+                    validator: (value) =>
+                        value == null || value.isEmpty
+                            ? "Please enter business name"
+                            : null,
                   ),
+
                   const SizedBox(height: 28),
 
-                  // Business Type Dropdown
                   _buildLabel("BUSINESS TYPE"),
                   DropdownButtonFormField<String>(
                     value: _selectedType,
                     hint: const Text("Select business type"),
-                    items: _sellerTypes.map((type) {
-                      return DropdownMenuItem(
-                        value: type,
-                        child: Text(type),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() => _selectedType = value);
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return "Please select business type";
-                      return null;
-                    },
-                    icon: Icon(
-                      Icons.keyboard_arrow_down,
-                      color: AppColors.textLight.withOpacity(0.6),
-                    ),
+                    items: _sellerTypes
+                        .map((type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(type),
+                            ))
+                        .toList(),
+                    onChanged: (value) =>
+                        setState(() => _selectedType = value),
+                    validator: (value) =>
+                        value == null || value.isEmpty
+                            ? "Please select business type"
+                            : null,
                   ),
+
                   const SizedBox(height: 28),
 
-                  // FSSAI Number Field
                   _buildLabel("FSSAI NUMBER"),
                   TextFormField(
                     controller: _fssaiController,
@@ -206,25 +203,18 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                       return null;
                     },
                   ),
-                  // Contact Number Field
+
+                  const SizedBox(height: 28),
+
                   PhoneInputField(
                     controller: _phoneController,
                     label: "CONTACT NUMBER",
                     hintText: "12345 67890",
                     maxLength: 10,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter your number";
-                      }
-                      if (value.length != 10) {
-                        return "Phone number must be 10 digits";
-                      }
-                      return null;
-                    },
                   ),
+
                   const SizedBox(height: 28),
 
-                  // Email Field
                   _buildLabel("BUSINESS EMAIL"),
                   TextFormField(
                     controller: _emailController,
@@ -235,17 +225,21 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                       prefixIcon: Icon(Icons.email_outlined),
                       counterText: '',
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return "Please enter email";
-                      if (!value.contains('@'))
-                        return "Please enter a valid email";
-                      return null;
-                    },
                   ),
+
                   const SizedBox(height: 28),
 
-                  // Password Field
+                  _buildLabel("LOCATION (OPTIONAL)"),
+                  TextFormField(
+                    controller: _locationController,
+                    decoration: const InputDecoration(
+                      hintText: "E.g. Bangalore, Karnataka",
+                      prefixIcon: Icon(Icons.location_on_outlined),
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
                   _buildLabel("PASSWORD"),
                   TextFormField(
                     controller: _passwordController,
@@ -259,64 +253,82 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                           _obscurePassword
                               ? Icons.visibility_off
                               : Icons.visibility,
-                          size: 20,
                         ),
                         onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
+                            () => _obscurePassword = !_obscurePassword),
                       ),
                       counterText: '',
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return "Please enter a password";
-                      if (value.length < 8)
-                        return "Password must be at least 8 characters";
-                      return null;
-                    },
+                    validator: (value) =>
+                        value == null || value.length < 8
+                            ? "Password must be at least 8 characters"
+                            : null,
                   ),
+
                   const SizedBox(height: 48),
 
                   SizedBox(
                     width: double.infinity,
                     height: 58,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _registerSeller,
+                      onPressed:
+                          _isLoading ? null : _registerSeller,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(16),
+                        ),
+                      ),
                       child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text("Create Account"),
+                          ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                          : const Text(
+                              "Create Seller Account",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
+
                   const SizedBox(height: 32),
+
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment:
+                        MainAxisAlignment.center,
                     children: [
                       Text(
                         "Already registered? ",
                         style: TextStyle(
-                          color: AppColors.textLight.withOpacity(0.8),
-                          fontSize: 14,
+                          color: AppColors.textLight
+                              .withOpacity(0.8),
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginPage(),
-                            ),
-                          );
-                        },
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const LoginPage(),
+                          ),
+                        ),
                         child: const Text(
                           "Login",
                           style: TextStyle(
                             color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
+                            fontWeight:
+                                FontWeight.bold,
                           ),
                         ),
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 40),
                 ],
               ),
@@ -329,8 +341,12 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
 
   Widget _buildLabel(String label) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0, left: 4.0),
-      child: Text(label, style: Theme.of(context).textTheme.labelMedium),
+      padding:
+          const EdgeInsets.only(bottom: 10.0, left: 4.0),
+      child: Text(label,
+          style: Theme.of(context)
+              .textTheme
+              .labelMedium),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'seller_overview_page.dart';
 import 'seller_listings_page.dart';
 import 'seller_orders_page.dart';
 import 'seller_profile_page.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class SellerDashboardPage extends StatefulWidget {
   final int initialIndex;
@@ -68,50 +69,50 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
                     fontWeight: FontWeight.w500,
                     fontSize: 11,
                   ),
-                  items: const [
+                  items: [
                     BottomNavigationBarItem(
                       icon: Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.dashboard_outlined),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: const Icon(Icons.dashboard_outlined),
                       ),
                       activeIcon: Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.dashboard),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: const Icon(Icons.dashboard),
                       ),
-                      label: "Overview",
+                      label: AppLocalizations.of(context)!.translate("overview"),
                     ),
                     BottomNavigationBarItem(
                       icon: Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.inventory_2_outlined),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: const Icon(Icons.inventory_2_outlined),
                       ),
                       activeIcon: Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.inventory_2),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: const Icon(Icons.inventory_2),
                       ),
-                      label: "Listings",
+                      label: AppLocalizations.of(context)!.translate("listings"),
                     ),
                     BottomNavigationBarItem(
                       icon: Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.receipt_long_outlined),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: const Icon(Icons.receipt_long_outlined),
                       ),
                       activeIcon: Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.receipt_long),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: const Icon(Icons.receipt_long),
                       ),
-                      label: "Orders",
+                      label: AppLocalizations.of(context)!.translate("orders"),
                     ),
                     BottomNavigationBarItem(
                       icon: Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.person_outline),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: const Icon(Icons.person_outline),
                       ),
                       activeIcon: Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.person),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: const Icon(Icons.person),
                       ),
-                      label: "Profile",
+                      label: AppLocalizations.of(context)!.translate("profile"),
                     ),
                   ],
                 ),

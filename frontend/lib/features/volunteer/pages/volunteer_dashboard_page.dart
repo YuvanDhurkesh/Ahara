@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 
 import 'volunteer_home_page.dart';
 import 'volunteer_orders_page.dart';
@@ -27,7 +28,7 @@ class _VolunteerDashboardPageState extends State<VolunteerDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _pages = const [
+    final List<Widget> _pages = [
       VolunteerHomePage(), // Home
       VolunteerOrdersPage(), // My Deliveries
       VolunteerVerificationPage(), // Verification page
@@ -78,61 +79,61 @@ class _VolunteerDashboardPageState extends State<VolunteerDashboardPage> {
                     fontWeight: FontWeight.w500,
                     fontSize: 11,
                   ),
-                  items: const [
+                  items: [
                     BottomNavigationBarItem(
-                      icon: Padding(
+                      icon: const Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.home_outlined),
                       ),
-                      activeIcon: Padding(
+                      activeIcon: const Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.home),
                       ),
-                      label: "Home",
+                      label: AppLocalizations.of(context)!.translate("home"),
                     ),
                     BottomNavigationBarItem(
-                      icon: Padding(
+                      icon: const Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.local_shipping_outlined),
                       ),
-                      activeIcon: Padding(
+                      activeIcon: const Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.local_shipping),
                       ),
-                      label: "Deliveries",
+                      label: AppLocalizations.of(context)!.translate("deliveries"),
                     ),
                     BottomNavigationBarItem(
-                      icon: Padding(
+                      icon: const Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.domain_verification),
                       ),
-                      activeIcon: Padding(
+                      activeIcon: const Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.domain_verification),
                       ),
-                      label: "verification",
+                      label: AppLocalizations.of(context)!.translate("verification"),
                     ),
                     BottomNavigationBarItem(
-                      icon: Padding(
+                      icon: const Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.star_border),
                       ),
-                      activeIcon: Padding(
+                      activeIcon: const Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.star),
                       ),
-                      label: "Ratings",
+                      label: AppLocalizations.of(context)!.translate("ratings"),
                     ),
                     BottomNavigationBarItem(
-                      icon: Padding(
+                      icon: const Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.person_outline),
                       ),
-                      activeIcon: Padding(
+                      activeIcon: const Padding(
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.person),
                       ),
-                      label: "Profile",
+                      label: AppLocalizations.of(context)!.translate("profile"),
                     ),
                   ],
                 ),

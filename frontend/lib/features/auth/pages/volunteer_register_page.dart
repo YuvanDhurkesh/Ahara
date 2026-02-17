@@ -1,33 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
 import '../../../shared/widgets/phone_input_field.dart';
-import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
+import '../../../core/localization/language_provider.dart';
 
 class VolunteerRegisterPage extends StatefulWidget {
   const VolunteerRegisterPage({super.key});
 
   @override
-  State<VolunteerRegisterPage> createState() => _VolunteerRegisterPageState();
+  State<VolunteerRegisterPage> createState() =>
+      _VolunteerRegisterPageState();
 }
 
-class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
+class _VolunteerRegisterPageState
+    extends State<VolunteerRegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _dobController = TextEditingController();
+  final _locationController = TextEditingController();
 
   String? _selectedTransport;
   DateTime? _selectedDate;
   bool _obscurePassword = true;
   bool _isLoading = false;
 
-  final List<String> _transportModes = ['Car', 'Bike', 'Cycle', 'Walk'];
+  final List<String> _transportModes = [
+    'Car',
+    'Bike',
+    'Cycle',
+    'Walk'
+  ];
 
   @override
   void dispose() {
@@ -36,32 +45,26 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
     _phoneController.dispose();
     _passwordController.dispose();
     _dobController.dispose();
+    _locationController.dispose();
     super.dispose();
   }
+
+  //---------------------------------------------------------
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+      initialDate:
+          DateTime.now().subtract(const Duration(days: 365 * 18)),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: Colors.white,
-              onSurface: AppColors.textDark,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
-    if (picked != null && picked != _selectedDate) {
+
+    if (picked != null) {
       setState(() {
         _selectedDate = picked;
-        _dobController.text = "${picked.day}/${picked.month}/${picked.year}";
+        _dobController.text =
+            "${picked.day}/${picked.month}/${picked.year}";
       });
     }
   }
@@ -70,22 +73,28 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
     final today = DateTime.now();
     int age = today.year - dob.year;
     if (today.month < dob.month ||
-        (today.month == dob.month && today.day < dob.day)) {
+        (today.month == dob.month &&
+            today.day < dob.day)) {
       age--;
     }
     return age >= 18;
   }
 
+  //---------------------------------------------------------
+  /// VOLUNTEER REGISTRATION
+  //---------------------------------------------------------
+
   Future<void> _registerVolunteer() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Age validation for Car/Bike
-    if ((_selectedTransport == 'Car' || _selectedTransport == 'Bike') &&
+    if ((_selectedTransport == 'Car' ||
+            _selectedTransport == 'Bike') &&
         _selectedDate != null) {
       if (!_isEligible(_selectedDate!)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("You must be 18+ to volunteer with Car/Bike"),
+            content: Text(
+                "You must be 18+ to volunteer with Car/Bike"),
             backgroundColor: Colors.red,
           ),
         );
@@ -104,9 +113,13 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
         phone: _phoneController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
-        location:
-            _selectedTransport ??
-            'Walk', // Using transport as location placeholder
+        location: _locationController.text.trim().isEmpty
+            ? 'Not specified'
+            : _locationController.text.trim(),
+        transportMode: _selectedTransport,
+        dateOfBirth: _selectedDate?.toIso8601String(),
+        language:
+            context.read<LanguageProvider>().locale.languageCode,
       );
 
       if (!mounted) return;
@@ -114,21 +127,24 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
       if (user != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Registration successful! Please login."),
+            content: Text(
+                "Registration successful! Please login."),
             backgroundColor: Colors.green,
           ),
         );
 
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const LoginPage()),
+          MaterialPageRoute(
+              builder: (_) => const LoginPage()),
           (route) => false,
         );
       }
     } on fb.FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.message ?? "Registration failed"),
+          content: Text(
+              e.message ?? "Registration failed"),
           backgroundColor: Colors.red,
         ),
       );
@@ -139,11 +155,13 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
     }
   }
 
+  //---------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
-    // Show DOB field for everything except 'Cycle' and 'Walk'
     final bool showDOB =
-        _selectedTransport == 'Car' || _selectedTransport == 'Bike';
+        _selectedTransport == 'Car' ||
+            _selectedTransport == 'Bike';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -151,30 +169,33 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          icon: const Icon(Icons.arrow_back,
+              color: AppColors.textDark),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
+          constraints:
+              const BoxConstraints(maxWidth: 600),
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
+                horizontal: 24.0, vertical: 16.0),
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Join as a Volunteer",
-                    style: Theme.of(context).textTheme.headlineLarge,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineLarge,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "Offer your time and help distribute food surplus to the neighborhood.",
+                    "Offer your time and help distribute food surplus.",
                     style: TextStyle(
                       color: AppColors.textLight,
                       fontSize: 15,
@@ -183,192 +204,213 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
                   ),
                   const SizedBox(height: 48),
 
-                  // Name Field
                   _buildLabel("FULL NAME"),
                   TextFormField(
                     controller: _nameController,
                     maxLength: 50,
-                    decoration: const InputDecoration(
-                      hintText: "Enter your full name",
-                      prefixIcon: Icon(Icons.person_outline),
+                    decoration:
+                        const InputDecoration(
+                      hintText:
+                          "Enter your full name",
+                      prefixIcon:
+                          Icon(Icons.person_outline),
                       counterText: '',
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return "Please enter your name";
-                      return null;
-                    },
+                    validator: (value) =>
+                        value == null ||
+                                value.isEmpty
+                            ? "Please enter your name"
+                            : null,
                   ),
+
                   const SizedBox(height: 28),
 
-                  // Mode of Transport Dropdown
-                  _buildLabel("MODE OF TRANSPORT"),
+                  _buildLabel(
+                      "MODE OF TRANSPORT"),
                   DropdownButtonFormField<String>(
                     value: _selectedTransport,
-                    hint: const Text("Select transport mode"),
-                    items: _transportModes.map((mode) {
-                      return DropdownMenuItem(
-                        value: mode,
-                        child: Text(mode),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedTransport = value;
-                        if (value == 'Cycle') {
-                          _selectedDate = null;
-                          _dobController.clear();
-                        }
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return "Please select transport mode";
-                      return null;
-                    },
-                    icon: Icon(
-                      Icons.keyboard_arrow_down,
-                      color: AppColors.textLight.withOpacity(0.6),
-                    ),
+                    hint: const Text(
+                        "Select transport mode"),
+                    items: _transportModes
+                        .map((mode) =>
+                            DropdownMenuItem(
+                              value: mode,
+                              child: Text(mode),
+                            ))
+                        .toList(),
+                    onChanged: (value) =>
+                        setState(() =>
+                            _selectedTransport =
+                                value),
+                    validator: (value) =>
+                        value == null
+                            ? "Please select transport mode"
+                            : null,
                   ),
+
                   const SizedBox(height: 28),
 
-                  // Conditional DOB Field
                   if (showDOB) ...[
-                    _buildLabel("DATE OF BIRTH"),
+                    _buildLabel(
+                        "DATE OF BIRTH"),
                     TextFormField(
                       controller: _dobController,
                       readOnly: true,
-                      decoration: const InputDecoration(
-                        hintText: "DD/MM/YYYY",
-                        prefixIcon: Icon(Icons.calendar_today_outlined),
+                      decoration:
+                          const InputDecoration(
+                        hintText:
+                            "DD/MM/YYYY",
+                        prefixIcon: Icon(Icons
+                            .calendar_today_outlined),
                       ),
-                      onTap: () => _selectDate(context),
-                      validator: (value) {
-                        if (value == null || value.isEmpty)
-                          return "Please select your date of birth";
-                        if (_selectedDate != null &&
-                            !_isEligible(_selectedDate!)) {
-                          return "You must be 18 years or older to register";
-                        }
-                        return null;
-                      },
+                      onTap: () =>
+                          _selectDate(context),
+                      validator: (value) =>
+                          value == null ||
+                                  value.isEmpty
+                              ? "Please select your date of birth"
+                              : null,
                     ),
                     const SizedBox(height: 28),
                   ],
 
-                  // Email Field
-                  _buildLabel("EMAIL ADDRESS"),
+                  _buildLabel(
+                      "EMAIL ADDRESS"),
                   TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
+                    controller:
+                        _emailController,
+                    keyboardType:
+                        TextInputType.emailAddress,
                     maxLength: 100,
-                    decoration: const InputDecoration(
-                      hintText: "name@example.com",
-                      prefixIcon: Icon(Icons.email_outlined),
+                    decoration:
+                        const InputDecoration(
+                      hintText:
+                          "name@example.com",
+                      prefixIcon: Icon(Icons
+                          .email_outlined),
                       counterText: '',
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return "Please enter your email";
-                      if (!value.contains('@'))
-                        return "Please enter a valid email";
-                      return null;
-                    },
+                    validator: (value) =>
+                        value == null ||
+                                !value.contains('@')
+                            ? "Enter valid email"
+                            : null,
                   ),
+
                   const SizedBox(height: 28),
 
-                  // Contact Number Field
                   PhoneInputField(
-                    controller: _phoneController,
+                    controller:
+                        _phoneController,
                     label: "CONTACT NUMBER",
                     hintText: "12345 67890",
                     maxLength: 10,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter your number";
-                      }
-                      if (value.length != 10) {
-                        return "Phone number must be 10 digits";
-                      }
-                      return null;
-                    },
                   ),
+
                   const SizedBox(height: 28),
 
-                  // Password Field
+                  _buildLabel("LOCATION"),
+                  TextFormField(
+                    controller:
+                        _locationController,
+                    decoration:
+                        const InputDecoration(
+                      hintText:
+                          "E.g. Bangalore",
+                      prefixIcon: Icon(Icons
+                          .location_on_outlined),
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
                   _buildLabel("PASSWORD"),
                   TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    maxLength: 50,
-                    decoration: InputDecoration(
-                      hintText: "At least 6 characters",
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
+                    controller:
+                        _passwordController,
+                    obscureText:
+                        _obscurePassword,
+                    decoration:
+                        InputDecoration(
+                      hintText:
+                          "At least 6 characters",
+                      prefixIcon:
+                          const Icon(Icons
+                              .lock_outline),
+                      suffixIcon:
+                          IconButton(
                         icon: Icon(
                           _obscurePassword
-                              ? Icons.visibility_off
+                              ? Icons
+                                  .visibility_off
                               : Icons.visibility,
-                          size: 20,
                         ),
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
+                        onPressed: () =>
+                            setState(() =>
+                                _obscurePassword =
+                                    !_obscurePassword),
                       ),
-                      counterText: '',
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty)
-                        return "Please enter a password";
-                      if (value.length < 6)
-                        return "Password must be at least 6 characters";
-                      return null;
-                    },
+                    validator: (value) =>
+                        value == null ||
+                                value.length < 6
+                            ? "Minimum 6 characters"
+                            : null,
                   ),
+
                   const SizedBox(height: 48),
 
-                  // Register Button
                   SizedBox(
                     width: double.infinity,
                     height: 58,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _registerVolunteer,
+                      onPressed: _isLoading
+                          ? null
+                          : _registerVolunteer,
                       child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text("Create Account"),
+                          ? const CircularProgressIndicator(
+                              color:
+                                  Colors.white)
+                          : const Text(
+                              "Create Volunteer Account"),
                     ),
                   ),
+
                   const SizedBox(height: 32),
+
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment:
+                        MainAxisAlignment
+                            .center,
                     children: [
                       Text(
                         "Already registered? ",
                         style: TextStyle(
-                          color: AppColors.textLight.withOpacity(0.8),
-                          fontSize: 14,
-                        ),
+                            color: AppColors
+                                .textLight
+                                .withOpacity(
+                                    0.8)),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginPage(),
-                            ),
-                          );
-                        },
+                        onTap: () =>
+                            Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) =>
+                                  const LoginPage()),
+                        ),
                         child: const Text(
                           "Login",
                           style: TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              color:
+                                  AppColors.primary,
+                              fontWeight:
+                                  FontWeight.bold),
                         ),
                       ),
                     ],
                   ),
+
                   const SizedBox(height: 40),
                 ],
               ),
@@ -381,8 +423,12 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
 
   Widget _buildLabel(String label) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0, left: 4.0),
-      child: Text(label, style: Theme.of(context).textTheme.labelMedium),
+      padding:
+          const EdgeInsets.only(bottom: 10),
+      child: Text(label,
+          style: Theme.of(context)
+              .textTheme
+              .labelMedium),
     );
   }
 }

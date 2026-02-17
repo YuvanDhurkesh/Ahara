@@ -1,113 +1,143 @@
-const User = require("../models/User");
-
-
-// ======================================================
-// CREATE USER (SAFE + IDEMPOTENT)
-// ======================================================
-
 exports.createUser = async (req, res) => {
-
   try {
+    console.log("Incoming body:", req.body);
 
     const {
       firebaseUid,
-      name,
       email,
+      name,
       role,
       phone,
       location,
       businessName,
       businessType,
       fssaiNumber,
+      fssaiCertificateUrl,
       transportMode,
       dateOfBirth
     } = req.body;
 
-
-    //---------------------------------------------------
-    // 🔥 HARD VALIDATION
-    //---------------------------------------------------
-
-    if (!firebaseUid) {
+    // Validate required fields
+    if (!firebaseUid || !email || !role) {
       return res.status(400).json({
-        error: "firebaseUID is required"
+        error: "firebaseUid, email, and role are required",
+        received: { firebaseUid: !!firebaseUid, email: !!email, role: !!role }
       });
     }
 
-
-    //---------------------------------------------------
-    // ✅ CHECK IF USER ALREADY EXISTS
-    //---------------------------------------------------
-
-    const existingUser = await User.findOne({
-      firebaseUid: firebaseUid
-    });
-
+    const existingUser = await User.findOne({ firebaseUid });
     if (existingUser) {
-
-      // SAFE RESPONSE — do NOT throw error
-      return res.status(200).json({
-        message: "User already exists",
-        user: existingUser
-      });
+      return res.status(200).json(existingUser);
     }
 
+    // Parse location
+    let geoData = null;
+    let addressText = location;
 
-    //---------------------------------------------------
-    // ✅ CREATE NEW USER
-    //---------------------------------------------------
+    if (location && typeof location === "object") {
+      if (
+        location.coordinates &&
+        Array.isArray(location.coordinates) &&
+        location.coordinates.length === 2
+      ) {
+        geoData = {
+          type: "Point",
+          coordinates: location.coordinates
+        };
+        addressText = location.address || location.addressText || "";
+      }
+    }
 
-    const newUser = await User.create({
-
+    const userData = {
       firebaseUid,
-      name: name || "",
-      email: email || "",
-      role: role || "buyer",
-      phone: phone || "",
-      location: location || "",
-      businessName: businessName || null,
-      businessType: businessType || null,
-      fssaiNumber: fssaiNumber || null,
-      transportMode: transportMode || null,
-      dateOfBirth: dateOfBirth || null
+      email,
+      name,
+      role,
+      phone,
+      language: req.body.language || "en",
+      addressText: addressText || "Not specified",
+      emailVerified: false,
+      phoneVerified: false
+    };
 
-    });
+    if (geoData) {
+      userData.geo = geoData;
+    }
 
+    if (role === "seller" || role === "volunteer") {
+      userData.trustScore = 50;
+    }
 
-    //---------------------------------------------------
-    // SUCCESS
-    //---------------------------------------------------
+    const newUser = await User.create(userData);
+
+    let profile = null;
+
+    if (role === "seller") {
+      const normalizedBusinessType = businessType
+        ? businessType.toLowerCase().replace(/ /g, "_")
+        : "other";
+
+      const sellerData = {
+        userId: newUser._id,
+        orgName: businessName || name,
+        orgType: normalizedBusinessType,
+        fssai: {
+          number: fssaiNumber || "",
+          certificateUrl: fssaiCertificateUrl || "",
+          verified: false
+        }
+      };
+
+      if (geoData) {
+        sellerData.businessGeo = geoData;
+        sellerData.businessAddressText = addressText;
+      }
+
+      profile = await SellerProfile.create(sellerData);
+
+    } else if (role === "buyer") {
+      profile = await BuyerProfile.create({ userId: newUser._id });
+
+    } else if (role === "volunteer") {
+      const normalizedTransportMode = transportMode
+        ? transportMode.toLowerCase()
+        : "walk";
+
+      const volunteerData = {
+        userId: newUser._id,
+        transportMode: normalizedTransportMode
+      };
+
+      if (dateOfBirth) {
+        const dob = new Date(dateOfBirth);
+        const age = Math.floor(
+          (Date.now() - dob.getTime()) /
+          (365.25 * 24 * 60 * 60 * 1000)
+        );
+
+        if (age >= 18) {
+          volunteerData.ageVerification = {
+            ageVerified: true,
+            verifiedAt: new Date(),
+            method: "self_declaration"
+          };
+        }
+      }
+
+      profile = await VolunteerProfile.create(volunteerData);
+    }
 
     res.status(201).json({
-      message: "User created successfully",
-      user: newUser
+      user: newUser,
+      profile,
+      message: "User and profile created successfully"
     });
 
-  }
-
-  //-------------------------------------------------------
-  // 🔥 DUPLICATE KEY GUARD (VERY IMPORTANT)
-  //-------------------------------------------------------
-
-  catch (error) {
-
-    if (error.code === 11000) {
-
-      // Happens when unique index hits
-      const user = await User.findOne({
-        firebaseUid: req.body.firebaseUid
-      });
-
-      return res.status(200).json({
-        message: "User already exists",
-        user
-      });
-    }
-
+  } catch (error) {
     console.error("Create User Error:", error);
-
     res.status(500).json({
-      error: "Server error while creating user"
+      error: "Server error while creating user",
+      details: error.message
     });
   }
 };

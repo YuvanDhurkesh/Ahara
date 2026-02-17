@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_home_page.dart';
 import 'buyer_browse_page.dart';
@@ -91,7 +92,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
                     fontWeight: FontWeight.w500,
                     fontSize: 11,
                   ),
-                  items: const [
+                  items: [
                     BottomNavigationBarItem(
                       icon: Padding(
                         padding: EdgeInsets.only(bottom: 4),
@@ -101,7 +102,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.explore),
                       ),
-                      label: "Discover",
+                      label: AppLocalizations.of(context)!.translate("discover"),
                     ),
                     BottomNavigationBarItem(
                       icon: Padding(
@@ -112,7 +113,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.location_on),
                       ),
-                      label: "Browse",
+                      label: AppLocalizations.of(context)!.translate("browse"),
                     ),
                     BottomNavigationBarItem(
                       icon: Padding(
@@ -123,7 +124,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.shopping_bag),
                       ),
-                      label: "Orders",
+                      label: AppLocalizations.of(context)!.translate("orders"),
                     ),
                     BottomNavigationBarItem(
                       icon: Padding(
@@ -134,7 +135,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.favorite),
                       ),
-                      label: "Favourites",
+                      label: AppLocalizations.of(context)!.translate("favourites"),
                     ),
                     BottomNavigationBarItem(
                       icon: Padding(
@@ -145,7 +146,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
                         padding: EdgeInsets.only(bottom: 4),
                         child: Icon(Icons.person),
                       ),
-                      label: "Profile",
+                      label: AppLocalizations.of(context)!.translate("profile"),
                     ),
                   ],
                 ),

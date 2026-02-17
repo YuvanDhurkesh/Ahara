@@ -11,6 +11,9 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+.env
+
+#files
 
 # IntelliJ related
 *.iml
@@ -44,11 +47,14 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Flutter generated plugin files
-linux/flutter/generated_*
-windows/flutter/generated_*
+# Desktop (Windows/Linux/macOS)
+linux/flutter/generated_plugin_registrant.cc
+linux/flutter/generated_plugins.cmake
 macos/Flutter/GeneratedPluginRegistrant.swift
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugins.cmake
 
 # Flutter tool files
 .flutter-plugins
 .flutter-plugins-dependencies
+
