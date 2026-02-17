@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../data/mock_stores.dart';
 import 'buyer_checkout_page.dart';
 import 'buyer_address_page.dart';
 import 'buyer_payment_page.dart';
+import 'buyer_order_confirmation_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
-
 import '../../../data/services/backend_service.dart';
+import '../../../core/auth/auth_provider.dart';
 
 class BuyerFoodDetailPage extends StatelessWidget {
   final MockStore? store;
@@ -717,5 +719,266 @@ class BuyerFoodDetailPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildReserveButton(BuildContext context, bool isFree, String price, bool offersDelivery) {
+    // Only show button for real listings (not mock stores)
+    if (listing == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Total Price',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                Text(
+                  isFree ? 'FREE' : price,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isFree ? Colors.green : AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => _showOrderDialog(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isFree ? Colors.green : AppColors.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: Text(
+              isFree ? 'Claim Now' : 'Order Now',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOrderDialog(BuildContext context) {
+    int quantity = 1;
+    final maxQuantity = listing?['remainingQuantity'] ?? 1;
+    final pricing = listing?['pricing'] ?? {};
+    final isFree = pricing['isFree'] ?? false;
+    final pricePerItem = pricing['discountedPrice'] ?? 0;
+    bool isPlacing = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          final total = isFree ? 0 : (pricePerItem * quantity);
+
+          return AlertDialog(
+            title: Text(
+              'Place Order',
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Select quantity to order',
+                  style: GoogleFonts.inter(fontSize: 14),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: quantity > 1
+                          ? () => setState(() => quantity--)
+                          : null,
+                      icon: const Icon(Icons.remove_circle_outline),
+                      color: AppColors.primary,
+                      iconSize: 32,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.primary),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '$quantity',
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: quantity < maxQuantity
+                          ? () => setState(() => quantity++)
+                          : null,
+                      icon: const Icon(Icons.add_circle_outline),
+                      color: AppColors.primary,
+                      iconSize: 32,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Max: $maxQuantity',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Total:',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        isFree ? 'FREE' : '₹$total',
+                        style: GoogleFonts.inter(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isFree ? Colors.green : AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: isPlacing ? null : () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: isPlacing
+                    ? null
+                    : () async {
+                        setState(() => isPlacing = true);
+                        await _placeOrder(context, quantity);
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isFree ? Colors.green : AppColors.primary,
+                ),
+                child: isPlacing
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        isFree ? 'Claim' : 'Place Order',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _placeOrder(BuildContext context, int quantity) async {
+    try {
+      // Get buyer ID from auth provider
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final buyerId = authProvider.mongoUserId;
+
+      if (buyerId == null) {
+        throw Exception('User not logged in');
+      }
+
+      final orderData = {
+        "listingId": listing!['_id'],
+        "buyerId": buyerId,
+        "quantityOrdered": quantity,
+        "fulfillment": "self_pickup",
+        "pickup": {
+          "addressText": listing!['pickupAddressText'] ?? 'Pickup location',
+          "scheduledAt": listing!['pickupWindow']?['to'],
+        },
+        "pricing": {
+          "itemTotal": (listing!['pricing']?['discountedPrice'] ?? 0) * quantity,
+          "deliveryFee": 0,
+          "platformFee": 0,
+          "total": (listing!['pricing']?['discountedPrice'] ?? 0) * quantity,
+        },
+      };
+
+      final response = await BackendService.createOrder(orderData);
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close dialog
+        
+        // Navigate to confirmation page
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BuyerOrderConfirmationPage(order: response),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // Close dialog
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to place order: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
