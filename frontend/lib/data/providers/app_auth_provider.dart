@@ -177,13 +177,6 @@ class AppAuthProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
-
-    return user;
-
-  } catch (e) {
-    rethrow;
-  } finally {
-    _setLoading(false);
   }
 
   //---------------------------------------------------------
