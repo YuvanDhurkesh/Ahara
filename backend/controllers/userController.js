@@ -63,6 +63,7 @@ exports.createUser = async (req, res) => {
       role,
       phone,
       language: req.body.language || "en",
+      uiMode: req.body.uiMode || "standard",
       addressText: addressText || "Not specified",
       emailVerified: false,
       phoneVerified: false
@@ -187,6 +188,31 @@ exports.getUserByFirebaseUid = async (req, res) => {
     }
 
     res.status(200).json({ user, profile });
+  } catch (error) {
+    res.status(500).json({ error: "Server error", details: error.message });
+  }
+};
+
+exports.updatePreferences = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { language, uiMode } = req.body;
+
+    const updates = {};
+    if (language) updates.language = language;
+    if (uiMode) updates.uiMode = uiMode;
+
+    const user = await User.findOneAndUpdate(
+      { firebaseUid: uid },
+      { $set: updates },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({ user, message: "Preferences updated successfully" });
   } catch (error) {
     res.status(500).json({ error: "Server error", details: error.message });
   }

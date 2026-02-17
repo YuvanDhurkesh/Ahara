@@ -137,7 +137,7 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
                     value: _selectedTransport,
                     hint: Text(
                       "Select transport mode",
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         color: AppColors.textLight.withOpacity(0.4),
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -148,7 +148,7 @@ class _VolunteerRegisterPageState extends State<VolunteerRegisterPage> {
                         value: mode,
                         child: Text(
                           mode,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             color: AppColors.textDark,
                             fontSize: 14,
                           ),

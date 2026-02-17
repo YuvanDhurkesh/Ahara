@@ -5,6 +5,8 @@ import '../../auth/pages/login_page.dart';
 import 'buyer_account_details_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
 import 'buyer_notifications_page.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class BuyerProfilePage extends StatelessWidget {
   const BuyerProfilePage({super.key});
@@ -353,14 +355,17 @@ class BuyerProfilePage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginPage(),
-                            ),
-                            (route) => false,
-                          );
+                        onPressed: () async {
+                          await Provider.of<AppAuthProvider>(context, listen: false).logout();
+                          if (context.mounted) {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginPage(),
+                              ),
+                              (route) => false,
+                            );
+                          }
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.red,

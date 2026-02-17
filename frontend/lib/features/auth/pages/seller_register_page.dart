@@ -103,7 +103,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                     value: _selectedType,
                     hint: Text(
                       "Select business type",
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.inter(
                         color: AppColors.textLight.withOpacity(0.4),
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
@@ -114,7 +114,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                         value: type,
                         child: Text(
                           type,
-                          style: GoogleFonts.plusJakartaSans(
+                          style: GoogleFonts.inter(
                             color: AppColors.textDark,
                             fontSize: 14,
                           ),

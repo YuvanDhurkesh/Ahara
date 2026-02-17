@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../common/pages/landing_page.dart';
+import '../../../core/localization/language_provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/backend_service.dart';
 import 'seller_business_details_page.dart';
 import 'seller_verification_page.dart';
 import 'seller_notifications_page.dart';
-import '../../common/pages/landing_page.dart';
 
 class SellerProfilePage extends StatelessWidget {
   const SellerProfilePage({super.key});
@@ -26,7 +30,7 @@ class SellerProfilePage extends StatelessWidget {
                   children: [
                     Text(
                       "Hello, Green Kitchen",
-                      style: GoogleFonts.lora(
+                      style: GoogleFonts.inter(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textDark,
@@ -256,6 +260,46 @@ class SellerProfilePage extends StatelessWidget {
                       Icons.notifications_outlined,
                       "Notifications",
                     ),
+                    
+                    const SizedBox(height: 16),
+                    _buildSectionHeader("ACCESSIBILITY"),
+                    Consumer<LanguageProvider>(
+                      builder: (context, langProvider, child) {
+                        return SwitchListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                          title: Text(
+                            "Easy Mode (Simplified)",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text(
+                            "Large icons and simple flow",
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                          ),
+                          value: langProvider.isSimplified,
+                          activeColor: AppColors.primary,
+                          onChanged: (val) async {
+                            final mode = val ? 'simplified' : 'standard';
+                            await langProvider.setUiMode(mode);
+                            
+                            // Persist to backend
+                            final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                            if (auth.currentUser != null) {
+                              try {
+                                await BackendService.updateUserPreferences(
+                                  firebaseUid: auth.currentUser!.uid,
+                                  uiMode: mode,
+                                );
+                              } catch (e) {
+                                debugPrint("Failed to sync UI mode: $e");
+                              }
+                            }
+                          },
+                        );
+                      },
+                    ),
 
                     const SizedBox(height: 24),
                     _buildSectionHeader("TRUST & VERIFICATION"),
@@ -278,14 +322,17 @@ class SellerProfilePage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LandingPage(),
-                            ),
-                            (route) => false,
-                          );
+                        onPressed: () async {
+                          await Provider.of<AppAuthProvider>(context, listen: false).logout();
+                          if (context.mounted) {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LandingPage(),
+                              ),
+                              (route) => false,
+                            );
+                          }
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.red,

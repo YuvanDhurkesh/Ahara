@@ -38,6 +38,8 @@ dependencies:
   http: ^1.2.0
   image_picker: ^1.0.7
   shared_preferences: ^2.5.4
+  speech_to_text: ^6.6.2
+  flutter_tts: ^4.2.2
 
 
 dev_dependencies:

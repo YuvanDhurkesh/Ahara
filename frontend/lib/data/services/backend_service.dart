@@ -176,4 +176,28 @@ class BackendService {
     final root = baseUrl.replaceAll('/api', '');
     return "$root$path";
   }
+
+  static Future<void> updateUserPreferences({
+    required String firebaseUid,
+    String? language,
+    String? uiMode,
+  }) async {
+    final url = Uri.parse("$baseUrl/users/preferences/$firebaseUid");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({
+        if (language != null) "language": language,
+        if (uiMode != null) "uiMode": uiMode,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to update user preferences");
+    }
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import 'volunteer_order_detail_page.dart';
 
 class VolunteerOrdersPage extends StatefulWidget {
@@ -27,14 +28,16 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'My Deliveries',
-          style: TextStyle(
+        title: Text(
+          localizations.translate('my_deliveries'),
+          style: const TextStyle(
             color: AppColors.textDark,
             fontWeight: FontWeight.w600,
           ),
@@ -50,10 +53,19 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
               unselectedLabelColor: AppColors.textLight,
               indicatorColor: AppColors.primary,
               indicatorWeight: 3,
-              tabs: const [
-                _TabLabel(title: 'New Requests', count: 1),
-                _TabLabel(title: 'Active', count: 1),
-                _TabLabel(title: 'Completed', count: 1),
+              tabs: [
+                _TabLabel(
+                  title: localizations.translate('new_requests'), 
+                  count: 1
+                ),
+                _TabLabel(
+                  title: localizations.translate('active'), 
+                  count: 1
+                ),
+                _TabLabel(
+                  title: localizations.translate('completed'), 
+                  count: 1
+                ),
               ],
             ),
           ),
@@ -64,7 +76,11 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
           constraints: const BoxConstraints(maxWidth: 900),
           child: TabBarView(
             controller: _tabController,
-            children: [_newRequestsTab(), _activeTab(), _completedTab()],
+            children: [
+              _newRequestsTab(localizations), 
+              _activeTab(localizations), 
+              _completedTab(localizations)
+            ],
           ),
         ),
       ),
@@ -73,39 +89,45 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
 
   // ---------------- TABS ----------------
 
-  Widget _newRequestsTab() {
+  Widget _newRequestsTab(AppLocalizations localizations) {
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: const [
+      children: [
         _DeliveryCard(
           title: 'Main Street Bakery → Sarah Johnson',
           pickup: '123 Bakers St',
           drop: '456 Oak Ave',
-          actionLabel: 'Accept Delivery (2.3 km)',
+          actionLabel: '${localizations.translate('accept_delivery')} (2.3 km)',
           showAccept: true,
+          localizations: localizations,
         ),
       ],
     );
   }
 
-  Widget _activeTab() {
+  Widget _activeTab(AppLocalizations localizations) {
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: const [
+      children: [
         _DeliveryCard(
           title: 'Sunshine Delights',
-          status: 'In Progress',
-          actionLabel: 'View Details',
+          status: localizations.translate('active'),
+          actionLabel: localizations.translate('view_details'),
+          localizations: localizations,
         ),
       ],
     );
   }
 
-  Widget _completedTab() {
+  Widget _completedTab(AppLocalizations localizations) {
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: const [
-        _DeliveryCard(title: 'Downtown Cafe → Emma Davis', status: 'Completed'),
+      children: [
+        _DeliveryCard(
+          title: 'Downtown Cafe → Emma Davis', 
+          status: localizations.translate('completed'),
+          localizations: localizations,
+        ),
       ],
     );
   }
@@ -147,9 +169,11 @@ class _DeliveryCard extends StatelessWidget {
   final String? status;
   final String? actionLabel;
   final bool showAccept;
+  final AppLocalizations localizations;
 
   const _DeliveryCard({
     required this.title,
+    required this.localizations,
     this.pickup,
     this.drop,
     this.status,
@@ -182,8 +206,8 @@ class _DeliveryCard extends StatelessWidget {
 
           if (pickup != null && drop != null) ...[
             const SizedBox(height: 12),
-            Text('Pickup: $pickup'),
-            Text('Delivery: $drop'),
+            Text('${localizations.translate('pickup')}: $pickup'),
+            Text('${localizations.translate('delivery_label')}: $drop'),
           ],
 
           if (actionLabel != null) ...[
@@ -201,7 +225,7 @@ class _DeliveryCard extends StatelessWidget {
                           ),
                         );
                       },
-                      child: const Text('View Details'),
+                      child: Text(localizations.translate('view_details')),
                     ),
                   ),
                 if (showAccept)

@@ -6,12 +6,9 @@ import '../../volunteer/pages/volunteer_dashboard_page.dart';
 import 'register_selection_page.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../core/localization/language_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'register_selection_page.dart';
-import 'package:provider/provider.dart';
-import '../../../data/providers/app_auth_provider.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -25,6 +22,14 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LanguageProvider>(context, listen: false).confirmCurrentLanguage();
+    });
+  }
 
   bool _obscurePassword = true;
   bool _isLoading = false; // ⭐ prevents button spam

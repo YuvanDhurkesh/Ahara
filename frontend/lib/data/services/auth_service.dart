@@ -43,6 +43,7 @@ class AuthService {
     String? transportMode,
     String? dateOfBirth,
     String? language,
+    String? uiMode,
   }) async {
 
     //-----------------------------------------------------
@@ -73,6 +74,7 @@ class AuthService {
       "location": location,
       "role": role,
       "language": language ?? "en",
+      "uiMode": uiMode ?? "standard",
       "createdAt": Timestamp.now(),
 
     });
@@ -93,6 +95,7 @@ class AuthService {
       transportMode: transportMode,
       dateOfBirth: dateOfBirth,
       language: language,
+      uiMode: uiMode,
     );
 
     return user;
@@ -126,6 +129,7 @@ class AuthService {
     String? transportMode,
     String? dateOfBirth,
     String? language,
+    String? uiMode,
   }) async {
 
     try {
@@ -146,6 +150,7 @@ class AuthService {
           "phone": phone,
           "location": location,
           if (language != null) "language": language,
+          if (uiMode != null) "uiMode": uiMode,
           if (businessName != null) "businessName": businessName,
           if (businessType != null) "businessType": businessType,
           if (fssaiNumber != null) "fssaiNumber": fssaiNumber,

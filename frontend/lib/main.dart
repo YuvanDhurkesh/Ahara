@@ -16,6 +16,9 @@ import 'data/providers/app_auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'core/services/voice_service.dart';
+import 'data/services/backend_service.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -27,6 +30,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AppAuthProvider()),
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider(create: (_) => VoiceService()),
       ],
       child: const MyApp(),
     ),
@@ -108,16 +112,43 @@ class AuthWrapper extends StatelessWidget {
               );
             }
 
+            if (dataSnap.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Text("Error loading user data: ${dataSnap.error}"),
+                ),
+              );
+            }
+
             final userData = dataSnap.data;
             final role = userData?['role'];
             final language = userData?['language'];
+            final uiMode = userData?['uiMode'];
 
-            // Sync Language if needed
-            if (language != null) {
+            if (language != null || uiMode != null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 final lp = Provider.of<LanguageProvider>(context, listen: false);
-                if (lp.locale.languageCode != language) {
-                  lp.setLanguage(language);
+                final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                
+                // Only sync from cloud IF the user hasn't explicitly changed it locally
+                if (!lp.isManualSelection) {
+                  if (language != null && lp.locale.languageCode != language) {
+                    lp.setLanguage(language, isManual: false);
+                  }
+                  if (uiMode != null && lp.uiMode != uiMode) {
+                    lp.setUiMode(uiMode, isManual: false);
+                  }
+                } else {
+                  // If local is manual but different from cloud, push local TO cloud
+                  if ((language != null && lp.locale.languageCode != language) ||
+                      (uiMode != null && lp.uiMode != uiMode)) {
+                    debugPrint("Syncing local manual preference to cloud: ${lp.locale.languageCode}");
+                    BackendService.updateUserPreferences(
+                      firebaseUid: auth.currentUser!.uid,
+                      language: lp.locale.languageCode,
+                      uiMode: lp.uiMode,
+                    ).catchError((e) => debugPrint("Failed to sync to cloud: $e"));
+                  }
                 }
               });
             }

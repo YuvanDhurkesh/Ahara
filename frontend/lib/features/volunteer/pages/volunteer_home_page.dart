@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
-import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../core/services/voice_service.dart';
+import '../../../core/localization/language_provider.dart';
+import '../../common/pages/landing_page.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import 'volunteer_profile_page.dart';
+import 'volunteer_ratings_page.dart';
+import 'volunteer_orders_page.dart';
 
 class VolunteerHomePage extends StatefulWidget {
   const VolunteerHomePage({super.key});
@@ -39,6 +46,9 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
                         ),
                       ),
 
+                      // Voice Mode Toggle
+                      _voiceModeToggle(),
+                      
                       // Availability Toggle
                       _availabilityToggle(),
                     ],
@@ -70,6 +80,90 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
 
   // ---------------- Widgets ----------------
 
+  Widget _voiceModeToggle() {
+    final voiceService = Provider.of<VoiceService>(context);
+    return IconButton(
+      icon: Icon(
+        voiceService.isListening ? Icons.mic : Icons.mic_none,
+        color: voiceService.isListening ? Colors.red : AppColors.primary,
+        size: 28,
+      ),
+      onPressed: () => _toggleVoiceMode(),
+      tooltip: "Voice Assistance",
+    );
+  }
+
+  void _toggleVoiceMode() async {
+    final voiceService = Provider.of<VoiceService>(context, listen: false);
+    final langProvider = Provider.of<LanguageProvider>(context, listen: false);
+
+    if (voiceService.isListening) {
+      await voiceService.stopListening();
+    } else {
+      await voiceService.speak(
+        AppLocalizations.of(context)!.translate("voice_mode_on") ?? "Voice mode activated. How can I help?",
+        languageCode: langProvider.locale.languageCode,
+      );
+      
+      voiceService.startListening((words) {
+        _handleVoiceCommand(words);
+      });
+    }
+  }
+
+  void _handleVoiceCommand(String words) {
+    debugPrint("Recognized words: $words");
+    final lowerWords = words.toLowerCase();
+    final voiceService = Provider.of<VoiceService>(context, listen: false);
+    
+    if (lowerWords.contains("help")) {
+      voiceService.speak("You can say: Logout, Profile, Ratings, Deliveries, Orders, Available, Unavailable, or Refresh.");
+    } else if (lowerWords.contains("logout")) {
+      voiceService.speak("Logging out...");
+      _performLogout();
+    } else if (lowerWords.contains("profile")) {
+      voiceService.speak("Opening profile");
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const VolunteerProfilePage()),
+      );
+    } else if (lowerWords.contains("rating")) {
+      voiceService.speak("Opening ratings");
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const VolunteerRatingsPage()),
+      );
+    } else if (lowerWords.contains("deliver") || lowerWords.contains("order")) {
+      voiceService.speak("Opening deliveries");
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const VolunteerOrdersPage()),
+      );
+    } else if (lowerWords.contains("available")) {
+      if (lowerWords.contains("un")) {
+        setState(() => isAvailable = false);
+        voiceService.speak("You are now unavailable");
+      } else {
+        setState(() => isAvailable = true);
+        voiceService.speak("You are now available");
+      }
+    } else if (lowerWords.contains("refresh")) {
+      voiceService.speak("Refreshing dashboard.");
+      setState(() {});
+    }
+  }
+
+  Future<void> _performLogout() async {
+    await Provider.of<AppAuthProvider>(context, listen: false).logout();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LandingPage()),
+        (route) => false,
+      );
+    }
+  }
+
   Widget _availabilityToggle() {
     return Row(
       children: [
@@ -100,13 +194,13 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
-        children: const [
-          Icon(Icons.pause_circle_outline, color: Colors.grey),
-          SizedBox(width: 12),
+        children: [
+          const Icon(Icons.pause_circle_outline, color: Colors.grey),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'You are currently inactive.\nTurn on availability to receive deliveries and view performance.',
-              style: TextStyle(color: Colors.grey),
+              AppLocalizations.of(context)!.translate('inactive_msg'),
+              style: const TextStyle(color: Colors.grey),
             ),
           ),
         ],
@@ -147,11 +241,11 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
         Wrap(
           spacing: 12,
           runSpacing: 12,
-          children: const [
-            _BadgeChip(icon: Icons.verified, label: 'Verified Volunteer'),
-            _BadgeChip(icon: Icons.star, label: 'Top Volunteer'),
-            _BadgeChip(icon: Icons.local_shipping, label: '50 Deliveries'),
-            _BadgeChip(icon: Icons.flash_on, label: 'Perfect Streak'),
+          children: [
+            _BadgeChip(icon: Icons.verified, label: AppLocalizations.of(context)!.translate('verified_volunteer')),
+            _BadgeChip(icon: Icons.star, label: AppLocalizations.of(context)!.translate('top_volunteer')),
+            _BadgeChip(icon: Icons.local_shipping, label: AppLocalizations.of(context)!.translate('fifty_deliveries')),
+            _BadgeChip(icon: Icons.flash_on, label: AppLocalizations.of(context)!.translate('perfect_streak')),
           ],
         ),
       ],
@@ -167,13 +261,13 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
         border: Border.all(color: const Color(0xFFFFD066)),
       ),
       child: Row(
-        children: const [
-          Icon(Icons.notifications_active, color: Colors.orange),
-          SizedBox(width: 12),
+        children: [
+          const Icon(Icons.notifications_active, color: Colors.orange),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'You have 2 new delivery requests waiting!',
-              style: TextStyle(fontWeight: FontWeight.w500),
+              AppLocalizations.of(context)!.translate('new_requests_banner'),
+              style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
         ],
