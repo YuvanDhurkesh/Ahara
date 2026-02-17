@@ -267,7 +267,10 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const BuyerBrowsePage(favouriteIds: []),
+                            builder: (_) => BuyerBrowsePage(
+                              favouriteIds: const {},
+                              onToggleFavourite: (_) {}, // Empty callback
+                            ),
                           ),
                           (route) => false,
                         );

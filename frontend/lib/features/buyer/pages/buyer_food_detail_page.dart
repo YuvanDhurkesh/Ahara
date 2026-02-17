@@ -900,7 +900,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     try {
       // Get buyer ID from auth provider
       final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
-      final buyerId = authProvider.mongoUserId;
+      final buyerId = authProvider.mongoUser?['_id'];
 
       if (buyerId == null) {
         throw Exception('User not logged in');
