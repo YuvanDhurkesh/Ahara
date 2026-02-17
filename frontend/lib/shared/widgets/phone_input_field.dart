@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../styles/app_colors.dart';
 
@@ -9,6 +10,7 @@ class PhoneInputField extends StatefulWidget {
   final String hintText;
   final String? initialCountryCode;
   final ValueChanged<String>? onCountryCodeChanged;
+  final int maxLength;
 
   const PhoneInputField({
     super.key,
@@ -18,6 +20,7 @@ class PhoneInputField extends StatefulWidget {
     this.hintText = "Enter phone number",
     this.initialCountryCode = "+91",
     this.onCountryCodeChanged,
+    this.maxLength = 10,
   });
 
   @override
@@ -60,8 +63,14 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
         TextFormField(
           controller: widget.controller,
           keyboardType: TextInputType.phone,
+          maxLength: widget.maxLength,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(widget.maxLength),
+          ],
           decoration: InputDecoration(
             hintText: widget.hintText,
+            counterText: '',
             prefixIcon: Container(
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 12),

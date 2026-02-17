@@ -7,6 +7,7 @@ import '../../../data/providers/app_auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:flutter/services.dart';
 import '../../../core/localization/language_provider.dart';
 
 class BuyerRegisterPage extends StatefulWidget {
@@ -202,6 +203,7 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                     _nameController,
                     "E.g. Jane Doe",
                     Icons.person_outline,
+                    maxLength: 50,
                   ),
 
                   const SizedBox(height: 28),
@@ -210,9 +212,13 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                     controller: _phoneController,
                     label: "PHONE NUMBER",
                     hintText: "12345 67890",
+                    maxLength: 10,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Please enter your number";
+                      }
+                      if (value.length != 10) {
+                        return "Phone number must be 10 digits";
                       }
                       return null;
                     },
@@ -225,6 +231,8 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                     _emailController,
                     "name@example.com",
                     Icons.email_outlined,
+                    maxLength: 100,
+                    keyboardType: TextInputType.emailAddress,
                   ),
 
                   const SizedBox(height: 28),
@@ -237,6 +245,7 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
+                    maxLength: 50,
                     decoration: InputDecoration(
                       hintText: "At least 6 characters",
                       prefixIcon: const Icon(Icons.lock_outline),
@@ -250,6 +259,7 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                           () => _obscurePassword = !_obscurePassword,
                         ),
                       ),
+                      counterText: '',
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -362,11 +372,21 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
   Widget _buildTextField(
     TextEditingController controller,
     String hint,
-    IconData icon,
-  ) {
+    IconData icon, {
+    int maxLength = 100,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
     return TextFormField(
       controller: controller,
-      decoration: InputDecoration(hintText: hint, prefixIcon: Icon(icon)),
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      maxLength: maxLength,
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon),
+        counterText: '',
+      ),
       validator: (value) =>
           value == null || value.isEmpty ? "This field is required" : null,
     );

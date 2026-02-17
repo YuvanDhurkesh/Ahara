@@ -78,7 +78,9 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
 // Geo index for proximity search
 userSchema.index({ geo: "2dsphere" });
+
 
 module.exports = mongoose.model("User", userSchema);

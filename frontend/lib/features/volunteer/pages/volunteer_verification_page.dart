@@ -1,8 +1,96 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../shared/styles/app_colors.dart';
 
-class VolunteerVerificationPage extends StatelessWidget {
+class VolunteerVerificationPage extends StatefulWidget {
   const VolunteerVerificationPage({super.key});
+
+  @override
+  State<VolunteerVerificationPage> createState() =>
+      _VolunteerVerificationPageState();
+}
+
+class _VolunteerVerificationPageState extends State<VolunteerVerificationPage> {
+  File? _frontImage;
+  File? _backImage;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickIdImage(bool isFront) async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text("Take a photo"),
+              onTap: () async {
+                Navigator.pop(context);
+                final XFile? image = await _picker.pickImage(
+                  source: ImageSource.camera,
+                  imageQuality: 70,
+                );
+                if (image != null) {
+                  setState(() {
+                    if (isFront) {
+                      _frontImage = File(image.path);
+                    } else {
+                      _backImage = File(image.path);
+                    }
+                  });
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text("Choose from gallery"),
+              onTap: () async {
+                Navigator.pop(context);
+                final XFile? image = await _picker.pickImage(
+                  source: ImageSource.gallery,
+                  imageQuality: 70,
+                );
+                if (image != null) {
+                  setState(() {
+                    if (isFront) {
+                      _frontImage = File(image.path);
+                    } else {
+                      _backImage = File(image.path);
+                    }
+                  });
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.insert_drive_file_outlined),
+              title: const Text("Choose file"),
+              onTap: () async {
+                Navigator.pop(context);
+                final XFile? image = await _picker.pickImage(
+                  source: ImageSource.gallery,
+                  imageQuality: 70,
+                );
+                if (image != null) {
+                  setState(() {
+                    if (isFront) {
+                      _frontImage = File(image.path);
+                    } else {
+                      _backImage = File(image.path);
+                    }
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +141,19 @@ class VolunteerVerificationPage extends StatelessWidget {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: (_frontImage != null && _backImage != null)
+                        ? () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Documents submitted successfully!",
+                                ),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                            Navigator.pop(context);
+                          }
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
@@ -108,6 +208,8 @@ class VolunteerVerificationPage extends StatelessWidget {
                 child: _buildUploadBox(
                   "Front",
                   Icons.add_photo_alternate_outlined,
+                  _frontImage,
+                  true,
                 ),
               ),
               const SizedBox(width: 12),
@@ -115,6 +217,8 @@ class VolunteerVerificationPage extends StatelessWidget {
                 child: _buildUploadBox(
                   "Back",
                   Icons.add_photo_alternate_outlined,
+                  _backImage,
+                  false,
                 ),
               ),
             ],
@@ -124,27 +228,86 @@ class VolunteerVerificationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildUploadBox(String label, IconData icon) {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: AppColors.background.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.textLight.withOpacity(0.1)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: AppColors.primary.withOpacity(0.5), size: 32),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              color: AppColors.textLight.withOpacity(0.6),
-            ),
+  Widget _buildUploadBox(
+    String label,
+    IconData icon,
+    File? image,
+    bool isFront,
+  ) {
+    return GestureDetector(
+      onTap: () => _pickIdImage(isFront),
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: image != null
+              ? Colors.transparent
+              : AppColors.background.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: image != null
+                ? AppColors.primary.withOpacity(0.3)
+                : AppColors.textLight.withOpacity(0.1),
           ),
-        ],
+        ),
+        child: image != null
+            ? Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      image,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (isFront) {
+                            _frontImage = null;
+                          } else {
+                            _backImage = null;
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    color: AppColors.primary.withOpacity(0.5),
+                    size: 32,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textLight.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }

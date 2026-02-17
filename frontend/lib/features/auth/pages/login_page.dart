@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,21 +17,21 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<LanguageProvider>(context, listen: false).confirmCurrentLanguage();
+      Provider.of<LanguageProvider>(context, listen: false)
+          .confirmCurrentLanguage();
     });
   }
-
-  bool _obscurePassword = true;
-  bool _isLoading = false; // ⭐ prevents button spam
 
   @override
   void dispose() {
@@ -42,9 +41,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   //-------------------------------------------------------------
+  /// LOGIN
+  //-------------------------------------------------------------
 
   Future<void> _login() async {
-
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
@@ -52,7 +52,6 @@ class _LoginPageState extends State<LoginPage> {
     final auth = context.read<AppAuthProvider>();
 
     try {
-
       final user = await auth.login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
@@ -61,47 +60,81 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       if (user != null) {
-        // Fetch user role from Firestore
-        final doc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        
-        final role = doc.data()?['role'] as String? ?? 'buyer';
-        
-        Widget dashboard;
-        switch (role) {
+        final role = await auth.getUserRole(user.uid);
+
+        if (!mounted) return;
+
+        Widget destination;
+
+        switch (role?.toLowerCase()) {
           case 'seller':
-            dashboard = const SellerDashboardPage();
+            destination = const SellerDashboardPage();
             break;
           case 'volunteer':
-            dashboard = const VolunteerDashboardPage();
+            destination = const VolunteerDashboardPage();
             break;
+          case 'buyer':
           default:
-            dashboard = const BuyerDashboardPage();
+            destination = const BuyerDashboardPage();
+            break;
         }
-        
+
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => dashboard),
+          MaterialPageRoute(builder: (_) => destination),
           (route) => false,
         );
       }
-
     } on fb.FirebaseAuthException catch (e) {
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message ?? "Login failed"),
-        ),
+        SnackBar(content: Text(e.message ?? "Login failed")),
       );
-
     } finally {
-
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
 
+  //-------------------------------------------------------------
+  /// GOOGLE SIGN IN
+  //-------------------------------------------------------------
+
+  Future<void> _handleGoogleSignIn() async {
+    final auth = context.read<AppAuthProvider>();
+
+    try {
+      final user = await auth.signInWithGoogle();
+
+      if (user != null && mounted) {
+        final role = await auth.getUserRole(user.uid);
+
+        if (!mounted) return;
+
+        Widget destination;
+
+        switch (role?.toLowerCase()) {
+          case 'seller':
+            destination = const SellerDashboardPage();
+            break;
+          case 'volunteer':
+            destination = const VolunteerDashboardPage();
+            break;
+          case 'buyer':
+          default:
+            destination = const BuyerDashboardPage();
+            break;
+        }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => destination),
+        );
+      }
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Google Sign-In Failed")),
+      );
     }
   }
 
@@ -109,26 +142,20 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Form(
           key: _formKey,
-
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               Text(
                 "Welcome Back",
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-
               const SizedBox(height: 12),
-
               Text(
                 "Login to continue your journey with Ahara and help the community.",
                 style: TextStyle(
@@ -137,12 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: 1.5,
                 ),
               ),
-
               const SizedBox(height: 48),
-
-              //-------------------------------------------------------------
-              // EMAIL
-              //-------------------------------------------------------------
 
               _buildLabel("EMAIL ADDRESS"),
 
@@ -166,10 +188,6 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 28),
 
-              //-------------------------------------------------------------
-              // PASSWORD
-              //-------------------------------------------------------------
-
               _buildLabel("PASSWORD"),
 
               TextFormField(
@@ -183,7 +201,6 @@ class _LoginPageState extends State<LoginPage> {
                       _obscurePassword
                           ? Icons.visibility_off
                           : Icons.visibility,
-                      size: 20,
                     ),
                     onPressed: () {
                       setState(() {
@@ -200,123 +217,54 @@ class _LoginPageState extends State<LoginPage> {
                 },
               ),
 
-              const SizedBox(height: 8),
-
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text("Forgot Password?"),
-                ),
-              ),
-
               const SizedBox(height: 32),
-
-              //-------------------------------------------------------------
-              // LOGIN BUTTON
-              //-------------------------------------------------------------
 
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-
                   onPressed: _isLoading ? null : _login,
-
                   child: _isLoading
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : const Text("Login"),
                 ),
               ),
 
               const SizedBox(height: 32),
 
+              Row(
+                children: const [
+                  Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Text("OR"),
+                  ),
+                  Expanded(child: Divider()),
+                ],
+              ),
+
               const SizedBox(height: 20),
 
-Row(
-  children: [
-    Expanded(child: Divider()),
-    Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Text("OR"),
-    ),
-    Expanded(child: Divider()),
-  ],
-),
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: OutlinedButton.icon(
+                  icon: Image.network(
+                    "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
+                    height: 24,
+                  ),
+                  label: const Text(
+                    "Sign in with Google",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  onPressed: _handleGoogleSignIn,
+                ),
+              ),
 
-const SizedBox(height: 20),
-
-SizedBox(
-  width: double.infinity,
-  height: 55,
-  child: OutlinedButton.icon(
-    icon: Image.network(
-      "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
-      height: 24,
-    ),
-    label: const Text(
-      "Sign in with Google",
-      style: TextStyle(fontSize: 16),
-    ),
-    onPressed: () async {
-
-      final auth = context.read<AppAuthProvider>();
-
-      try {
-
-        final user = await auth.signInWithGoogle();
-
-        if (user != null && context.mounted) {
-          // Fetch user role from Firestore
-          final doc = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .get();
-          
-          final role = doc.data()?['role'] as String? ?? 'buyer';
-          
-          Widget dashboard;
-          switch (role) {
-            case 'seller':
-              dashboard = const SellerDashboardPage();
-              break;
-            case 'volunteer':
-              dashboard = const VolunteerDashboardPage();
-              break;
-            default:
-              dashboard = const BuyerDashboardPage();
-          }
-          
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => dashboard),
-          );
-        }
-
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Google Sign-In Failed")),
-        );
-      }
-    },
-  ),
-),
-
-
-              //-------------------------------------------------------------
-              // REGISTER
-              //-------------------------------------------------------------
+              const SizedBox(height: 32),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
                   Text(
                     "Don't have an account? ",
                     style: TextStyle(
@@ -324,7 +272,6 @@ SizedBox(
                       fontSize: 14,
                     ),
                   ),
-
                   GestureDetector(
                     onTap: () {
                       Navigator.pushReplacement(
@@ -334,13 +281,11 @@ SizedBox(
                         ),
                       );
                     },
-
                     child: const Text(
                       "Register",
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
                       ),
                     ),
                   ),
@@ -355,16 +300,11 @@ SizedBox(
     );
   }
 
-  //-------------------------------------------------------------
-
   Widget _buildLabel(String label) {
-
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0, left: 4.0),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelMedium,
-      ),
+      padding: const EdgeInsets.only(bottom: 10, left: 4),
+      child: Text(label,
+          style: Theme.of(context).textTheme.labelMedium),
     );
   }
 }

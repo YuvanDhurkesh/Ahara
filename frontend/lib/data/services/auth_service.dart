@@ -5,19 +5,16 @@ import 'package:http/http.dart' as http;
 import '../../config/api_config.dart';
 
 class AuthService {
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   static String get backendBaseUrl => ApiConfig.baseUrl;
-  
 
   //---------------------------------------------------------
   /// LOGIN (NO MONGO CALL)
   //---------------------------------------------------------
 
   Future<User?> login(String email, String password) async {
-
     final cred = await _auth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -45,7 +42,6 @@ class AuthService {
     String? language,
     String? uiMode,
   }) async {
-
     //-----------------------------------------------------
     /// CREATE FIREBASE USER
     //-----------------------------------------------------
@@ -56,17 +52,13 @@ class AuthService {
     );
 
     final user = cred.user!;
-
     await user.updateDisplayName(name);
 
     //-----------------------------------------------------
-    /// FIRESTORE (optional but fine)
+    /// FIRESTORE SAVE
     //-----------------------------------------------------
 
-    await _db.collection('users')
-        .doc(user.uid)
-        .set({
-
+    await _db.collection('users').doc(user.uid).set({
       "uid": user.uid,
       "name": name,
       "phone": phone,
@@ -76,11 +68,10 @@ class AuthService {
       "language": language ?? "en",
       "uiMode": uiMode ?? "standard",
       "createdAt": Timestamp.now(),
-
     });
 
     //-----------------------------------------------------
-    /// 🔥 MONGO SYNC
+    /// MONGO SYNC
     //-----------------------------------------------------
 
     await syncUserWithBackend(
@@ -106,10 +97,7 @@ class AuthService {
   //---------------------------------------------------------
 
   Future<User?> handleGoogleLogin(User user) async {
-
-    /// DO NOT CREATE MONGO USER HERE
-    /// Instead redirect user to profile completion screen.
-
+    // DO NOT create Mongo user here
     return user;
   }
 
@@ -131,9 +119,7 @@ class AuthService {
     String? language,
     String? uiMode,
   }) async {
-
     try {
-
       final token = await user.getIdToken();
 
       final response = await http.post(
@@ -162,10 +148,8 @@ class AuthService {
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception("Backend sync failed: ${response.body}");
       }
-
     } catch (e) {
-
-      /// NEVER crash signup
+      // NEVER crash signup
       print("⚠️ Mongo sync failed: $e");
     }
   }
