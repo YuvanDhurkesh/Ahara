@@ -1,6 +1,7 @@
 const Listing = require("../models/Listing");
 const Order = require("../models/Order");
 const SellerProfile = require("../models/SellerProfile");
+const PerishabilityEngine = require("../utils/perishabilityEngine");
 
 // Create a new listing
 exports.createListing = async (req, res) => {
@@ -46,7 +47,24 @@ exports.createListing = async (req, res) => {
             return res.status(400).json({ error: "totalQuantity must be a number" });
         }
 
-        // 4. Handle Geo JSON safely
+        // 4. Safety Validation
+        const safetyValidation = PerishabilityEngine.validateSafety(
+            normalizedFoodType,
+            new Date(pickupWindow.from),
+            new Date(pickupWindow.to)
+        );
+
+        if (!safetyValidation.isValid) {
+            console.warn(`Safety Rejection: ${safetyValidation.details}`);
+            return res.status(400).json({
+                error: "Safety validation failed",
+                translationKey: safetyValidation.translationKey,
+                details: safetyValidation.details,
+                safetyThreshold: safetyValidation.safetyThreshold
+            });
+        }
+
+        // 5. Handle Geo JSON safely
         let geoData = null;
         if (pickupGeo && pickupGeo.coordinates && Array.isArray(pickupGeo.coordinates) && pickupGeo.coordinates.length === 2) {
             geoData = {
@@ -76,7 +94,10 @@ exports.createListing = async (req, res) => {
             description: description || "",
             images: images || [],
             options: options || { selfPickupAvailable: true, deliveryAvailable: true },
-            status: "active"
+            status: "active",
+            isSafetyValidated: true,
+            safetyStatus: "validated",
+            safetyThreshold: safetyValidation.safetyThreshold
         };
 
         if (geoData) {

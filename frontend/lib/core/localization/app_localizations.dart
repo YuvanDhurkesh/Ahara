@@ -63,6 +63,7 @@ class AppLocalizations {
       'hours_ago': 'hours ago',
       'yesterday': 'Yesterday',
       'ends_in': 'Ends in ',
+      'error_unsafe_donation': 'Safety Warning: The selected pickup window exceeds the safe consumption threshold for this food type.',
     },
     'hi': {
       'welcome': 'वापस स्वागत है',
@@ -117,6 +118,7 @@ class AppLocalizations {
       'hours_ago': 'घंटे पहले',
       'yesterday': 'कल',
       'ends_in': 'समाप्त होगा ',
+      'error_unsafe_donation': 'सुरक्षा चेतावनी: चयनित पिकअप विंडो इस प्रकार के भोजन के लिए सुरक्षित उपभोग सीमा से अधिक है।',
     },
     'ta': {
       'welcome': 'மீண்டும் வருக',
@@ -171,6 +173,7 @@ class AppLocalizations {
       'hours_ago': 'மணிநேரங்களுக்கு முன்பு',
       'yesterday': 'நேற்று',
       'ends_in': 'முடிவடைகிறது ',
+      'error_unsafe_donation': 'பாதுகாப்பு எச்சரிக்கை: தேர்ந்தெடுக்கப்பட்ட பிக்கப் சாளரம் இந்த வகை உணவிற்கான பாதுகாப்பான நுகர்வு வரம்பை மீறுகிறது.',
     },
     'te': {
       'welcome': 'తిరిగి స్వాగతం',
@@ -225,6 +228,7 @@ class AppLocalizations {
       'hours_ago': 'గంటల క్రితం',
       'yesterday': 'నిన్న',
       'ends_in': 'ముగిసే సమయం ',
+      'error_unsafe_donation': 'భద్రతా హెచ్చరిక: ఎంచుకున్న పికప్ విండో ఈ రకమైన ఆహారం కోసం సురక్షితమైన వినియోగ పరిమితిని మించిపోయింది.',
     },
   };
 
