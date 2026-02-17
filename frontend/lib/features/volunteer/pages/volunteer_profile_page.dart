@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import '../../common/pages/landing_page.dart';
+import 'package:provider/provider.dart';
 
 class VolunteerProfilePage extends StatefulWidget {
   const VolunteerProfilePage({super.key});
@@ -29,14 +33,16 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'My Profile',
-          style: TextStyle(
+        title: Text(
+          localizations.translate('my_profile'),
+          style: const TextStyle(
             color: AppColors.textDark,
             fontWeight: FontWeight.w600,
           ),
@@ -49,11 +55,11 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _personalInfoCard(),
+                _personalInfoCard(localizations),
                 const SizedBox(height: 20),
-                _securityCard(),
+                _securityCard(localizations),
                 const SizedBox(height: 30),
-                _logoutButton(context),
+                _logoutButton(context, localizations),
               ],
             ),
           ),
@@ -64,35 +70,47 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
 
   // ───────────────────────── Personal Info ─────────────────────────
 
-  Widget _personalInfoCard() {
+  Widget _personalInfoCard(AppLocalizations localizations) {
     return _CardWrapper(
-      title: 'Personal Information',
+      title: localizations.translate('personal_info'),
       child: Column(
         children: [
-          _textField(label: 'Full Name', controller: _nameController),
+          _textField(
+            label: localizations.translate('full_name'), 
+            controller: _nameController
+          ),
           const SizedBox(height: 12),
           _textField(
-            label: 'Phone Number',
+            label: localizations.translate('phone_number'),
             controller: _phoneController,
             keyboardType: TextInputType.phone,
           ),
           const SizedBox(height: 12),
           _textField(
-            label: 'Address',
+            label: localizations.translate('address'),
             controller: _addressController,
             maxLines: 3,
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             value: _vehicleType,
-            decoration: const InputDecoration(
-              labelText: 'Vehicle Type',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: localizations.translate('vehicle_type'),
+              border: const OutlineInputBorder(),
             ),
-            items: const [
-              DropdownMenuItem(value: 'Bicycle', child: Text('Bicycle')),
-              DropdownMenuItem(value: 'Bike', child: Text('Bike')),
-              DropdownMenuItem(value: 'Car', child: Text('Car')),
+            items: [
+              DropdownMenuItem(
+                value: 'Bicycle', 
+                child: Text(localizations.translate('bicycle'))
+              ),
+              DropdownMenuItem(
+                value: 'Bike', 
+                child: Text(localizations.translate('bike'))
+              ),
+              DropdownMenuItem(
+                value: 'Car', 
+                child: Text(localizations.translate('car'))
+              ),
             ],
             onChanged: (value) {
               setState(() {
@@ -112,7 +130,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text('Save Changes'),
+              child: Text(localizations.translate('save_changes')),
             ),
           ),
         ],
@@ -122,20 +140,20 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
 
   // ───────────────────────── Security ─────────────────────────
 
-  Widget _securityCard() {
+  Widget _securityCard(AppLocalizations localizations) {
     return _CardWrapper(
-      title: 'Security',
+      title: localizations.translate('security'),
       child: Column(
         children: [
           _textField(
-            label: 'New Password',
+            label: localizations.translate('new_password'),
             controller: _newPasswordController,
             obscureText: true,
             hint: 'Min 6 characters',
           ),
           const SizedBox(height: 12),
           _textField(
-            label: 'Confirm New Password',
+            label: localizations.translate('confirm_new_password'),
             controller: _confirmPasswordController,
             obscureText: true,
           ),
@@ -144,7 +162,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () {},
-              child: const Text('Change Password'),
+              child: Text(localizations.translate('change_password')),
             ),
           ),
         ],
@@ -154,21 +172,22 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
 
   // ───────────────────────── Logout ─────────────────────────
 
-  Widget _logoutButton(BuildContext context) {
+  Widget _logoutButton(BuildContext context, AppLocalizations localizations) {
     return SizedBox(
       width: double.infinity,
       child: TextButton(
-        onPressed: () {
-          // Clear session here later (Provider / SecureStorage)
-
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            '/', // 👈 your app default / landing route
-            (route) => false,
-          );
+        onPressed: () async {
+          await Provider.of<AppAuthProvider>(context, listen: false).logout();
+          if (context.mounted) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const LandingPage()),
+              (route) => false,
+            );
+          }
         },
-        child: const Text(
-          'Logout',
-          style: TextStyle(
+        child: Text(
+          localizations.translate('logout_btn'),
+          style: const TextStyle(
             color: Colors.red,
             fontSize: 16,
             fontWeight: FontWeight.w600,

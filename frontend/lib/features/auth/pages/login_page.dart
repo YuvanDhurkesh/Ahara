@@ -6,6 +6,7 @@ import '../../volunteer/pages/volunteer_dashboard_page.dart';
 import 'register_selection_page.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../core/localization/language_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 class LoginPage extends StatefulWidget {
@@ -22,6 +23,15 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _obscurePassword = true;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LanguageProvider>(context, listen: false)
+          .confirmCurrentLanguage();
+    });
+  }
 
   @override
   void dispose() {
@@ -135,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Form(
           key: _formKey,
           child: Column(
@@ -156,9 +166,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 48),
 
-              //-------------------------------------------------------------
-              // EMAIL
-              //-------------------------------------------------------------
               _buildLabel("EMAIL ADDRESS"),
 
               TextFormField(
@@ -181,9 +188,6 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 28),
 
-              //-------------------------------------------------------------
-              // PASSWORD
-              //-------------------------------------------------------------
               _buildLabel("PASSWORD"),
 
               TextFormField(
@@ -215,31 +219,18 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 32),
 
-              //-------------------------------------------------------------
-              // LOGIN BUTTON
-              //-------------------------------------------------------------
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _login,
                   child: _isLoading
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : const Text("Login"),
                 ),
               ),
 
               const SizedBox(height: 32),
 
-              //-------------------------------------------------------------
-              // OR DIVIDER
-              //-------------------------------------------------------------
               Row(
                 children: const [
                   Expanded(child: Divider()),
@@ -253,9 +244,6 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 20),
 
-              //-------------------------------------------------------------
-              // GOOGLE BUTTON
-              //-------------------------------------------------------------
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -274,9 +262,6 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 32),
 
-              //-------------------------------------------------------------
-              // REGISTER
-              //-------------------------------------------------------------
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -301,7 +286,6 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
                       ),
                     ),
                   ),
@@ -316,12 +300,11 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  //-------------------------------------------------------------
-
   Widget _buildLabel(String label) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0, left: 4.0),
-      child: Text(label, style: Theme.of(context).textTheme.labelMedium),
+      padding: const EdgeInsets.only(bottom: 10, left: 4),
+      child: Text(label,
+          style: Theme.of(context).textTheme.labelMedium),
     );
   }
 }

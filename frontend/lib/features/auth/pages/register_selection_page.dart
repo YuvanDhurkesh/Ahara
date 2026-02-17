@@ -6,10 +6,14 @@ import 'seller_register_page.dart';
 import 'volunteer_register_page.dart';
 import 'login_page.dart';
 
+import '../../../core/localization/language_provider.dart';
+import 'package:provider/provider.dart';
+
 class RegisterSelectionPage extends StatelessWidget {
   const RegisterSelectionPage({super.key});
 
   void navigateWithRole(BuildContext context, Widget page) {
+    Provider.of<LanguageProvider>(context, listen: false).confirmCurrentLanguage();
     Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 

@@ -5,19 +5,16 @@ import 'package:http/http.dart' as http;
 import '../../config/api_config.dart';
 
 class AuthService {
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   static String get backendBaseUrl => ApiConfig.baseUrl;
-  
 
   //---------------------------------------------------------
   /// LOGIN (NO MONGO CALL)
   //---------------------------------------------------------
 
   Future<User?> login(String email, String password) async {
-
     final cred = await _auth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -43,8 +40,8 @@ class AuthService {
     String? transportMode,
     String? dateOfBirth,
     String? language,
+    String? uiMode,
   }) async {
-
     //-----------------------------------------------------
     /// CREATE FIREBASE USER
     //-----------------------------------------------------
@@ -55,17 +52,13 @@ class AuthService {
     );
 
     final user = cred.user!;
-
     await user.updateDisplayName(name);
 
     //-----------------------------------------------------
-    /// FIRESTORE (optional but fine)
+    /// FIRESTORE SAVE
     //-----------------------------------------------------
 
-    await _db.collection('users')
-        .doc(user.uid)
-        .set({
-
+    await _db.collection('users').doc(user.uid).set({
       "uid": user.uid,
       "name": name,
       "phone": phone,
@@ -73,12 +66,12 @@ class AuthService {
       "location": location,
       "role": role,
       "language": language ?? "en",
+      "uiMode": uiMode ?? "standard",
       "createdAt": Timestamp.now(),
-
     });
 
     //-----------------------------------------------------
-    /// 🔥 MONGO SYNC
+    /// MONGO SYNC
     //-----------------------------------------------------
 
     await syncUserWithBackend(
@@ -93,6 +86,7 @@ class AuthService {
       transportMode: transportMode,
       dateOfBirth: dateOfBirth,
       language: language,
+      uiMode: uiMode,
     );
 
     return user;
@@ -103,10 +97,7 @@ class AuthService {
   //---------------------------------------------------------
 
   Future<User?> handleGoogleLogin(User user) async {
-
-    /// DO NOT CREATE MONGO USER HERE
-    /// Instead redirect user to profile completion screen.
-
+    // DO NOT create Mongo user here
     return user;
   }
 
@@ -126,29 +117,10 @@ class AuthService {
     String? transportMode,
     String? dateOfBirth,
     String? language,
+    String? uiMode,
   }) async {
-
     try {
-
       final token = await user.getIdToken();
-
-      final body = {
-        "firebaseUid": user.uid,
-        "email": user.email,
-        "name": name,
-        "role": role,
-        "phone": phone,
-        "location": location,
-      };
-
-      // Add seller-specific fields if provided
-      if (businessName != null) body["businessName"] = businessName;
-      if (businessType != null) body["businessType"] = businessType;
-      if (fssaiNumber != null) body["fssaiNumber"] = fssaiNumber;
-      
-      // Add volunteer-specific fields if provided
-      if (transportMode != null) body["transportMode"] = transportMode;
-      if (dateOfBirth != null) body["dateOfBirth"] = dateOfBirth;
 
       final response = await http.post(
         Uri.parse("$backendBaseUrl/users/create"),
@@ -156,16 +128,28 @@ class AuthService {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
-        body: jsonEncode(body),
+        body: jsonEncode({
+          "firebaseUid": user.uid,
+          "email": user.email,
+          "name": name,
+          "role": role,
+          "phone": phone,
+          "location": location,
+          if (language != null) "language": language,
+          if (uiMode != null) "uiMode": uiMode,
+          if (businessName != null) "businessName": businessName,
+          if (businessType != null) "businessType": businessType,
+          if (fssaiNumber != null) "fssaiNumber": fssaiNumber,
+          if (transportMode != null) "transportMode": transportMode,
+          if (dateOfBirth != null) "dateOfBirth": dateOfBirth,
+        }),
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception("Backend sync failed: ${response.body}");
       }
-
     } catch (e) {
-
-      /// NEVER crash signup
+      // NEVER crash signup
       print("⚠️ Mongo sync failed: $e");
     }
   }

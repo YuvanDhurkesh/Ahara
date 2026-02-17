@@ -49,10 +49,6 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
     super.dispose();
   }
 
-  //---------------------------------------------------------
-  /// SELLER REGISTRATION
-  //---------------------------------------------------------
-
   Future<void> _registerSeller() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -98,13 +94,9 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
         SnackBar(content: Text(e.message ?? "Registration failed")),
       );
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
-
-  //---------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -122,8 +114,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
           child: SingleChildScrollView(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Form(
               key: _formKey,
               child: Column(
@@ -164,19 +155,36 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                   _buildLabel("BUSINESS TYPE"),
                   DropdownButtonFormField<String>(
                     value: _selectedType,
-                    hint: const Text("Select business type"),
-                    items: _sellerTypes
-                        .map((type) => DropdownMenuItem(
-                              value: type,
-                              child: Text(type),
-                            ))
-                        .toList(),
-                    onChanged: (value) =>
-                        setState(() => _selectedType = value),
+                    hint: Text(
+                      "Select business type",
+                      style: GoogleFonts.inter(
+                        color: AppColors.textLight.withOpacity(0.4),
+                        fontSize: 14,
+                      ),
+                    ),
+                    items: _sellerTypes.map((type) {
+                      return DropdownMenuItem(
+                        value: type,
+                        child: Text(
+                          type,
+                          style: GoogleFonts.inter(
+                            color: AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() => _selectedType = value);
+                    },
                     validator: (value) =>
                         value == null || value.isEmpty
                             ? "Please select business type"
                             : null,
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      color: AppColors.textLight.withOpacity(0.6),
+                    ),
                   ),
 
                   const SizedBox(height: 28),
@@ -254,8 +262,8 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                               ? Icons.visibility_off
                               : Icons.visibility,
                         ),
-                        onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword),
+                        onPressed: () =>
+                            setState(() => _obscurePassword = !_obscurePassword),
                       ),
                       counterText: '',
                     ),
@@ -271,21 +279,16 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                     width: double.infinity,
                     height: 58,
                     child: ElevatedButton(
-                      onPressed:
-                          _isLoading ? null : _registerSeller,
+                      onPressed: _isLoading ? null : _registerSeller,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
-                        elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                       child: _isLoading
-                          ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
+                          ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
                               "Create Seller Account",
                               style: TextStyle(
@@ -294,39 +297,6 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                               ),
                             ),
                     ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Already registered? ",
-                        style: TextStyle(
-                          color: AppColors.textLight
-                              .withOpacity(0.8),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                const LoginPage(),
-                          ),
-                        ),
-                        child: const Text(
-                          "Login",
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
 
                   const SizedBox(height: 40),
@@ -341,12 +311,9 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
 
   Widget _buildLabel(String label) {
     return Padding(
-      padding:
-          const EdgeInsets.only(bottom: 10.0, left: 4.0),
+      padding: const EdgeInsets.only(bottom: 10, left: 4),
       child: Text(label,
-          style: Theme.of(context)
-              .textTheme
-              .labelMedium),
+          style: Theme.of(context).textTheme.labelMedium),
     );
   }
 }

@@ -163,7 +163,7 @@ class _LandingPageState extends State<LandingPage> {
               padding: const EdgeInsets.all(32),
               child: Text(
                 "Menu",
-                style: GoogleFonts.lora(
+                style: GoogleFonts.inter(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
@@ -220,6 +220,9 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   void _showAuthOptions(BuildContext context) {
+    // Confirm the current language choice before entering auth flow
+    Provider.of<LanguageProvider>(context, listen: false).confirmCurrentLanguage();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -572,7 +575,7 @@ class ImpactSection extends StatelessWidget {
         children: [
           Text(
             "Our Global Impact",
-            style: GoogleFonts.lora(
+            style: GoogleFonts.inter(
               fontSize: 32,
               fontWeight: FontWeight.bold,
               color: AppColors.textDark,

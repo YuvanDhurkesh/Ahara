@@ -5,7 +5,7 @@ import '../shared/styles/app_colors.dart';
 class ThemeConfig {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+    fontFamily: GoogleFonts.inter().fontFamily,
     scaffoldBackgroundColor: AppColors.background,
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
@@ -15,28 +15,28 @@ class ThemeConfig {
       onSurface: AppColors.textDark,
       background: AppColors.background,
     ),
-    textTheme: GoogleFonts.plusJakartaSansTextTheme().copyWith(
-      displayLarge: GoogleFonts.lora(
+    textTheme: GoogleFonts.interTextTheme().copyWith(
+      displayLarge: GoogleFonts.inter(
         fontWeight: FontWeight.w800,
         color: AppColors.textDark,
         letterSpacing: -0.5,
       ),
-      headlineLarge: GoogleFonts.lora(
+      headlineLarge: GoogleFonts.inter(
         fontWeight: FontWeight.bold,
         color: AppColors.textDark,
         fontSize: 24,
       ),
-      headlineMedium: GoogleFonts.plusJakartaSans(
+      headlineMedium: GoogleFonts.inter(
         fontWeight: FontWeight.bold,
         color: AppColors.textDark,
         fontSize: 20,
       ),
-      titleLarge: GoogleFonts.plusJakartaSans(
+      titleLarge: GoogleFonts.inter(
         fontWeight: FontWeight.w700,
         color: AppColors.textDark,
         fontSize: 16,
       ),
-      labelMedium: GoogleFonts.plusJakartaSans(
+      labelMedium: GoogleFonts.inter(
         fontWeight: FontWeight.w700,
         color: AppColors.textDark,
         fontSize: 11,

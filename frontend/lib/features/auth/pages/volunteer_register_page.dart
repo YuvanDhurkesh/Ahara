@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
 import '../../../shared/widgets/phone_input_field.dart';
@@ -49,8 +50,6 @@ class _VolunteerRegisterPageState
     super.dispose();
   }
 
-  //---------------------------------------------------------
-
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -79,10 +78,6 @@ class _VolunteerRegisterPageState
     }
     return age >= 18;
   }
-
-  //---------------------------------------------------------
-  /// VOLUNTEER REGISTRATION
-  //---------------------------------------------------------
 
   Future<void> _registerVolunteer() async {
     if (!_formKey.currentState!.validate()) return;
@@ -155,8 +150,6 @@ class _VolunteerRegisterPageState
     }
   }
 
-  //---------------------------------------------------------
-
   @override
   Widget build(BuildContext context) {
     final bool showDOB =
@@ -225,34 +218,51 @@ class _VolunteerRegisterPageState
 
                   const SizedBox(height: 28),
 
-                  _buildLabel(
-                      "MODE OF TRANSPORT"),
+                  _buildLabel("MODE OF TRANSPORT"),
                   DropdownButtonFormField<String>(
                     value: _selectedTransport,
-                    hint: const Text(
-                        "Select transport mode"),
-                    items: _transportModes
-                        .map((mode) =>
-                            DropdownMenuItem(
-                              value: mode,
-                              child: Text(mode),
-                            ))
-                        .toList(),
-                    onChanged: (value) =>
-                        setState(() =>
-                            _selectedTransport =
-                                value),
+                    hint: Text(
+                      "Select transport mode",
+                      style: GoogleFonts.inter(
+                        color: AppColors.textLight.withOpacity(0.4),
+                        fontSize: 14,
+                      ),
+                    ),
+                    items: _transportModes.map((mode) {
+                      return DropdownMenuItem(
+                        value: mode,
+                        child: Text(
+                          mode,
+                          style: GoogleFonts.inter(
+                            color: AppColors.textDark,
+                            fontSize: 14,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedTransport = value;
+                        if (value == 'Cycle') {
+                          _selectedDate = null;
+                          _dobController.clear();
+                        }
+                      });
+                    },
                     validator: (value) =>
                         value == null
                             ? "Please select transport mode"
                             : null,
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      color: AppColors.textLight.withOpacity(0.6),
+                    ),
                   ),
 
                   const SizedBox(height: 28),
 
                   if (showDOB) ...[
-                    _buildLabel(
-                        "DATE OF BIRTH"),
+                    _buildLabel("DATE OF BIRTH"),
                     TextFormField(
                       controller: _dobController,
                       readOnly: true,
@@ -274,8 +284,7 @@ class _VolunteerRegisterPageState
                     const SizedBox(height: 28),
                   ],
 
-                  _buildLabel(
-                      "EMAIL ADDRESS"),
+                  _buildLabel("EMAIL ADDRESS"),
                   TextFormField(
                     controller:
                         _emailController,
@@ -369,46 +378,10 @@ class _VolunteerRegisterPageState
                           : _registerVolunteer,
                       child: _isLoading
                           ? const CircularProgressIndicator(
-                              color:
-                                  Colors.white)
+                              color: Colors.white)
                           : const Text(
                               "Create Volunteer Account"),
                     ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment
-                            .center,
-                    children: [
-                      Text(
-                        "Already registered? ",
-                        style: TextStyle(
-                            color: AppColors
-                                .textLight
-                                .withOpacity(
-                                    0.8)),
-                      ),
-                      GestureDetector(
-                        onTap: () =>
-                            Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) =>
-                                  const LoginPage()),
-                        ),
-                        child: const Text(
-                          "Login",
-                          style: TextStyle(
-                              color:
-                                  AppColors.primary,
-                              fontWeight:
-                                  FontWeight.bold),
-                        ),
-                      ),
-                    ],
                   ),
 
                   const SizedBox(height: 40),

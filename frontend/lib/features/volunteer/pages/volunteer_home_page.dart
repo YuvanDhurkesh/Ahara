@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
-import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../core/services/voice_service.dart';
+import '../../../core/localization/language_provider.dart';
+import '../../common/pages/landing_page.dart';
+import 'volunteer_profile_page.dart';
+import 'volunteer_ratings_page.dart';
+import 'volunteer_orders_page.dart';
 
 class VolunteerHomePage extends StatefulWidget {
   const VolunteerHomePage({super.key});
@@ -30,8 +36,7 @@ class _VolunteerHomePageState
             constraints:
                 const BoxConstraints(maxWidth: 1000),
             child: SingleChildScrollView(
-              padding:
-                  const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
@@ -41,46 +46,38 @@ class _VolunteerHomePageState
                   //--------------------------------------------------
                   Row(
                     mainAxisAlignment:
-                        MainAxisAlignment
-                            .spaceBetween,
+                        MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
                         child: Text(
                           '${AppLocalizations.of(context)!.translate("welcome_back_user")}$userName',
-                          style:
-                              const TextStyle(
+                          style: const TextStyle(
                             fontSize: 24,
-                            fontWeight:
-                                FontWeight.w600,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
 
+                      // Voice Mode Toggle
+                      _voiceModeToggle(),
+
+                      // Availability Toggle
                       _availabilityToggle(),
                     ],
                   ),
 
                   const SizedBox(height: 20),
 
-                  //--------------------------------------------------
-                  // Inactive State
-                  //--------------------------------------------------
                   if (!isAvailable)
                     _inactiveState(),
 
-                  //--------------------------------------------------
-                  // Active Dashboard
-                  //--------------------------------------------------
                   if (isAvailable) ...[
                     _dashboardCards(),
-                    const SizedBox(
-                        height: 20),
+                    const SizedBox(height: 20),
                     _badgeSection(),
-                    const SizedBox(
-                        height: 24),
+                    const SizedBox(height: 24),
                     _alertBanner(),
-                    const SizedBox(
-                        height: 24),
+                    const SizedBox(height: 24),
                     _quickActions(),
                   ],
                 ],
@@ -93,7 +90,110 @@ class _VolunteerHomePageState
   }
 
   //----------------------------------------------------------
-  // Availability Toggle
+  // Voice Toggle
+  //----------------------------------------------------------
+
+  Widget _voiceModeToggle() {
+    final voiceService =
+        Provider.of<VoiceService>(context);
+
+    return IconButton(
+      icon: Icon(
+        voiceService.isListening
+            ? Icons.mic
+            : Icons.mic_none,
+        color: voiceService.isListening
+            ? Colors.red
+            : AppColors.primary,
+        size: 28,
+      ),
+      onPressed: () => _toggleVoiceMode(),
+      tooltip: "Voice Assistance",
+    );
+  }
+
+  void _toggleVoiceMode() async {
+    final voiceService =
+        Provider.of<VoiceService>(context,
+            listen: false);
+    final langProvider =
+        Provider.of<LanguageProvider>(context,
+            listen: false);
+
+    if (voiceService.isListening) {
+      await voiceService.stopListening();
+    } else {
+      await voiceService.speak(
+        AppLocalizations.of(context)!
+                .translate("voice_mode_on") ??
+            "Voice mode activated. How can I help?",
+        languageCode:
+            langProvider.locale.languageCode,
+      );
+
+      voiceService.startListening((words) {
+        _handleVoiceCommand(words);
+      });
+    }
+  }
+
+  void _handleVoiceCommand(String words) {
+    final lower = words.toLowerCase();
+    final voiceService =
+        Provider.of<VoiceService>(context,
+            listen: false);
+
+    if (lower.contains("logout")) {
+      _performLogout();
+    } else if (lower.contains("profile")) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) =>
+                const VolunteerProfilePage()),
+      );
+    } else if (lower.contains("rating")) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) =>
+                const VolunteerRatingsPage()),
+      );
+    } else if (lower.contains("deliver") ||
+        lower.contains("order")) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) =>
+                const VolunteerOrdersPage()),
+      );
+    } else if (lower.contains("available")) {
+      setState(() => isAvailable = true);
+    } else if (lower.contains("unavailable")) {
+      setState(() => isAvailable = false);
+    } else if (lower.contains("refresh")) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _performLogout() async {
+    await Provider.of<AppAuthProvider>(context,
+            listen: false)
+        .logout();
+
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (_) =>
+                const LandingPage()),
+        (route) => false,
+      );
+    }
+  }
+
+  //----------------------------------------------------------
+  // Availability
   //----------------------------------------------------------
 
   Widget _availabilityToggle() {
@@ -103,14 +203,12 @@ class _VolunteerHomePageState
           AppLocalizations.of(context)!
               .translate("availability"),
           style: const TextStyle(
-              fontWeight:
-                  FontWeight.w500),
+              fontWeight: FontWeight.w500),
         ),
         const SizedBox(width: 8),
         Switch(
           value: isAvailable,
-          activeColor:
-              AppColors.primary,
+          activeColor: AppColors.primary,
           onChanged: (value) {
             setState(() {
               isAvailable = value;
@@ -127,25 +225,24 @@ class _VolunteerHomePageState
 
   Widget _inactiveState() {
     return Container(
-      margin:
-          const EdgeInsets.only(top: 40),
-      padding:
-          const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(top: 40),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius:
             BorderRadius.circular(18),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.pause_circle_outline,
+          const Icon(Icons.pause_circle_outline,
               color: Colors.grey),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'You are currently inactive.\nTurn on availability to receive deliveries and view performance.',
-              style: TextStyle(
-                  color: Colors.grey),
+              AppLocalizations.of(context)!
+                  .translate('inactive_msg'),
+              style:
+                  const TextStyle(color: Colors.grey),
             ),
           ),
         ],
@@ -158,49 +255,31 @@ class _VolunteerHomePageState
   //----------------------------------------------------------
 
   Widget _dashboardCards() {
-    return LayoutBuilder(
-      builder: (context,
-          constraints) {
-        final bool isWide =
-            constraints.maxWidth > 600;
-
-        return GridView.count(
-          shrinkWrap: true,
-          physics:
-              const NeverScrollableScrollPhysics(),
-          crossAxisCount:
-              isWide ? 3 : 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio:
-              isWide ? 2.5 : 1.5,
-          children: [
-            _StatCard(
-              title: AppLocalizations.of(
-                      context)!
-                  .translate(
-                      "deliveries"),
-              value: '47',
-              color: Colors.blue,
-            ),
-            _StatCard(
-              title: AppLocalizations.of(
-                      context)!
-                  .translate("today"),
-              value: '3',
-              color: Colors.green,
-            ),
-            _StatCard(
-              title: AppLocalizations.of(
-                      context)!
-                  .translate(
-                      "ratings"),
-              value: '4.8',
-              color: Colors.orange,
-            ),
-          ],
-        );
-      },
+    return GridView.count(
+      shrinkWrap: true,
+      physics:
+          const NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 2.5,
+      children: [
+        _StatCard(
+            title: AppLocalizations.of(context)!
+                .translate("deliveries"),
+            value: '47',
+            color: Colors.blue),
+        _StatCard(
+            title: AppLocalizations.of(context)!
+                .translate("today"),
+            value: '3',
+            color: Colors.green),
+        _StatCard(
+            title: AppLocalizations.of(context)!
+                .translate("ratings"),
+            value: '4.8',
+            color: Colors.orange),
+      ],
     );
   }
 
@@ -216,35 +295,40 @@ class _VolunteerHomePageState
         Text(
           AppLocalizations.of(context)!
               .translate("your_badges"),
-          style:
-              const TextStyle(
+          style: const TextStyle(
             fontSize: 18,
-            fontWeight:
-                FontWeight.w600,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 12),
-        const Wrap(
+        Wrap(
           spacing: 12,
           runSpacing: 12,
           children: [
             _BadgeChip(
                 icon: Icons.verified,
-                label:
-                    'Verified Volunteer'),
+                label: AppLocalizations.of(
+                        context)!
+                    .translate(
+                        'verified_volunteer')),
             _BadgeChip(
                 icon: Icons.star,
-                label:
-                    'Top Volunteer'),
+                label: AppLocalizations.of(
+                        context)!
+                    .translate(
+                        'top_volunteer')),
             _BadgeChip(
-                icon:
-                    Icons.local_shipping,
-                label:
-                    '50 Deliveries'),
+                icon: Icons.local_shipping,
+                label: AppLocalizations.of(
+                        context)!
+                    .translate(
+                        'fifty_deliveries')),
             _BadgeChip(
                 icon: Icons.flash_on,
-                label:
-                    'Perfect Streak'),
+                label: AppLocalizations.of(
+                        context)!
+                    .translate(
+                        'perfect_streak')),
           ],
         ),
       ],
@@ -257,29 +341,26 @@ class _VolunteerHomePageState
 
   Widget _alertBanner() {
     return Container(
-      padding:
-          const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            const Color(0xFFFFF4D6),
+        color: const Color(0xFFFFF4D6),
         borderRadius:
             BorderRadius.circular(16),
         border: Border.all(
-            color:
-                const Color(0xFFFFD066)),
+            color: const Color(0xFFFFD066)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(
-              Icons
-                  .notifications_active,
-              color:
-                  Colors.orange),
-          SizedBox(width: 12),
+          const Icon(
+              Icons.notifications_active,
+              color: Colors.orange),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'You have 2 new delivery requests waiting!',
-              style: TextStyle(
+              AppLocalizations.of(context)!
+                  .translate(
+                      'new_requests_banner'),
+              style: const TextStyle(
                   fontWeight:
                       FontWeight.w500),
             ),
@@ -302,8 +383,7 @@ class _VolunteerHomePageState
           AppLocalizations.of(context)!
               .translate(
                   "quick_actions"),
-          style:
-              const TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontWeight:
                 FontWeight.w600,
@@ -314,170 +394,28 @@ class _VolunteerHomePageState
           children: [
             _QuickAction(
                 icon: Icons.list_alt,
-                label:
-                    AppLocalizations.of(
-                            context)!
-                        .translate(
-                            "view_orders")),
+                label: AppLocalizations.of(
+                        context)!
+                    .translate(
+                        "view_orders")),
             const SizedBox(width: 12),
             _QuickAction(
                 icon:
                     Icons.verified_user,
-                label:
-                    AppLocalizations.of(
-                            context)!
-                        .translate(
-                            "verification")),
+                label: AppLocalizations.of(
+                        context)!
+                    .translate(
+                        "verification")),
             const SizedBox(width: 12),
             _QuickAction(
                 icon: Icons.star,
-                label:
-                    AppLocalizations.of(
-                            context)!
-                        .translate(
-                            "ratings")),
+                label: AppLocalizations.of(
+                        context)!
+                    .translate(
+                        "ratings")),
           ],
         ),
       ],
-    );
-  }
-}
-
-// ------------------------------------------------------------
-// Reusable Widgets
-// ------------------------------------------------------------
-
-class _StatCard
-    extends StatelessWidget {
-  final String title;
-  final String value;
-  final Color color;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(
-      BuildContext context) {
-    return Container(
-      padding:
-          const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius:
-            BorderRadius.circular(18),
-      ),
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-        mainAxisAlignment:
-            MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.circle,
-                  size: 8,
-                  color: color),
-              const SizedBox(
-                  width: 6),
-              Text(
-                title,
-                style:
-                    const TextStyle(
-                  color:
-                      Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style:
-                const TextStyle(
-              fontSize: 20,
-              fontWeight:
-                  FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BadgeChip
-    extends StatelessWidget {
-  final IconData icon;
-  final String label;
-
-  const _BadgeChip({
-    required this.icon,
-    required this.label,
-  });
-
-  @override
-  Widget build(
-      BuildContext context) {
-    return Chip(
-      avatar: Icon(icon,
-          size: 18,
-          color:
-              AppColors.primary),
-      label: Text(label),
-      backgroundColor:
-          Colors.white,
-      shape:
-          RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.circular(12),
-      ),
-    );
-  }
-}
-
-class _QuickAction
-    extends StatelessWidget {
-  final IconData icon;
-  final String label;
-
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-  });
-
-  @override
-  Widget build(
-      BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding:
-            const EdgeInsets.symmetric(
-                vertical: 14),
-        decoration:
-            BoxDecoration(
-          color: Colors.white,
-          borderRadius:
-              BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Icon(icon,
-                color:
-                    AppColors.primary),
-            const SizedBox(
-                height: 6),
-            Text(label,
-                style:
-                    const TextStyle(
-                        fontSize: 12)),
-          ],
-        ),
-      ),
     );
   }
 }

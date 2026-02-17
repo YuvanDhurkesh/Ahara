@@ -39,7 +39,12 @@ const listingSchema = new mongoose.Schema(
         options: {
             selfPickupAvailable: { type: Boolean, default: true },
             deliveryAvailable: { type: Boolean, default: true }
-        }
+        },
+        // Safety & Lifecycle
+        isSafetyValidated: { type: Boolean, default: false },
+        safetyStatus: { type: String, enum: ["validated", "rejected", "pending"], default: "pending" },
+        safetyRejectionReason: String,
+        safetyThreshold: Date
     },
     { timestamps: true }
 );

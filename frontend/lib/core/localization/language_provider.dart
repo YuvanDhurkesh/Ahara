@@ -3,28 +3,58 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LanguageProvider extends ChangeNotifier {
   Locale _locale = const Locale('en');
-  static const String _prefKey = 'selected_language';
+  String _uiMode = 'standard';
+  bool _isManualSelection = false;
+  
+  static const String _langKey = 'selected_language';
+  static const String _uiKey = 'ui_mode';
 
   Locale get locale => _locale;
+  String get uiMode => _uiMode;
+  bool get isSimplified => _uiMode == 'simplified';
+  bool get isManualSelection => _isManualSelection;
 
   LanguageProvider() {
     _loadFromPrefs();
   }
 
-  Future<void> setLanguage(String languageCode) async {
+  Future<void> setLanguage(String languageCode, {bool isManual = true}) async {
     _locale = Locale(languageCode);
+    if (isManual) _isManualSelection = true;
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefKey, languageCode);
+    await prefs.setString(_langKey, languageCode);
+  }
+
+  Future<void> setUiMode(String mode, {bool isManual = true}) async {
+    _uiMode = mode;
+    if (isManual) _isManualSelection = true;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_uiKey, mode);
+  }
+
+  Future<void> confirmCurrentLanguage() async {
+    _isManualSelection = true;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_langKey, _locale.languageCode);
+    await prefs.setString(_uiKey, _uiMode);
   }
 
   Future<void> _loadFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    final code = prefs.getString(_prefKey);
+    final code = prefs.getString(_langKey);
     if (code != null) {
       _locale = Locale(code);
-      notifyListeners();
+      _isManualSelection = true;
     }
+    final mode = prefs.getString(_uiKey);
+    if (mode != null) {
+      _uiMode = mode;
+      _isManualSelection = true;
+    }
+    notifyListeners();
   }
 
   String getLanguageName() {
