@@ -9,7 +9,7 @@ import 'buyer_payment_page.dart';
 import 'buyer_order_confirmation_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
 import '../../../data/services/backend_service.dart';
-import '../../../core/auth/auth_provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
 
 class BuyerFoodDetailPage extends StatelessWidget {
   final MockStore? store;
@@ -514,39 +514,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReserveButton(BuildContext context, bool isFree, String price, bool offersDelivery) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () => _showSelectionSlide(context, offersDelivery),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 22),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          elevation: 12,
-          shadowColor: AppColors.primary.withOpacity(0.4),
-          backgroundColor: isFree ? Colors.green : AppColors.primary,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              isFree ? "Claim Now" : "Reserve for $price",
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Icon(Icons.arrow_forward, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
+  // Removed old _buildReserveButton - using new integrated version below
 
   void _showSelectionSlide(BuildContext context, bool offersDelivery) {
     String currentAddress = "123, Green Street, Koramangala";
@@ -931,7 +899,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
   Future<void> _placeOrder(BuildContext context, int quantity) async {
     try {
       // Get buyer ID from auth provider
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
       final buyerId = authProvider.mongoUserId;
 
       if (buyerId == null) {
