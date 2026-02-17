@@ -9,6 +9,7 @@ const userRoutes = require("./routes/userRoutes");
 const listingRoutes = require("./routes/listingRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
@@ -37,6 +38,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/listings", listingRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/payments", paymentRoutes);
 
 // Serve static uploads with ngrok bypass header (best effort)
 app.use("/uploads", (req, res, next) => {
