@@ -7,31 +7,146 @@ import 'buyer_address_page.dart';
 import 'buyer_payment_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
 
-class BuyerFoodDetailPage extends StatelessWidget {
-  final MockStore store;
+import '../../../data/services/backend_service.dart';
 
-  const BuyerFoodDetailPage({super.key, required this.store});
+class BuyerFoodDetailPage extends StatelessWidget {
+  final MockStore? store;
+  final Map<String, dynamic>? listing;
+
+  const BuyerFoodDetailPage({super.key, this.store, this.listing});
 
   @override
   Widget build(BuildContext context) {
+    // Check if listing is expired
+    final expiryTime = listing?['pickupWindow']?['to'] != null
+        ? DateTime.tryParse(listing!['pickupWindow']['to'])
+        : null;
+    final isExpired = expiryTime != null && DateTime.now().isAfter(expiryTime);
+
+    // Show expired state if listing has expired
+    if (isExpired && listing != null) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.access_time_filled,
+                  size: 80,
+                  color: Colors.grey.shade400,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  "This listing has expired",
+                  style: GoogleFonts.inter(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "This food item is no longer available for reservation.",
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    color: Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "Browse Active Listings",
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Original build logic for active listings
+    // Unify data from store or listing
+    final String name = store?.name ?? listing?['foodName'] ?? "Unknown Food";
+    final String type = store?.type ?? listing?['foodType'] ?? "Meal";
+    
+    // Get rating from seller profile or use default
+    final sellerProfile = listing?['sellerProfileId'] ?? {};
+    final double sellerRating = (sellerProfile['stats']?['avgRating'] ?? 0.0).toDouble();
+    final int ratingCount = sellerProfile['stats']?['ratingCount'] ?? 0;
+    final String rating = store?.rating ?? (sellerRating > 0 ? sellerRating.toStringAsFixed(1) : "4.5");
+    
+    final bool isFree = store?.isFree ?? (listing?['pricing']?['isFree'] ?? false);
+    final String price = store?.price ?? "₹${listing?['pricing']?['discountedPrice'] ?? 0}";
+    
+    final List images = listing?['images'] ?? [];
+    final String imageUrl = store?.image ?? (images.isNotEmpty 
+        ? BackendService.formatImageUrl(images[0])
+        : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop");
+
+    final String address = store?.address ?? (listing?['pickupAddressText'] ?? "Bangalore");
+    final String orgName = store?.name ?? (listing?['sellerProfileId']?['orgName'] ?? "Local Seller");
+    
+    final Map<String, double> reviews = store?.reviews ?? {
+      "Collection": 4.5,
+      "Quality": 4.8,
+      "Variety": 4.2,
+      "Quantity": 4.7,
+    };
+    
+    // Use ingredients if available, else use a placeholder based on description
+    final List<String> ingredients = store?.ingredients ?? 
+        (listing?['description']?.toString().split(',') ?? ["Organic", "Healthy", "Fresh"]);
+    
+    final bool offersDelivery = store?.offersDelivery ?? (listing?['options']?['deliveryAvailable'] ?? true);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          _buildSliverAppBar(context),
+          _buildSliverAppBar(context, imageUrl),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeaderInfo(context),
+                  _buildHeaderInfo(context, type, rating, name, address),
                   const SizedBox(height: 32),
                   _buildDirectionsButton(),
                   const SizedBox(height: 48),
-                  _buildReviewSection(context),
+                  _buildReviewSection(context, rating, reviews),
                   const SizedBox(height: 48),
-                  _buildIngredientsSection(),
+                  _buildIngredientsSection(ingredients),
                   const SizedBox(height: 120), // Bottom padding for FAB
                 ],
               ),
@@ -40,11 +155,11 @@ class BuyerFoodDetailPage extends StatelessWidget {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _buildReserveButton(context),
+      floatingActionButton: _buildReserveButton(context, isFree, price, offersDelivery),
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context) {
+  Widget _buildSliverAppBar(BuildContext context, String imageUrl) {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
@@ -64,7 +179,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(store.image, fit: BoxFit.cover),
+            Image.network(imageUrl, fit: BoxFit.cover),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -84,7 +199,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderInfo(BuildContext context) {
+  Widget _buildHeaderInfo(BuildContext context, String type, String rating, String name, String address) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -98,7 +213,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                store.type.toUpperCase(),
+                type.toUpperCase(),
                 style: GoogleFonts.inter(
                   color: AppColors.primary,
                   fontSize: 10,
@@ -112,7 +227,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
                 const Icon(Icons.star, color: Colors.amber, size: 20),
                 const SizedBox(width: 4),
                 Text(
-                  store.rating,
+                  rating,
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -125,7 +240,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          store.name,
+          name,
           style: GoogleFonts.cormorantInfant(
             fontSize: 36,
             fontWeight: FontWeight.w700,
@@ -141,7 +256,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                store.address,
+                address,
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   color: AppColors.textLight.withOpacity(0.8),
@@ -178,7 +293,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReviewSection(BuildContext context) {
+  Widget _buildReviewSection(BuildContext context, String rating, Map<String, double> reviews) {
     final bool isMobile = ResponsiveLayout.isMobile(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,7 +304,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
                 children: [
                   _buildRatingsTitle(),
                   const SizedBox(height: 16),
-                  _buildLargeRating(store.rating),
+                  _buildLargeRating(rating),
                 ],
               )
             : Row(
@@ -197,7 +312,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(child: _buildRatingsTitle()),
-                  _buildLargeRating(store.rating),
+                  _buildLargeRating(rating),
                 ],
               ),
         const SizedBox(height: 32),
@@ -210,10 +325,10 @@ class BuyerFoodDetailPage extends StatelessWidget {
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
           ),
-          itemCount: store.reviews.length,
+          itemCount: reviews.length,
           itemBuilder: (context, index) {
-            String category = store.reviews.keys.elementAt(index);
-            double score = store.reviews.values.elementAt(index);
+            String category = reviews.keys.elementAt(index);
+            double score = reviews.values.elementAt(index);
             return _buildReviewCard(category, score);
           },
         ),
@@ -349,7 +464,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildIngredientsSection() {
+  Widget _buildIngredientsSection(List<String> ingredients) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -374,7 +489,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
         Wrap(
           spacing: 10,
           runSpacing: 10,
-          children: store.ingredients.map((item) {
+          children: ingredients.map((item) {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               decoration: BoxDecoration(
@@ -397,12 +512,12 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReserveButton(BuildContext context) {
+  Widget _buildReserveButton(BuildContext context, bool isFree, String price, bool offersDelivery) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () => _showSelectionSlide(context),
+        onPressed: () => _showSelectionSlide(context, offersDelivery),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 22),
           shape: RoundedRectangleBorder(
@@ -410,13 +525,13 @@ class BuyerFoodDetailPage extends StatelessWidget {
           ),
           elevation: 12,
           shadowColor: AppColors.primary.withOpacity(0.4),
-          backgroundColor: store.isFree ? Colors.green : AppColors.primary,
+          backgroundColor: isFree ? Colors.green : AppColors.primary,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              store.isFree ? "Claim Now" : "Reserve for ${store.price}",
+              isFree ? "Claim Now" : "Reserve for $price",
               style: GoogleFonts.inter(
                 fontSize: 16,
                 fontWeight: FontWeight.w900,
@@ -431,7 +546,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  void _showSelectionSlide(BuildContext context) {
+  void _showSelectionSlide(BuildContext context, bool offersDelivery) {
     String currentAddress = "123, Green Street, Koramangala";
     String currentPayment = "Visa *1234";
 
@@ -469,7 +584,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 32),
-                  if (store.offersDelivery) ...[
+                  if (offersDelivery) ...[
                     _buildSelectionItem(
                       context,
                       icon: Icons.location_on_outlined,
@@ -512,13 +627,20 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                BuyerCheckoutPage(store: store),
-                          ),
-                        );
+                        if (store != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  BuyerCheckoutPage(store: store!),
+                            ),
+                          );
+                        } else {
+                          // Handle real listing checkout
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Checkout for real listings coming soon!")),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,

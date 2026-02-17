@@ -19,8 +19,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware
-app.use(cors());
+// Middleware - CORS with explicit configuration for ngrok
+app.use(cors({
+  origin: '*', // Allow all origins (for development)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
 
 /// ✅ THEN JSON
 app.use(express.json());

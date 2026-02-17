@@ -8,5 +8,6 @@ router.get("/active", listingController.getActiveListings);
 router.get("/expired", listingController.getExpiredListings);
 router.get("/completed", listingController.getCompletedListings);
 router.get("/seller-stats", listingController.getSellerStats);
+router.put("/relist/:id", listingController.relistListing);
 
 module.exports = router;

@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../data/mock_stores.dart';
 import 'buyer_food_detail_page.dart';
+import '../../../data/services/backend_service.dart';
 
 class BuyerBrowsePage extends StatefulWidget {
   final Set<String> favouriteIds;
@@ -31,31 +33,101 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   // Map Interaction State
   String? _selectedStoreId;
 
+  // Real Data State
+  List<Map<String, dynamic>> _realListings = [];
+  bool _isListingsLoading = false;
+  
+  // Live countdown state
+  DateTime _now = DateTime.now();
+  Timer? _countdownTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRealListings();
+    // Update countdown every 30 seconds
+    _countdownTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) {
+        setState(() => _now = DateTime.now());
+      }
+    });
+  }
+
+  Future<void> _fetchRealListings() async {
+    setState(() => _isListingsLoading = true);
+    try {
+      final listings = await BackendService.getAllActiveListings();
+      setState(() {
+        _realListings = listings;
+        _isListingsLoading = false;
+      });
+    } catch (e) {
+      debugPrint("Error fetching real listings: $e");
+      setState(() => _isListingsLoading = false);
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
     _sheetController.dispose();
+    _countdownTimer?.cancel();
     super.dispose();
   }
 
+  // Format time remaining until expiry
+  String _formatTimeRemaining(DateTime expiryTime) {
+    final diff = expiryTime.difference(_now);
+    if (diff.isNegative) return "Expired";
+    if (diff.inDays > 0) return "Expires in ${diff.inDays}d ${diff.inHours % 24}h";
+    if (diff.inHours > 0) return "Expires in ${diff.inHours}h ${diff.inMinutes % 60}m";
+    if (diff.inMinutes > 0) return "Expires in ${diff.inMinutes}m";
+    return "Expiring soon";
+  }
+
+  // Filter out expired listings (client-side defense)
+  List<Map<String, dynamic>> get _validListings {
+    final now = DateTime.now();
+    return _realListings.where((listing) {
+      final expiryStr = listing['pickupWindow']?['to'];
+      if (expiryStr == null) return false;
+      try {
+        final expiry = DateTime.parse(expiryStr);
+        return expiry.isAfter(now);
+      } catch (e) {
+        return false;
+      }
+    }).toList();
+  }
+
   // Filter stores based on search and filters
-  List<MockStore> get _filteredStores {
-    return allMockStores.where((store) {
+  List<dynamic> get _allResults {
+    // 1. Start with mock stores
+    List<dynamic> results = List.from(allMockStores);
+    
+    // 2. Add only valid (non-expired) real listings
+    results.insertAll(0, _validListings);
+
+    return results.where((item) {
+      final name = item is MockStore ? item.name : (item['foodName'] ?? "");
+      final type = item is MockStore ? item.type : (item['foodType'] ?? "");
+      final rating = item is MockStore ? double.tryParse(item.rating) ?? 0.0 : 0.0; // Real listings don't have ratings yet
+      final isFree = item is MockStore ? item.isFree : (item['pricing']?['isFree'] ?? false);
+
       // 1. Search Query
       if (_searchQuery.isNotEmpty) {
         final query = _searchQuery.toLowerCase();
-        if (!store.name.toLowerCase().contains(query) &&
-            !store.type.toLowerCase().contains(query)) {
+        if (!name.toLowerCase().contains(query) &&
+            !type.toLowerCase().contains(query)) {
           return false;
         }
       }
 
       // 2. Min Rating
-      final rating = double.tryParse(store.rating) ?? 0.0;
       if (rating < _minRating) return false;
 
       // 3. Price Filters
-      if (_onlyFree && !store.isFree) return false;
+      if (_onlyFree && !isFree) return false;
 
       return true;
     }).toList();
@@ -116,18 +188,22 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
 
     return Stack(
       children: List.generate(
-        _filteredStores.length.clamp(0, positions.length),
+        _allResults.length.clamp(0, positions.length),
         (index) {
-          final store = _filteredStores[index];
+          final item = _allResults[index];
           final pos = positions[index];
-          final isSelected = _selectedStoreId == store.id;
+          
+          final String id = item is MockStore ? item.id : (item['_id'] ?? "");
+          final bool isSelected = _selectedStoreId == id;
+          final bool isFree = item is MockStore ? item.isFree : (item['pricing']?['isFree'] ?? false);
+          final String price = item is MockStore ? item.price : "₹${item['pricing']?['discountedPrice'] ?? 0}";
 
           return Positioned(
             top: pos.dy,
             left: pos.dx,
             child: GestureDetector(
               onTap: () {
-                setState(() => _selectedStoreId = store.id);
+                setState(() => _selectedStoreId = id);
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
@@ -147,7 +223,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                   ],
                 ),
                 child: Text(
-                  store.isFree ? "Free" : store.price,
+                  isFree ? "Free" : price,
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -232,7 +308,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                 ],
                 const Spacer(),
                 Text(
-                  "${_filteredStores.length} results",
+                  "${_allResults.length} results",
                   style: GoogleFonts.inter(
                     color: Colors.grey.shade600,
                     fontWeight: FontWeight.w500,
@@ -416,10 +492,10 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                 child: ListView.separated(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                   controller: scrollController,
-                  itemCount: _filteredStores.length,
+                  itemCount: _allResults.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 24),
                   itemBuilder: (context, index) {
-                    return _buildStoreCard(_filteredStores[index]);
+                    return _buildStoreCard(_allResults[index]);
                   },
                 ),
               ),
@@ -431,7 +507,10 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   }
 
   Widget _buildPopOutCard() {
-    final store = allMockStores.firstWhere((s) => s.id == _selectedStoreId);
+    final item = _allResults.firstWhere((s) {
+      final id = s is MockStore ? s.id : (s['_id'] ?? "");
+      return id == _selectedStoreId;
+    });
     return Positioned(
       bottom: 150,
       left: 20,
@@ -455,7 +534,11 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                       top: Radius.circular(20),
                     ),
                     child: Image.network(
-                      store.image,
+                      item is MockStore 
+                          ? item.image 
+                          : ((item['images'] as List?)?.isNotEmpty == true 
+                              ? BackendService.formatImageUrl(item['images'][0]) 
+                              : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop"),
                       height: 150,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -480,14 +563,16 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            store.name,
+                            item is MockStore ? item.name : (item['foodName'] ?? "Unknown Food"),
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
                           Text(
-                            "${store.rating} ★ • ${store.isFree ? "Free" : store.price}",
+                            item is MockStore 
+                                ? "${item.rating} ★ • ${item.isFree ? "Free" : item.price}"
+                                : "4.5 ★ • ${item['pricing']?['isFree'] == true ? "Free" : "₹${item['pricing']?['discountedPrice'] ?? 0}"}",
                             style: GoogleFonts.inter(color: Colors.grey),
                           ),
                         ],
@@ -498,7 +583,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => BuyerFoodDetailPage(store: store),
+                            builder: (_) => BuyerFoodDetailPage(listing: item is! MockStore ? item : null, store: item is MockStore ? item : null),
                           ),
                         );
                       },
@@ -520,7 +605,207 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     );
   }
 
-  Widget _buildStoreCard(MockStore store) {
+  Widget _buildStoreCard(dynamic item) {
+    if (item is MockStore) {
+      return _buildMockStoreCard(item);
+    } else {
+      return _buildRealListingCard(item);
+    }
+  }
+
+  Widget _buildRealListingCard(Map<String, dynamic> listing) {
+    // Implement real listing card
+    final String name = listing['foodName'] ?? "Unknown Food";
+    final String type = listing['foodType'] ?? "Meal";
+    final pricing = listing['pricing'] ?? {};
+    final bool isFree = pricing['isFree'] ?? false;
+    final int price = pricing['discountedPrice'] ?? 0;
+    
+    final sellerProfile = listing['sellerProfileId'] ?? {};
+    final String orgName = sellerProfile['orgName'] ?? "Local Seller";
+    final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0).toDouble();
+    final int ratingCount = sellerProfile['stats']?['ratingCount'] ?? 0;
+    
+    // Get expiry time for countdown
+    final String? expiryStr = listing['pickupWindow']?['to'];
+    final DateTime? expiryTime = expiryStr != null ? DateTime.tryParse(expiryStr) : null;
+    
+    final List images = listing['images'] ?? [];
+    final String imageUrl = images.isNotEmpty 
+        ? BackendService.formatImageUrl(images[0])
+        : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => BuyerFoodDetailPage(listing: listing)),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.network(
+                  imageUrl,
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.favorite_border,
+                    size: 20,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      orgName,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        if (rating > 0) ...[
+                          const Icon(Icons.star, size: 14, color: Colors.amber),
+                          const SizedBox(width: 4),
+                          Text(
+                            "${rating.toStringAsFixed(1)} ($ratingCount)",
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                        ],
+                        if (expiryTime != null) ...[
+                          const Icon(Icons.access_time, size: 14, color: Colors.orange),
+                          const SizedBox(width: 4),
+                          Text(
+                            _formatTimeRemaining(expiryTime),
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.orange.shade700,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(
+                          listing['pickupAddressText'] ?? "Bangalore",
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: isFree ? "Free" : "₹$price",
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        TextSpan(
+                          text: " / item",
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BuyerFoodDetailPage(listing: listing),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                      minimumSize: const Size(0, 32),
+                    ),
+                    child: Text(
+                      "Select",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMockStoreCard(MockStore store) {
     bool isFavourite = widget.favouriteIds.contains(store.id);
 
     return InkWell(

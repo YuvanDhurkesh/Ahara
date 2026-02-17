@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -15,16 +16,30 @@ class SellerListingsPage extends StatefulWidget {
 }
 
 class _SellerListingsPageState extends State<SellerListingsPage> {
-  List<Listing> _activeListings = [];
-  List<Listing> _completedListings = [];
-  List<Listing> _expiredListings = [];
+  List<Listing> _allListings = [];
   bool _isLoading = true;
   String? _errorMessage;
+  
+  // Real-time state for dynamic expiry
+  DateTime _now = DateTime.now();
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _fetchListings();
+    // Update timer every 10 seconds for live countdown
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (mounted) {
+        setState(() => _now = DateTime.now());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   Future<void> _fetchListings() async {
@@ -45,16 +60,19 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
       final profileData = await BackendService.getUserProfile(firebaseUser.uid);
       final mongoSellerId = profileData['user']['_id'];
 
-      // 2. Fetch all statuses
+      // 2. Fetch all listings (we'll filter client-side for real-time updates)
       final activeJson = await BackendService.getSellerListings(mongoSellerId, 'active');
       final completedJson = await BackendService.getSellerListings(mongoSellerId, 'completed');
       final expiredJson = await BackendService.getSellerListings(mongoSellerId, 'expired');
 
       if (mounted) {
         setState(() {
-          _activeListings = activeJson.map((j) => Listing.fromJson(j)).toList();
-          _completedListings = completedJson.map((j) => Listing.fromJson(j)).toList();
-          _expiredListings = expiredJson.map((j) => Listing.fromJson(j)).toList();
+          // Combine all into _allListings for dynamic filtering
+          _allListings = [
+            ...activeJson.map((j) => Listing.fromJson(j)),
+            ...completedJson.map((j) => Listing.fromJson(j)),
+            ...expiredJson.map((j) => Listing.fromJson(j)),
+          ];
           _isLoading = false;
         });
       }
@@ -66,6 +84,26 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
         });
       }
     }
+  }
+
+  // Dynamic getters for real-time filtering
+  List<Listing> get _activeListings {
+    return _allListings.where((l) {
+      return l.expiryTime.isAfter(_now) && 
+             l.status != ListingStatus.claimed &&
+             (l.quantityValue > 0);
+    }).toList();
+  }
+
+  List<Listing> get _expiredListings {
+    return _allListings.where((l) {
+      return (l.expiryTime.isBefore(_now) || l.expiryTime.isAtSameMomentAs(_now)) &&
+             l.status != ListingStatus.claimed;
+    }).toList();
+  }
+
+  List<Listing> get _completedListings {
+    return _allListings.where((l) => l.status == ListingStatus.claimed).toList();
   }
 
   @override
@@ -167,6 +205,117 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
     );
   }
 
+  Future<void> _showRelistDialog(Listing listing) async {
+    DateTime? newFrom;
+    DateTime? newTo;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Relist Listing"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Relist: ${listing.foodName}"),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 7)),
+                );
+                if (picked != null) {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (time != null) {
+                    newFrom = DateTime(
+                      picked.year,
+                      picked.month,
+                      picked.day,
+                      time.hour,
+                      time.minute,
+                    );
+                  }
+                }
+              },
+              child: Text(newFrom == null ? "Select Start Time" : "From: ${newFrom!.toString().substring(0, 16)}"),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now().add(const Duration(hours: 2)),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 7)),
+                );
+                if (picked != null) {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (time != null) {
+                    newTo = DateTime(
+                      picked.year,
+                      picked.month,
+                      picked.day,
+                      time.hour,
+                      time.minute,
+                    );
+                  }
+                }
+              },
+              child: Text(newTo == null ? "Select End Time" : "To: ${newTo!.toString().substring(0, 16)}"),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (newFrom != null && newTo != null) {
+                Navigator.pop(context, true);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Please select both start and end times")),
+                );
+              }
+            },
+            child: const Text("Relist"),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && newFrom != null && newTo != null) {
+      try {
+        await BackendService.relistListing(listing.id, {
+          "from": newFrom!.toIso8601String(),
+          "to": newTo!.toIso8601String(),
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Listing relisted successfully!")),
+          );
+          _fetchListings();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to relist: $e")),
+          );
+        }
+      }
+    }
+  }
+
   Widget _buildEmptyState(BuildContext context, ListingStatus status) {
     String message = "No listings yet";
     if (status == ListingStatus.claimed) message = "No completed listings";
@@ -213,6 +362,8 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
   }
 
   Widget _buildListingCard(BuildContext context, Listing listing) {
+    final bool isExpired = _now.isAfter(listing.expiryTime);
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
@@ -362,11 +513,13 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      listing.expiryTime.isAfter(DateTime.now())
-                        ? "Expires in ${_formatDuration(listing.expiryTime.difference(DateTime.now()))}"
-                        : "Expired",
+                      _now.isBefore(listing.expiryTime)
+                          ? "Expires in ${_formatDuration(listing.expiryTime.difference(_now))}"
+                          : "Expired ${_formatDuration(_now.difference(listing.expiryTime))} ago",
                       style: TextStyle(
-                        color: listing.expiryTime.isAfter(DateTime.now()) ? Colors.orange.shade700 : Colors.red,
+                        color: _now.isBefore(listing.expiryTime) 
+                            ? Colors.orange.shade700 
+                            : Colors.red,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),
@@ -419,21 +572,36 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                           child: const Text("Edit"),
                         ),
                         const SizedBox(width: 4),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side: const BorderSide(color: AppColors.primary),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                        if (isExpired)
+                          ElevatedButton.icon(
+                            onPressed: () => _showRelistDialog(listing),
+                            icon: const Icon(Icons.refresh, size: 16),
+                            label: const Text("Relist"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          )
+                        else
+                          ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              side: const BorderSide(color: AppColors.primary),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              "View Details",
+                              style: TextStyle(color: AppColors.primary),
                             ),
                           ),
-                          child: const Text(
-                            "View Details",
-                            style: TextStyle(color: AppColors.primary),
-                          ),
-                        ),
                       ],
                     ),
                   ],
