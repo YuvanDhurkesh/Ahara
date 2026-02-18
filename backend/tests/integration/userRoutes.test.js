@@ -3,7 +3,17 @@ const app = require('../../server');
 const mongoose = require('mongoose');
 const User = require('../../models/User');
 
+const { connect, disconnect } = require('../setup');
+
 describe('User Routes Integration Tests', () => {
+
+    beforeAll(async () => {
+        await connect();
+    });
+
+    afterAll(async () => {
+        await disconnect();
+    });
 
     // Clear database before each test
     beforeEach(async () => {

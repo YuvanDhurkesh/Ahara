@@ -51,7 +51,8 @@ describe('Listing Routes Integration Tests', () => {
         const res = await request(app)
             .post('/api/listings/create')
             .send({
-                firebaseUID: 'seller-test-uid',
+                sellerId: sellerUser._id,
+                sellerProfileId: sellerProfile._id,
                 foodName: 'Fresh Apples',
                 description: 'A box of fresh apples',
                 quantityText: '5kg',

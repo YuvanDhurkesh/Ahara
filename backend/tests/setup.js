@@ -9,11 +9,13 @@ dotenv.config();
 exports.connect = async () => {
     mongoServer = await MongoMemoryServer.create({
         replSet: {
+            name: 'rs0',
             count: 1,
             storageEngine: 'wiredTiger',
         }
     });
     const uri = mongoServer.getUri();
+    console.log("MongoMemoryServer URI:", uri);
     await mongoose.connect(uri);
 };
 
