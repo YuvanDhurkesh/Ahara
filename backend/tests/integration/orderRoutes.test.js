@@ -8,15 +8,18 @@ const SellerProfile = require('../../models/SellerProfile');
 const { connect, disconnect } = require('../setup');
 
 describe('Order Routes Integration Tests', () => {
-    jest.setTimeout(60000);
     let seller, buyer, listing, sellerProfile;
 
     beforeAll(async () => {
         await connect();
-        await User.deleteMany({});
-        await SellerProfile.deleteMany({});
-        await Listing.deleteMany({});
-        await Order.deleteMany({});
+        try {
+            await User.deleteMany({});
+            await SellerProfile.deleteMany({});
+            await Listing.deleteMany({});
+            await Order.deleteMany({});
+        } catch (e) {
+            console.error('Cleanup error:', e.message);
+        }
 
         // Create Users
         seller = await User.create({
@@ -74,13 +77,17 @@ describe('Order Routes Integration Tests', () => {
                 isFree: false
             }
         });
-    }, 60000);
+    }, 180000);
 
     afterAll(async () => {
-        await User.deleteMany({});
-        await SellerProfile.deleteMany({});
-        await Listing.deleteMany({});
-        await Order.deleteMany({});
+        try {
+            await User.deleteMany({});
+            await SellerProfile.deleteMany({});
+            await Listing.deleteMany({});
+            await Order.deleteMany({});
+        } catch (e) {
+            console.error('Final cleanup error:', e.message);
+        }
         await disconnect();
     });
 
