@@ -20,11 +20,14 @@ describe('Order Routes Integration Tests', () => {
             await Order.deleteMany({});
 
             // Explicitly create collections to avoid "Cannot create namespace in transaction" error
-            await User.createCollection();
-            await SellerProfile.createCollection();
-            await Listing.createCollection();
-            await Order.createCollection();
-            await Notification.createCollection();
+            const collections = ['users', 'sellerprofiles', 'listings', 'orders', 'notifications'];
+            const existingCollections = (await mongoose.connection.db.listCollections().toArray()).map(c => c.name);
+
+            if (!existingCollections.includes('users')) await User.createCollection();
+            if (!existingCollections.includes('sellerprofiles')) await SellerProfile.createCollection();
+            if (!existingCollections.includes('listings')) await Listing.createCollection();
+            if (!existingCollections.includes('orders')) await Order.createCollection();
+            if (!existingCollections.includes('notifications')) await Notification.createCollection();
 
             const cols = await mongoose.connection.db.listCollections().toArray();
             console.log("✅ Verified Collections:", cols.map(c => c.name));
