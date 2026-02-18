@@ -141,8 +141,18 @@ exports.getBuyerOrders = async (req, res) => {
         if (status) query.status = status;
 
         const orders = await Order.find(query)
-            .populate("listingId", "foodName images pricing pickupAddressText")
-            .populate('sellerId', 'name email firebaseUid')
+            .populate({
+                path: "listingId",
+                select: "foodName images pricing pickupAddressText pickupWindow safetyStatus isSafetyValidated"
+            })
+            .populate({
+                path: "sellerId",
+                select: "name email phone firebaseUid trustScore role addressText"
+            })
+            .populate({
+                path: "volunteerId",
+                select: "name phone trustScore"
+            })
             .sort({ createdAt: -1 });
 
         res.status(200).json(orders);
