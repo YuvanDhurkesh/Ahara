@@ -116,6 +116,39 @@ class BackendService {
     }
   }
 
+  static Future<void> updateSellerProfile({
+    required String firebaseUid,
+    String? name,
+    String? phone,
+    String? addressText,
+    String? orgName,
+    String? fssaiNumber,
+    String? pickupHours,
+  }) async {
+    final url = Uri.parse("$baseUrl/users/$firebaseUid/seller-profile");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({
+        if (name != null) "name": name,
+        if (phone != null) "phone": phone,
+        if (addressText != null) "addressText": addressText,
+        if (orgName != null) "orgName": orgName,
+        if (fssaiNumber != null) "fssaiNumber": fssaiNumber,
+        if (pickupHours != null) "pickupHours": pickupHours,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? "Failed to update seller profile");
+    }
+  }
+
   // ========================= LISTINGS =========================
 
   static Future<List<Map<String, dynamic>>> getAllActiveListings() async {
@@ -184,6 +217,32 @@ class BackendService {
       return jsonDecode(response.body);
     } else {
       throw Exception("Failed to fetch seller stats");
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getActiveListings(
+    String sellerId,
+  ) async {
+    final url = Uri.parse("$baseUrl/listings/active?sellerId=$sellerId");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is List) {
+        return List<Map<String, dynamic>>.from(data);
+      } else if (data is Map && data.containsKey('listings')) {
+        return List<Map<String, dynamic>>.from(data['listings']);
+      }
+      return [];
+    } else {
+      throw Exception("Failed to fetch active listings");
     }
   }
 

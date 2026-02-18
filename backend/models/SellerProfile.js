@@ -18,6 +18,8 @@ const sellerProfileSchema = new mongoose.Schema(
         businessState: String,
         businessPincode: String,
 
+        pickupHours: { type: String, default: "09:00 AM - 09:00 PM" },
+
         // FSSAI verification
         fssai: {
             number: { type: String }, // Made optional
