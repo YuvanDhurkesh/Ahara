@@ -24,7 +24,11 @@ describe('Order Routes Integration Tests', () => {
             await SellerProfile.createCollection();
             await Listing.createCollection();
             await Order.createCollection();
+            await Order.createCollection();
             await Notification.createCollection();
+
+            const cols = await mongoose.connection.db.listCollections().toArray();
+            console.log("✅ Verified Collections:", cols.map(c => c.name));
         } catch (e) {
             console.error('Cleanup/Setup error:', e.message);
         }
@@ -120,8 +124,8 @@ describe('Order Routes Integration Tests', () => {
             });
 
         if (res.statusCode !== 201) {
-            console.log("!!! ORDER CREATION FAILED !!!");
-            console.log(JSON.stringify(res.body, null, 2));
+            console.error("!!! ORDER CREATION FAILED !!!");
+            console.error(JSON.stringify(res.body, null, 2));
         }
 
         expect(res.statusCode).toBe(201);
