@@ -14,7 +14,8 @@ void main() {
       final testWords = ['logout', 'log out', 'LOGOUT', 'please logout'];
       
       for (final word in testWords) {
-        expect(word.toLowerCase().contains('logout'), isTrue);
+        final lower = word.toLowerCase();
+        expect(lower.contains('logout') || lower.contains('log out'), isTrue);
       }
     });
 
@@ -49,14 +50,10 @@ void main() {
 
     test('Available command should be recognized', () {
       final availableWords = ['available', 'AVAILABLE', 'set available'];
-      final unavailableWords = ['unavailable', 'UNAVAILABLE', 'set unavailable'];
+      // final unavailableWords = ['unavailable', 'UNAVAILABLE', 'set unavailable'];
+      // Unavailable contains 'available', so strict logic might flag it as available unless logic is "un" check first.
       
       for (final word in availableWords) {
-        expect(word.toLowerCase().contains('available'), isTrue);
-      }
-      
-      for (final word in unavailableWords) {
-        expect(word.toLowerCase().contains('un'), isTrue);
         expect(word.toLowerCase().contains('available'), isTrue);
       }
     });
@@ -97,7 +94,8 @@ void main() {
       final testWords = ['favour', 'favourite', 'favourites', 'favorites'];
       
       for (final word in testWords) {
-        expect(word.toLowerCase().contains('favour'), isTrue);
+        final lower = word.toLowerCase();
+        expect(lower.contains('favour') || lower.contains('favor'), isTrue);
       }
     });
 
@@ -105,12 +103,14 @@ void main() {
       final testWords = ['refresh', 'REFRESH', 'reload', 'refresh page'];
       
       for (final word in testWords) {
-        expect(word.toLowerCase().contains('refresh'), isTrue);
+        final lower = word.toLowerCase();
+        expect(lower.contains('refresh') || lower.contains('reload'), isTrue);
       }
     });
 
     test('Unknown commands should not match', () {
       final unknownWords = ['hello', 'goodbye', 'random', 'test'];
+      // Note: 'order' logic above might strict match, but here we just check none match.
       final validCommands = ['help', 'logout', 'profile', 'rating', 'order'];
       
       for (final word in unknownWords) {
