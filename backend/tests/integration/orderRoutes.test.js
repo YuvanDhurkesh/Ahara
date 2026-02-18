@@ -24,7 +24,6 @@ describe('Order Routes Integration Tests', () => {
             await SellerProfile.createCollection();
             await Listing.createCollection();
             await Order.createCollection();
-            await Order.createCollection();
             await Notification.createCollection();
 
             const cols = await mongoose.connection.db.listCollections().toArray();
