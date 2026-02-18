@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../data/providers/app_auth_provider.dart';
 
 class BuyerAccountDetailsPage extends StatefulWidget {
   const BuyerAccountDetailsPage({super.key});
@@ -13,16 +15,51 @@ class BuyerAccountDetailsPage extends StatefulWidget {
 class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
   // Controllers
   final _nameController = TextEditingController(text: "");
-  final _emailController = TextEditingController(
-    text: "harishreedevi58@gmail.com",
-  );
+  final _emailController = TextEditingController(text: "");
   final _phoneController = TextEditingController(text: "");
-  final _countryController = TextEditingController(text: "United States");
+  final _countryController = TextEditingController(text: "");
   final _genderController = TextEditingController(text: "");
   final _dietaryController = TextEditingController(text: "");
   final _birthdayController = TextEditingController(
     text: "",
   ); // Could use DatePicker
+
+  String? _lastHydratedUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final auth = context.read<AppAuthProvider>();
+      if (auth.mongoUser == null && auth.currentUser != null) {
+        auth.refreshMongoUser();
+      }
+    });
+  }
+
+  void _hydrateFromBackend(AppAuthProvider auth) {
+    final mongoUser = auth.mongoUser;
+    final mongoProfile = auth.mongoProfile;
+    final currentUserId = mongoUser?['_id']?.toString();
+
+    if (currentUserId == null || currentUserId == _lastHydratedUserId) {
+      return;
+    }
+
+    _nameController.text = (mongoUser?['name'] ?? '').toString();
+    _emailController.text =
+        (mongoUser?['email'] ?? auth.currentUser?.email ?? '').toString();
+    _phoneController.text = (mongoUser?['phone'] ?? '').toString();
+    _countryController.text = (mongoUser?['addressText'] ?? '').toString();
+
+    final dietary = mongoProfile?['dietaryPreferences'];
+    if (dietary is List) {
+      _dietaryController.text = dietary.map((e) => e.toString()).join(', ');
+    }
+
+    _lastHydratedUserId = currentUserId;
+  }
 
   @override
   void dispose() {
@@ -38,6 +75,9 @@ class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AppAuthProvider>();
+    _hydrateFromBackend(auth);
+
     return Scaffold(
       backgroundColor: const Color(0xFFFDFBF7), // Slightly warmer cream
       appBar: AppBar(
@@ -85,7 +125,7 @@ class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
                 keyboardType: TextInputType.phone,
               ),
               _buildDivider(),
-              _buildInputRow("Country", _countryController),
+              _buildInputRow("Location", _countryController),
               _buildDivider(),
               _buildInputRow("Gender", _genderController, optional: true),
               _buildDivider(),

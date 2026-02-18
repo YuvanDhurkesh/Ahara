@@ -6,13 +6,98 @@ import 'buyer_account_details_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
 import 'buyer_notifications_page.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/backend_service.dart';
 import 'package:provider/provider.dart';
 
-class BuyerProfilePage extends StatelessWidget {
+class BuyerProfilePage extends StatefulWidget {
   const BuyerProfilePage({super.key});
 
   @override
+  State<BuyerProfilePage> createState() => _BuyerProfilePageState();
+}
+
+class _BuyerProfilePageState extends State<BuyerProfilePage> {
+  bool _isLoadingStats = true;
+  String? _statsError;
+  int _ordersPlaced = 0;
+  int _ordersCancelled = 0;
+  double _totalSpent = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBuyerStats();
+  }
+
+  Future<void> _fetchBuyerStats() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingStats = true;
+      _statsError = null;
+    });
+
+    try {
+      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+
+      if (authProvider.mongoUser == null) {
+        await authProvider.refreshMongoUser();
+      }
+
+      final buyerId = authProvider.mongoUser?['_id'];
+      if (buyerId == null) {
+        throw Exception("Unable to load buyer profile");
+      }
+
+      final orders = await BackendService.getBuyerOrders(buyerId.toString());
+
+      int totalOrders = 0;
+      int cancelledOrders = 0;
+      double totalSpent = 0;
+
+      for (final order in orders) {
+        totalOrders += 1;
+
+        final status = (order['status'] ?? '').toString();
+        if (status == 'cancelled' || status == 'failed') {
+          cancelledOrders += 1;
+        }
+
+        final pricing = order['pricing'];
+        final total = pricing is Map<String, dynamic>
+            ? pricing['total']
+            : (pricing is Map ? pricing['total'] : null);
+
+        if (total is num) {
+          totalSpent += total.toDouble();
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _ordersPlaced = totalOrders;
+        _ordersCancelled = cancelledOrders;
+        _totalSpent = totalSpent;
+        _isLoadingStats = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _statsError = e.toString();
+        _isLoadingStats = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AppAuthProvider>();
+    final mongoUser = auth.mongoUser;
+    final displayName =
+        (mongoUser?['name'] ?? auth.currentUser?.displayName ?? 'Buyer')
+            .toString();
+    final trustScore = mongoUser?['trustScore'];
+
     return SafeArea(
       child: Center(
         child: ConstrainedBox(
@@ -27,7 +112,7 @@ class BuyerProfilePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Hello, Harishree",
+                      "Hello, $displayName",
                       style: GoogleFonts.lora(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -49,9 +134,13 @@ class BuyerProfilePage extends StatelessWidget {
                     Expanded(
                       child: _buildInfoCard(
                         context,
-                        title: "Rewards",
-                        value: "Gold",
-                        subtext: "2,450 pts",
+                        title: "Orders Placed",
+                        value: _isLoadingStats
+                            ? "..."
+                            : _ordersPlaced.toString(),
+                        subtext: _statsError != null
+                            ? "Unable to load"
+                            : "Real backend data",
                         icon: Icons.star_outline,
                         color: AppColors.primary,
                       ),
@@ -61,8 +150,12 @@ class BuyerProfilePage extends StatelessWidget {
                       child: _buildInfoCard(
                         context,
                         title: "Trust Score",
-                        value: "950",
-                        subtext: "Top 5% Buyer",
+                        value: trustScore == null
+                            ? "N/A"
+                            : trustScore.toString(),
+                        subtext: trustScore == null
+                            ? "Not available for buyer"
+                            : "From backend profile",
                         icon: Icons.shield_outlined,
                         color: AppColors.secondary,
                       ),
@@ -85,11 +178,21 @@ class BuyerProfilePage extends StatelessWidget {
                 ResponsiveLayout(
                   mobile: Column(
                     children: [
-                      _buildImpactStat("Meals Saved", "12", Icons.lunch_dining),
-                      _buildImpactStat("CO2 Saved", "4.5 kg", Icons.co2),
                       _buildImpactStat(
-                        "Money Saved",
-                        "₹1,200",
+                        "Orders Placed",
+                        _isLoadingStats ? "..." : _ordersPlaced.toString(),
+                        Icons.shopping_bag_outlined,
+                      ),
+                      _buildImpactStat(
+                        "Orders Cancelled",
+                        _isLoadingStats ? "..." : _ordersCancelled.toString(),
+                        Icons.cancel_outlined,
+                      ),
+                      _buildImpactStat(
+                        "Total Spent",
+                        _isLoadingStats
+                            ? "..."
+                            : "₹${_totalSpent.toStringAsFixed(0)}",
                         Icons.savings_outlined,
                       ),
                     ],
@@ -98,24 +201,26 @@ class BuyerProfilePage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: _buildImpactStat(
-                          "Meals Saved",
-                          "12",
-                          Icons.lunch_dining,
+                          "Orders Placed",
+                          _isLoadingStats ? "..." : _ordersPlaced.toString(),
+                          Icons.shopping_bag_outlined,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildImpactStat(
-                          "CO2 Saved",
-                          "4.5 kg",
-                          Icons.co2,
+                          "Orders Cancelled",
+                          _isLoadingStats ? "..." : _ordersCancelled.toString(),
+                          Icons.cancel_outlined,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildImpactStat(
-                          "Money Saved",
-                          "₹1,200",
+                          "Total Spent",
+                          _isLoadingStats
+                              ? "..."
+                              : "₹${_totalSpent.toStringAsFixed(0)}",
                           Icons.savings_outlined,
                         ),
                       ),
@@ -356,7 +461,10 @@ class BuyerProfilePage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: OutlinedButton(
                         onPressed: () async {
-                          await Provider.of<AppAuthProvider>(context, listen: false).logout();
+                          await Provider.of<AppAuthProvider>(
+                            context,
+                            listen: false,
+                          ).logout();
                           if (context.mounted) {
                             Navigator.pushAndRemoveUntil(
                               context,
