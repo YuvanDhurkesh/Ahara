@@ -14,15 +14,15 @@ describe('User Routes Integration Tests', () => {
         const res = await request(app)
             .post('/api/users/create')
             .send({
-                firebaseUID: {
-                    firebaseUid: 'test-uid-123',
-                    name: 'Integration User',
-                    email: 'integration@test.com'
-                }
+                firebaseUid: 'test-uid-123',
+                name: 'Integration User',
+                email: 'integration@test.com',
+                phone: '1234567890',
+                role: 'buyer'
             });
 
         expect(res.statusCode).toBe(201);
-        expect(res.body.message).toBe('User created successfully');
+        expect(res.body.message).toBe('User and profile created successfully');
         expect(res.body.user.firebaseUid).toBe('test-uid-123');
 
         // Verify in DB
@@ -36,16 +36,19 @@ describe('User Routes Integration Tests', () => {
         await User.create({
             firebaseUid: 'duplicate-uid',
             name: 'Original User',
-            email: 'original@test.com'
+            email: 'original@test.com',
+            phone: '0987654321',
+            role: 'buyer'
         });
 
         const res = await request(app)
             .post('/api/users/create')
             .send({
-                firebaseUID: {
-                    firebaseUid: 'duplicate-uid',
-                    name: 'Duplicate Attempt'
-                }
+                firebaseUid: 'duplicate-uid',
+                name: 'Duplicate Attempt',
+                email: 'duplicate@test.com',
+                phone: '1122334455',
+                role: 'buyer'
             });
 
         expect(res.statusCode).toBe(200);
@@ -61,9 +64,12 @@ describe('User Routes Integration Tests', () => {
         const res = await request(app)
             .post('/api/users/create')
             .send({
-                firebaseUID: {} // Missing firebaseUid
+                // Missing firebaseUid
+                name: 'No UID User',
+                role: 'buyer'
             });
 
         expect(res.statusCode).toBe(400);
+        expect(res.body.error).toContain('firebaseUid, email, and role are required');
     });
 });
