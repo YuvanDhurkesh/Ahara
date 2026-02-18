@@ -391,6 +391,44 @@ class _VolunteerHomePageState
   }
 
   //----------------------------------------------------------
+  // ALERT BANNER
+  //----------------------------------------------------------
+
+  Widget _alertBanner() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            color: AppColors.primary,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context)!
+                  .translate('rescue_alert_banner'),
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //----------------------------------------------------------
   // RESCUE REQUESTS
   //----------------------------------------------------------
 

@@ -89,6 +89,73 @@ class BackendService {
 
   // ========================= LISTINGS =========================
 
+  static Future<List<Map<String, dynamic>>> getAllActiveListings() async {
+    final url = Uri.parse("$baseUrl/listings/active");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is List) {
+        return List<Map<String, dynamic>>.from(data);
+      } else if (data is Map && data.containsKey('listings')) {
+        return List<Map<String, dynamic>>.from(data['listings']);
+      }
+      return [];
+    } else {
+      throw Exception("Failed to fetch active listings");
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getSellerListings(
+      String sellerId, String status) async {
+    final url = Uri.parse("$baseUrl/listings/$status?sellerId=$sellerId");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is List) {
+        return List<Map<String, dynamic>>.from(data);
+      } else if (data is Map && data.containsKey('listings')) {
+        return List<Map<String, dynamic>>.from(data['listings']);
+      }
+      return [];
+    } else {
+      throw Exception("Failed to fetch $status listings");
+    }
+  }
+
+  static Future<Map<String, dynamic>> getSellerStats(String sellerId) async {
+    final url = Uri.parse("$baseUrl/listings/seller-stats?sellerId=$sellerId");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to fetch seller stats");
+    }
+  }
+
   static Future<void> createListing(
       Map<String, dynamic> listingData) async {
     final url = Uri.parse("$baseUrl/listings/create");
@@ -226,6 +293,142 @@ class BackendService {
     }
   }
 
+  static Future<Map<String, dynamic>> getOrderById(String orderId) async {
+    final url = Uri.parse("$baseUrl/orders/$orderId");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to fetch order");
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getBuyerOrders(String buyerId) async {
+    final url = Uri.parse("$baseUrl/orders/buyer/$buyerId");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is List) {
+        return List<Map<String, dynamic>>.from(data);
+      } else if (data is Map && data.containsKey('orders')) {
+        return List<Map<String, dynamic>>.from(data['orders']);
+      }
+      return [];
+    } else {
+      throw Exception("Failed to fetch buyer orders");
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getSellerOrders(String sellerId) async {
+    final url = Uri.parse("$baseUrl/orders/seller/$sellerId");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is List) {
+        return List<Map<String, dynamic>>.from(data);
+      } else if (data is Map && data.containsKey('orders')) {
+        return List<Map<String, dynamic>>.from(data['orders']);
+      }
+      return [];
+    } else {
+      throw Exception("Failed to fetch seller orders");
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getVolunteerRescueRequests(String volunteerId) async {
+    final url = Uri.parse("$baseUrl/orders/volunteer/requests/$volunteerId");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is List) {
+        return List<Map<String, dynamic>>.from(data);
+      } else if (data is Map && data.containsKey('requests')) {
+        return List<Map<String, dynamic>>.from(data['requests']);
+      }
+      return [];
+    } else {
+      throw Exception("Failed to fetch rescue requests");
+    }
+  }
+
+  static Future<void> acceptRescueRequest(
+      String requestId, String volunteerId) async {
+    final url = Uri.parse("$baseUrl/orders/$requestId/accept");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({
+        "volunteerId": volunteerId,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = jsonDecode(response.body);
+      throw Exception(
+          errorBody['error'] ??
+              "Failed to accept rescue request");
+    }
+  }
+
+  static Future<void> updateOrder(
+      String orderId,
+      Map<String, dynamic> data) async {
+    final url = Uri.parse("$baseUrl/orders/$orderId");
+
+    final response = await http.patch(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode(data),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody =
+          jsonDecode(response.body);
+      throw Exception(
+          errorBody['error'] ??
+              "Failed to update order");
+    }
+  }
+
   static Future<void> updateOrderStatus(
       String orderId,
       String status) async {
@@ -278,5 +481,48 @@ class BackendService {
           errorBody['error'] ??
               "Failed to cancel order");
     }
+  }
+
+  // ========================= IMAGE UTILITIES =========================
+
+  static String formatImageUrl(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return generateFoodImageUrl("food");
+    }
+
+    // If it's already a full HTTP/HTTPS URL, return as is
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+
+    // If it's a relative path, prepend the base URL
+    if (imageUrl.startsWith('/')) {
+      return "$baseUrl$imageUrl";
+    }
+
+    // Otherwise, prepend base URL with /uploads/
+    return "$baseUrl/uploads/$imageUrl";
+  }
+
+  static bool isValidImageUrl(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return false;
+    }
+
+    try {
+      Uri.parse(imageUrl);
+      return imageUrl.startsWith('http://') ||
+          imageUrl.startsWith('https://') ||
+          imageUrl.startsWith('/');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static String generateFoodImageUrl(String foodName) {
+    // Generate a placeholder image URL using a food image service
+    // Using a simple approach with emoji representation
+    final encodedName = Uri.encodeComponent(foodName);
+    return "https://via.placeholder.com/300?text=${encodedName.replaceAll('%20', '+')}";
   }
 }
