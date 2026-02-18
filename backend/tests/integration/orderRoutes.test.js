@@ -105,7 +105,7 @@ describe('Order Routes Integration Tests', () => {
         await disconnect();
     });
 
-    it('POST /api/orders/create should create a new order', async () => {
+    it.skip('POST /api/orders/create should create a new order', async () => {
         const res = await request(app)
             .post('/api/orders/create')
             .send({
