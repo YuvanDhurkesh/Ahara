@@ -1,3 +1,10 @@
+/// File: volunteer_register_page.dart
+/// Purpose: Onboarding form for logistics and delivery volunteers.
+/// 
+/// Responsibilities:
+/// - Captures volunteer demographics and transport capabilities
+/// - Validates age eligibility for vehicle-based transport
+/// - Synchronizes volunteer profile with MongoDB
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +16,12 @@ import '../../../shared/widgets/phone_input_field.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
 
+/// Registration interface for community delivery participants.
+/// 
+/// Features:
+/// - Transport-aware age validation logic
+/// - Date-of-birth picker for eligibility checks
+/// - Native location and contact profile initialization
 class VolunteerRegisterPage extends StatefulWidget {
   const VolunteerRegisterPage({super.key});
 
@@ -17,6 +30,7 @@ class VolunteerRegisterPage extends StatefulWidget {
       _VolunteerRegisterPageState();
 }
 
+/// Monitors volunteer registration state, transport-specific logic, and form submission.
 class _VolunteerRegisterPageState
     extends State<VolunteerRegisterPage> {
   final _formKey = GlobalKey<FormState>();
@@ -50,6 +64,7 @@ class _VolunteerRegisterPageState
     super.dispose();
   }
 
+  /// Launches a date picker and updates the DOB state.
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -79,6 +94,14 @@ class _VolunteerRegisterPageState
     return age >= 18;
   }
 
+  /// Process account creation with transport-specific eligibility checks.
+  /// 
+  /// Flow:
+  /// 1. Validate form fields
+  /// 2. Verify 18+ age requirement if 'Car' or 'Bike' is selected
+  /// 3. Set loading state
+  /// 4. Invoke [AppAuthProvider.registerUser]
+  /// 5. Route to login on success
   Future<void> _registerVolunteer() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -394,6 +417,7 @@ class _VolunteerRegisterPageState
     );
   }
 
+  /// Builds a standard semantic label for form categorization.
   Widget _buildLabel(String label) {
     return Padding(
       padding:

@@ -1,9 +1,22 @@
+/// File: buyer_order_confirmation_page.dart
+/// Purpose: Post-purchase success state and summarized receipt view.
+/// 
+/// Responsibilities:
+/// - Confirms transaction completion visually
+/// - Surfacing pickup location and time constraints
+/// - Central navigation hub for follow-up actions (Track, Browse)
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_browse_page.dart';
 import 'buyer_orders_page.dart'; // Assuming this is the target page for "My Orders"
 
+/// Terminal stage of the ordering flow for buyers.
+/// 
+/// Features:
+/// - Success animation/iconography
+/// - One-tap navigation to active order tracking
+/// - Safety reminders for pickup scheduling
 class BuyerOrderConfirmationPage extends StatelessWidget {
   final Map<String, dynamic> order;
 

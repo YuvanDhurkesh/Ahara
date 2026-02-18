@@ -1,3 +1,10 @@
+/// File: buyer_orders_page.dart
+/// Purpose: Historical and active order management for buyers.
+/// 
+/// Responsibilities:
+/// - Fetches and categorizes orders (Active vs History)
+/// - Displays live order status with progress indicators
+/// - Links to deep-level order tracking and details
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +14,7 @@ import '../../../shared/styles/app_colors.dart';
 import 'buyer_order_track_page.dart';
 import 'buyer_order_details_page.dart';
 
+/// Tabbed interface for monitoring order lifecycles.
 class BuyerOrdersPage extends StatefulWidget {
   const BuyerOrdersPage({super.key});
 
@@ -14,6 +22,7 @@ class BuyerOrdersPage extends StatefulWidget {
   State<BuyerOrdersPage> createState() => _BuyerOrdersPageState();
 }
 
+/// Manages order synchronization, tab filtering, and status rendering.
 class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
   List<Map<String, dynamic>> _orders = [];
   bool _isLoading = true;
@@ -25,6 +34,7 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
     _fetchOrders();
   }
 
+  /// Synchronizes the order list with the [BackendService].
   Future<void> _fetchOrders() async {
     if (!mounted) return;
     setState(() {
@@ -157,6 +167,7 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
     );
   }
 
+  /// Constructs a summarized order card with status chips and progress bars.
   Widget _buildOrderCard(BuildContext context, Map<String, dynamic> order) {
     final status = order['status'] ?? "unknown";
     final isDelivery = order['fulfillment'] == 'volunteer_delivery';
@@ -384,6 +395,7 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
     );
   }
 
+  /// Renders a multi-stage dot-and-line progress indicator based on order status.
   Widget _buildLiveProgressBar(String status) {
     final List<String> stages = ['placed', 'volunteer_assigned', 'picked_up', 'delivered'];
     int currentIndex = stages.indexOf(status);

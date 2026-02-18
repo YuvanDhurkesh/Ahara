@@ -1,3 +1,10 @@
+/// File: create_listing_page.dart
+/// Purpose: Data entry and validation interface for publishing new food listings.
+/// 
+/// Responsibilities:
+/// - Manages complex form state for food redistribution (Pricing, Expiry, Logistics)
+/// - Handles asynchronous image uploads to the project server
+/// - Coordinates with [LocationPickerPage] for spatial data acquisition
 import 'dart:convert';
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
@@ -12,6 +19,12 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Operational form for introducing new surplus food items into the ecosystem.
+/// 
+/// Features:
+/// - Multi-modal pricing (Free vs Discounted)
+/// - Automated expiry calculation based on food category
+/// - Integrated camera and gallery image acquisition
 class CreateListingPage extends StatefulWidget {
   final Listing? listing;
   const CreateListingPage({super.key, this.listing});
@@ -152,6 +165,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
     );
   }
 
+  /// Validates form integrity and dispatches the data to [BackendService.createListing].
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       try {

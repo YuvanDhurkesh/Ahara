@@ -1,7 +1,20 @@
+/// File: seller_order_detail_page.dart
+/// Purpose: Granular view and lifecycle management for individual food orders.
+/// 
+/// Responsibilities:
+/// - Displays comprehensive order metadata (Items, Buyer, Timing)
+/// - Implements a status transformation stepper for fulfillment tracking
+/// - Provides contextual actions based on the current order state
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Detailed inspection and management interface for a specific order.
+/// 
+/// Features:
+/// - Reactive status synchronization logic
+/// - Visual stepper for fulfillment progress
+/// - Contextual action triggers (Confirm, Cancel, Logistics)
 class SellerOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic> order;
   const SellerOrderDetailPage({super.key, required this.order});
@@ -19,6 +32,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     _currentStatus = widget.order['status'] ?? 'pending';
   }
 
+  /// Dispatcher for updating order status and notifying relevant telemetry services.
   void _updateStatus(String newStatus) {
     setState(() {
       _currentStatus = newStatus;

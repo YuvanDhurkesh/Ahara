@@ -1,9 +1,22 @@
+/// File: auth_service.dart
+/// Purpose: Low-level authentication and database synchronization primitives.
+/// 
+/// Responsibilities:
+/// - Manages Firebase Authentication lifecycle (Sign-in/Sign-up)
+/// - Orchestrates Firestore and MongoDB profile creation
+/// - Implements failure-tolerant backend synchronization
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../config/api_config.dart';
 
+/// Infrastructure service for managing user credentials and cross-platform identity.
+/// 
+/// Features:
+/// - Unified registration flow for all user roles (Buyer, Seller, Volunteer)
+/// - Integrated Firestore metadata storage for auth persistence
+/// - Bearer-token based REST API synchronization
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;

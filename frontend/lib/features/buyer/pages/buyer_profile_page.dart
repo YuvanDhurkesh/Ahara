@@ -1,3 +1,10 @@
+/// File: buyer_profile_page.dart
+/// Purpose: Centralized account hub and impact visualization for buyers.
+/// 
+/// Responsibilities:
+/// - Displays user identity, rewards, and trust metrics
+/// - Visualizes environmental and social impact stats
+/// - Orchestrates account management and logout flows
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
@@ -8,6 +15,12 @@ import 'buyer_notifications_page.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import 'package:provider/provider.dart';
 
+/// Primary profile dashboard for registered buyers.
+/// 
+/// Features:
+/// - Gamified reward tiers (e.g., Gold status)
+/// - Pro-social impact statistics (CO2/Meals saved)
+/// - Quick-access settings and support menu
 class BuyerProfilePage extends StatelessWidget {
   const BuyerProfilePage({super.key});
 
@@ -130,6 +143,7 @@ class BuyerProfilePage extends StatelessWidget {
     );
   }
 
+  /// Builds a stylised card for high-level profile metrics (Rewards/Trust).
   Widget _buildInfoCard(
     BuildContext context, {
     required String title,
@@ -228,6 +242,7 @@ class BuyerProfilePage extends StatelessWidget {
     );
   }
 
+  /// Triggers a bottom sheet containing granular settings and support links.
   void _showManageAccountSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,

@@ -1,3 +1,10 @@
+/// File: buyer_order_details_page.dart
+/// Purpose: Granular breakdown and live lifecycle tracking for a specific order.
+/// 
+/// Responsibilities:
+/// - Visualizes order status, timelines, and handover OTPs
+/// - Displays seller metadata and food safety thresholds
+/// - Provides quick actions (Live Track, Rate, Cancel)
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +13,12 @@ import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_order_rate_page.dart';
 
+/// Comprehensive view for a single order's post-checkout lifecycle.
+/// 
+/// Includes:
+/// - Dynamic status banners
+/// - Fulfillment mode indicators (Delivery vs Pickup)
+/// - Volunteer assignment details
 class BuyerOrderDetailsPage extends StatefulWidget {
   final Map<String, dynamic> order;
 
@@ -15,6 +28,7 @@ class BuyerOrderDetailsPage extends StatefulWidget {
   State<BuyerOrderDetailsPage> createState() => _BuyerOrderDetailsPageState();
 }
 
+/// Manages real-time OTP countdowns, cancellation state, and fulfillment sync.
 class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
   late Map<String, dynamic> _localOrder;
   bool _isCancelled = false;
@@ -114,6 +128,7 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     );
   }
 
+  /// Renders a thematic banner based on the current [status] (e.g., Picking up, Finding Hero).
   Widget _buildStatusBanner(String status) {
     final bannerConfig = {
       'placed': {'color': Colors.blue, 'msg': 'Order placed successfully!'},
@@ -293,6 +308,7 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     );
   }
 
+  /// Displays the secure handover OTP required for fulfillment validation.
   Widget _buildOtpSection(dynamic otp) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -505,6 +521,7 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     );
   }
 
+  /// Vertical timeline reflecting the chronological progress of the order.
   Widget _buildTimelineCard(Map<String, dynamic> order) {
     final timeline = order['timeline'] ?? {};
     final status = order['status'] ?? "placed";

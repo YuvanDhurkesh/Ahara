@@ -1,5 +1,16 @@
+/// File: volunteer_notifications_page.dart
+/// Purpose: Activity feed and alert center for field volunteers.
+/// 
+/// Responsibilities:
+/// - Displays real-time updates regarding delivery requests and completion
+/// - Provides a temporal view of mission-related system events
 import 'package:flutter/material.dart';
 
+/// Interface for monitoring logistical alerts and fulfillment updates.
+/// 
+/// Features:
+/// - Reactive notification tiles for status changes
+/// - Centralized event polling interface
 class VolunteerNotificationsPage extends StatelessWidget {
   const VolunteerNotificationsPage({super.key});
 

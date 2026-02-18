@@ -1,3 +1,10 @@
+/// File: register_selection_page.dart
+/// Purpose: Gateway for new users to choose their application role.
+/// 
+/// Responsibilities:
+/// - Provides role-specific registration entry points
+/// - Synchronizes user language preferences during onboarding
+/// - Links back to the login workflow
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
@@ -9,9 +16,16 @@ import 'login_page.dart';
 import '../../../core/localization/language_provider.dart';
 import 'package:provider/provider.dart';
 
+/// Role selection interface for new user onboarding.
+/// 
+/// Features:
+/// - Visual role cards with descriptive summaries
+/// - Automatic language preference confirmation
+/// - Seamless navigation to specific registration flows
 class RegisterSelectionPage extends StatelessWidget {
   const RegisterSelectionPage({super.key});
 
+  /// Synchronizes locale and routes to the selected registration page.
   void navigateWithRole(BuildContext context, Widget page) {
     Provider.of<LanguageProvider>(context, listen: false).confirmCurrentLanguage();
     Navigator.push(context, MaterialPageRoute(builder: (_) => page));
@@ -124,6 +138,7 @@ class RegisterSelectionPage extends StatelessWidget {
   }
 }
 
+/// Internal stateless card for consistent role presentation.
 class _SelectionCard extends StatelessWidget {
   final String title;
   final String description;

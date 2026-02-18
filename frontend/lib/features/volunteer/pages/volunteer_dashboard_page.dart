@@ -1,3 +1,10 @@
+/// File: volunteer_dashboard_page.dart
+/// Purpose: Main navigational shell for the volunteer experience.
+/// 
+/// Responsibilities:
+/// - Manages top-level navigation state using a [BottomNavigationBar]
+/// - Orchestrates page switching between Home, Deliveries, Verification, and Profile
+/// - Provides a consistent layout wrapper for mobile viewports
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
@@ -9,6 +16,12 @@ import 'volunteer_ratings_page.dart';
 import 'volunteer_profile_page.dart';
 import 'volunteer_verification_page.dart';
 
+/// Root coordination interface for field volunteers.
+/// 
+/// Features:
+/// - Persistent bottom navigation for rapid context switching
+/// - Initial index support for deep-linking into specific modules
+/// - Integrated [SafeArea] for device-agnostic UI stability
 class VolunteerDashboardPage extends StatefulWidget {
   final int initialIndex;
   const VolunteerDashboardPage({super.key, this.initialIndex = 0});

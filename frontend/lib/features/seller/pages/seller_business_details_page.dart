@@ -1,6 +1,18 @@
+/// File: seller_business_details_page.dart
+/// Purpose: Profile management for business-related vendor metadata.
+/// 
+/// Responsibilities:
+/// - Manages field validation for business names, FSSAI licenses, and contact info
+/// - Provides a persistent form for updating seller office/location data
+/// - Implements real-time formatting and validation for compliance tokens
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Management interface for adjusting a seller's professional profile.
+/// 
+/// Includes:
+/// - Integrated FSSAI license validation logic
+/// - Business-specific metadata fields (Hours, Contact, Address)
 class SellerBusinessDetailsPage extends StatefulWidget {
   const SellerBusinessDetailsPage({super.key});
 

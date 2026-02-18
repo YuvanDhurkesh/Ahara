@@ -1,7 +1,19 @@
+/// File: seller_notifications_page.dart
+/// Purpose: Historical and real-time event log for seller-specific activities.
+/// 
+/// Responsibilities:
+/// - Displays categorized notifications (Orders, Inventory, System)
+/// - Grouping logic for temporal visualization of events
+/// - Interface for granular interaction with individual alerts
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Central communication hub for alerts, updates, and order notifications.
+/// 
+/// Components:
+/// - Notification grouping by category
+/// - Detail-oriented list items with semantic iconography
 class SellerNotificationsPage extends StatelessWidget {
   const SellerNotificationsPage({super.key});
 

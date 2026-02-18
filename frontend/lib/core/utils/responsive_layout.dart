@@ -1,5 +1,17 @@
+/// File: responsive_layout.dart
+/// Purpose: Viewport-aware layout orchestration for multi-platform support.
+/// 
+/// Responsibilities:
+/// - Provides a declarative interface for adaptive UI switching
+/// - Visualizes breakpoint thresholds for Mobile, Tablet, and Desktop tiers
 import 'package:flutter/material.dart';
 
+/// Declarative layout wrapper for building device-agnostic interfaces.
+/// 
+/// Logic:
+/// - Mobile: < 600px
+/// - Tablet: 600px to 1100px
+/// - Desktop: >= 1100px
 class ResponsiveLayout extends StatelessWidget {
   final Widget mobile;
   final Widget? tablet;

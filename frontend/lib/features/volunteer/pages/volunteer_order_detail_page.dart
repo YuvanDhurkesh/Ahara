@@ -1,7 +1,20 @@
+/// File: volunteer_order_detail_page.dart
+/// Purpose: Logistical coordination view for executing food rescues.
+/// 
+/// Responsibilities:
+/// - Visualizes routes using [GoogleMap] integration
+/// - Displays granular pickup and delivery contact/location metadata
+/// - Provides external mapping triggers for turn-by-turn navigation
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Mission execution interface for navigating and fulfilling food rescue orders.
+/// 
+/// Features:
+/// - Real-time spatial visualization using [GoogleMaps] markers and polylines
+/// - Integrated contact shortcuts (Call/SMS) for stakeholders
+/// - Centralized order summary and timing constraints
 class VolunteerOrderDetailPage extends StatefulWidget {
   const VolunteerOrderDetailPage({super.key});
 

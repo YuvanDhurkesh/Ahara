@@ -1,6 +1,19 @@
+/// File: volunteer_ratings_page.dart
+/// Purpose: Impact visualization and quality control dashboard for field agents.
+/// 
+/// Responsibilities:
+/// - Displays aggregated performance metrics (On-time rate, Success rate)
+/// - Visualizes gamified badges earned through community service
+/// - Aggregates and renders qualitative feedback from donors and recipients
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Comprehensive performance and trust score evaluation interface.
+/// 
+/// Features:
+/// - Achievement visualization (Badges & Milestones)
+/// - Statistical performance decomposition
+/// - Historical review feed with qualitative sentiment
 class VolunteerRatingsPage extends StatelessWidget {
   const VolunteerRatingsPage({super.key});
 

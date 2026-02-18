@@ -1,8 +1,21 @@
+/// File: buyer_checkout_page.dart
+/// Purpose: Transactional interface for finalizing food orders.
+/// 
+/// Responsibilities:
+/// - Manages shipping address and payment method selection
+/// - Calculates subtotal, taxes, and final costs
+/// - Handles promo code application and fulfillment validation
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'buyer_dashboard_page.dart';
 import '../data/mock_stores.dart';
 
+/// Interactive checkout wizard for finalizing food purchases.
+/// 
+/// Features:
+/// - Dynamic delivery option visibility
+/// - Multi-step interactive selectors (Address/Payment/Promo)
+/// - Grand total arithmetic with mock pricing integration
 class BuyerCheckoutPage extends StatefulWidget {
   final MockStore store;
 
@@ -12,6 +25,7 @@ class BuyerCheckoutPage extends StatefulWidget {
   State<BuyerCheckoutPage> createState() => _BuyerCheckoutPageState();
 }
 
+/// Manages transactional state, promo validation, and selection sheets.
 class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
   // State Variables
   String _selectedAddress = "Add shipping address";

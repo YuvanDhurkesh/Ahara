@@ -1,7 +1,20 @@
+/// File: buyer_add_address_page.dart
+/// Purpose: Interface for registering new delivery locations.
+/// 
+/// Responsibilities:
+/// - Provides a manual entry form for address components
+/// - Implements a mock-interactive map for visual pin placement
+/// - Synchronizes coordinates with high-accuracy GPS (Mocked)
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Dual-mode address registration wizard.
+/// 
+/// Includes:
+/// - [TabBar] controlled toggle between Form and Map modes
+/// - Auto-fill functionality via device GPS
+/// - Draggable map marker for precise coordinate selection
 class BuyerAddAddressPage extends StatefulWidget {
   const BuyerAddAddressPage({super.key});
 
@@ -9,6 +22,7 @@ class BuyerAddAddressPage extends StatefulWidget {
   State<BuyerAddAddressPage> createState() => _BuyerAddAddressPageState();
 }
 
+/// Manages form validation, tab transitions, and mock map painting logic.
 class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;

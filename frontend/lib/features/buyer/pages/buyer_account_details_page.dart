@@ -1,7 +1,20 @@
+/// File: buyer_account_details_page.dart
+/// Purpose: Profile management and personal preference configuration for buyers.
+/// 
+/// Responsibilities:
+/// - Collects personal metadata (Name, Email, Gender, Birthday)
+/// - Stores dietary and regional preferences
+/// - Links to delivery address management
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Granular profile editor for buyer-specific information.
+/// 
+/// Features:
+/// - Semantic grouping of personal vs delivery metadata
+/// - Dietary preference capture for personalized listings
+/// - Form-style layout with inline validation hints
 class BuyerAccountDetailsPage extends StatefulWidget {
   const BuyerAccountDetailsPage({super.key});
 
@@ -10,6 +23,7 @@ class BuyerAccountDetailsPage extends StatefulWidget {
       _BuyerAccountDetailsPageState();
 }
 
+/// Manages form controller lifecycles and preference persistence.
 class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
   // Controllers
   final _nameController = TextEditingController(text: "");

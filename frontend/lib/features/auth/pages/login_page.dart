@@ -1,3 +1,11 @@
+/// File: login_page.dart
+/// Purpose: Handles user authentication UI and login workflow.
+/// 
+/// Responsibilities:
+/// - Captures user credentials
+/// - Validates input
+/// - Calls authentication API
+/// - Navigates to role-based dashboard on success
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../buyer/pages/buyer_dashboard_page.dart';
@@ -9,6 +17,12 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
+/// Entry point for user authentication.
+/// 
+/// Features:
+/// - Role-based redirection logic
+/// - Google Sign-In integration
+/// - Persistent login state handling
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -16,6 +30,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
+/// Manages login form validation, loading states, and API interaction.
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -44,6 +59,13 @@ class _LoginPageState extends State<LoginPage> {
   /// LOGIN
   //-------------------------------------------------------------
 
+  /// Process user-initiated login via email and password.
+  /// 
+  /// Flow:
+  /// 1. Validate form inputs
+  /// 2. Set loading state
+  /// 3. Invoke [AppAuthProvider.login]
+  /// 4. Fetch user role and navigate to dashboard
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -100,6 +122,12 @@ class _LoginPageState extends State<LoginPage> {
   /// GOOGLE SIGN IN
   //-------------------------------------------------------------
 
+  /// Handles third-party authentication via Google.
+  /// 
+  /// Flow:
+  /// 1. Trigger Google SDK sign-in
+  /// 2. Validate Firebase user token
+  /// 3. Determine user role and route to dashboard
   Future<void> _handleGoogleSignIn() async {
     final auth = context.read<AppAuthProvider>();
 
@@ -300,6 +328,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  /// Builds standardized form labels with consistent typography.
   Widget _buildLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10, left: 4),

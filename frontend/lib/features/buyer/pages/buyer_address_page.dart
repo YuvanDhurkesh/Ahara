@@ -1,9 +1,17 @@
+/// File: buyer_address_page.dart
+/// Purpose: Management and selection hub for buyer's delivery locations.
+/// 
+/// Responsibilities:
+/// - Lists saved addresses with primary selection logic
+/// - Routes to the "Add Address" flow
+/// - Provides feedback on the currently active delivery point
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 
 import 'buyer_add_address_page.dart';
 
+/// List-based interface for managing and selecting delivery addresses.
 class BuyerAddressPage extends StatefulWidget {
   const BuyerAddressPage({super.key});
 
@@ -11,6 +19,7 @@ class BuyerAddressPage extends StatefulWidget {
   State<BuyerAddressPage> createState() => _BuyerAddressPageState();
 }
 
+/// Orchestrates address selection, list management, and navigation callbacks.
 class _BuyerAddressPageState extends State<BuyerAddressPage> {
   final List<Map<String, dynamic>> _addresses = [
     {

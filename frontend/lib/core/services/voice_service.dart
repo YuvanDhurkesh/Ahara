@@ -1,7 +1,20 @@
+/// File: voice_service.dart
+/// Purpose: Accessibility and hands-free interaction service.
+/// 
+/// Responsibilities:
+/// - Orchestrates Speech-to-Text (STT) and Text-to-Speech (TTS) transformations
+/// - Manages multi-lingual voice synthesis and recognition
+/// - Provides reactive state for listening status and captured transcriptions
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/foundation.dart';
 
+/// Reactive cross-platform voice interaction engine.
+/// 
+/// Features:
+/// - Singleton architectural pattern for global availability
+/// - Integrated [SpeechToText] and [FlutterTts] lifecycle management
+/// - Context-aware language switching for TTS synthesis
 class VoiceService extends ChangeNotifier {
   static final VoiceService _instance = VoiceService._internal();
   factory VoiceService() => _instance;

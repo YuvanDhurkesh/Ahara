@@ -1,3 +1,10 @@
+/// File: buyer_food_detail_page.dart
+/// Purpose: Deep-link destination for food specifics and ordering orchestration.
+/// 
+/// Responsibilities:
+/// - Displays granular food metadata and reviews
+/// - Manages specialized "Order Now" / "Claim Now" workflows
+/// - Coordinates volunteer matching and fulfillment selection
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +18,12 @@ import '../../../../core/utils/responsive_layout.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../data/providers/app_auth_provider.dart';
 
+/// Detailed view for a specific food listing or mock store.
+/// 
+/// Features:
+/// - Expiry-aware rendering (auto-locks on expiration)
+/// - Integrated rating and review breakdown
+/// - Multi-step ordering modal (Quantity -> Logistics -> Tracking)
 class BuyerFoodDetailPage extends StatelessWidget {
   final MockStore? store;
   final Map<String, dynamic>? listing;
@@ -161,6 +174,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
+  /// Standardized app bar with image parallax and navigation control.
   Widget _buildSliverAppBar(BuildContext context, String imageUrl) {
     return SliverAppBar(
       expandedHeight: 300,
@@ -201,6 +215,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
+  /// Displays high-level food metadata including name, category, and rating.
   Widget _buildHeaderInfo(BuildContext context, String type, String rating, String name, String address) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -516,6 +531,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
 
   // Removed old _buildReserveButton - using new integrated version below
 
+  /// Displays a selection sheet for address and payment before checkout.
   void _showSelectionSlide(BuildContext context, bool offersDelivery) {
     String currentAddress = "123, Green Street, Koramangala";
     String currentPayment = "Visa *1234";
@@ -689,6 +705,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
+  /// Persistent CTA for initiating the transaction or reservation.
   Widget _buildReserveButton(BuildContext context, bool isFree, String price, bool offersDelivery) {
     // Only show button for real listings (not mock stores)
     if (listing == null) {
@@ -757,6 +774,13 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
+  /// Orchestrates the multi-step ordering and volunteer matching flow.
+  /// 
+  /// Steps:
+  /// 1. Quantity Selection
+  /// 2. Logistics choice (Pickup/Delivery)
+  /// 3. Matching (if delivery)
+  /// 4. Final confirmation
   void _showOrderDialog(BuildContext context) {
     int quantity = 1;
     final maxQuantity = listing!['remainingQuantity'] ?? 1;

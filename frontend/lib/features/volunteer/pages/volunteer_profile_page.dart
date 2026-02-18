@@ -1,3 +1,10 @@
+/// File: volunteer_profile_page.dart
+/// Purpose: Account management and preference configuration for field agents.
+/// 
+/// Responsibilities:
+/// - Manages personal metadata (Name, Vehicle Type, Address)
+/// - Implements security protocols for password rotation
+/// - Orchestrates session termination and authentication state cleanup
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
@@ -5,6 +12,12 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../common/pages/landing_page.dart';
 import 'package:provider/provider.dart';
 
+/// Profile hub for operational and personal configuration of a volunteer account.
+/// 
+/// Components:
+/// - Interactive form for logistical metadata (Vehicle Type)
+/// - Security sub-section for credential management
+/// - Logout synchronization via [AppAuthProvider]
 class VolunteerProfilePage extends StatefulWidget {
   const VolunteerProfilePage({super.key});
 

@@ -1,3 +1,10 @@
+/// File: app_auth_provider.dart
+/// Purpose: Global state manager for authentication and user identity.
+/// 
+/// Responsibilities:
+/// - Wraps Firebase Auth state as a reactive [ChangeNotifier]
+/// - Orchestrates synchronization between Firebase and MongoDB profiles
+/// - Provides centralized access to User primitives and role-specific metadata
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,6 +12,12 @@ import '../services/auth_service.dart';
 import '../services/google_auth_service.dart';
 import '../services/backend_service.dart';
 
+/// Primary coordination hub for authentication state and profile synchronization.
+/// 
+/// Features:
+/// - Multi-modal authentication (Email/Password, Google)
+/// - Transparent self-healing logic for missing MongoDB user profiles
+/// - Reactive session monitoring via [authStateChanges]
 class AppAuthProvider extends ChangeNotifier {
   //---------------------------------------------------------
   /// SERVICES
@@ -43,6 +56,10 @@ class AppAuthProvider extends ChangeNotifier {
   Map<String, dynamic>? _mongoProfile;
   Map<String, dynamic>? get mongoProfile => _mongoProfile;
 
+  /// Synchronizes the current Firebase user with MongoDB data.
+  /// 
+  /// Effectively performs a "self-healing" sync by checking Firestore if
+  /// the user profile is missing from MongoDB.
   Future<void> refreshMongoUser() async {
     if (currentUser == null) return;
     
@@ -94,6 +111,10 @@ class AppAuthProvider extends ChangeNotifier {
   /// Only Firebase authentication.
   //---------------------------------------------------------
 
+  /// Authenticates a user via Firebase Email/Password.
+  /// 
+  /// Triggers a MongoDB profile refresh upon successful authentication.
+  /// Returns the authenticated [User] or throws an exception on failure.
   Future<User?> login(String email, String password) async {
     _setLoading(true);
 

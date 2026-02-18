@@ -1,3 +1,10 @@
+/// File: seller_dashboard_page.dart
+/// Purpose: Orchestration layer for seller-specific feature modules.
+/// 
+/// Responsibilities:
+/// - Manages primary navigation between Overview, Listings, Orders, and Profile
+/// - Implements voice-controlled navigation and command handling
+/// - Synchronizes authentication state with the dashboard view
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'seller_overview_page.dart';
@@ -11,6 +18,12 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../common/pages/landing_page.dart';
 import 'package:provider/provider.dart';
 
+/// Main navigation hub for registered food donors and sellers.
+/// 
+/// Features:
+/// - Bottom navigation index management
+/// - Floating voice-assist trigger (VUI)
+/// - Deep-linking support via [initialIndex]
 class SellerDashboardPage extends StatefulWidget {
   final int initialIndex;
   const SellerDashboardPage({super.key, this.initialIndex = 0});
@@ -29,6 +42,7 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
     _selectedIndex = widget.initialIndex;
   }
 
+  /// Toggles the [VoiceService] listener and provides haptic/vocal feedback.
   void _toggleVoiceMode() async {
     final voiceService = Provider.of<VoiceService>(context, listen: false);
     final langProvider = Provider.of<LanguageProvider>(context, listen: false);
@@ -49,6 +63,7 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
     }
   }
 
+  /// Interprets recognized speech tokens into navigational or functional actions.
   void _handleVoiceCommand(String words) {
     debugPrint("Recognized words: $words");
     final lowerWords = words.toLowerCase();

@@ -1,3 +1,10 @@
+/// File: volunteer_home_page.dart
+/// Purpose: Operational command center for active volunteers.
+/// 
+/// Responsibilities:
+/// - Displays real-time rescue requests and availability toggles
+/// - Integrates voice-activated commands for hands-free logistics
+/// - Visualizes volunteer impact through gamified badges and statistics
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
@@ -12,6 +19,12 @@ import 'volunteer_orders_page.dart';
 import '../../../data/services/backend_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Primary activity hub for monitoring and accepting food rescue missions.
+/// 
+/// Features:
+/// - Real-time availability synchronization with the backend
+/// - Voice-modal integration via [VoiceService]
+/// - Dynamic request polling and notification banners
 class VolunteerHomePage extends StatefulWidget {
   const VolunteerHomePage({super.key});
 
@@ -116,6 +129,7 @@ class _VolunteerHomePageState
     );
   }
 
+  /// Toggles the voice interface and synchronizes with [LanguageProvider] for TTS/STT locale.
   void _toggleVoiceMode() async {
     final voiceService =
         Provider.of<VoiceService>(context,
@@ -382,6 +396,7 @@ class _VolunteerHomePageState
   // Rescue Requests Section
   //----------------------------------------------------------
 
+  /// Conditional listing of nearby rescue requests fetched from [BackendService].
   Widget _rescueRequestsSection() {
     final auth = Provider.of<AppAuthProvider>(context, listen: false);
     final volunteerId = auth.mongoUser?['_id'];

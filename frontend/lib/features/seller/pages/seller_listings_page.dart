@@ -1,3 +1,10 @@
+/// File: seller_listings_page.dart
+/// Purpose: Comprehensive management interface for a seller's food inventory.
+/// 
+/// Responsibilities:
+/// - Fetches and categorizes listings by operational state (Active, Expired, Claimed)
+/// - Implements real-time countdown logic for food safety monitoring
+/// - Orchestrates relisting and editing flows for inventory items
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,6 +15,12 @@ import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'create_listing_page.dart';
 
+/// Tab-based overview of all food items donated or sold by the user.
+/// 
+/// Features:
+/// - Dynamic filtering based on live time-of-flight (expiry)
+/// - Multi-status tabs (Active/Completed/Expired)
+/// - Integration with [CreateListingPage] for inventory expansion
 class SellerListingsPage extends StatefulWidget {
   const SellerListingsPage({super.key});
 
@@ -102,6 +115,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
     }).toList();
   }
 
+  /// Returns listings that have been successfully fulfilled or claimed.
   List<Listing> get _completedListings {
     return _allListings.where((l) => l.status == ListingStatus.claimed).toList();
   }
@@ -205,6 +219,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
     );
   }
 
+  /// Triggers a modal to update the availability window for an expired listing.
   Future<void> _showRelistDialog(Listing listing) async {
     DateTime? newFrom;
     DateTime? newTo;

@@ -1,7 +1,19 @@
+/// File: buyer_favourites_page.dart
+/// Purpose: Curated list of a buyer's explicitly liked stores and listings.
+/// 
+/// Responsibilities:
+/// - Filters global listings based on user's favourite IDs
+/// - Handles real-time removal from favourites
+/// - Renders a persistent empty state for zero-item curation
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../data/mock_stores.dart';
 
+/// Stateless widget for visualizing a buyer's saved listings.
+/// 
+/// Interaction:
+/// - Syncs with [BuyerDashboardPage] via [onToggleFavourite]
+/// - Pulls data from [allMockStores] as a primary source
 class BuyerFavouritesPage extends StatelessWidget {
   final Set<String> favouriteIds;
   final Function(String) onToggleFavourite;

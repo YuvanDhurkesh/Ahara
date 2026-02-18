@@ -1,3 +1,10 @@
+/// File: buyer_browse_page.dart
+/// Purpose: Primary discovery interface for food listings with map integration.
+/// 
+/// Responsibilities:
+/// - Fetches real-time active listings from the operational backend
+/// - Implements complex multi-parameter filtering (Rating, Price, Text)
+/// - Synchronizes map-based spatial discovery with list-view overlays
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +13,12 @@ import '../data/mock_stores.dart';
 import 'buyer_food_detail_page.dart';
 import '../../../data/services/backend_service.dart';
 
+/// Interactive discovery portal for browsing regional food availability.
+/// 
+/// Features:
+/// - Proximity-based spatial listing visualization
+/// - Live countdown state management for time-sensitive listings
+/// - Multi-modal navigation (Draggable Sheet vs Static Map)
 class BuyerBrowsePage extends StatefulWidget {
   final Set<String> favouriteIds;
   final Function(String) onToggleFavourite;
@@ -20,6 +33,7 @@ class BuyerBrowsePage extends StatefulWidget {
   State<BuyerBrowsePage> createState() => _BuyerBrowsePageState();
 }
 
+/// Monitors discovery state, filtering logic, and interactive map markers.
 class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   final TextEditingController _searchController = TextEditingController();
   final DraggableScrollableController _sheetController =
@@ -53,6 +67,12 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     });
   }
 
+  /// Pulls active listings from the Node.js backend.
+  /// 
+  /// Flow:
+  /// 1. Set loading state
+  /// 2. Invoke [BackendService.getAllActiveListings]
+  /// 3. Update local state and refresh UI
   Future<void> _fetchRealListings() async {
     setState(() => _isListingsLoading = true);
     try {
@@ -162,6 +182,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     );
   }
 
+  /// Constructs the interactive map background.
   Widget _buildMapBackground() {
     return GestureDetector(
       onTap: () {
@@ -238,6 +259,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     );
   }
 
+  /// Builds the top-floating search and filter control bar.
   Widget _buildFloatingSearchHeader() {
     return SafeArea(
       child: Container(
@@ -458,6 +480,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     );
   }
 
+  /// Renders a full-screen scrollable list view for food browsing.
   Widget _buildBottomSheetList() {
     return DraggableScrollableSheet(
       initialChildSize: 0.15,

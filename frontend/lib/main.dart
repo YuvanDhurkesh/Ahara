@@ -1,3 +1,11 @@
+/// File: main.dart
+/// Purpose: Application entry point and root orchestration.
+/// 
+/// Responsibilities:
+/// - Initializes Firebase and Environment variables
+/// - Configures global Dependency Injection (MultiProvider)
+/// - Manages top-level Auth Guarding (AuthWrapper)
+/// - Handles application-wide localization and themes
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -41,6 +49,12 @@ Future<void> main() async {
   );
 }
 
+/// Root application widget.
+/// 
+/// Logic:
+/// - Injects global theme and locale configuration
+/// - Defines supported locales and localization delegates
+/// - Wraps the app with [AuthWrapper] for state-driven routing
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -70,9 +84,13 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// 🔥 AUTH WRAPPER
-/// Controls app entry based on login state
-
+/// Top-level authentication guard and role-based router.
+/// 
+/// Responsibility:
+/// - Listens to [AppAuthProvider] for login state changes
+/// - Fetches extended MongoDB user metadata (Role, Language)
+/// - Orchestrates automatic UI preference synchronization
+/// - Routes to [Buyer/Seller/Volunteer] dashboards based on profile role
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 

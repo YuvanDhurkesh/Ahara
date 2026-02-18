@@ -1,3 +1,10 @@
+/// File: simplified_seller_home.dart
+/// Purpose: Accessibility-focused interface for the seller dashboard.
+/// 
+/// Responsibilities:
+/// - Provides a high-contrast, large-format UI for core redistribution tasks
+/// - Simplifies navigation for users with visual or cognitive impairments
+/// - Highlights the "Donate Food" primary action as a central focal point
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +12,12 @@ import '../../../shared/styles/app_colors.dart';
 import '../pages/create_listing_page.dart';
 import '../../../core/localization/app_localizations.dart';
 
+/// Streamlined view for food donors prioritizing ease of use and high visibility.
+/// 
+/// Features:
+/// - Giant interactive primary action targets
+/// - Minimalist aesthetic with oversized iconography
+/// - Core navigational shortcuts to profile and inventory
 class SimplifiedSellerHome extends StatelessWidget {
   const SimplifiedSellerHome({super.key});
 

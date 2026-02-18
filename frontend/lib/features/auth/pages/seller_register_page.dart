@@ -1,3 +1,10 @@
+/// File: seller_register_page.dart
+/// Purpose: Onboarding form for food businesses and sellers.
+/// 
+/// Responsibilities:
+/// - Captures business metadata (Name, Type, FSSAI)
+/// - Validates regulatory compliance inputs
+/// - Synchronizes seller profile with MongoDB
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +16,12 @@ import '../../../shared/widgets/phone_input_field.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
 
+/// Registration interface for food vendors and surplus providers.
+/// 
+/// Features:
+/// - Dynamic business type categorization
+/// - FSSAI 14-digit validation logic
+/// - Specialized seller profile initialization
 class SellerRegisterPage extends StatefulWidget {
   const SellerRegisterPage({super.key});
 
@@ -16,6 +29,7 @@ class SellerRegisterPage extends StatefulWidget {
   State<SellerRegisterPage> createState() => _SellerRegisterPageState();
 }
 
+/// Manages seller registration state, validation rules, and submission workflow.
 class _SellerRegisterPageState extends State<SellerRegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
@@ -49,6 +63,13 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
     super.dispose();
   }
 
+  /// Process seller account creation with extended business metadata.
+  /// 
+  /// Flow:
+  /// 1. Perform form-level validation (including FSSAI length)
+  /// 2. Set asynchronous loading state
+  /// 3. Invoke [AppAuthProvider.registerUser] with seller-specific parameters
+  /// 4. Navigate to login on success
   Future<void> _registerSeller() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -309,6 +330,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
     );
   }
 
+  /// Standardized label builder for consistent form typography.
   Widget _buildLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10, left: 4),

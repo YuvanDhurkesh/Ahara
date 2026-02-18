@@ -1,8 +1,21 @@
+/// File: volunteer_orders_page.dart
+/// Purpose: Management interface for active and historical delivery assignments.
+/// 
+/// Responsibilities:
+/// - Categorizes assignments into New, Active, and Completed states
+/// - Displays delivery metadata (Pickup/Drop locations, Distance)
+/// - Facilitates navigation to granular route details
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
 import 'volunteer_order_detail_page.dart';
 
+/// Tabbed dashboard for tracking the lifecycle of assigned food rescues.
+/// 
+/// Features:
+/// - Multi-stage tab synchronization using [TabController]
+/// - Distance-aware delivery cards with integrated action triggers
+/// - Localized status and label rendering
 class VolunteerOrdersPage extends StatefulWidget {
   const VolunteerOrdersPage({super.key});
 

@@ -1,7 +1,20 @@
+/// File: buyer_payment_page.dart
+/// Purpose: Management and selection of financial transaction methods.
+/// 
+/// Responsibilities:
+/// - Lists supported payment channels (UPI, Cards, Cash)
+/// - Manages primary payment method selection state
+/// - Provides a secure-looking interface for financial checkout preparation
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Dedicated selector for finalizing the payment preference.
+/// 
+/// Features:
+/// - Multi-modal support (Digital vs Physical Cash)
+/// - Integrated selection indicators and thematic iconography
+/// - Reusable list-based payment picker
 class BuyerPaymentPage extends StatefulWidget {
   const BuyerPaymentPage({super.key});
 
@@ -9,6 +22,7 @@ class BuyerPaymentPage extends StatefulWidget {
   State<BuyerPaymentPage> createState() => _BuyerPaymentPageState();
 }
 
+/// Manages payment method list indices and selection persistence.
 class _BuyerPaymentPageState extends State<BuyerPaymentPage> {
   final List<Map<String, dynamic>> _methods = [
     {"type": "Card", "label": "Visa *1234", "icon": Icons.credit_card_rounded},

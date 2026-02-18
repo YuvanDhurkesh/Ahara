@@ -1,9 +1,22 @@
+/// File: seller_verification_page.dart
+/// Purpose: Identity and compliance verification flow for trust score enhancement.
+/// 
+/// Responsibilities:
+/// - Orchestrates document acquisition (Aadhar, ID) via the [ImagePicker]
+/// - Manages local file state and UI feedback for document completion
+/// - Facilitates the submission of verification tokens to the backend
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Step-based verification portal for validating seller legitimacy.
+/// 
+/// Features:
+/// - Multi-side document upload (Front/Back)
+/// - Integrated camera and gallery synchronization
+/// - Conditional submission gate based on document availability
 class SellerVerificationPage extends StatefulWidget {
   const SellerVerificationPage({super.key});
 

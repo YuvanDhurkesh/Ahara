@@ -1,7 +1,20 @@
+/// File: buyer_order_rate_page.dart
+/// Purpose: Feedback collection interface for completed transactions.
+/// 
+/// Responsibilities:
+/// - Collects granular metrics for food quality, variety, and packaging
+/// - Captures dedicated ratings for volunteer delivery performance
+/// - Synchronizes multi-dimensional feedback with the backend repository
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../data/services/backend_service.dart';
 
+/// Evaluation wizard for aggregating buyer sentiment post-fulfillment.
+/// 
+/// Features:
+/// - Dual-category rating system (Food vs Delivery Hero)
+/// - Interactive five-star selection widgets
+/// - Free-form text input for qualitative reviews
 class BuyerOrderRatePage extends StatefulWidget {
   final Map<String, dynamic> order;
 
@@ -11,6 +24,7 @@ class BuyerOrderRatePage extends StatefulWidget {
   State<BuyerOrderRatePage> createState() => _BuyerOrderRatePageState();
 }
 
+/// Manages rating state arithmetic and submission lifecycle.
 class _BuyerOrderRatePageState extends State<BuyerOrderRatePage> {
   // Mock Ratings
   double _collectionRating = 0;

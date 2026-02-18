@@ -1,8 +1,15 @@
+/// File: role_selection_page.dart
+/// Purpose: Simplified role picker for administrative or debug registration flows.
+/// 
+/// Responsibilities:
+/// - List-based role selection
+/// - Direct routing to registration forms
 import 'package:flutter/material.dart';
 import 'buyer_register_page.dart';
 import 'seller_register_page.dart';
 import 'volunteer_register_page.dart';
 
+/// Light-weight role selection screen.
 class RoleSelectionPage extends StatelessWidget {
   const RoleSelectionPage({super.key});
 

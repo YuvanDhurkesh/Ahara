@@ -1,3 +1,10 @@
+/// File: seller_overview_page.dart
+/// Purpose: Operational analytics and engagement dashboard for sellers.
+/// 
+/// Responsibilities:
+/// - Aggregates seller-specific metrics (listings, ratings, earnings) from the backend
+/// - Displays recent activity feeds and notification entry points
+/// - Integrates a simplified dashboard view for accessibility
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +17,12 @@ import '../../common/pages/landing_page.dart';
 import 'simplified_seller_home.dart';
 import 'seller_notifications_page.dart';
 
+/// Primary analytical hub for registered donors and vendors.
+/// 
+/// Features:
+/// - Real-time statistics synchronization via [BackendService]
+/// - Adaptive layout for mobile and desktop viewports
+/// - Toggleable simplified UI mode via [SimplifiedDashboardWrapper]
 class SellerOverviewPage extends StatefulWidget {
   const SellerOverviewPage({super.key});
 
@@ -28,6 +41,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
     _fetchStats();
   }
 
+  /// Synchronizes local state with aggregated seller metrics from the Node.js API.
   Future<void> _fetchStats() async {
     try {
       if (!mounted) return;

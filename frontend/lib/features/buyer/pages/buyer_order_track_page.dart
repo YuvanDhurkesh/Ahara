@@ -1,7 +1,20 @@
+/// File: buyer_order_track_page.dart
+/// Purpose: Real-time visual tracking for active order fulfillment.
+/// 
+/// Responsibilities:
+/// - Visualizes the end-to-end delivery timeline
+/// - Displays estimated arrival metrics and current logistics stage
+/// - Links to volunteer contact and live location (Placeholder)
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/mock_orders.dart';
 
+/// Live monitoring interface for active food transit.
+/// 
+/// Includes:
+/// - Thematic timeline with stage-completion markers
+/// - Volunteer hero metadata and contact actions
+/// - Simplified map-view placeholder for future integration
 class BuyerOrderTrackPage extends StatelessWidget {
   final MockOrder order;
 
@@ -191,6 +204,7 @@ class BuyerOrderTrackPage extends StatelessWidget {
     );
   }
 
+  /// Constructs a graphical timeline node showing ordered fulfillment stages.
   Widget _buildTimelineTile({
     required String title,
     required String subtitle,

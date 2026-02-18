@@ -1,8 +1,21 @@
+/// File: volunteer_verification_page.dart
+/// Purpose: Identity and trust validation flow for field agents.
+/// 
+/// Responsibilities:
+/// - Manages document acquisition (Aadhar, ID) via [ImagePicker]
+/// - Orchestrates the submission of KYC tokens to the project server
+/// - Provides visual feedback on verification progress and trust scoring
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Compliance portal for verifying volunteer legitimacy and safety.
+/// 
+/// Features:
+/// - Multi-modal image acquisition (Front/Back)
+/// - Integrated submission gate based on document presence
+/// - Visual reinforcement of trust score benefits
 class VolunteerVerificationPage extends StatefulWidget {
   const VolunteerVerificationPage({super.key});
 

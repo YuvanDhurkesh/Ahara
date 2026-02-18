@@ -1,3 +1,10 @@
+/// File: buyer_dashboard_page.dart
+/// Purpose: Main navigation shell for the buyer experience.
+/// 
+/// Responsibilities:
+/// - Manages top-level navigation state ([BottomNavigationBar])
+/// - Orchestrates Voice-Activated commands via [VoiceService]
+/// - Global logout coordination
 import 'package:flutter/material.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../shared/styles/app_colors.dart';
@@ -12,6 +19,12 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../common/pages/landing_page.dart';
 import 'package:provider/provider.dart';
 
+/// Root scaffolding for the buyer-facing application.
+/// 
+/// Features:
+/// - Persisted navigation index
+/// - Voice-enabled navigation and actions
+/// - Centrally managed favourite state
 class BuyerDashboardPage extends StatefulWidget {
   final int initialIndex;
   const BuyerDashboardPage({super.key, this.initialIndex = 0});
@@ -20,6 +33,7 @@ class BuyerDashboardPage extends StatefulWidget {
   State<BuyerDashboardPage> createState() => _BuyerDashboardPageState();
 }
 
+/// Manages UI selection, voice-command logic, and bottom navigation lifecycle.
 class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
   late int _selectedIndex;
   bool _isVoiceModeActive = false;
@@ -32,6 +46,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
 
   final Set<String> _favouriteIds = {};
 
+  /// Toggles the persistence of a listing in the user's favourite set.
   void _toggleFavourite(String id) {
     setState(() {
       if (_favouriteIds.contains(id)) {
@@ -42,6 +57,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
     });
   }
 
+  /// Activates or deactivates the hands-free voice control mode.
   void _toggleVoiceMode() async {
     final voiceService = Provider.of<VoiceService>(context, listen: false);
     final langProvider = Provider.of<LanguageProvider>(context, listen: false);
@@ -62,6 +78,9 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
     }
   }
 
+  /// Processes natural language input to trigger application navigation or actions.
+  /// 
+  /// Recognized Keywords: help, logout, profile, discover, browse, order, favour, refresh.
   void _handleVoiceCommand(String words) {
     debugPrint("Recognized words: $words");
     final lowerWords = words.toLowerCase();
@@ -93,6 +112,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
     }
   }
 
+  /// Invalidates the local session and redirects to the landing experience.
   Future<void> _performLogout() async {
     await Provider.of<AppAuthProvider>(context, listen: false).logout();
     if (mounted) {

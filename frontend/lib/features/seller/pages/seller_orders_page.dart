@@ -1,3 +1,10 @@
+/// File: seller_orders_page.dart
+/// Purpose: Order management dashboard for tracking donation fulfillment.
+/// 
+/// Responsibilities:
+/// - Retrieves order history and active claims from the backend
+/// - Displays reactive status indicators for multi-stage fulfillment
+/// - Facilitates navigation to granular order details and actions
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +13,12 @@ import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'seller_order_detail_page.dart';
 
+/// Interface for monitors and processing claims on food listings.
+/// 
+/// Features:
+/// - Dynamic order status tracking with color-coded chips
+/// - Pull-to-refresh synchronization with Node.js backend
+/// - Responsive order history visualization
 class SellerOrdersPage extends StatefulWidget {
   const SellerOrdersPage({super.key});
 
@@ -13,6 +26,7 @@ class SellerOrdersPage extends StatefulWidget {
   State<SellerOrdersPage> createState() => _SellerOrdersPageState();
 }
 
+/// Manages order state, asynchronous fetching, and error handling for the seller.
 class _SellerOrdersPageState extends State<SellerOrdersPage> {
   List<Map<String, dynamic>> _orders = [];
   bool _isLoading = true;
@@ -24,6 +38,13 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
     _fetchOrders();
   }
 
+  /// Synchronizes the seller's order list with the database.
+  /// 
+  /// Flow:
+  /// 1. Set loading state
+  /// 2. Fetch authenticated seller ID from [AppAuthProvider]
+  /// 3. Invoke [BackendService.getSellerOrders]
+  /// 4. Handle success/error and update UI
   Future<void> _fetchOrders() async {
     if (!mounted) return;
     setState(() {
@@ -105,6 +126,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
     );
   }
 
+  /// Builds a descriptive card for an individual order.
   Widget _buildOrderCard(BuildContext context, Map<String, dynamic> order) {
     final foodName = order['listingId']?['foodName'] ?? "Unknown Item";
     final buyerName = order['buyerId']?['name'] ?? "Unknown Buyer";
@@ -211,6 +233,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
     );
   }
 
+  /// Generates reactive status chips with domain-specific color coding.
   Widget _buildStatusChip(String status) {
     Color color;
     switch (status) {

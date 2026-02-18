@@ -1,3 +1,10 @@
+/// File: backend_service.dart
+/// Purpose: Network abstraction layer for Node.js REST API.
+/// 
+/// Responsibilities:
+/// - Manages HTTP request/response cycle
+/// - Implements custom headers for ngrok bypass and content-types
+/// - Decouples business logic from REST infrastructure
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
@@ -5,6 +12,12 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../../config/api_config.dart';
 
+/// Main bridge for all external backend communication.
+/// 
+/// Features:
+/// - Unifies all REST endpoints (Users, Listings, Orders)
+/// - Standardized error handling for non-200 responses
+/// - Image binary upload handling via Multipart requests
 class BackendService {
   static String get baseUrl => ApiConfig.baseUrl;
 
@@ -43,6 +56,11 @@ class BackendService {
     }
   }
 
+  /// Fetches a unified user profile (User + Role-specific details).
+  /// 
+  /// Logic:
+  /// - Direct REST call to `/users/profile/:uid`.
+  /// - Returns a Map containing `user` and `profile` keys.
   static Future<Map<String, dynamic>> getUserProfile(String firebaseUid) async {
     final url = Uri.parse("$baseUrl/users/firebase/$firebaseUid");
 
@@ -255,6 +273,11 @@ class BackendService {
   }
 
   // Order Management Methods
+  /// Creates a new order in the MongoDB database.
+  /// 
+  /// Logic:
+  /// - Direct REST POST to `/orders/create`.
+  /// - Automatically decrements listing quantity and generates Handover OTP.
   static Future<Map<String, dynamic>> createOrder(Map<String, dynamic> orderData) async {
     final url = Uri.parse("$baseUrl/orders/create");
 
@@ -355,6 +378,9 @@ class BackendService {
     }
   }
 
+  /// Updates the status of an existing order (e.g., 'picked_up', 'delivered').
+  /// 
+  /// Used by Volunteers to update fulfillment progression.
   static Future<void> updateOrderStatus(String orderId, String status) async {
     final url = Uri.parse("$baseUrl/orders/$orderId/status");
 
@@ -396,6 +422,9 @@ class BackendService {
 
   // --- Volunteer Methods ---
 
+  /// Retrieves active rescue tasks within a volunteer's proximity.
+  /// 
+  /// Returns a list of pending orders awaiting assignment.
   static Future<List<Map<String, dynamic>>> getVolunteerRescueRequests(String volunteerId) async {
     final url = Uri.parse("$baseUrl/orders/volunteer/requests/$volunteerId");
 

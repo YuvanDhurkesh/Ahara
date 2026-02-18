@@ -1,7 +1,20 @@
+/// File: buyer_notifications_page.dart
+/// Purpose: Aggregated feed of time-sensitive system and transactional alerts.
+/// 
+/// Responsibilities:
+/// - Displays categorized notifications (Deals, Messages, Alerts)
+/// - Provides visual feedback through thematic markers and icons
+/// - Renders a chronological history of user interactions
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Central inbox for all buyer-related push and in-app notifications.
+/// 
+/// Features:
+/// - Contextual iconography based on alert type
+/// - Time-relative stay stamps (e.g., 2 mins ago)
+/// - High-contrast indicators for high-priority deals
 class BuyerNotificationsPage extends StatelessWidget {
   const BuyerNotificationsPage({super.key});
 

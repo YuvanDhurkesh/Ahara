@@ -1,3 +1,10 @@
+/// File: seller_profile_page.dart
+/// Purpose: Account management and impact visualization for food donors.
+/// 
+/// Responsibilities:
+/// - Displays social impact metrics (CO2 offset, meals shared)
+/// - Manages user preferences (UI mode, notifications)
+/// - Provides navigation to business verification and detail editing
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +17,12 @@ import 'seller_business_details_page.dart';
 import 'seller_verification_page.dart';
 import 'seller_notifications_page.dart';
 
+/// Central profile hub for managing seller identity and monitoring impact.
+/// 
+/// Features:
+/// - Integrated impact statistics visualization
+/// - Modal-based account settings and preference management
+/// - Seamless logout and session termination logic
 class SellerProfilePage extends StatelessWidget {
   const SellerProfilePage({super.key});
 
@@ -196,6 +209,7 @@ class SellerProfilePage extends StatelessWidget {
     );
   }
 
+  /// Displays an interactive sheet for adjusting account-level configurations.
   void _showManageAccountSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,

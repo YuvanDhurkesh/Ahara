@@ -1,3 +1,10 @@
+/// File: buyer_home_page.dart
+/// Purpose: Discovery portal for available food listings and categories.
+/// 
+/// Responsibilities:
+/// - Displays real-time and mock food listings
+/// - Implements live countdown timers for listing expiry
+/// - Handles category and sub-category filtering logic
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
@@ -13,6 +20,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 
 
+/// Primary discovery interface for buyers.
+/// 
+/// Features:
+/// - Proximity-aware discovery titles
+/// - Dynamic category tabs (Meals, Bread, Groceries, etc.)
+/// - Mixed-mode rendering (Backend real data + static mock fallback)
 class BuyerHomePage extends StatefulWidget {
   final Set<String> favouriteIds;
   final Function(String) onToggleFavourite;
@@ -27,6 +40,7 @@ class BuyerHomePage extends StatefulWidget {
   State<BuyerHomePage> createState() => _BuyerHomePageState();
 }
 
+/// Manages listing fetches, countdown cycles, and complex filtering logic.
 class _BuyerHomePageState extends State<BuyerHomePage> {
   String _mainCategory = "All";
   String _subCategory = "All";
@@ -76,6 +90,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
       }
     });
   }
+  /// Retrieves the current user's location string from their backend profile.
   Future<void> _loadUserLocation() async {
   try {
     final response =
@@ -108,6 +123,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   }
 
 
+  /// Synchronizes the UI with all active listings from the central API.
   Future<void> _fetchRealListings() async {
     setState(() => _isLoading = true);
     try {
@@ -142,6 +158,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   }
 
   // Format time remaining
+  /// Calculates a human-readable countdown string for listing expiration.
   String _formatTimeRemaining(DateTime expiryTime) {
     final diff = expiryTime.difference(_now);
     if (diff.isNegative) return "Expired";
@@ -262,6 +279,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     );
   }
 
+  /// Renders top-level discover header with location context and navigation.
   Widget _buildHeader() {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -355,6 +373,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   );
 }
 
+  /// Builds a toggle-style tab bar for primary categorizations (Free/Discounted).
   Widget _buildMainCategoryTabs() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -444,6 +463,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   }
 
   // Unified card builder for both mock and real data
+  /// Unified router for item card rendering based on data source type.
   Widget _buildItemCard(dynamic item) {
     if (item is MockStore) {
       return _buildRestaurantCard(item);
@@ -453,6 +473,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   }
 
   // New: Real listing card
+  /// Constructs a visual card for a production backend listing.
   Widget _buildRealListingCard(Map<String, dynamic> listing) {
     final String name = listing['foodName'] ?? "Unknown Food";
     final pricing = listing['pricing'] ?? {};

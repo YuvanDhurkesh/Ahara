@@ -1,3 +1,10 @@
+/// File: buyer_register_page.dart
+/// Purpose: Onboarding form for new buyers/recipients.
+/// 
+/// Responsibilities:
+/// - Captures user profile and contact information
+/// - Implements GPS-based auto-location detection
+/// - Orchestrates account creation via [AppAuthProvider]
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'login_page.dart';
@@ -10,6 +17,12 @@ import 'package:geocoding/geocoding.dart';
 import 'package:flutter/services.dart';
 import '../../../core/localization/language_provider.dart';
 
+/// Registration interface for food recipients.
+/// 
+/// Features:
+/// - Dynamic role-based header
+/// - Form validation for contact and location
+/// - Automated geolocation retrieval
 class BuyerRegisterPage extends StatefulWidget {
   final String role;
 
@@ -19,6 +32,7 @@ class BuyerRegisterPage extends StatefulWidget {
   State<BuyerRegisterPage> createState() => _BuyerRegisterPageState();
 }
 
+/// Manages registration form state, location detection logic, and submission flow.
 class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
   final _formKey = GlobalKey<FormState>();
 
@@ -48,6 +62,13 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
   /// 🔥 AUTO LOCATION DETECTION (PRODUCTION SAFE)
   //---------------------------------------------------------
 
+  /// Detects current device coordinates and resolves to a human-readable address.
+  /// 
+  /// Flow:
+  /// 1. Check/Request location services and permissions
+  /// 2. Fetch [Position] via high-accuracy GPS
+  /// 3. Reverse-geocode coordinates to [Placemark]
+  /// 4. Populate location field with formatted address string
   Future<void> _detectLocation() async {
     setState(() => _isDetectingLocation = true);
 
@@ -115,6 +136,13 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
 
   //---------------------------------------------------------
 
+  /// Triggers account creation and backend profile synchronization.
+  /// 
+  /// Flow:
+  /// 1. Validate form state
+  /// 2. Set loading status
+  /// 3. Invoke [AppAuthProvider.registerUser]
+  /// 4. Route to login on success
   Future<void> _registerUser() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -360,6 +388,7 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
 
   //---------------------------------------------------------
 
+  /// Builds a semantic label for form sections.
   Widget _buildLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10, left: 4),
@@ -369,6 +398,7 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
 
   //---------------------------------------------------------
 
+  /// Constructs a standardized [TextFormField] for registration inputs.
   Widget _buildTextField(
     TextEditingController controller,
     String hint,

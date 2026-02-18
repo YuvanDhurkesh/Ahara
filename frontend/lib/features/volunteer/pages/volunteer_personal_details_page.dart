@@ -1,6 +1,17 @@
+/// File: volunteer_personal_details_page.dart
+/// Purpose: Profile management for logistical and contact metadata.
+/// 
+/// Responsibilities:
+/// - Manages field validation for contact info and vehicle classification
+/// - Provides a persistent form for updating volunteer transit capabilities
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 
+/// Logistics-specific profile management interface for volunteers.
+/// 
+/// Includes:
+/// - Transit capability selection (Bicycle, Bike, Car)
+/// - Contact information synchronization logic
 class VolunteerPersonalDetailsPage extends StatefulWidget {
   const VolunteerPersonalDetailsPage({super.key});
 

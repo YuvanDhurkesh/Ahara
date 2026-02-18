@@ -1,3 +1,10 @@
+/// File: landing_page.dart
+/// Purpose: Public-facing gateway and brand mission interface.
+/// 
+/// Responsibilities:
+/// - Communicates the project's value proposition and impact metrics
+/// - Facilitates multi-lingual onboarding and entry point selection
+/// - Orchestrates modular sections (Hero, How It Works, Trust, Impact)
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
@@ -9,6 +16,12 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/localization/language_provider.dart';
 import 'package:provider/provider.dart';
 
+/// Principal entry point and information hub for new/unauthenticated users.
+/// 
+/// Features:
+/// - Responsive layout orchestration for Web and Mobile viewports
+/// - Smooth-scroll navigation to informational sections
+/// - Modal-driven authentication branching (Login vs Registration)
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
 
