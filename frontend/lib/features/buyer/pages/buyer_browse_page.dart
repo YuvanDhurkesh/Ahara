@@ -538,10 +538,18 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                           ? item.image 
                           : ((item['images'] as List?)?.isNotEmpty == true 
                               ? BackendService.formatImageUrl(item['images'][0]) 
-                              : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop"),
+                              : BackendService.generateFoodImageUrl(item['foodName'] ?? "")),
                       height: 150,
                       width: double.infinity,
                       fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => 
+                        Container(
+                          height: 150,
+                          color: Colors.grey.shade300,
+                          child: const Center(
+                            child: Icon(Icons.image_not_supported, size: 40),
+                          ),
+                        ),
                     ),
                   ),
                   Positioned(
@@ -631,9 +639,12 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     final DateTime? expiryTime = expiryStr != null ? DateTime.tryParse(expiryStr) : null;
     
     final List images = listing['images'] ?? [];
-    final String imageUrl = images.isNotEmpty 
+    final String uploadedImageUrl = images.isNotEmpty 
         ? BackendService.formatImageUrl(images[0])
-        : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
+        : "";
+    final String imageUrl = BackendService.isValidImageUrl(uploadedImageUrl) 
+        ? uploadedImageUrl 
+        : BackendService.generateFoodImageUrl(name);
 
     return InkWell(
       onTap: () {
@@ -654,6 +665,14 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => 
+                    Container(
+                      height: 200,
+                      color: Colors.grey.shade300,
+                      child: const Center(
+                        child: Icon(Icons.image_not_supported, size: 48),
+                      ),
+                    ),
                 ),
               ),
               Positioned(

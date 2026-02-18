@@ -111,9 +111,13 @@ class BuyerFoodDetailPage extends StatelessWidget {
     final String price = store?.price ?? "₹${listing?['pricing']?['discountedPrice'] ?? 0}";
     
     final List images = listing?['images'] ?? [];
-    final String imageUrl = store?.image ?? (images.isNotEmpty 
+    final String foodName = store?.name ?? (listing?['foodName'] ?? "Food Item");
+    final String uploadedImageUrl = images.isNotEmpty
         ? BackendService.formatImageUrl(images[0])
-        : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop");
+        : "";
+    final String imageUrl = store?.image ?? (BackendService.isValidImageUrl(uploadedImageUrl) 
+        ? uploadedImageUrl 
+        : BackendService.generateFoodImageUrl(foodName));
 
     final String address = store?.address ?? (listing?['pickupAddressText'] ?? "Bangalore");
     final String orgName = store?.name ?? (listing?['sellerProfileId']?['orgName'] ?? "Local Seller");
@@ -181,7 +185,17 @@ class BuyerFoodDetailPage extends StatelessWidget {
         background: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(imageUrl, fit: BoxFit.cover),
+            Image.network(
+              imageUrl, 
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => 
+                Container(
+                  color: Colors.grey.shade300,
+                  child: const Center(
+                    child: Icon(Icons.image_not_supported, size: 64),
+                  ),
+                ),
+            ),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(

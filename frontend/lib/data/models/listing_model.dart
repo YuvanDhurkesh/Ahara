@@ -1,3 +1,6 @@
+import 'package:flutter/foundation.dart';
+import '../services/backend_service.dart';
+
 enum FoodType {
   prepared_meal,
   fresh_produce,
@@ -83,6 +86,22 @@ class Listing {
       'status': status.name,
       'businessType': businessType?.name,
     };
+  }
+
+  /// Get the display image URL for this listing
+  /// Returns uploaded image if available, otherwise generates aesthetic food image
+  String getDisplayImageUrl() {
+    if (imageUrl.isNotEmpty) {
+      final formattedUrl = BackendService.formatImageUrl(imageUrl);
+      if (BackendService.isValidImageUrl(formattedUrl)) {
+        debugPrint("📸 Using uploaded image for '$foodName': $formattedUrl");
+        return formattedUrl;
+      }
+    }
+    
+    final generatedUrl = BackendService.generateFoodImageUrl(foodName);
+    debugPrint("🎨 Using generated image for '$foodName': $generatedUrl");
+    return generatedUrl;
   }
 
   factory Listing.fromJson(Map<String, dynamic> json) {

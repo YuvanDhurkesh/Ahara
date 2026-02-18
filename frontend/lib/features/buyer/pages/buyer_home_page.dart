@@ -469,9 +469,13 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     final DateTime? expiryTime = expiryStr != null ? DateTime.tryParse(expiryStr) : null;
     
     final List images = listing['images'] ?? [];
-    final String imageUrl = images.isNotEmpty 
+    final String uploadedImageUrl = images.isNotEmpty 
         ? BackendService.formatImageUrl(images[0])
-        : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop";
+        : "";
+    final String foodName = listing['foodName'] ?? "Food Item";
+    final String imageUrl = BackendService.isValidImageUrl(uploadedImageUrl)
+        ? uploadedImageUrl
+        : BackendService.generateFoodImageUrl(foodName);
 
     return GestureDetector(
       onTap: () {

@@ -47,12 +47,14 @@ class AppAuthProvider extends ChangeNotifier {
     if (currentUser == null) return;
     
     try {
+      debugPrint("🔄 Fetching mongo user for UID: ${currentUser!.uid}");
       final data = await BackendService.getUserProfile(currentUser!.uid);
       _mongoUser = data['user'];
       _mongoProfile = data['profile'];
+      debugPrint("✅ Mongo user loaded: ${_mongoUser?['_id']}");
       notifyListeners();
     } catch (e) {
-      debugPrint("Error fetching mongo user: $e. Checking Firestore for auto-sync...");
+      debugPrint("❌ Error fetching mongo user: $e. Checking Firestore for auto-sync...");
       
       try {
         // SELF-HEALING: If not in Mongo, check Firestore
@@ -63,7 +65,7 @@ class AppAuthProvider extends ChangeNotifier {
 
         if (firestoreDoc.exists) {
           final userData = firestoreDoc.data()!;
-          debugPrint("Found Firestore data, attempting auto-sync to Mongo...");
+          debugPrint("📝 Found Firestore data, attempting auto-sync to Mongo...");
           
           await BackendService.createUser(
             firebaseUid: currentUser!.uid,
@@ -79,10 +81,12 @@ class AppAuthProvider extends ChangeNotifier {
           _mongoUser = data['user'];
           _mongoProfile = data['profile'];
           notifyListeners();
-          debugPrint("Auto-sync successful ✅");
+          debugPrint("✅ Auto-sync successful");
+        } else {
+          debugPrint("❌ No Firestore data found for user");
         }
       } catch (innerError) {
-        debugPrint("Auto-sync failed: $innerError");
+        debugPrint("❌ Auto-sync failed: $innerError");
       }
     }
   }

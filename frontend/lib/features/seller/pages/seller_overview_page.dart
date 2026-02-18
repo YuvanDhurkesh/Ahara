@@ -37,10 +37,16 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
       });
 
       final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
-      final sellerId = authProvider.mongoUser?['_id'];
+      
+      // Ensure mongoUser is refreshed if not available
+      if (authProvider.mongoUser == null) {
+        await authProvider.refreshMongoUser();
+      }
+
+      var sellerId = authProvider.mongoUser?['_id'];
 
       if (sellerId == null) {
-        throw Exception("Seller ID not found. Please log in again.");
+        throw Exception("Unable to load user profile. Please log in again.");
       }
 
       final stats = await BackendService.getSellerStats(sellerId);

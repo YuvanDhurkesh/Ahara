@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -386,13 +387,24 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
               SizedBox(
                 height: 160,
                 width: double.infinity,
-                child: listing.imageUrl.isNotEmpty 
-                  ? Image.network(
-                      BackendService.formatImageUrl(listing.imageUrl),
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => _buildImagePlaceholder(),
-                    )
-                  : _buildImagePlaceholder(),
+                child: Image.network(
+                  listing.getDisplayImageUrl(),
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    debugPrint("❌ Image load error: $error");
+                    return _buildImagePlaceholder();
+                  },
+                ),
               ),
               Positioned(
                 top: 16,

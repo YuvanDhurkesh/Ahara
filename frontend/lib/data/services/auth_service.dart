@@ -146,11 +146,15 @@ class AuthService {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
+        print("❌ Backend sync error: Status ${response.statusCode}");
+        print("Response body: ${response.body}");
         throw Exception("Backend sync failed: ${response.body}");
       }
+      print("✅ Backend sync successful for user: ${user.uid}");
     } catch (e) {
-      // NEVER crash signup
       print("⚠️ Mongo sync failed: $e");
+      // Don't crash signup, but log the error
+      rethrow; // Allow caller to handle if needed
     }
   }
 }
