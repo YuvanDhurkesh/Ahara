@@ -7,10 +7,11 @@ const mongoose = require("mongoose");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+    let session;
     try {
+        console.log("ENTERING createOrder");
+        session = await mongoose.startSession();
+        session.startTransaction();
         const {
             listingId,
             buyerId,
@@ -102,8 +103,10 @@ exports.createOrder = async (req, res) => {
         });
 
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
+        if (session) {
+            await session.abortTransaction();
+            session.endSession();
+        }
         console.error("Create Order Error:", error.message);
         console.error("Full error:", error);
         res.status(400).json({ error: error.message });
