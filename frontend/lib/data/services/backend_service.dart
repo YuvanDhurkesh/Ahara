@@ -43,8 +43,7 @@ class BackendService {
     }
   }
 
-  static Future<Map<String, dynamic>> getUserProfile(
-      String firebaseUid) async {
+  static Future<Map<String, dynamic>> getUserProfile(String firebaseUid) async {
     final url = Uri.parse("$baseUrl/users/firebase/$firebaseUid");
 
     final response = await http.get(
@@ -67,8 +66,7 @@ class BackendService {
     String? language,
     String? uiMode,
   }) async {
-    final url =
-        Uri.parse("$baseUrl/users/preferences/$firebaseUid");
+    final url = Uri.parse("$baseUrl/users/preferences/$firebaseUid");
 
     final response = await http.put(
       url,
@@ -84,6 +82,37 @@ class BackendService {
 
     if (response.statusCode != 200) {
       throw Exception("Failed to update user preferences");
+    }
+  }
+
+  static Future<void> updateVolunteerProfile({
+    required String firebaseUid,
+    required String transportMode,
+    String? name,
+    String? phone,
+    String? addressText,
+  }) async {
+    final url = Uri.parse("$baseUrl/users/$firebaseUid/volunteer-profile");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({
+        "transportMode": transportMode,
+        if (name != null) "name": name,
+        if (phone != null) "phone": phone,
+        if (addressText != null) "addressText": addressText,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = jsonDecode(response.body);
+      throw Exception(
+        errorBody['error'] ?? "Failed to update volunteer profile",
+      );
     }
   }
 
@@ -114,7 +143,9 @@ class BackendService {
   }
 
   static Future<List<Map<String, dynamic>>> getSellerListings(
-      String sellerId, String status) async {
+    String sellerId,
+    String status,
+  ) async {
     final url = Uri.parse("$baseUrl/listings/$status?sellerId=$sellerId");
 
     final response = await http.get(
@@ -156,8 +187,7 @@ class BackendService {
     }
   }
 
-  static Future<void> createListing(
-      Map<String, dynamic> listingData) async {
+  static Future<void> createListing(Map<String, dynamic> listingData) async {
     final url = Uri.parse("$baseUrl/listings/create");
 
     final response = await http.post(
@@ -169,16 +199,16 @@ class BackendService {
       body: jsonEncode(listingData),
     );
 
-    if (response.statusCode != 200 &&
-        response.statusCode != 201) {
+    if (response.statusCode != 200 && response.statusCode != 201) {
       final errorBody = jsonDecode(response.body);
-      throw Exception(
-          errorBody['error'] ?? "Failed to create listing");
+      throw Exception(errorBody['error'] ?? "Failed to create listing");
     }
   }
 
   static Future<void> updateListing(
-      String id, Map<String, dynamic> data) async {
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final url = Uri.parse("$baseUrl/listings/update/$id");
 
     final response = await http.put(
@@ -192,13 +222,14 @@ class BackendService {
 
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body);
-      throw Exception(
-          errorBody['error'] ?? "Failed to update listing");
+      throw Exception(errorBody['error'] ?? "Failed to update listing");
     }
   }
 
   static Future<void> relistListing(
-      String id, Map<String, dynamic> pickupWindow) async {
+    String id,
+    Map<String, dynamic> pickupWindow,
+  ) async {
     final url = Uri.parse("$baseUrl/listings/relist/$id");
 
     final response = await http.put(
@@ -207,57 +238,42 @@ class BackendService {
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: jsonEncode({
-        "pickupWindow": pickupWindow,
-      }),
+      body: jsonEncode({"pickupWindow": pickupWindow}),
     );
 
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body);
-      throw Exception(
-          errorBody['error'] ?? "Failed to relist listing");
+      throw Exception(errorBody['error'] ?? "Failed to relist listing");
     }
   }
 
   // ========================= UPLOAD =========================
 
-  static Future<String> uploadImage(
-      Uint8List bytes, String filename) async {
+  static Future<String> uploadImage(Uint8List bytes, String filename) async {
     final url = Uri.parse("$baseUrl/upload");
 
-    final request =
-        http.MultipartRequest("POST", url);
+    final request = http.MultipartRequest("POST", url);
 
-    request.headers.addAll({
-      "ngrok-skip-browser-warning": "true",
-    });
+    request.headers.addAll({"ngrok-skip-browser-warning": "true"});
 
     request.files.add(
       http.MultipartFile.fromBytes(
         'image',
         bytes,
         filename: filename,
-        contentType: MediaType(
-          'image',
-          filename.split('.').last.toLowerCase(),
-        ),
+        contentType: MediaType('image', filename.split('.').last.toLowerCase()),
       ),
     );
 
     try {
-      final streamedResponse =
-          await request.send();
-      final response =
-          await http.Response.fromStream(
-              streamedResponse);
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
-        final data =
-            jsonDecode(response.body);
+        final data = jsonDecode(response.body);
         return data['imageUrl'];
       } else {
-        throw Exception(
-            "Upload failed: ${response.body}");
+        throw Exception("Upload failed: ${response.body}");
       }
     } catch (e) {
       debugPrint("Upload exception: $e");
@@ -268,9 +284,9 @@ class BackendService {
   // ========================= ORDERS =========================
 
   static Future<Map<String, dynamic>> createOrder(
-      Map<String, dynamic> orderData) async {
-    final url =
-        Uri.parse("$baseUrl/orders/create");
+    Map<String, dynamic> orderData,
+  ) async {
+    final url = Uri.parse("$baseUrl/orders/create");
 
     final response = await http.post(
       url,
@@ -281,15 +297,11 @@ class BackendService {
       body: jsonEncode(orderData),
     );
 
-    if (response.statusCode == 200 ||
-        response.statusCode == 201) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body);
     } else {
-      final errorBody =
-          jsonDecode(response.body);
-      throw Exception(
-          errorBody['error'] ??
-              "Failed to create order");
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? "Failed to create order");
     }
   }
 
@@ -311,7 +323,9 @@ class BackendService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getBuyerOrders(String buyerId) async {
+  static Future<List<Map<String, dynamic>>> getBuyerOrders(
+    String buyerId,
+  ) async {
     final url = Uri.parse("$baseUrl/orders/buyer/$buyerId");
 
     final response = await http.get(
@@ -335,7 +349,9 @@ class BackendService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getSellerOrders(String sellerId) async {
+  static Future<List<Map<String, dynamic>>> getSellerOrders(
+    String sellerId,
+  ) async {
     final url = Uri.parse("$baseUrl/orders/seller/$sellerId");
 
     final response = await http.get(
@@ -359,7 +375,9 @@ class BackendService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> getVolunteerRescueRequests(String volunteerId) async {
+  static Future<List<Map<String, dynamic>>> getVolunteerRescueRequests(
+    String volunteerId,
+  ) async {
     final url = Uri.parse("$baseUrl/orders/volunteer/requests/$volunteerId");
 
     final response = await http.get(
@@ -384,7 +402,9 @@ class BackendService {
   }
 
   static Future<void> acceptRescueRequest(
-      String requestId, String volunteerId) async {
+    String requestId,
+    String volunteerId,
+  ) async {
     final url = Uri.parse("$baseUrl/orders/$requestId/accept");
 
     final response = await http.post(
@@ -393,22 +413,19 @@ class BackendService {
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: jsonEncode({
-        "volunteerId": volunteerId,
-      }),
+      body: jsonEncode({"volunteerId": volunteerId}),
     );
 
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body);
-      throw Exception(
-          errorBody['error'] ??
-              "Failed to accept rescue request");
+      throw Exception(errorBody['error'] ?? "Failed to accept rescue request");
     }
   }
 
   static Future<void> updateOrder(
-      String orderId,
-      Map<String, dynamic> data) async {
+    String orderId,
+    Map<String, dynamic> data,
+  ) async {
     final url = Uri.parse("$baseUrl/orders/$orderId");
 
     final response = await http.patch(
@@ -421,19 +438,13 @@ class BackendService {
     );
 
     if (response.statusCode != 200) {
-      final errorBody =
-          jsonDecode(response.body);
-      throw Exception(
-          errorBody['error'] ??
-              "Failed to update order");
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? "Failed to update order");
     }
   }
 
-  static Future<void> updateOrderStatus(
-      String orderId,
-      String status) async {
-    final url = Uri.parse(
-        "$baseUrl/orders/$orderId/status");
+  static Future<void> updateOrderStatus(String orderId, String status) async {
+    final url = Uri.parse("$baseUrl/orders/$orderId/status");
 
     final response = await http.patch(
       url,
@@ -441,26 +452,21 @@ class BackendService {
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: jsonEncode({
-        "status": status,
-      }),
+      body: jsonEncode({"status": status}),
     );
 
     if (response.statusCode != 200) {
-      final errorBody =
-          jsonDecode(response.body);
-      throw Exception(
-          errorBody['error'] ??
-              "Failed to update order status");
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? "Failed to update order status");
     }
   }
 
   static Future<void> cancelOrder(
-      String orderId,
-      String cancelledBy,
-      String reason) async {
-    final url = Uri.parse(
-        "$baseUrl/orders/$orderId/cancel");
+    String orderId,
+    String cancelledBy,
+    String reason,
+  ) async {
+    final url = Uri.parse("$baseUrl/orders/$orderId/cancel");
 
     final response = await http.post(
       url,
@@ -468,18 +474,12 @@ class BackendService {
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: jsonEncode({
-        "cancelledBy": cancelledBy,
-        "reason": reason,
-      }),
+      body: jsonEncode({"cancelledBy": cancelledBy, "reason": reason}),
     );
 
     if (response.statusCode != 200) {
-      final errorBody =
-          jsonDecode(response.body);
-      throw Exception(
-          errorBody['error'] ??
-              "Failed to cancel order");
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? "Failed to cancel order");
     }
   }
 
