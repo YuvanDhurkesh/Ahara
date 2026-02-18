@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Order = require('../../models/Order');
 const Listing = require('../../models/Listing');
 const User = require('../../models/User');
+const Notification = require('../../models/Notification');
 const SellerProfile = require('../../models/SellerProfile');
 const { connect, disconnect } = require('../setup');
 
@@ -11,24 +12,21 @@ describe('Order Routes Integration Tests', () => {
     let seller, buyer, listing, sellerProfile;
 
     beforeAll(async () => {
-        // Mock session to avoid "Transaction numbers are only allowed on a replica set member" error
-        const mockSession = {
-            startTransaction: jest.fn(),
-            commitTransaction: jest.fn(),
-            abortTransaction: jest.fn(),
-            endSession: jest.fn(),
-            inTransaction: () => false,
-        };
-        jest.spyOn(mongoose, 'startSession').mockResolvedValue(mockSession);
-
         await connect();
         try {
             await User.deleteMany({});
             await SellerProfile.deleteMany({});
             await Listing.deleteMany({});
             await Order.deleteMany({});
+
+            // Explicitly create collections to avoid "Cannot create namespace in transaction" error
+            await User.createCollection();
+            await SellerProfile.createCollection();
+            await Listing.createCollection();
+            await Order.createCollection();
+            await Notification.createCollection();
         } catch (e) {
-            console.error('Cleanup error:', e.message);
+            console.error('Cleanup/Setup error:', e.message);
         }
 
         // Create Users

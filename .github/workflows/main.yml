@@ -30,11 +30,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # - name: Run Tests
-      #   run: npm test
-      #   env:
-      #     NODE_ENV: test
-      #     # MongoMemoryServer will automatically download binaries
+      - name: Run Tests
+        run: npm test
+        env:
+          NODE_ENV: test
+          # MongoMemoryServer will automatically download binaries
 
   frontend-ci:
     name: Frontend (Flutter)
