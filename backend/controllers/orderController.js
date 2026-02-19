@@ -7,11 +7,8 @@ const mongoose = require("mongoose");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-    let session;
     try {
         console.log("ENTERING createOrder");
-        session = await mongoose.startSession();
-        session.startTransaction();
         const {
             listingId,
             buyerId,
@@ -24,7 +21,7 @@ exports.createOrder = async (req, res) => {
         } = req.body;
 
         // 1. Find the listing
-        const listing = await Listing.findById(listingId).session(session);
+        const listing = await Listing.findById(listingId);
 
         if (!listing) {
             throw new Error("Listing not found");
@@ -63,7 +60,7 @@ exports.createOrder = async (req, res) => {
             timeline: { placedAt: new Date() }
         });
 
-        await newOrder.save({ session });
+        await newOrder.save();
 
         // 5. Update listing quantity
         listing.remainingQuantity -= quantityOrdered;
@@ -73,7 +70,7 @@ exports.createOrder = async (req, res) => {
             listing.status = "completed";
         }
 
-        await listing.save({ session });
+        await listing.save();
 
         // 6. Notify Seller
         await Notification.create([{
@@ -86,15 +83,7 @@ exports.createOrder = async (req, res) => {
                 listingId: listing._id,
                 action: "view_order"
             }
-        }], { session });
-
-        await session.commitTransaction();
-        session.endSession();
-
-        // If volunteer delivery, trigger matching
-        if (fulfillment === "volunteer_delivery") {
-            initiateVolunteerMatching(newOrder, listing);
-        }
+        }]);
 
         res.status(201).json({
             message: "Order placed successfully",
@@ -102,11 +91,12 @@ exports.createOrder = async (req, res) => {
             remainingQuantity: listing.remainingQuantity
         });
 
-    } catch (error) {
-        if (session) {
-            await session.abortTransaction();
-            session.endSession();
+        // If volunteer delivery, trigger matching
+        if (fulfillment === "volunteer_delivery") {
+            initiateVolunteerMatching(newOrder, listing);
         }
+
+    } catch (error) {
         console.error("Create Order Error:", error.message);
         console.error("Full error:", error);
         res.status(400).json({ error: error.message });
