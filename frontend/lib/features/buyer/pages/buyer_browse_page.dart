@@ -5,6 +5,9 @@ import '../../../shared/styles/app_colors.dart';
 import '../data/mock_stores.dart';
 import 'buyer_food_detail_page.dart';
 import '../../../data/services/backend_service.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+
 
 class BuyerBrowsePage extends StatefulWidget {
   final Set<String> favouriteIds;
@@ -24,6 +27,8 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   final TextEditingController _searchController = TextEditingController();
   final DraggableScrollableController _sheetController =
       DraggableScrollableController();
+
+  final MapController _mapController = MapController();
 
   // Filter States
   String _searchQuery = "";
@@ -141,8 +146,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
           // 1. Map Background
           _buildMapBackground(),
 
-          // 2. Map Markers
-          _buildMapMarkers(),
+         
 
           // 3. Floating Search Header
           Positioned(
@@ -163,81 +167,88 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   }
 
   Widget _buildMapBackground() {
-    return GestureDetector(
-      onTap: () {
+  return FlutterMap(
+    mapController: _mapController,
+    options: MapOptions(
+      initialCenter: const LatLng(12.9716, 77.5946), // Bangalore default
+      initialZoom: 13,
+      onTap: (_, __) {
         if (_selectedStoreId != null) {
           setState(() => _selectedStoreId = null);
         }
       },
-      child: Container(
-        color: const Color(0xFFE5E5E5),
-        child: CustomPaint(painter: GridMapPainter(), child: Container()),
+    ),
+    children: [
+      TileLayer(
+        urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        userAgentPackageName: "com.yourapp.app",
       ),
-    );
-  }
+      MarkerLayer(
+        markers: _buildOSMMarkers(),
+      ),
+    ],
+  );
+}
 
-  Widget _buildMapMarkers() {
-    final List<Offset> positions = [
-      const Offset(100, 250),
-      const Offset(250, 300),
-      const Offset(150, 400),
-      const Offset(300, 200),
-      const Offset(80, 500),
-      const Offset(320, 550),
-    ];
+List<Marker> _buildOSMMarkers() {
+  return _allResults.map((item) {
+    final String id =
+        item is MockStore ? item.id : (item['_id'] ?? "");
 
-    return Stack(
-      children: List.generate(
-        _allResults.length.clamp(0, positions.length),
-        (index) {
-          final item = _allResults[index];
-          final pos = positions[index];
-          
-          final String id = item is MockStore ? item.id : (item['_id'] ?? "");
-          final bool isSelected = _selectedStoreId == id;
-          final bool isFree = item is MockStore ? item.isFree : (item['pricing']?['isFree'] ?? false);
-          final String price = item is MockStore ? item.price : "₹${item['pricing']?['discountedPrice'] ?? 0}";
+    final bool isSelected = _selectedStoreId == id;
+    final bool isFree = item is MockStore
+        ? item.isFree
+        : (item['pricing']?['isFree'] ?? false);
 
-          return Positioned(
-            top: pos.dy,
-            left: pos.dx,
-            child: GestureDetector(
-              onTap: () {
-                setState(() => _selectedStoreId = id);
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.black : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  isFree ? "Free" : price,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: isSelected ? Colors.white : Colors.black,
-                  ),
-                ),
-              ),
-            ),
-          );
+    final String price = item is MockStore
+        ? item.price
+        : "₹${item['pricing']?['discountedPrice'] ?? 0}";
+
+    // TEMP coordinates (replace with real lat/lng from backend later)
+    final double lat = item is MockStore
+        ? 12.9716 + (_allResults.indexOf(item) * 0.005)
+        : 12.9716 + (_allResults.indexOf(item) * 0.005);
+
+    final double lng = item is MockStore
+        ? 77.5946 + (_allResults.indexOf(item) * 0.005)
+        : 77.5946 + (_allResults.indexOf(item) * 0.005);
+
+    return Marker(
+      width: 100,
+      height: 50,
+      point: LatLng(lat, lng),
+      child: GestureDetector(
+        onTap: () {
+          setState(() => _selectedStoreId = id);
         },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.black : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Text(
+            isFree ? "Free" : price,
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: isSelected ? Colors.white : Colors.black,
+            ),
+          ),
+        ),
       ),
     );
-  }
-
+  }).toList();
+}
+  
   Widget _buildFloatingSearchHeader() {
     return SafeArea(
       child: Container(
