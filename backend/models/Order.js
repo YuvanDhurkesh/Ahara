@@ -71,6 +71,7 @@ const orderSchema = new mongoose.Schema(
             razorpaySignature: String
         },
 
+        pickupOtp: String,
         handoverOtp: String,
 
         timeline: {

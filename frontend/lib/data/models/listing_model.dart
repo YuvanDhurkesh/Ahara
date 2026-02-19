@@ -28,7 +28,8 @@ class Listing {
   final String id;
   final String foodName;
   final FoodType foodType;
-  final double quantityValue;
+  final double totalQuantity;
+  final double remainingQuantity;
   final String quantityUnit; // kg, portions, pieces, liters
   final RedistributionMode redistributionMode;
   final double? price; // Required if mode is discounted
@@ -48,7 +49,8 @@ class Listing {
     required this.id,
     required this.foodName,
     required this.foodType,
-    required this.quantityValue,
+    required this.totalQuantity,
+    required this.remainingQuantity,
     required this.quantityUnit,
     required this.redistributionMode,
     this.price,
@@ -70,7 +72,8 @@ class Listing {
       'id': id,
       'foodName': foodName,
       'foodType': foodType.name,
-      'quantityValue': quantityValue,
+      'totalQuantity': totalQuantity,
+      'remainingQuantity': remainingQuantity,
       'quantityUnit': quantityUnit,
       'redistributionMode': redistributionMode.name,
       'price': price,
@@ -93,7 +96,11 @@ class Listing {
   String getDisplayImageUrl() {
     if (imageUrl.isNotEmpty) {
       final formattedUrl = BackendService.formatImageUrl(imageUrl);
-      if (BackendService.isValidImageUrl(formattedUrl)) {
+      // Filter out old SVG generator URLs (DiceBear/Placeholder) to ensure real food photos
+      final isOldGenerator = formattedUrl.contains('dicebear.com') || 
+                            formattedUrl.contains('placeholder.com');
+                            
+      if (BackendService.isValidImageUrl(formattedUrl) && !isOldGenerator) {
         debugPrint("📸 Using uploaded image for '$foodName': $formattedUrl");
         return formattedUrl;
       }
@@ -112,7 +119,8 @@ class Listing {
       id: json['_id'] ?? json['id'] ?? '',
       foodName: json['foodName'] ?? 'Unknown',
       foodType: _parseFoodType(json['foodType']),
-      quantityValue: (json['totalQuantity'] as num?)?.toDouble() ?? 0.0,
+      totalQuantity: (json['totalQuantity'] as num?)?.toDouble() ?? 0.0,
+      remainingQuantity: (json['remainingQuantity'] as num?)?.toDouble() ?? 0.0,
       quantityUnit: _extractUnit(json['quantityText'] ?? ''),
       redistributionMode: (pricing?['isFree'] == false)
           ? RedistributionMode.discounted

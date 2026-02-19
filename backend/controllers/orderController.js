@@ -47,6 +47,7 @@ exports.createOrder = async (req, res) => {
         // 4. Create the order
         const initialStatus = fulfillment === "volunteer_delivery" ? "awaiting_volunteer" : "placed";
         const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate 4-digit OTP
+        const pOtp = fulfillment === "volunteer_delivery" ? Math.floor(1000 + Math.random() * 9000).toString() : null;
 
         const newOrder = new Order({
             listingId,
@@ -59,6 +60,7 @@ exports.createOrder = async (req, res) => {
             drop,
             pricing,
             specialInstructions,
+            pickupOtp: pOtp,
             handoverOtp: otp,
             timeline: { placedAt: new Date() }
         });
@@ -496,3 +498,90 @@ async function initiateVolunteerMatching(order, listing) {
         console.error("[Matching] Error in initiateVolunteerMatching:", error);
     }
 }
+// 11. Verify OTP and transition status
+exports.verifyOtp = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { otp } = req.body;
+
+        const order = await Order.findById(id);
+        if (!order) {
+            return res.status(404).json({ error: "Order not found" });
+        }
+
+        let isCorrect = false;
+        let nextStatus = null;
+
+        if (order.fulfillment === "self_pickup") {
+            // Only one stage: Handover to Buyer
+            if (otp === order.handoverOtp) {
+                isCorrect = true;
+                nextStatus = "delivered";
+            }
+        } else {
+            // Volunteer Delivery has two stages
+            if (["placed", "volunteer_assigned", "volunteer_accepted"].includes(order.status)) {
+                // Stage 1: Handover from Seller to Volunteer
+                if (otp === order.pickupOtp) {
+                    isCorrect = true;
+                    nextStatus = "picked_up";
+                }
+            } else if (["picked_up", "in_transit"].includes(order.status)) {
+                // Stage 2: Handover from Volunteer to Buyer
+                if (otp === order.handoverOtp) {
+                    isCorrect = true;
+                    nextStatus = "delivered";
+                }
+            }
+        }
+
+        if (!isCorrect) {
+            return res.status(400).json({ error: "Invalid OTP code" });
+        }
+
+        // Apply transition
+        order.status = nextStatus;
+        if (nextStatus === "picked_up") order.timeline.pickedUpAt = new Date();
+        if (nextStatus === "delivered") order.timeline.deliveredAt = new Date();
+
+        await order.save();
+
+        // Send Notifications
+        if (nextStatus === "picked_up") {
+            await Notification.create({
+                userId: order.buyerId,
+                type: "order_update",
+                title: "🚚 Food Picked Up!",
+                message: "The volunteer has collected your food and is on the way.",
+                data: { orderId: order._id }
+            });
+        } else if (nextStatus === "delivered") {
+            // Notify both Buyer and Seller
+            await Notification.create([
+                {
+                    userId: order.buyerId,
+                    type: "order_update",
+                    title: "✅ Delivered!",
+                    message: "Hope you enjoy the food! This rescue is complete.",
+                    data: { orderId: order._id }
+                },
+                {
+                    userId: order.sellerId,
+                    type: "order_update",
+                    title: "✅ Rescue Successful!",
+                    message: "Your food donation has been successfully delivered.",
+                    data: { orderId: order._id }
+                }
+            ]);
+        }
+
+        res.status(200).json({
+            message: `OTP verified. Status updated to ${nextStatus}`,
+            order
+        });
+
+    } catch (error) {
+        console.error("Verify OTP Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};

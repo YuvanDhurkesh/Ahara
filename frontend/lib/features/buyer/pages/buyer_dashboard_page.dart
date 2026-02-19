@@ -30,18 +30,6 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
     _selectedIndex = widget.initialIndex;
   }
 
-  final Set<String> _favouriteIds = {};
-
-  void _toggleFavourite(String id) {
-    setState(() {
-      if (_favouriteIds.contains(id)) {
-        _favouriteIds.remove(id);
-      } else {
-        _favouriteIds.add(id);
-      }
-    });
-  }
-
   void _toggleVoiceMode() async {
     final voiceService = Provider.of<VoiceService>(context, listen: false);
     final langProvider = Provider.of<LanguageProvider>(context, listen: false);
@@ -107,19 +95,10 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _pages = [
-      BuyerHomePage(
-        favouriteIds: _favouriteIds,
-        onToggleFavourite: _toggleFavourite,
-      ), // Discover
-      BuyerBrowsePage(
-        favouriteIds: _favouriteIds,
-        onToggleFavourite: _toggleFavourite,
-      ), // Browse
+      const BuyerHomePage(), // Discover
+      const BuyerBrowsePage(), // Browse
       const BuyerOrdersPage(), // Orders
-      BuyerFavouritesPage(
-        favouriteIds: _favouriteIds,
-        onToggleFavourite: _toggleFavourite,
-      ), // Favourites
+      const BuyerFavouritesPage(), // Favourites
       const BuyerProfilePage(), // Profile
     ];
 

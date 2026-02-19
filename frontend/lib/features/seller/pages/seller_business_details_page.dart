@@ -59,7 +59,7 @@ class _SellerBusinessDetailsPageState extends State<SellerBusinessDetailsPage> {
   void _validateFssai() {
     setState(() {
       _isFssaiValid =
-          _fssaiController.text.isEmpty || _fssaiController.text.length == 12;
+          _fssaiController.text.isEmpty || _fssaiController.text.length == 14;
     });
   }
 
@@ -81,7 +81,7 @@ class _SellerBusinessDetailsPageState extends State<SellerBusinessDetailsPage> {
     if (!_isFssaiValid) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("FSSAI must be 12 digits")));
+      ).showSnackBar(const SnackBar(content: Text("FSSAI must be 14 digits")));
       return;
     }
 
@@ -324,7 +324,7 @@ class _SellerBusinessDetailsPageState extends State<SellerBusinessDetailsPage> {
           keyboardType: TextInputType.number,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           decoration: InputDecoration(
-            hintText: "Enter 12-digit number",
+            hintText: "Enter 14-digit number",
             prefixIcon: Icon(
               Icons.verified_user_outlined,
               size: 18,

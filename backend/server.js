@@ -10,6 +10,7 @@ const listingRoutes = require("./routes/listingRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const otpRoutes = require("./routes/otpRoutes");
 
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
@@ -20,12 +21,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware - CORS with explicit configuration for ngrok
+// Middleware - CORS with explicit configuration
 app.use(cors({
-  origin: '*', // Allow all origins (for development)
+  origin: function (origin, callback) {
+    // Allow all origins for development (ngrok, localhost, etc)
+    callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
-  credentials: true,
+  credentials: false,
   preflightContinue: false,
   optionsSuccessStatus: 204
 }));
@@ -39,9 +43,10 @@ app.use("/api/listings", listingRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/otp", otpRoutes);
 
 // Serve static uploads with ngrok bypass header (best effort)
-app.use("/uploads", (req, res, next) => {
+app.use("/api/uploads", (req, res, next) => {
   res.set("ngrok-skip-browser-warning", "true");
   next();
 }, express.static(path.join(__dirname, "uploads")));

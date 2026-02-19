@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'phone_login_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -282,6 +283,26 @@ class _LoginPageState extends State<LoginPage> {
           ),
   ),
 ),
+
+              const SizedBox(height: 16),
+
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.phone_android_outlined, color: AppColors.primary),
+                  label: const Text(
+                    "Sign in with Phone (OTP)",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PhoneLoginPage()),
+                    );
+                  },
+                ),
+              ),
 
               const SizedBox(height: 32),
 

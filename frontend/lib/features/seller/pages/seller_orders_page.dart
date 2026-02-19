@@ -86,22 +86,88 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                     ],
                   ),
                 )
-              : RefreshIndicator(
-                  onRefresh: _fetchOrders,
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 900),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _orders.length,
-                        itemBuilder: (context, index) {
-                          final order = _orders[index];
-                          return _buildOrderCard(context, order);
-                        },
-                      ),
-                    ),
-                  ),
-                ),
+              : _buildTabbedView(),
+    );
+  }
+
+  Widget _buildTabbedView() {
+    final activeStatusList = [
+      "placed",
+      "awaiting_volunteer",
+      "volunteer_assigned",
+      "volunteer_accepted",
+    ];
+    
+    final activeOrders = _orders
+        .where((o) => activeStatusList.contains(o['status']))
+        .toList();
+    final historicalOrders = _orders
+        .where((o) => !activeStatusList.contains(o['status']))
+        .toList();
+
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          Container(
+            color: Colors.white,
+            child: const TabBar(
+              labelColor: AppColors.primary,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: AppColors.primary,
+              tabs: [
+                Tab(text: "Active"),
+                Tab(text: "History"),
+              ],
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _buildOrderList(activeOrders),
+                _buildOrderList(historicalOrders),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrderList(List<Map<String, dynamic>> orders) {
+    if (orders.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _fetchOrders,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Center(
+              child: Text(
+                "No orders found",
+                style: TextStyle(color: Colors.grey.shade400),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _fetchOrders,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: orders.length,
+            itemBuilder: (context, index) {
+              final order = orders[index];
+              return _buildOrderCard(context, order);
+            },
+          ),
+        ),
+      ),
     );
   }
 
@@ -131,7 +197,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
             MaterialPageRoute(
               builder: (context) => SellerOrderDetailPage(order: order),
             ),
-          );
+          ).then((_) => _fetchOrders());
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(

@@ -2,6 +2,35 @@ const Listing = require("../models/Listing");
 const Order = require("../models/Order");
 const SellerProfile = require("../models/SellerProfile");
 const PerishabilityEngine = require("../utils/perishabilityEngine");
+const { generateDefaultImageUrl } = require("../utils/imageGenerator");
+
+// Helper: Ensure listing has an image. If not, generate one and save it.
+async function ensureListingHasImage(listing) {
+    const listingObj = listing.toObject ? listing.toObject() : listing;
+
+    const isOldGenerator = listingObj.images &&
+        listingObj.images.length > 0 &&
+        (listingObj.images[0].includes('dicebear.com') ||
+            listingObj.images[0].includes('placeholder.com'));
+
+    if (!listingObj.images || listingObj.images.length === 0 || isOldGenerator) {
+        const defaultImageUrl = generateDefaultImageUrl(listingObj.foodName, listingObj.category);
+
+        // Update in database to permanently fix old entries or set new one
+        if (listing._id) {
+            await Listing.findByIdAndUpdate(
+                listing._id,
+                { images: [defaultImageUrl] },
+                { new: false }
+            );
+        }
+
+        // Add to object for response
+        listingObj.images = [defaultImageUrl];
+    }
+
+    return listingObj;
+}
 
 // Create a new listing
 exports.createListing = async (req, res) => {
@@ -73,7 +102,15 @@ exports.createListing = async (req, res) => {
             };
         }
 
-        // 5. Build the object
+        // 5. Handle images - generate default if none provided
+        let imageList = images || [];
+        if (!imageList || imageList.length === 0) {
+            const defaultImageUrl = generateDefaultImageUrl(foodName, normalizedCategory);
+            imageList = [defaultImageUrl];
+            console.log(`Generated default image for ${foodName}: ${defaultImageUrl}`);
+        }
+
+        // 6. Build the object
         const listingData = {
             sellerId,
             sellerProfileId,
@@ -92,7 +129,7 @@ exports.createListing = async (req, res) => {
             pickupWindow,
             pickupAddressText: pickupAddressText || "",
             description: description || "",
-            images: images || [],
+            images: imageList,
             options: options || { selfPickupAvailable: true, deliveryAvailable: true },
             status: "active",
             isSafetyValidated: true,
@@ -150,9 +187,13 @@ exports.updateListing = async (req, res) => {
         }
 
         console.log("!!! UPDATE SUCCESS !!! ID:", updatedListing._id);
+
+        // Ensure listing has image
+        const listingWithImage = await ensureListingHasImage(updatedListing);
+
         res.status(200).json({
             message: "Listing updated successfully",
-            listing: updatedListing
+            listing: listingWithImage
         });
     } catch (error) {
         console.error("!!! UPDATE LISTING CRASH !!!", error);
@@ -180,7 +221,12 @@ exports.getActiveListings = async (req, res) => {
             .populate("sellerProfileId")
             .sort({ "pickupWindow.to": 1 });
 
-        res.status(200).json(listings);
+        // Ensure all listings have images
+        const listingsWithImages = await Promise.all(
+            listings.map(listing => ensureListingHasImage(listing))
+        );
+
+        res.status(200).json(listingsWithImages);
     } catch (error) {
         res.status(500).json({ error: "Server error", details: error.message });
     }
@@ -199,7 +245,12 @@ exports.getExpiredListings = async (req, res) => {
 
         const listings = await Listing.find(query).sort({ "pickupWindow.to": -1 });
 
-        res.status(200).json(listings);
+        // Ensure all listings have images
+        const listingsWithImages = await Promise.all(
+            listings.map(listing => ensureListingHasImage(listing))
+        );
+
+        res.status(200).json(listingsWithImages);
     } catch (error) {
         res.status(500).json({ error: "Server error", details: error.message });
     }
@@ -220,7 +271,12 @@ exports.getCompletedListings = async (req, res) => {
 
         const listings = await Listing.find(query);
 
-        res.status(200).json(listings);
+        // Ensure all listings have images
+        const listingsWithImages = await Promise.all(
+            listings.map(listing => ensureListingHasImage(listing))
+        );
+
+        res.status(200).json(listingsWithImages);
     } catch (error) {
         res.status(500).json({ error: "Server error", details: error.message });
     }
@@ -252,13 +308,46 @@ exports.relistListing = async (req, res) => {
             { new: true, runValidators: true }
         );
 
+        // Ensure listing has image
+        const listingWithImage = await ensureListingHasImage(updatedListing);
+
         res.status(200).json({
             message: "Listing relisted successfully",
-            listing: updatedListing
+            listing: listingWithImage
         });
     } catch (error) {
         console.error("Error relisting:", error);
         res.status(500).json({ error: "Server error", details: error.message });
+    }
+};
+
+// Delete a listing
+exports.deleteListing = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check if there are active orders for this listing
+        const activeOrders = await Order.countDocuments({
+            listingId: id,
+            status: { $in: ["placed", "awaiting_volunteer", "volunteer_assigned", "volunteer_accepted", "picked_up", "in_transit"] }
+        });
+
+        if (activeOrders > 0) {
+            return res.status(400).json({
+                error: "Cannot delete listing with active orders. Complete or cancel orders first."
+            });
+        }
+
+        const deletedListing = await Listing.findByIdAndDelete(id);
+
+        if (!deletedListing) {
+            return res.status(404).json({ error: "Listing not found" });
+        }
+
+        res.status(200).json({ message: "Listing deleted successfully" });
+    } catch (error) {
+        console.error("Delete Listing Error:", error);
+        res.status(500).json({ error: "Server error during deletion", details: error.message });
     }
 };
 
@@ -322,5 +411,39 @@ exports.getSellerStats = async (req, res) => {
     } catch (error) {
         console.error("Error fetching seller stats:", error);
         res.status(500).json({ error: "Server error fetching statistics", details: error.message });
+    }
+};
+
+// Get favorite listings for a user
+exports.getFavoriteListings = async (req, res) => {
+    try {
+        const { uid } = req.params;
+        const User = require("../models/User");
+        const BuyerProfile = require("../models/BuyerProfile");
+
+        const user = await User.findOne({ firebaseUid: uid });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const profile = await BuyerProfile.findOne({ userId: user._id });
+        if (!profile || !profile.favouriteListings || profile.favouriteListings.length === 0) {
+            return res.status(200).json([]);
+        }
+
+        const listings = await Listing.find({
+            _id: { $in: profile.favouriteListings },
+            status: "active" // Only show active favorites
+        }).populate("sellerProfileId");
+
+        // Ensure all listings have images
+        const listingsWithImages = await Promise.all(
+            listings.map(listing => ensureListingHasImage(listing))
+        );
+
+        res.status(200).json(listingsWithImages);
+    } catch (error) {
+        console.error("Error fetching favorite listings:", error);
+        res.status(500).json({ error: "Server error fetching favorite listings", details: error.message });
     }
 };

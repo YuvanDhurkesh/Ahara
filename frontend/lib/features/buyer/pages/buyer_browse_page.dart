@@ -9,15 +9,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 
-class BuyerBrowsePage extends StatefulWidget {
-  final Set<String> favouriteIds;
-  final Function(String) onToggleFavourite;
+import 'package:provider/provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
 
-  const BuyerBrowsePage({
-    super.key,
-    required this.favouriteIds,
-    required this.onToggleFavourite,
-  });
+class BuyerBrowsePage extends StatefulWidget {
+  const BuyerBrowsePage({super.key});
 
   @override
   State<BuyerBrowsePage> createState() => _BuyerBrowsePageState();
@@ -689,17 +685,39 @@ List<Marker> _buildOSMMarkers() {
               Positioned(
                 top: 12,
                 right: 12,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.favorite_border,
-                    size: 20,
-                    color: Colors.black,
-                  ),
+                child: Consumer<AppAuthProvider>(
+                  builder: (context, auth, _) {
+                    final profile = auth.mongoProfile;
+                    final listingId = listing['_id'] ?? listing['id'];
+                    final List? favorites = profile?['favouriteListings'];
+                    final bool isFavorited = favorites?.contains(listingId) ?? false;
+
+                    return GestureDetector(
+                      onTap: () async {
+                        if (auth.currentUser == null) return;
+                        try {
+                          await BackendService.toggleFavoriteListing(
+                              firebaseUid: auth.currentUser!.uid,
+                              listingId: listingId);
+                          await auth.refreshMongoUser();
+                        } catch (e) {
+                          debugPrint("Error toggling favorite: $e");
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isFavorited ? Icons.favorite : Icons.favorite_border,
+                          size: 20,
+                          color: isFavorited ? Colors.red : Colors.black,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -836,8 +854,6 @@ List<Marker> _buildOSMMarkers() {
   }
 
   Widget _buildMockStoreCard(MockStore store) {
-    bool isFavourite = widget.favouriteIds.contains(store.id);
-
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -862,17 +878,38 @@ List<Marker> _buildOSMMarkers() {
               Positioned(
                 top: 12,
                 right: 12,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    isFavourite ? Icons.favorite : Icons.favorite_border,
-                    size: 20,
-                    color: isFavourite ? Colors.red : Colors.black,
-                  ),
+                child: Consumer<AppAuthProvider>(
+                  builder: (context, auth, _) {
+                    final profile = auth.mongoProfile;
+                    final List? favorites = profile?['favouriteListings'];
+                    final bool isFavorited = favorites?.contains(store.id) ?? false;
+
+                    return GestureDetector(
+                      onTap: () async {
+                        if (auth.currentUser == null) return;
+                        try {
+                          await BackendService.toggleFavoriteListing(
+                              firebaseUid: auth.currentUser!.uid,
+                              listingId: store.id);
+                          await auth.refreshMongoUser();
+                        } catch (e) {
+                          debugPrint("Error toggling favorite for mock store: $e");
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isFavorited ? Icons.favorite : Icons.favorite_border,
+                          size: 20,
+                          color: isFavorited ? Colors.red : Colors.black,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
