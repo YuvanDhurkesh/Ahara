@@ -40,6 +40,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
   String _dietaryType = "vegetarian";
 
   final TextEditingController _pincodeController = TextEditingController();
+  Map<String, double>? _coordinates;
 
   final List<String> _units = ['kg', 'portions', 'pieces', 'liters'];
 
@@ -190,6 +191,13 @@ class _CreateListingPageState extends State<CreateListingPage> {
             "to": expiryTime.toIso8601String(),
           },
           "pickupAddressText": _locationController.text,
+          "pincode": _pincodeController.text,
+          "geo": {
+            "type": "Point",
+            "coordinates": _coordinates != null 
+                ? [_coordinates!['longitude'], _coordinates!['latitude']]
+                : [77.5946, 12.9716] // Fallback to Bangalore center
+          },
         };
 
         debugPrint('--- SUBMIT FORM ---');
@@ -367,16 +375,6 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     _buildDietarySelector(),
 
                     const SizedBox(height: 20),
-                    _buildSectionTitle("Logistics"),
-                    const SizedBox(height: 12),
-                    _buildTextField(
-                      controller: _locationController,
-                      label: "Pickup Location",
-                      hint: "Enter your full address",
-                      maxLines: 2,
-                      validator: (v) => v?.isEmpty ?? true ? "Required" : null,
-                    ),
-                    const SizedBox(height: 12),
                     _buildMapPicker(),
                     const SizedBox(height: 32),
                     SizedBox(
@@ -828,7 +826,10 @@ class _CreateListingPageState extends State<CreateListingPage> {
 
   Widget _buildMapPicker() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildSectionTitle("Logistics"),
+        const SizedBox(height: 16),
         TextFormField(
           controller: _locationController,
           decoration: InputDecoration(
@@ -904,6 +905,10 @@ class _CreateListingPageState extends State<CreateListingPage> {
               setState(() {
                 _locationController.text = result.address;
                 _pincodeController.text = result.pincode;
+                _coordinates = {
+                  'latitude': result.latitude,
+                  'longitude': result.longitude,
+                };
               });
             }
           },

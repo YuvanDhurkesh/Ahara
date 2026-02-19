@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../../data/services/backend_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class VolunteerOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic>? order;
@@ -14,12 +16,12 @@ class VolunteerOrderDetailPage extends StatefulWidget {
 }
 
 class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
-  late GoogleMapController _mapController;
+  final MapController _mapController = MapController();
   final TextEditingController _otpController = TextEditingController();
   bool _isVerifying = false;
   late String _currentStatus;
 
-  // Dummy coordinates (replace later with real ones)
+  // LatLng from latlong2
   LatLng pickupLocation = const LatLng(28.6139, 77.2090); // Delhi
   LatLng deliveryLocation = const LatLng(28.5355, 77.3910); // Noida
 
@@ -100,6 +102,19 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     }
   }
 
+  Future<void> _launchNavigation(LatLng destination) async {
+    final url = 'https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Could not launch navigation")),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,39 +133,46 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
       ),
       body: Column(
         children: [
-          // 🗺️ MAP
+          // 🗺️ OPEN STREET MAP
           SizedBox(
             height: 280,
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: pickupLocation,
-                zoom: 12,
+            child: FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: pickupLocation,
+                initialZoom: 12,
               ),
-              markers: {
-                Marker(
-                  markerId: const MarkerId('pickup'),
-                  position: pickupLocation,
-                  infoWindow: const InfoWindow(title: 'Pickup Location'),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.ahara.app',
                 ),
-                Marker(
-                  markerId: const MarkerId('delivery'),
-                  position: deliveryLocation,
-                  infoWindow: const InfoWindow(title: 'Delivery Location'),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: pickupLocation,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(Icons.location_on, color: AppColors.primary, size: 40),
+                    ),
+                    Marker(
+                      point: deliveryLocation,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+                    ),
+                  ],
                 ),
-              },
-              polylines: {
-                Polyline(
-                  polylineId: const PolylineId('route'),
-                  points: [pickupLocation, deliveryLocation],
-                  color: AppColors.primary,
-                  width: 5,
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: [pickupLocation, deliveryLocation],
+                      color: AppColors.primary,
+                      strokeWidth: 4,
+                    ),
+                  ],
                 ),
-              },
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
-              myLocationButtonEnabled: false,
-              zoomControlsEnabled: false,
+              ],
             ),
           ),
 
@@ -433,10 +455,13 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () {
-          // Later: open Google Maps intent
+          final target = ['placed', 'volunteer_assigned', 'volunteer_accepted'].contains(_currentStatus)
+              ? pickupLocation
+              : deliveryLocation;
+          _launchNavigation(target);
         },
-        icon: const Icon(Icons.map),
-        label: const Text('Open in Google Maps'),
+        icon: const Icon(Icons.navigation, color: Colors.white),
+        label: const Text('Open in Navigation', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           padding: const EdgeInsets.symmetric(vertical: 14),

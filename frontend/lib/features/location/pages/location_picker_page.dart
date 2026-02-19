@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../../../shared/styles/app_colors.dart';
 
 class LocationResult {
@@ -32,13 +38,18 @@ class LocationPickerPage extends StatefulWidget {
 class _LocationPickerPageState extends State<LocationPickerPage> {
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _pincodeController = TextEditingController();
+  final MapController _mapController = MapController();
+  
+  LatLng _currentSelectedPos = const LatLng(12.9716, 77.5946); // Bengaluru
   bool _isLocating = false;
+  bool _isReverseGeocoding = false;
 
   @override
   void initState() {
     super.initState();
     _addressController.text = widget.initialAddress ?? "";
     _pincodeController.text = widget.initialPincode ?? "";
+    _determinePosition();
   }
 
   @override
@@ -48,18 +59,111 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
     super.dispose();
   }
 
-  void _simulateCurrentLocation() {
+  Future<void> _determinePosition() async {
     setState(() => _isLocating = true);
-    Future.delayed(const Duration(seconds: 1), () {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) throw 'Location services are disabled.';
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) throw 'Denied';
+      }
+      
+      Position position = await Geolocator.getCurrentPosition();
+      final newPos = LatLng(position.latitude, position.longitude);
+      
       setState(() {
+        _currentSelectedPos = newPos;
         _isLocating = false;
-        _addressController.text = "123 Green Valley, Bengaluru";
-        _pincodeController.text = "560001";
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Location detected!")));
-    });
+
+      _mapController.move(newPos, 16);
+      _reverseGeocode(newPos.latitude, newPos.longitude);
+    } catch (e) {
+      setState(() => _isLocating = false);
+    }
+  }
+
+  Future<void> _reverseGeocode(double lat, double lon) async {
+    if (!mounted) return;
+    setState(() => _isReverseGeocoding = true);
+    
+    _addressController.text = "Locating...";
+    _pincodeController.text = "...";
+
+    try {
+      debugPrint("Reverse Geocoding: $lat, $lon");
+      
+      // Try native geocoding first
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+        if (placemarks.isNotEmpty) {
+          final p = placemarks.first;
+          debugPrint("Native Placemark: ${p.toString()}");
+          
+          List<String> parts = [];
+          if (p.name != null && p.name!.isNotEmpty && p.name != p.street) parts.add(p.name!);
+          if (p.street != null && p.street!.isNotEmpty) parts.add(p.street!);
+          if (p.subLocality != null && p.subLocality!.isNotEmpty) parts.add(p.subLocality!);
+          if (p.locality != null && p.locality!.isNotEmpty) parts.add(p.locality!);
+          
+          final address = parts.where((s) => s.isNotEmpty).join(", ");
+          if (address.isNotEmpty) {
+            if (mounted) {
+              setState(() {
+                _addressController.text = address;
+                _pincodeController.text = p.postalCode ?? "";
+              });
+              return; // Success
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint("Native Geocoding failed, trying Nominatim: $e");
+      }
+
+      // Fallback: Use Nominatim (OSM Geocoder)
+      final url = Uri.parse('https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lon&zoom=18&addressdetails=1');
+      final response = await http.get(url, headers: {
+        'User-Agent': 'AharaApp/1.0 (com.ahara.app)',
+        'Accept-Language': 'en',
+      });
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final displayName = data['display_name'] as String?;
+        final addressData = data['address'] as Map<String, dynamic>?;
+        final postcode = addressData?['postcode'] as String?;
+
+        if (mounted && displayName != null) {
+          setState(() {
+            _addressController.text = displayName.split(", ").take(4).join(", ");
+            _pincodeController.text = postcode ?? "";
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+             _addressController.text = "Location Selected (${lat.toStringAsFixed(4)}, ${lon.toStringAsFixed(4)})";
+             _pincodeController.text = "";
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint("All Geocoding methods failed: $e");
+      if (mounted) {
+        setState(() {
+          _addressController.text = "Location Selected";
+          _pincodeController.text = "";
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isReverseGeocoding = false);
+      }
+    }
   }
 
   @override
@@ -67,10 +171,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          "Pick Location",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
+        title: const Text("Select Location", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: AppColors.textDark,
@@ -80,170 +181,120 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
           Expanded(
             child: Stack(
               children: [
-                // Placeholder Map
-                Container(
-                  width: double.infinity,
-                  color: AppColors.textLight.withOpacity(0.05),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.map_outlined,
-                          size: 64,
-                          color: AppColors.primary.withOpacity(0.2),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          "Interactive Map Placeholder",
-                          style: TextStyle(
-                            color: AppColors.textLight.withOpacity(0.5),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          "Pinch to zoom • Drag to move pin",
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
-                        ),
-                      ],
-                    ),
+                FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    initialCenter: _currentSelectedPos,
+                    initialZoom: 15,
+                    onPositionChanged: (position, hasGesture) {
+                      if (hasGesture) {
+                        _currentSelectedPos = position.center!;
+                      }
+                    },
+                    onMapEvent: (event) {
+                      if (event is MapEventMoveEnd) {
+                        _reverseGeocode(_currentSelectedPos.latitude, _currentSelectedPos.longitude);
+                      }
+                    },
                   ),
+                  children: [
+                    TileLayer(
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.ahara.app',
+                    ),
+                  ],
                 ),
-
-                // Pin Overlay
+                
+                // Static Center Pin
                 const Center(
                   child: Padding(
-                    padding: EdgeInsets.only(bottom: 40),
-                    child: Icon(
-                      Icons.location_on,
-                      color: AppColors.primary,
-                      size: 40,
-                    ),
+                    padding: EdgeInsets.only(bottom: 35),
+                    child: Icon(Icons.location_on, color: AppColors.primary, size: 45),
                   ),
                 ),
 
-                // Current Location Button
+                // Loader for Geocoding
+                if (_isReverseGeocoding)
+                  Positioned(
+                    top: 20,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)]),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2)),
+                            SizedBox(width: 10),
+                            Text("Fetching address...", style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // My Location Button
                 Positioned(
-                  right: 16,
-                  bottom: 16,
+                  right: 20,
+                  bottom: 20,
                   child: FloatingActionButton(
-                    onPressed: _isLocating ? null : _simulateCurrentLocation,
+                    onPressed: _determinePosition,
                     backgroundColor: Colors.white,
                     mini: true,
-                    child: _isLocating
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(
-                            Icons.my_location,
-                            color: AppColors.primary,
-                          ),
+                    child: _isLocating 
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) 
+                        : const Icon(Icons.my_location, color: AppColors.primary),
                   ),
                 ),
               ],
             ),
           ),
 
-          // Bottom Inputs
+          // Bottom Input Sheet
           Container(
             padding: const EdgeInsets.all(24),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, -5),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -5))],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Confirm Address",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Address Field
                 TextField(
                   controller: _addressController,
-                  maxLines: 2,
                   decoration: InputDecoration(
-                    labelText: "Full Address",
-                    hintText: "Building name, Street, Area",
+                    labelText: "Address",
                     prefixIcon: const Icon(Icons.location_on_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Pincode Field
                 TextField(
                   controller: _pincodeController,
-                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: "Pincode",
-                    hintText: "6-digit code",
                     prefixIcon: const Icon(Icons.pin_drop_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // Confirm Button
                 SizedBox(
                   width: double.infinity,
-                  height: 50,
+                  height: 54,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (_addressController.text.isEmpty ||
-                          _pincodeController.text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Please enter address and pincode"),
-                          ),
-                        );
-                        return;
-                      }
-
-                      Navigator.pop(
-                        context,
-                        LocationResult(
-                          address: _addressController.text,
-                          pincode: _pincodeController.text,
-                          latitude: 12.9716, // Dummy
-                          longitude: 77.5946, // Dummy
-                        ),
-                      );
+                      Navigator.pop(context, LocationResult(
+                        address: _addressController.text,
+                        pincode: _pincodeController.text,
+                        latitude: _currentSelectedPos.latitude,
+                        longitude: _currentSelectedPos.longitude,
+                      ));
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      "Confirm Selection",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                    child: const Text("Confirm Location", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
