@@ -103,7 +103,7 @@ describe('Order Routes Integration Tests', () => {
             console.error('Final cleanup error:', e.message);
         }
         await disconnect();
-    });
+    }, 60000);
 
     it.skip('POST /api/orders/create should create a new order', async () => {
         const res = await request(app)
