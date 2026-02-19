@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../config/api_config.dart';
 
+
+
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -121,7 +123,7 @@ class AuthService {
   }) async {
     try {
       final token = await user.getIdToken();
-
+      
       final response = await http.post(
         Uri.parse("$backendBaseUrl/users/create"),
         headers: {
