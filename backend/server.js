@@ -20,12 +20,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware - CORS with explicit configuration for ngrok
+// Middleware - CORS with explicit configuration
 app.use(cors({
-  origin: '*', // Allow all origins (for development)
+  origin: function(origin, callback) {
+    // Allow all origins for development (ngrok, localhost, etc)
+    callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
-  credentials: true,
+  credentials: false,
   preflightContinue: false,
   optionsSuccessStatus: 204
 }));

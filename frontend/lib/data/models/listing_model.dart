@@ -93,7 +93,11 @@ class Listing {
   String getDisplayImageUrl() {
     if (imageUrl.isNotEmpty) {
       final formattedUrl = BackendService.formatImageUrl(imageUrl);
-      if (BackendService.isValidImageUrl(formattedUrl)) {
+      // Filter out old SVG generator URLs (DiceBear/Placeholder) to ensure real food photos
+      final isOldGenerator = formattedUrl.contains('dicebear.com') || 
+                            formattedUrl.contains('placeholder.com');
+                            
+      if (BackendService.isValidImageUrl(formattedUrl) && !isOldGenerator) {
         debugPrint("📸 Using uploaded image for '$foodName': $formattedUrl");
         return formattedUrl;
       }

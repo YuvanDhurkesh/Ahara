@@ -61,6 +61,24 @@ class BackendService {
     }
   }
 
+  static Future<List<dynamic>> getFavoriteListings(String firebaseUid) async {
+    final url = Uri.parse("$baseUrl/listings/favorites/$firebaseUid");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to fetch favorite listings");
+    }
+  }
+
   static Future<void> updateUserPreferences({
     required String firebaseUid,
     String? language,
@@ -82,6 +100,28 @@ class BackendService {
 
     if (response.statusCode != 200) {
       throw Exception("Failed to update user preferences");
+    }
+  }
+
+  static Future<Map<String, dynamic>> toggleFavoriteListing({
+    required String firebaseUid,
+    required String listingId,
+  }) async {
+    final url = Uri.parse("$baseUrl/users/$firebaseUid/toggle-favorite-listing");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({"listingId": listingId}),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to toggle favorite");
     }
   }
 
@@ -596,6 +636,11 @@ class BackendService {
       return false;
     }
 
+    // Filter out old SVG generator URLs (DiceBear/Placeholder)
+    if (imageUrl.contains('dicebear.com') || imageUrl.contains('placeholder.com')) {
+      return false;
+    }
+
     try {
       Uri.parse(imageUrl);
       return imageUrl.startsWith('http://') ||
@@ -607,9 +652,28 @@ class BackendService {
   }
 
   static String generateFoodImageUrl(String foodName) {
-    // Generate a placeholder image URL using a food image service
-    // Using a simple approach with emoji representation
-    final encodedName = Uri.encodeComponent(foodName);
-    return "https://via.placeholder.com/300?text=${encodedName.replaceAll('%20', '+')}";
+    // Generate a default real food image URL using LoremFlickr
+    final String name = (foodName).toLowerCase();
+    
+    // Primary mandatory tag is always 'food' to avoid random non-food pics
+    final List<String> tags = ["food"];
+    
+    // Add ONE high-reliability secondary tag
+    if (name.contains('chaap') || name.contains('soya')) tags.add('curry');
+    else if (name.contains('biryani') || name.contains('rice')) tags.add('rice');
+    else if (name.contains('bread') || name.contains('roti') || name.contains('naan')) tags.add('bread');
+    else if (name.contains('pasta') || name.contains('noodle')) tags.add('pasta');
+    else if (name.contains('pizza')) tags.add('pizza');
+    else if (name.contains('burger')) tags.add('burger');
+    else if (name.contains('fruit')) tags.add('fruit');
+    else if (name.contains('cake') || name.contains('pastry') || name.contains('sweet')) tags.add('dessert');
+    else tags.add('meal');
+
+    // Create a consistent lock/seed for the same food item
+    final seed = foodName.codeUnits.fold<int>(0, (prev, element) => prev + element) % 1000;
+    
+    // Using a single tag search for 'food,tag' which acts as (food AND tag)
+    // This provides high-quality images and avoids fallback to the cat statue
+    return "https://loremflickr.com/800/600/${tags.join(',')}?lock=$seed";
   }
 }

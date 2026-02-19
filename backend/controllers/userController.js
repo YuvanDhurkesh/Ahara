@@ -404,3 +404,51 @@ exports.updateSellerProfile = async (req, res) => {
     });
   }
 };
+
+// ======================================================
+// TOGGLE FAVOURITE LISTING
+// ======================================================
+
+exports.toggleFavoriteListing = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { listingId } = req.body;
+
+    if (!listingId) {
+      return res.status(400).json({ error: "listingId is required" });
+    }
+
+    const user = await User.findOne({ firebaseUid: uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    let profile = await BuyerProfile.findOne({ userId: user._id });
+    if (!profile) {
+      profile = await BuyerProfile.create({ userId: user._id });
+    }
+
+    const listingIndex = profile.favouriteListings.indexOf(listingId);
+    let isFavorited = false;
+
+    if (listingIndex > -1) {
+      profile.favouriteListings.splice(listingIndex, 1);
+    } else {
+      profile.favouriteListings.push(listingId);
+      isFavorited = true;
+    }
+
+    await profile.save();
+
+    return res.status(200).json({
+      message: isFavorited ? "Listing favorited" : "Listing unfavorited",
+      isFavorited,
+      favouriteListings: profile.favouriteListings
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Server error toggle favorite",
+      details: error.message
+    });
+  }
+};
