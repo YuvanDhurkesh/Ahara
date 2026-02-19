@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart';
 
 class GoogleAuthService {
 
@@ -9,36 +10,54 @@ class GoogleAuthService {
     scopes: ['email'],
   );
 
-  Future<User?> signInWithGoogle() async {
+  //---------------------------------------------------------
+  /// GOOGLE SIGN-IN
+  //---------------------------------------------------------
 
+  Future<User?> signInWithGoogle() async {
     try {
 
-      // Trigger popup
+      // Trigger Google Sign-In popup
       final GoogleSignInAccount? googleUser =
           await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        return null; // user cancelled
+        return null; // User cancelled login
       }
 
-      // Get auth details
+      // Get authentication details
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      // Create credential
+      // Create Firebase credential
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Firebase login
+      // Sign in with Firebase
       final userCredential =
           await _auth.signInWithCredential(credential);
 
       return userCredential.user;
 
-    } catch (e) {
-      print("Google Sign-In Error: $e");
+    } catch (e, stackTrace) {
+      debugPrint("Google Sign-In Error: $e");
+      debugPrint(stackTrace.toString());
+      rethrow;
+    }
+  }
+
+  //---------------------------------------------------------
+  /// GOOGLE SIGN-OUT 🔥 (THIS FIXES YOUR ERROR)
+  //---------------------------------------------------------
+
+  Future<void> signOut() async {
+    try {
+      await _googleSignIn.signOut(); // Clears Google session
+    } catch (e, stackTrace) {
+      debugPrint("Google Sign-Out Error: $e");
+      debugPrint(stackTrace.toString());
       rethrow;
     }
   }

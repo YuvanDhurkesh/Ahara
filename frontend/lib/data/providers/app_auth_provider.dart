@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../services/auth_service.dart';
 import '../services/google_auth_service.dart';
 import '../services/backend_service.dart';
 
 class AppAuthProvider extends ChangeNotifier {
+
   //---------------------------------------------------------
   /// SERVICES
   //---------------------------------------------------------
@@ -15,11 +17,12 @@ class AppAuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   AppAuthProvider() {
-    _auth.authStateChanges().listen((user) {
+    _auth.authStateChanges().listen((user) async {
       if (user != null) {
-        refreshMongoUser();
+        await refreshMongoUser();
       } else {
         _mongoUser = null;
+        _mongoProfile = null;
         notifyListeners();
       }
     });
@@ -30,11 +33,9 @@ class AppAuthProvider extends ChangeNotifier {
   //---------------------------------------------------------
 
   bool _loading = false;
-
   bool get loading => _loading;
 
   Stream<User?> get authState => _auth.authStateChanges();
-
   User? get currentUser => _auth.currentUser;
 
   Map<String, dynamic>? _mongoUser;
@@ -43,59 +44,49 @@ class AppAuthProvider extends ChangeNotifier {
   Map<String, dynamic>? _mongoProfile;
   Map<String, dynamic>? get mongoProfile => _mongoProfile;
 
-  Future<void> refreshMongoUser() async {
-    if (currentUser == null) return;
-    
+  //---------------------------------------------------------
+  /// GOOGLE SIGN-IN
+  //---------------------------------------------------------
+
+  Future<User?> signInWithGoogle() async {
+    _setLoading(true);
+
     try {
-      debugPrint("🔄 Fetching mongo user for UID: ${currentUser!.uid}");
-      final data = await BackendService.getUserProfile(currentUser!.uid);
-      _mongoUser = data['user'];
-      _mongoProfile = data['profile'];
-      debugPrint("✅ Mongo user loaded: ${_mongoUser?['_id']}");
-      notifyListeners();
-    } catch (e) {
-      debugPrint("❌ Error fetching mongo user: $e. Checking Firestore for auto-sync...");
-      
-      try {
-        // SELF-HEALING: If not in Mongo, check Firestore
-        final firestoreDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(currentUser!.uid)
-            .get();
+      final user = await _googleService.signInWithGoogle();
 
-        if (firestoreDoc.exists) {
-          final userData = firestoreDoc.data()!;
-          debugPrint("📝 Found Firestore data, attempting auto-sync to Mongo...");
-          
-          await BackendService.createUser(
-            firebaseUid: currentUser!.uid,
-            name: userData['name'] ?? currentUser!.displayName ?? "User",
-            email: userData['email'] ?? currentUser!.email ?? "",
-            role: userData['role'] ?? "buyer",
-            phone: userData['phone'] ?? "",
-            location: userData['location'] ?? "",
-          );
+      if (user == null) return null;
 
-          // Retry fetching profile
-          final data = await BackendService.getUserProfile(currentUser!.uid);
-          _mongoUser = data['user'];
-          _mongoProfile = data['profile'];
-          notifyListeners();
-          debugPrint("✅ Auto-sync successful");
-        } else {
-          debugPrint("❌ No Firestore data found for user");
-        }
-      } catch (innerError) {
-        debugPrint("❌ Auto-sync failed: $innerError");
-      }
+      final docRef =
+          FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+      // 🔥 Safe merge to avoid overwrite issues
+      await docRef.set({
+        "firebaseUid": user.uid,
+        "name": user.displayName ?? "User",
+        "email": user.email ?? "",
+        "role": "buyer",
+        "phone": "",
+        "location": "",
+        "language": "en",
+        "uiMode": "light",
+        "createdAt": FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      await refreshMongoUser();
+
+      return user;
+
+    } catch (e, stackTrace) {
+      debugPrint("Google Sign-In Error: $e");
+      debugPrint(stackTrace.toString());
+      rethrow;
+    } finally {
+      _setLoading(false);
     }
   }
 
   //---------------------------------------------------------
   /// EMAIL LOGIN
-  /// 🔥 IMPORTANT:
-  /// Mongo sync SHOULD NOT happen here.
-  /// Only Firebase authentication.
   //---------------------------------------------------------
 
   Future<User?> login(String email, String password) async {
@@ -107,7 +98,9 @@ class AppAuthProvider extends ChangeNotifier {
         await refreshMongoUser();
       }
       return user;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint("Email Login Error: $e");
+      debugPrint(stackTrace.toString());
       rethrow;
     } finally {
       _setLoading(false);
@@ -116,7 +109,6 @@ class AppAuthProvider extends ChangeNotifier {
 
   //---------------------------------------------------------
   /// REGISTER USER
-  /// ✅ Mongo sync happens INSIDE AuthService
   //---------------------------------------------------------
 
   Future<User?> registerUser({
@@ -156,7 +148,9 @@ class AppAuthProvider extends ChangeNotifier {
       }
 
       return user;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint("Register Error: $e");
+      debugPrint(stackTrace.toString());
       rethrow;
     } finally {
       _setLoading(false);
@@ -164,45 +158,47 @@ class AppAuthProvider extends ChangeNotifier {
   }
 
   //---------------------------------------------------------
-  /// GOOGLE SIGN-IN
-  /// 🔥 DO NOT sync Mongo here.
-  /// Google users should complete profile first.
-  //---------------------------------------------------------
+/// GET USER ROLE FROM FIRESTORE
+//---------------------------------------------------------
 
-  Future<User?> signInWithGoogle() async {
-    _setLoading(true);
+Future<String?> getUserRole(String uid) async {
+  try {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
 
-    try {
-      final user = await _googleService.signInWithGoogle();
-
-      return user;
-    } catch (e) {
-      rethrow;
-    } finally {
-      _setLoading(false);
+    if (doc.exists) {
+      return doc.data()?['role'];
     }
+
+    return null;
+  } catch (e, stackTrace) {
+    debugPrint("GetUserRole Error: $e");
+    debugPrint(stackTrace.toString());
+    return null;
   }
+}
+
 
   //---------------------------------------------------------
-  /// GET USER ROLE FROM FIRESTORE
+  /// REFRESH MONGO USER
   //---------------------------------------------------------
 
-  Future<String?> getUserRole(String uid) async {
+  Future<void> refreshMongoUser() async {
+    if (currentUser == null) return;
+
     try {
-      if (_auth.currentUser == null) return null;
+      final data =
+          await BackendService.getUserProfile(currentUser!.uid);
 
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .get();
+      _mongoUser = data['user'];
+      _mongoProfile = data['profile'];
 
-      if (doc.exists) {
-        return doc.data()?['role'] as String?;
-      }
-      return null;
-    } catch (e) {
-      print('Error fetching user role: $e');
-      return null;
+      notifyListeners();
+    } catch (e, stackTrace) {
+      debugPrint("Mongo Fetch Error: $e");
+      debugPrint(stackTrace.toString());
     }
   }
 
@@ -211,12 +207,22 @@ class AppAuthProvider extends ChangeNotifier {
   //---------------------------------------------------------
 
   Future<void> logout() async {
-    await _auth.signOut();
-    notifyListeners();
+    try {
+      await _googleService.signOut(); // 🔥 important
+      await _auth.signOut();
+
+      _mongoUser = null;
+      _mongoProfile = null;
+
+      notifyListeners();
+    } catch (e, stackTrace) {
+      debugPrint("Logout Error: $e");
+      debugPrint(stackTrace.toString());
+    }
   }
 
   //---------------------------------------------------------
-  /// INTERNAL LOADING HANDLER
+  /// LOADING HANDLER
   //---------------------------------------------------------
 
   void _setLoading(bool value) {
