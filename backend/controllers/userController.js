@@ -343,6 +343,61 @@ exports.updateVolunteerProfile = async (req, res) => {
   }
 };
 
+exports.updateBuyerProfile = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { name, addressText, gender, dietaryPreferences } = req.body;
+
+    const user = await User.findOne({ firebaseUid: uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.role !== "buyer") {
+      return res.status(400).json({ error: "User is not a buyer" });
+    }
+
+    const userUpdates = {};
+    if (typeof name === "string") userUpdates.name = name.trim();
+    if (typeof addressText === "string") userUpdates.addressText = addressText.trim();
+    if (typeof gender === "string") userUpdates.gender = gender.trim();
+
+    if (Object.keys(userUpdates).length > 0) {
+      await User.findByIdAndUpdate(user._id, { $set: userUpdates });
+    }
+
+    const profileUpdates = {};
+    if (Array.isArray(dietaryPreferences)) {
+      profileUpdates.dietaryPreferences = dietaryPreferences;
+    }
+
+    let updatedProfile = await BuyerProfile.findOne({ userId: user._id });
+
+    if (!updatedProfile) {
+      updatedProfile = await BuyerProfile.create({ userId: user._id });
+    } else if (Object.keys(profileUpdates).length > 0) {
+      updatedProfile = await BuyerProfile.findOneAndUpdate(
+        { userId: user._id },
+        { $set: profileUpdates },
+        { new: true }
+      );
+    }
+
+    const updatedUser = await User.findById(user._id);
+
+    return res.status(200).json({
+      message: "Buyer profile updated successfully",
+      user: updatedUser,
+      profile: updatedProfile
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Server error",
+      details: error.message
+    });
+  }
+};
+
 exports.updateSellerProfile = async (req, res) => {
   try {
     const { uid } = req.params;

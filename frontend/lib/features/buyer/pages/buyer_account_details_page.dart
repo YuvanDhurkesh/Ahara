@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/backend_service.dart';
 
 class BuyerAccountDetailsPage extends StatefulWidget {
   const BuyerAccountDetailsPage({super.key});
@@ -13,18 +14,19 @@ class BuyerAccountDetailsPage extends StatefulWidget {
 }
 
 class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
-  // Controllers
-  final _nameController = TextEditingController(text: "");
-  final _emailController = TextEditingController(text: "");
-  final _phoneController = TextEditingController(text: "");
-  final _countryController = TextEditingController(text: "");
-  final _genderController = TextEditingController(text: "");
-  final _dietaryController = TextEditingController(text: "");
-  final _birthdayController = TextEditingController(
-    text: "",
-  ); // Could use DatePicker
+  // Editable controllers
+  final _nameController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _genderController = TextEditingController();
+  final _dietaryController = TextEditingController();
+  final _birthdayController = TextEditingController();
+
+  // Read-only display values (email & phone)
+  String _emailDisplay = '';
+  String _phoneDisplay = '';
 
   String? _lastHydratedUserId;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -48,10 +50,12 @@ class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
     }
 
     _nameController.text = (mongoUser?['name'] ?? '').toString();
-    _emailController.text =
-        (mongoUser?['email'] ?? auth.currentUser?.email ?? '').toString();
-    _phoneController.text = (mongoUser?['phone'] ?? '').toString();
-    _countryController.text = (mongoUser?['addressText'] ?? '').toString();
+    _locationController.text = (mongoUser?['addressText'] ?? '').toString();
+    _genderController.text = (mongoUser?['gender'] ?? '').toString();
+
+    _emailDisplay = (mongoUser?['email'] ?? auth.currentUser?.email ?? '')
+        .toString();
+    _phoneDisplay = (mongoUser?['phone'] ?? '').toString();
 
     final dietary = mongoProfile?['dietaryPreferences'];
     if (dietary is List) {
@@ -61,12 +65,75 @@ class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
     _lastHydratedUserId = currentUserId;
   }
 
+  Future<void> _save() async {
+    final auth = context.read<AppAuthProvider>();
+    final firebaseUid = auth.currentUser?.uid;
+    if (firebaseUid == null) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      final rawDietary = _dietaryController.text.trim();
+      final List<String> dietaryList = rawDietary.isEmpty
+          ? []
+          : rawDietary
+                .split(',')
+                .map((e) => e.trim().toLowerCase().replaceAll(' ', '_'))
+                .where((e) => e.isNotEmpty)
+                .toList();
+
+      await BackendService.updateBuyerProfile(
+        firebaseUid: firebaseUid,
+        name: _nameController.text.trim(),
+        addressText: _locationController.text.trim(),
+        gender: _genderController.text.trim().isEmpty
+            ? null
+            : _genderController.text.trim(),
+        dietaryPreferences: dietaryList,
+      );
+
+      // Force re-hydration on next build
+      _lastHydratedUserId = null;
+      await auth.refreshMongoUser();
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Profile saved successfully",
+            style: GoogleFonts.inter(fontSize: 14),
+          ),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Failed to save: ${e.toString()}",
+            style: GoogleFonts.inter(fontSize: 14),
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _countryController.dispose();
+    _locationController.dispose();
     _genderController.dispose();
     _dietaryController.dispose();
     _birthdayController.dispose();
@@ -111,32 +178,51 @@ class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
           children: [
             _buildSectionLabel("PERSONAL INFO"),
             _buildSectionCard([
-              _buildInputRow("Name", _nameController),
+              _buildEditableRow("Name", _nameController),
               _buildDivider(),
-              _buildInputRow(
-                "Email",
-                _emailController,
-                keyboardType: TextInputType.emailAddress,
-              ),
+              _buildReadOnlyRow("Email", _emailDisplay),
               _buildDivider(),
-              _buildInputRow(
-                "Phone number",
-                _phoneController,
-                keyboardType: TextInputType.phone,
-              ),
+              _buildReadOnlyRow("Phone number", _phoneDisplay),
               _buildDivider(),
-              _buildInputRow("Location", _countryController),
+              _buildEditableRow("Location", _locationController),
               _buildDivider(),
-              _buildInputRow("Gender", _genderController, optional: true),
+              _buildEditableRow("Gender", _genderController, optional: true),
               _buildDivider(),
-              _buildInputRow(
+              _buildEditableRow(
                 "Dietary preferences",
                 _dietaryController,
                 optional: true,
+                hint: "e.g. vegetarian, vegan",
               ),
               _buildDivider(),
-              _buildInputRow("Birthday", _birthdayController, readOnly: true),
+              _buildEditableRow(
+                "Birthday",
+                _birthdayController,
+                optional: true,
+                readOnly: true,
+              ),
             ]),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.lock_outline,
+                    size: 13,
+                    color: AppColors.textLight.withOpacity(0.5),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    "Email and phone number cannot be changed here.",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: AppColors.textLight.withOpacity(0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 32),
             _buildSectionLabel("DELIVERY ADDRESSES"),
             _buildSectionCard([
@@ -144,6 +230,40 @@ class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
               _buildDivider(),
               _buildAddressRow("Work"),
             ]),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _isSaving ? null : _save,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  disabledBackgroundColor: AppColors.primary.withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
+                ),
+                child: _isSaving
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        "Save changes",
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -193,12 +313,14 @@ class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
     );
   }
 
-  Widget _buildInputRow(
+  /// A fully editable text field row.
+  Widget _buildEditableRow(
     String label,
     TextEditingController controller, {
     bool optional = false,
     TextInputType keyboardType = TextInputType.text,
     bool readOnly = false,
+    String? hint,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -229,7 +351,7 @@ class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
                 fontWeight: FontWeight.w600,
               ),
               decoration: InputDecoration(
-                hintText: optional ? "Add" : "Enter $label",
+                hintText: hint ?? (optional ? "Add" : "Enter $label"),
                 hintStyle: GoogleFonts.inter(
                   fontSize: 14,
                   color: AppColors.textLight.withOpacity(0.5),
@@ -238,6 +360,51 @@ class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
                 border: InputBorder.none,
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// A non-editable display row for locked fields (email, phone).
+  Widget _buildReadOnlyRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 4,
+            child: Row(
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    color: AppColors.textDark.withOpacity(0.5),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.lock_outline,
+                  size: 13,
+                  color: AppColors.textLight.withOpacity(0.4),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            flex: 5,
+            child: Text(
+              value.isEmpty ? "—" : value,
+              textAlign: TextAlign.end,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                color: AppColors.textDark.withOpacity(0.4),
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),

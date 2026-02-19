@@ -149,6 +149,36 @@ class BackendService {
     }
   }
 
+  static Future<void> updateBuyerProfile({
+    required String firebaseUid,
+    String? name,
+    String? addressText,
+    String? gender,
+    List<String>? dietaryPreferences,
+  }) async {
+    final url = Uri.parse("$baseUrl/users/$firebaseUid/buyer-profile");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({
+        if (name != null) "name": name,
+        if (addressText != null) "addressText": addressText,
+        if (gender != null) "gender": gender,
+        if (dietaryPreferences != null)
+          "dietaryPreferences": dietaryPreferences,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? "Failed to update buyer profile");
+    }
+  }
+
   // ========================= LISTINGS =========================
 
   static Future<List<Map<String, dynamic>>> getAllActiveListings() async {
