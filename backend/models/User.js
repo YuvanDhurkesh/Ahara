@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema(
     state: String,
     pincode: String,
 
+    
     // Trust system (seller + volunteer only)
     trustScore: {
       type: Number,
