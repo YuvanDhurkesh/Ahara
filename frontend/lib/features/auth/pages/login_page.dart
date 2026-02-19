@@ -102,42 +102,57 @@ class _LoginPageState extends State<LoginPage> {
   //-------------------------------------------------------------
 
   Future<void> _handleGoogleSignIn() async {
-    final auth = context.read<AppAuthProvider>();
+  if (_isLoading) return;
 
-    try {
-      final user = await auth.signInWithGoogle();
+  setState(() => _isLoading = true);
 
-      if (user != null && mounted) {
-        final role = await auth.getUserRole(user.uid);
+  final auth = context.read<AppAuthProvider>();
 
-        if (!mounted) return;
+  try {
+    final user = await auth.signInWithGoogle();
 
-        Widget destination;
+    if (!mounted) return;
 
-        switch (role?.toLowerCase()) {
-          case 'seller':
-            destination = const SellerDashboardPage();
-            break;
-          case 'volunteer':
-            destination = const VolunteerDashboardPage();
-            break;
-          case 'buyer':
-          default:
-            destination = const BuyerDashboardPage();
-            break;
-        }
+    if (user != null) {
+      final role = await auth.getUserRole(user.uid);
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => destination),
-        );
+      if (!mounted) return;
+
+      Widget destination;
+
+      switch (role?.toLowerCase()) {
+        case 'seller':
+          destination = const SellerDashboardPage();
+          break;
+        case 'volunteer':
+          destination = const VolunteerDashboardPage();
+          break;
+        case 'buyer':
+        default:
+          destination = const BuyerDashboardPage();
+          break;
       }
-    } catch (_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Google Sign-In Failed")),
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => destination),
+        (route) => false,
       );
     }
+  } on fb.FirebaseAuthException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.message ?? "Google Sign-In Failed")),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Google Sign-In Failed")),
+    );
+  } finally {
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
+}
 
   //-------------------------------------------------------------
 
@@ -246,20 +261,28 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 20),
 
               SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: OutlinedButton.icon(
-                  icon: Image.network(
-                    "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
-                    height: 24,
-                  ),
-                  label: const Text(
-                    "Sign in with Google",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  onPressed: _handleGoogleSignIn,
-                ),
+  width: double.infinity,
+  height: 55,
+  child: OutlinedButton(
+    onPressed: _isLoading ? null : _handleGoogleSignIn,
+    child: _isLoading
+        ? const CircularProgressIndicator()
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.network(
+                "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
+                height: 24,
               ),
+              const SizedBox(width: 10),
+              const Text(
+                "Sign in with Google",
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+  ),
+),
 
               const SizedBox(height: 16),
 
