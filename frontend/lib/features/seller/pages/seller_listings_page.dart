@@ -8,6 +8,7 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'create_listing_page.dart';
+import 'seller_listing_details_page.dart';
 
 class SellerListingsPage extends StatefulWidget {
   const SellerListingsPage({super.key});
@@ -92,7 +93,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
     return _allListings.where((l) {
       return l.expiryTime.isAfter(_now) && 
              l.status != ListingStatus.claimed &&
-             (l.quantityValue > 0);
+             (l.remainingQuantity > 0);
     }).toList();
   }
 
@@ -511,7 +512,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      "${listing.quantityValue} ${listing.quantityUnit}",
+                      "${listing.totalQuantity} ${listing.quantityUnit}",
                       style: TextStyle(
                         color: AppColors.textLight.withOpacity(0.8),
                         fontWeight: FontWeight.w500,
@@ -600,7 +601,17 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                           )
                         else
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SellerListingDetailsPage(listing: listing),
+                                ),
+                              );
+                              if (result == true) {
+                                _fetchListings(); // Refresh if something changed (like deletion)
+                              }
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               side: const BorderSide(color: AppColors.primary),

@@ -11,6 +11,7 @@ router.get("/:id", orderController.getOrderById);
 router.patch("/:id/status", orderController.updateOrderStatus);
 router.patch("/:id", orderController.updateOrder);
 router.post("/:id/cancel", orderController.cancelOrder);
+router.post("/:id/verify-otp", orderController.verifyOtp);
 router.post("/:id/accept", orderController.acceptRescueRequest);
 
 module.exports = router;

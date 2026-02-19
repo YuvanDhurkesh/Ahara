@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../../data/services/backend_service.dart';
 
 class SellerOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -12,6 +13,8 @@ class SellerOrderDetailPage extends StatefulWidget {
 
 class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
   late String _currentStatus;
+  final TextEditingController _otpController = TextEditingController();
+  bool _isVerifying = false;
 
   @override
   void initState() {
@@ -19,18 +22,76 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     _currentStatus = widget.order['status'] ?? 'pending';
   }
 
-  void _updateStatus(String newStatus) {
-    setState(() {
-      _currentStatus = newStatus;
-    });
-    // TODO: Call service to update status in backend
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "Order status updated to ${newStatus.replaceAll('_', ' ')}",
-        ),
-      ),
-    );
+  @override
+  void dispose() {
+    _otpController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleOtpVerification() async {
+    final otp = _otpController.text.trim();
+    if (otp.length != 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid 4-digit OTP")),
+      );
+      return;
+    }
+
+    setState(() => _isVerifying = true);
+
+    try {
+      final response = await BackendService.verifyOtp(
+        widget.order['_id'],
+        otp,
+      );
+
+      if (mounted) {
+        setState(() {
+          _currentStatus = response['order']['status'];
+          _isVerifying = false;
+          _otpController.clear();
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.green,
+            content: Text(response['message'] ?? "Verified successfully!"),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isVerifying = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: Text(e.toString().replaceAll("Exception: ", "")),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _updateStatus(String newStatus) async {
+    try {
+      await BackendService.updateOrderStatus(widget.order['_id'], newStatus);
+      if (mounted) {
+        setState(() => _currentStatus = newStatus);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Order status updated to ${newStatus.replaceAll('_', ' ')}",
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    }
   }
 
   @override
@@ -58,6 +119,8 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
             _buildBuyerInfo(),
             const SizedBox(height: 16),
             _buildPickupInstructions(),
+            const SizedBox(height: 24),
+            _buildOtpVerificationSection(),
             const SizedBox(height: 32),
             _buildActionButtons(),
             const SizedBox(height: 24),
@@ -396,9 +459,137 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     );
   }
 
+  Widget _buildOtpVerificationSection() {
+    bool isSelfPickup = widget.order['fulfillment'] == 'self_pickup';
+    bool canVerify = false;
+    String helperText = "";
+
+    if (isSelfPickup) {
+      if (_currentStatus == 'placed') {
+        canVerify = true;
+        helperText = "Enter Buyer's Handover OTP once they arrive for pickup.";
+      }
+    } else {
+      // Volunteer Delivery
+      if (['placed', 'volunteer_assigned', 'volunteer_accepted'].contains(_currentStatus)) {
+        canVerify = true;
+        helperText = "Enter Volunteer's Pickup OTP to record the collection.";
+      }
+    }
+
+    if (!canVerify) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.verified_user, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                "Secure Handover",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary.withOpacity(0.8),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            helperText,
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textLight.withOpacity(0.7),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _otpController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 4,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 8,
+                  ),
+                  decoration: InputDecoration(
+                    counterText: "",
+                    hintText: "0000",
+                    hintStyle: TextStyle(
+                      color: AppColors.textLight.withOpacity(0.2),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: AppColors.primary.withOpacity(0.2),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isVerifying ? null : _handleOtpVerification,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                  ),
+                  child: _isVerifying
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          "Verify",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActionButtons() {
     if (_currentStatus == "delivered" ||
-        _currentStatus == "cancelled") {
+        _currentStatus == "cancelled" ||
+        _currentStatus == "picked_up") {
       return const SizedBox.shrink();
     }
 
@@ -408,24 +599,29 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     switch (_currentStatus) {
       case "placed":
       case "pending":
-        nextButtonText = "Confirm Order";
-        nextStatus = "awaiting_volunteer";
+        // For seller, if it's self-pickup, they verify OTP. 
+        // If it's delivery, they should wait for a volunteer matching.
+        if (widget.order['fulfillment'] == 'volunteer_delivery') {
+          nextButtonText = "Awaiting Volunteer...";
+          nextStatus = null;
+        } else {
+          // Self pickup? They can use the OTP section. 
+          return const SizedBox.shrink();
+        }
         break;
       case "awaiting_volunteer":
-        nextButtonText = "Volunteer Requested";
+        nextButtonText = "Broadcast Sent...";
         nextStatus = null; 
         break;
       case "volunteer_assigned":
-        nextButtonText = "Mark as Picked Up";
-        nextStatus = "picked_up";
-        break;
-      case "picked_up":
-        nextButtonText = "Mark as Delivered";
-        nextStatus = "delivered";
-        break;
+      case "volunteer_accepted":
+        // Use OTP section
+        return const SizedBox.shrink();
       default:
         break;
     }
+
+    if (nextButtonText.isEmpty) return const SizedBox.shrink();
 
     return Column(
       children: [

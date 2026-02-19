@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../../data/services/backend_service.dart';
 
 class VolunteerOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic>? order;
@@ -14,6 +15,9 @@ class VolunteerOrderDetailPage extends StatefulWidget {
 
 class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   late GoogleMapController _mapController;
+  final TextEditingController _otpController = TextEditingController();
+  bool _isVerifying = false;
+  late String _currentStatus;
 
   // Dummy coordinates (replace later with real ones)
   LatLng pickupLocation = const LatLng(28.6139, 77.2090); // Delhi
@@ -23,6 +27,57 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   void initState() {
     super.initState();
     _loadLocations();
+    _currentStatus = widget.order?['status'] ?? 'placed';
+  }
+
+  @override
+  void dispose() {
+    _otpController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleOtpVerification() async {
+    final otp = _otpController.text.trim();
+    if (otp.length != 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a 4-digit OTP")),
+      );
+      return;
+    }
+
+    setState(() => _isVerifying = true);
+
+    try {
+      final response = await BackendService.verifyOtp(
+        widget.order?['_id'],
+        otp,
+      );
+
+      if (mounted) {
+        setState(() {
+          _currentStatus = response['order']['status'];
+          _isVerifying = false;
+          _otpController.clear();
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text("Delivery verified. Order completed!"),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isVerifying = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: Text(e.toString().replaceAll("Exception: ", "")),
+          ),
+        );
+      }
+    }
   }
 
   void _loadLocations() {
@@ -112,6 +167,8 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                   const SizedBox(height: 16),
                   _deliveryCard(),
                   const SizedBox(height: 24),
+                  _buildDeliveryOtpSection(),
+                  const SizedBox(height: 24),
                   _openInMapsButton(),
                 ],
               ),
@@ -134,20 +191,153 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         ? null
         : (idText.length > 8 ? idText.substring(0, 8) : idText);
 
+    final pickupOtp = order?['pickupOtp']?.toString();
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: _cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            shortId != null ? 'Order $shortId' : 'Order Details',
-            style: const TextStyle(fontWeight: FontWeight.w600),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    shortId != null ? 'Order $shortId' : 'Order Details',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Items: $foodName ($quantity)',
+                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
+                  ),
+                ],
+              ),
+              if (['placed', 'volunteer_assigned', 'volunteer_accepted'].contains(_currentStatus) && pickupOtp != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "PICKUP OTP",
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      Text(
+                        pickupOtp,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            'Items: $foodName ($quantity)',
-            style: const TextStyle(color: AppColors.textLight),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeliveryOtpSection() {
+    if (!['picked_up', 'in_transit'].contains(_currentStatus)) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.verified_user, color: AppColors.primary, size: 20),
+              const SizedBox(width: 12),
+              const Text(
+                "Secure Delivery",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            "Ask the Buyer for their 4-digit Delivery OTP once you reach the drop location.",
+            style: TextStyle(fontSize: 12, color: AppColors.textLight),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _otpController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 4,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 8,
+                  ),
+                  decoration: InputDecoration(
+                    counterText: "",
+                    hintText: "0000",
+                    hintStyle: TextStyle(color: AppColors.textLight.withOpacity(0.2)),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.all(12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.primary.withOpacity(0.2)),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isVerifying ? null : _handleOtpVerification,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                  ),
+                  child: _isVerifying
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text("Verify", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
           ),
         ],
       ),

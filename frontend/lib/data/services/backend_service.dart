@@ -376,6 +376,23 @@ class BackendService {
     }
   }
 
+  static Future<void> deleteListing(String id) async {
+    final url = Uri.parse("$baseUrl/listings/delete/$id");
+
+    final response = await http.delete(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? "Failed to delete listing");
+    }
+  }
+
   // ========================= UPLOAD =========================
 
   static Future<String> uploadImage(Uint8List bytes, String filename) async {
@@ -615,6 +632,27 @@ class BackendService {
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body);
       throw Exception(errorBody['error'] ?? "Failed to update order status");
+    }
+  }
+
+  static Future<Map<String, dynamic>> verifyOtp(
+      String orderId, String otp) async {
+    final url = Uri.parse("$baseUrl/orders/$orderId/verify-otp");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({"otp": otp}),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? "Invalid OTP code");
     }
   }
 

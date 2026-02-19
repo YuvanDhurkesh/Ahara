@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
-import 'buyer_browse_page.dart';
-import 'buyer_orders_page.dart'; // Assuming this is the target page for "My Orders"
+import 'buyer_dashboard_page.dart';
 
 class BuyerOrderConfirmationPage extends StatelessWidget {
   final Map<String, dynamic> order;
@@ -250,7 +249,9 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                       onPressed: () {
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (_) => const BuyerOrdersPage()),
+                          MaterialPageRoute(
+                            builder: (_) => const BuyerDashboardPage(initialIndex: 2),
+                          ),
                           (route) => false,
                         );
                       },
@@ -279,7 +280,7 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const BuyerBrowsePage(),
+                            builder: (_) => const BuyerDashboardPage(initialIndex: 1),
                           ),
                           (route) => false,
                         );

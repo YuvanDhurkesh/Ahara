@@ -10,5 +10,6 @@ router.get("/completed", listingController.getCompletedListings);
 router.get("/seller-stats", listingController.getSellerStats);
 router.put("/relist/:id", listingController.relistListing);
 router.get("/favorites/:uid", listingController.getFavoriteListings);
+router.delete("/delete/:id", listingController.deleteListing);
 
 module.exports = router;

@@ -49,7 +49,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
     if (widget.listing != null) {
       final l = widget.listing!;
       _foodNameController.text = l.foodName;
-      _quantityController.text = l.quantityValue.toString();
+      _quantityController.text = l.totalQuantity.toString();
       _priceController.text = l.price?.toString() ?? "";
       _locationController.text = l.locationAddress;
       _pincodeController.text = l.pincode ?? "";

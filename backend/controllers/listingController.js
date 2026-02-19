@@ -7,15 +7,15 @@ const { generateDefaultImageUrl } = require("../utils/imageGenerator");
 // Helper: Ensure listing has an image. If not, generate one and save it.
 async function ensureListingHasImage(listing) {
     const listingObj = listing.toObject ? listing.toObject() : listing;
-    
-    const isOldGenerator = listingObj.images && 
-                          listingObj.images.length > 0 && 
-                          (listingObj.images[0].includes('dicebear.com') || 
-                           listingObj.images[0].includes('placeholder.com'));
+
+    const isOldGenerator = listingObj.images &&
+        listingObj.images.length > 0 &&
+        (listingObj.images[0].includes('dicebear.com') ||
+            listingObj.images[0].includes('placeholder.com'));
 
     if (!listingObj.images || listingObj.images.length === 0 || isOldGenerator) {
         const defaultImageUrl = generateDefaultImageUrl(listingObj.foodName, listingObj.category);
-        
+
         // Update in database to permanently fix old entries or set new one
         if (listing._id) {
             await Listing.findByIdAndUpdate(
@@ -24,11 +24,11 @@ async function ensureListingHasImage(listing) {
                 { new: false }
             );
         }
-        
+
         // Add to object for response
         listingObj.images = [defaultImageUrl];
     }
-    
+
     return listingObj;
 }
 
@@ -187,10 +187,10 @@ exports.updateListing = async (req, res) => {
         }
 
         console.log("!!! UPDATE SUCCESS !!! ID:", updatedListing._id);
-        
+
         // Ensure listing has image
         const listingWithImage = await ensureListingHasImage(updatedListing);
-        
+
         res.status(200).json({
             message: "Listing updated successfully",
             listing: listingWithImage
@@ -318,6 +318,36 @@ exports.relistListing = async (req, res) => {
     } catch (error) {
         console.error("Error relisting:", error);
         res.status(500).json({ error: "Server error", details: error.message });
+    }
+};
+
+// Delete a listing
+exports.deleteListing = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Check if there are active orders for this listing
+        const activeOrders = await Order.countDocuments({
+            listingId: id,
+            status: { $in: ["placed", "awaiting_volunteer", "volunteer_assigned", "volunteer_accepted", "picked_up", "in_transit"] }
+        });
+
+        if (activeOrders > 0) {
+            return res.status(400).json({
+                error: "Cannot delete listing with active orders. Complete or cancel orders first."
+            });
+        }
+
+        const deletedListing = await Listing.findByIdAndDelete(id);
+
+        if (!deletedListing) {
+            return res.status(404).json({ error: "Listing not found" });
+        }
+
+        res.status(200).json({ message: "Listing deleted successfully" });
+    } catch (error) {
+        console.error("Delete Listing Error:", error);
+        res.status(500).json({ error: "Server error during deletion", details: error.message });
     }
 };
 
