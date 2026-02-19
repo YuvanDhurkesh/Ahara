@@ -212,7 +212,41 @@ class AppAuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await _auth.signOut();
+    _mongoUser = null;
+    _mongoProfile = null;
     notifyListeners();
+  }
+
+  //---------------------------------------------------------
+  /// OTP HANDLERS (EXPOSED FOR UI)
+  //---------------------------------------------------------
+
+  Future<Map<String, dynamic>> sendOtp(String phoneNumber) async {
+    _setLoading(true);
+    try {
+      return await _authService.sendOtpSync(phoneNumber);
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyOtp(String phoneNumber, String otp) async {
+    _setLoading(true);
+    try {
+      final result = await _authService.verifyOtpSync(phoneNumber, otp);
+      
+      // If user exists and it's a login flow, set the mongoUser
+      if (result['isExistingUser'] == true && result['user'] != null) {
+        _mongoUser = result['user'];
+        _mongoProfile = result['profile'] ?? {}; // Backend should return profile too
+        notifyListeners();
+        debugPrint("📱 Phone Auth: Logged in as ${_mongoUser?['name']}");
+      }
+      
+      return result;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   //---------------------------------------------------------

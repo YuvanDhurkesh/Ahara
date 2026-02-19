@@ -89,86 +89,66 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: context.read<AppAuthProvider>().authState,
-      builder: (context, snapshot) {
+    final auth = context.watch<AppAuthProvider>();
 
-        /// Loading
+    // 1. Check if we already have a Mongo user (either via Phone login or Firebase sync)
+    if (auth.mongoUser != null) {
+      final role = auth.mongoUser!['role'];
+      
+      // Auto-sync preferences if needed
+      final language = auth.mongoUser!['language'];
+      final uiMode = auth.mongoUser!['uiMode'];
+
+      if (language != null || uiMode != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final lp = Provider.of<LanguageProvider>(context, listen: false);
+          if (!lp.isManualSelection) {
+            if (language != null && lp.locale.languageCode != language) {
+              lp.setLanguage(language, isManual: false);
+            }
+            if (uiMode != null && lp.uiMode != uiMode) {
+              lp.setUiMode(uiMode, isManual: false);
+            }
+          }
+        });
+      }
+
+      if (role == "seller") {
+        return const SellerDashboardPage();
+      } else if (role == "volunteer") {
+        return const VolunteerDashboardPage();
+      } else if (role == "buyer") {
+        return const BuyerDashboardPage();
+      }
+    }
+
+    // 2. If no Mongo user, check Firebase state
+    return StreamBuilder<User?>(
+      stream: auth.authState,
+      builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        /// NOT LOGGED IN
+        // If Firebase is null and we don't have a phone session (checked above), show Landing
         if (!snapshot.hasData) {
           return const LandingPage();
         }
 
-        /// LOGGED IN → FETCH ROLE & LANGUAGE
-        return FutureBuilder<Map<String, dynamic>?>(
-          future: getUserData(snapshot.data!.uid),
-          builder: (context, dataSnap) {
-
-            if (dataSnap.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            if (dataSnap.hasError) {
-              return Scaffold(
-                body: Center(
-                  child: Text("Error loading user data: ${dataSnap.error}"),
-                ),
-              );
-            }
-
-            final userData = dataSnap.data;
-            final role = userData?['role'];
-            final language = userData?['language'];
-            final uiMode = userData?['uiMode'];
-
-            if (language != null || uiMode != null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                final lp = Provider.of<LanguageProvider>(context, listen: false);
-                final auth = Provider.of<AppAuthProvider>(context, listen: false);
-                
-                if (!lp.isManualSelection) {
-                  if (language != null && lp.locale.languageCode != language) {
-                    lp.setLanguage(language, isManual: false);
-                  }
-                  if (uiMode != null && lp.uiMode != uiMode) {
-                    lp.setUiMode(uiMode, isManual: false);
-                  }
-                } else {
-                  if ((language != null && lp.locale.languageCode != language) ||
-                      (uiMode != null && lp.uiMode != uiMode)) {
-                    debugPrint("Syncing local manual preference to cloud: ${lp.locale.languageCode}");
-                    BackendService.updateUserPreferences(
-                      firebaseUid: auth.currentUser!.uid,
-                      language: lp.locale.languageCode,
-                      uiMode: lp.uiMode,
-                    ).catchError((e) => debugPrint("Failed to sync to cloud: $e"));
-                  }
-                }
-              });
-            }
-
-            //------------------------------------------------
-            // ROLE ROUTING
-            //------------------------------------------------
-
-            if (role == "seller") {
-              return const SellerDashboardPage();
-            } else if (role == "volunteer") {
-              return const VolunteerDashboardPage();
-            } else if (role == "buyer") {
-              return const BuyerDashboardPage();
-            }
-
-            return const LandingPage();
-          },
+        // 3. Fallback: Firebase user exists but Mongo not loaded yet
+        return const Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text("Loading profile..."),
+              ],
+            ),
+          ),
         );
       },
     );

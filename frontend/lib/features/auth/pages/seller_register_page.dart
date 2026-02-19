@@ -8,6 +8,7 @@ import 'login_page.dart';
 import '../../../shared/widgets/phone_input_field.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
+import 'otp_verification_page.dart';
 
 class SellerRegisterPage extends StatefulWidget {
   const SellerRegisterPage({super.key});
@@ -28,6 +29,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
   String? _selectedType;
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isPhoneVerified = false;
 
   final List<String> _sellerTypes = [
     'Restaurant',
@@ -49,8 +51,56 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
     super.dispose();
   }
 
+  Future<void> _verifyPhone() async {
+    if (_phoneController.text.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid phone number first")),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final auth = context.read<AppAuthProvider>();
+      await auth.sendOtp(_phoneController.text.trim());
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+        final verified = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OTPVerificationPage(
+              phoneNumber: _phoneController.text.trim(),
+              isRegistration: true,
+            ),
+          ),
+        );
+
+        if (verified == true) {
+          if (mounted) {
+            setState(() => _isPhoneVerified = true);
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to send OTP: $e")),
+        );
+      }
+    }
+  }
+
   Future<void> _registerSeller() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (!_isPhoneVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please verify your contact number with OTP first")),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -221,7 +271,35 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                     maxLength: 10,
                   ),
 
-                  const SizedBox(height: 28),
+                  if (!_isPhoneVerified) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: _verifyPhone,
+                        icon: const Icon(Icons.verified_user_outlined, size: 18),
+                        label: const Text("Verify Phone with OTP"),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: const [
+                        Icon(Icons.check_circle, color: Colors.green, size: 18),
+                        SizedBox(width: 4),
+                        Text(
+                          "Phone Verified",
+                          style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  const SizedBox(height: 16),
 
                   _buildLabel("BUSINESS EMAIL"),
                   TextFormField(

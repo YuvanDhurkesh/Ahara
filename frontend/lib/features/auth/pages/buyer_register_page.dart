@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:flutter/services.dart';
 import '../../../core/localization/language_provider.dart';
+import 'otp_verification_page.dart';
 
 class BuyerRegisterPage extends StatefulWidget {
   final String role;
@@ -31,6 +32,7 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
   bool _obscurePassword = true;
   bool _isLoading = false;
   bool _isDetectingLocation = false;
+  bool _isPhoneVerified = false;
 
   //---------------------------------------------------------
 
@@ -113,10 +115,58 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
     }
   }
 
+  Future<void> _verifyPhone() async {
+    if (_phoneController.text.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid phone number first")),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final auth = context.read<AppAuthProvider>();
+      await auth.sendOtp(_phoneController.text.trim());
+      
+      if (mounted) {
+        setState(() => _isLoading = false);
+        final verified = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OTPVerificationPage(
+              phoneNumber: _phoneController.text.trim(),
+              isRegistration: true,
+            ),
+          ),
+        );
+
+        if (verified == true) {
+          if (mounted) {
+            setState(() => _isPhoneVerified = true);
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to send OTP: $e")),
+        );
+      }
+    }
+  }
+
   //---------------------------------------------------------
 
   Future<void> _registerUser() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (!_isPhoneVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please verify your phone number with OTP first")),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -224,7 +274,35 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
                     },
                   ),
 
-                  const SizedBox(height: 28),
+                  if (!_isPhoneVerified) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: _verifyPhone,
+                        icon: const Icon(Icons.verified_user_outlined, size: 18),
+                        label: const Text("Verify Phone with OTP"),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: const [
+                        Icon(Icons.check_circle, color: Colors.green, size: 18),
+                        SizedBox(width: 4),
+                        Text(
+                          "Phone Verified",
+                          style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  const SizedBox(height: 16),
 
                   _buildLabel("EMAIL ADDRESS"),
                   _buildTextField(

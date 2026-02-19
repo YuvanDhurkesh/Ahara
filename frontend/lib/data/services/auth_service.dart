@@ -104,6 +104,46 @@ class AuthService {
   }
 
   //---------------------------------------------------------
+  /// OTP SERVICES
+  //---------------------------------------------------------
+
+  Future<Map<String, dynamic>> sendOtpSync(String phoneNumber) async {
+    final response = await http.post(
+      Uri.parse("$backendBaseUrl/otp/send"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"phoneNumber": phoneNumber}),
+    );
+
+    if (response.statusCode != 200) {
+      final errorData = jsonDecode(response.body);
+      String errorMessage = errorData['error'] ?? "Failed to send OTP";
+      
+      // Special handling for Twilio Trial restrictions
+      if (errorData['isTrialError'] == true) {
+         errorMessage = "Twilio Trial: Go to Twilio console and verify this number as a Caller ID!";
+      }
+      
+      throw Exception(errorMessage);
+    }
+
+    return jsonDecode(response.body);
+  }
+
+  Future<Map<String, dynamic>> verifyOtpSync(String phoneNumber, String otp) async {
+    final response = await http.post(
+      Uri.parse("$backendBaseUrl/otp/verify"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"phoneNumber": phoneNumber, "otp": otp}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(jsonDecode(response.body)['error'] ?? "Verification failed");
+    }
+
+    return jsonDecode(response.body);
+  }
+
+  //---------------------------------------------------------
   /// BACKEND SYNC
   //---------------------------------------------------------
 
