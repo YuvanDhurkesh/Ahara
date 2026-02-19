@@ -1,10 +1,15 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_order_rate_page.dart';
+import 'buyer_order_track_page.dart';
+import '../data/mock_orders.dart';
+import '../data/mock_stores.dart';
 
 class BuyerOrderDetailsPage extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -20,6 +25,7 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
   bool _isCancelled = false;
   int _otpExpirySeconds = 492; // Mock 8:12
   Timer? _otpTimer;
+  final MapController _mapController = MapController();
 
   @override
   void initState() {
@@ -90,6 +96,10 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                 const SizedBox(height: 24),
                 _buildModeIndicator(isDelivery),
                 const SizedBox(height: 24),
+                if (!isDelivery && !isCompleted && !isCancelled) ...[
+                  _buildPickupMap(listing),
+                  const SizedBox(height: 24),
+                ],
                 _buildSellerCard(seller, listing),
                 const SizedBox(height: 24),
                 if (!isCompleted && !isCancelled) ...[
@@ -110,6 +120,57 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPickupMap(Map<String, dynamic> listing) {
+    final geo = listing['geo']?['coordinates'] as List?;
+    final LatLng pickupPos = (geo != null && geo.length == 2) 
+        ? LatLng(geo[1].toDouble(), geo[0].toDouble()) 
+        : const LatLng(12.9716, 77.5946); // Default Bangalore
+
+    return Container(
+      height: 180,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: FlutterMap(
+          mapController: _mapController,
+          options: MapOptions(
+            initialCenter: pickupPos,
+            initialZoom: 15,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.ahara.app',
+            ),
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: pickupPos,
+                  width: 40,
+                  height: 40,
+                  child: const Icon(Icons.location_on, color: AppColors.primary, size: 40),
+                ),
+              ],
+            ),
+            Positioned(
+              bottom: 12,
+              right: 12,
+              child: FloatingActionButton.small(
+                onPressed: () => _mapController.move(pickupPos, 15),
+                backgroundColor: Colors.white,
+                child: const Icon(Icons.my_location, color: AppColors.primary, size: 18),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -679,7 +740,27 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BuyerOrderTrackPage(
+                      order: MockOrder(
+                        id: _localOrder['_id'],
+                        store: allMockStores[0],
+                        status: OrderStatus.active,
+                        type: OrderType.delivery,
+                        date: "Today",
+                        total: "₹${_localOrder['pricing']?['total'] ?? 0}",
+                        itemsSummary: _localOrder['listingId']?['foodName'] ?? "Items",
+                        volunteerName: _localOrder['volunteerId']?['name'] ?? "Volunteer",
+                        volunteerRating: 4.8,
+                        deliveryTime: "30 mins",
+                      ),
+                    ),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
               child: const Text("Live Tracking"),

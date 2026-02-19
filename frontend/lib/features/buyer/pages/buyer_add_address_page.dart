@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../location/pages/location_picker_page.dart';
 
 class BuyerAddAddressPage extends StatefulWidget {
   const BuyerAddAddressPage({super.key});
@@ -20,9 +21,7 @@ class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
   final TextEditingController _areaController = TextEditingController();
   final TextEditingController _pincodeController = TextEditingController();
 
-  // Map state
-  Offset _markerPosition = const Offset(150, 150);
-  bool _isLoadingLocation = false;
+  Map<String, double>? _coordinates;
 
   @override
   void initState() {
@@ -41,41 +40,46 @@ class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
   }
 
   void _handleConfirm() {
-    if (_tabController.index == 0) {
-      if (_formKey.currentState!.validate()) {
-        final addressText =
-            "${_houseController.text}, ${_streetController.text}, ${_areaController.text}, Bangalore - ${_pincodeController.text}";
-        Navigator.pop(context, {
-          "addressText": addressText,
-          "geo": {
-            "type": "Point",
-            "coordinates": [77.6309, 12.9352] // Mock coordinates for Koramangala
-          }
-        });
-      }
-    } else {
-      // For mock map, return a static address based on "selection"
+    if (_formKey.currentState!.validate()) {
+      final addressText =
+          "${_houseController.text}, ${_streetController.text}, ${_areaController.text}, Bangalore - ${_pincodeController.text}";
+      
       Navigator.pop(context, {
-        "addressText": "Selected Location, Whitefield, Bangalore",
+        "addressText": addressText,
         "geo": {
           "type": "Point",
-          "coordinates": [77.7500, 12.9698] // Mock coordinates for Whitefield
+          "coordinates": _coordinates != null 
+              ? [_coordinates!['longitude'], _coordinates!['latitude']]
+              : [77.5946, 12.9716] // Fallback to Bangalore center
         }
       });
     }
   }
 
-  Future<void> _useCurrentLocation() async {
-    setState(() => _isLoadingLocation = true);
-    await Future.delayed(const Duration(seconds: 1)); // Mock delay
-    _houseController.text = "Flat 402, Green Meadows";
-    _streetController.text = "12th Cross, 8th Main";
-    _areaController.text = "Koramangala";
-    _pincodeController.text = "560034";
-    setState(() => _isLoadingLocation = false);
-    ScaffoldMessenger.of(
+  Future<void> _openMapPicker() async {
+    final result = await Navigator.push<LocationResult>(
       context,
-    ).showSnackBar(const SnackBar(content: Text("Location auto-filled!")));
+      MaterialPageRoute(
+        builder: (context) => const LocationPickerPage(),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _streetController.text = result.address;
+        _pincodeController.text = result.pincode;
+        _coordinates = {
+          'latitude': result.latitude,
+          'longitude': result.longitude,
+        };
+        // Switch to form tab to show auto-filled results
+        _tabController.animateTo(0);
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Location updated from map!")),
+      );
+    }
   }
 
   @override
@@ -86,20 +90,12 @@ class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-            size: 20,
-          ),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           "Add New Address",
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         centerTitle: true,
       ),
@@ -122,7 +118,10 @@ class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [_buildForm(), _buildMapSelector()],
+              children: [
+                _buildForm(),
+                _buildMapSelector(),
+              ],
             ),
           ),
           _buildConfirmButton(),
@@ -140,26 +139,13 @@ class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
           children: [
             _buildLocationButton(),
             const SizedBox(height: 32),
-            _buildTextField(
-              "House/Flat Number",
-              _houseController,
-              "e.g. 123, 4th Floor",
-            ),
+            _buildTextField("House/Flat Number", _houseController, "e.g. 123, 4th Floor"),
             const SizedBox(height: 20),
-            _buildTextField(
-              "Street / Landmark",
-              _streetController,
-              "e.g. Near Rose Park",
-            ),
+            _buildTextField("Street / Landmark", _streetController, "e.g. Near Rose Park"),
             const SizedBox(height: 20),
             _buildTextField("Area", _areaController, "e.g. Koramangala"),
             const SizedBox(height: 20),
-            _buildTextField(
-              "Pincode",
-              _pincodeController,
-              "e.g. 560034",
-              keyboardType: TextInputType.number,
-            ),
+            _buildTextField("Pincode", _pincodeController, "e.g. 560034", keyboardType: TextInputType.number),
           ],
         ),
       ),
@@ -168,7 +154,7 @@ class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
 
   Widget _buildLocationButton() {
     return InkWell(
-      onTap: _useCurrentLocation,
+      onTap: _openMapPicker,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
@@ -179,57 +165,25 @@ class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
         ),
         child: Row(
           children: [
-            _isLoadingLocation
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primary,
-                    ),
-                  )
-                : const Icon(
-                    Icons.my_location_rounded,
-                    color: AppColors.primary,
-                    size: 20,
-                  ),
+            const Icon(Icons.map_rounded, color: AppColors.primary, size: 20),
             const SizedBox(width: 12),
             Text(
-              "Use Current Location",
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-                fontSize: 14,
-              ),
+              "Pin Location on Map",
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14),
             ),
             const Spacer(),
-            Icon(
-              Icons.chevron_right,
-              color: AppColors.primary.withOpacity(0.5),
-            ),
+            const Icon(Icons.chevron_right, color: AppColors.primary),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller,
-    String hint, {
-    TextInputType? keyboardType,
-  }) {
+  Widget _buildTextField(String label, TextEditingController controller, String hint, {TextInputType? keyboardType}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textLight.withOpacity(0.6),
-          ),
-        ),
+        Text(label, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textLight.withOpacity(0.6))),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -237,125 +191,54 @@ class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
           style: GoogleFonts.inter(color: AppColors.textDark),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: GoogleFonts.inter(
-              color: Colors.grey.shade400,
-              fontSize: 14,
-            ),
+            hintStyle: GoogleFonts.inter(color: Colors.grey.shade400, fontSize: 14),
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primary),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
-          validator: (value) =>
-              value == null || value.isEmpty ? "Required" : null,
+          validator: (value) => value == null || value.isEmpty ? "Required" : null,
         ),
       ],
     );
   }
 
   Widget _buildMapSelector() {
-    return Stack(
-      children: [
-        // Mock Map Background (Grid)
-        Positioned.fill(
-          child: Container(
-            color: const Color(0xFFF9F6F1),
-            child: CustomPaint(painter: MapGridPainter()),
-          ),
-        ),
-        // Draggable Marker
-        Positioned(
-          left: _markerPosition.dx - 20,
-          top: _markerPosition.dy - 40,
-          child: GestureDetector(
-            onPanUpdate: (details) {
-              setState(() {
-                _markerPosition += details.delta;
-              });
-            },
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    "Pick Location",
-                    style: GoogleFonts.inter(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const Icon(
-                  Icons.location_on_rounded,
-                  color: AppColors.primary,
-                  size: 40,
-                ),
-              ],
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(40.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.location_on, size: 80, color: AppColors.primary.withOpacity(0.2)),
+            const SizedBox(height: 24),
+            Text(
+              "Precise Address Selection",
+              style: GoogleFonts.lora(fontSize: 22, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ),
-        // Map Overlay Info
-        Positioned(
-          bottom: 24,
-          left: 24,
-          right: 24,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+            const SizedBox(height: 12),
+            Text(
+              "Pin your exact location on the map to help our volunteers find you easily.",
+              style: GoogleFonts.inter(color: AppColors.textLight, height: 1.5),
+              textAlign: TextAlign.center,
             ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.location_searching_rounded,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    "Move the pin to select location",
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                ),
-              ],
+            const SizedBox(height: 40),
+            ElevatedButton.icon(
+              onPressed: _openMapPicker,
+              icon: const Icon(Icons.map, color: Colors.white),
+              label: const Text("Open Interactive Map", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -364,57 +247,17 @@ class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, -2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -2))],
       ),
       child: ElevatedButton(
         onPressed: _handleConfirm,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black,
           minimumSize: const Size(double.infinity, 56),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        child: Text(
-          "Confirm Selected Address",
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            color: Colors.white,
-          ),
-        ),
+        child: Text("Save Address", style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
       ),
     );
   }
-}
-
-class MapGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.grey.withOpacity(0.2)
-      ..strokeWidth = 1.0;
-
-    for (double i = 0; i < size.width; i += 40) {
-      canvas.drawLine(Offset(i, 0), Offset(i, size.height), paint);
-    }
-    for (double i = 0; i < size.height; i += 40) {
-      canvas.drawLine(Offset(0, i), Offset(size.width, i), paint);
-    }
-
-    // Draw some mock buildings
-    final blockPaint = Paint()..color = Colors.grey.withOpacity(0.05);
-    canvas.drawRect(const Rect.fromLTWH(80, 80, 80, 60), blockPaint);
-    canvas.drawRect(const Rect.fromLTWH(200, 150, 60, 100), blockPaint);
-    canvas.drawRect(const Rect.fromLTWH(40, 300, 120, 40), blockPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
