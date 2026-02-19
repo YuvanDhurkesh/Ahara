@@ -3,28 +3,35 @@ pipeline {
 
     stages {
         stage('Backend') {
+            agent {
+                docker { image 'node:20-alpine' }
+            }
             steps {
                 dir('backend') {
-                    // Install backend dependencies
-                    // Using 'ci' for cleaner, deterministic installs in CI environments, 
-                    // or 'install' if lockfile issues arise.
-                    sh 'npm install'
-                    
-                    // Run backend tests
-                    sh 'npm test'
+                    withCredentials([file(credentialsId: 'backend_env', variable: 'BACKEND_ENV_FILE')]) {
+                        // Copy the secret file to .env
+                        sh 'cp $BACKEND_ENV_FILE .env'
+                        // Alpine images might need --unsafe-perm for some npm packages or simple install
+                        sh 'npm install'
+                        sh 'npm test'
+                    }
                 }
             }
         }
 
         stage('Frontend') {
+            agent {
+                docker { image 'ghcr.io/cirruslabs/flutter:stable' }
+            }
             steps {
                 dir('frontend') {
-                    // Install frontend dependencies
-                    sh 'flutter pub get'
-                    
-                    // Run frontend unit and widget tests
-                    // Integration tests are excluded here as they might require a connected device/emulator
-                    sh 'flutter test'
+                    withCredentials([file(credentialsId: 'frontend_env', variable: 'FRONTEND_ENV_FILE')]) {
+                        // Copy the secret file to .env
+                        sh 'cp $FRONTEND_ENV_FILE .env'
+                        // Fix permission issues if any, usually okay in these images
+                        sh 'flutter pub get'
+                        sh 'flutter test'
+                    }
                 }
             }
         }
@@ -32,7 +39,6 @@ pipeline {
 
     post {
         always {
-            // Clean up or simple notification
             echo 'Pipeline completed.'
         }
         failure {
