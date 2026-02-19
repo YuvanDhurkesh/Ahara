@@ -200,8 +200,8 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
 
   Widget _buildOtpField(int index) {
     return Container(
-      width: 45,
-      height: 55,
+      width: 50, // Slightly wider for better visibility
+      height: 60, // Slightly taller
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -216,9 +216,10 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         maxLength: 1,
+        obscureText: false, // Ensures digits are visible while typing
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
+          fontSize: 26, // Increased size for better visibility
+          fontWeight: FontWeight.w800, // Extra bold
           color: AppColors.textDark,
         ),
         inputFormatters: [
@@ -227,6 +228,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
         decoration: const InputDecoration(
           counterText: "",
           border: InputBorder.none,
+          contentPadding: EdgeInsets.zero, // Center vertically better
         ),
         onChanged: (value) {
           if (value.isNotEmpty) {
