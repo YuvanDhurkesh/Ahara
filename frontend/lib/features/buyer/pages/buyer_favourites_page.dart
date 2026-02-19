@@ -1,31 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
-import '../data/mock_stores.dart';
+import '../../../data/services/backend_service.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import 'buyer_food_detail_page.dart';
 
-class BuyerFavouritesPage extends StatelessWidget {
-  final Set<String> favouriteIds;
-  final Function(String) onToggleFavourite;
+class BuyerFavouritesPage extends StatefulWidget {
+  const BuyerFavouritesPage({super.key});
 
-  const BuyerFavouritesPage({
-    super.key,
-    required this.favouriteIds,
-    required this.onToggleFavourite,
-  });
+  @override
+  State<BuyerFavouritesPage> createState() => _BuyerFavouritesPageState();
+}
+
+class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
+  List<dynamic> _favouriteListings = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchFavourites();
+  }
+
+  Future<void> _fetchFavourites() async {
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+    if (auth.currentUser == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    try {
+      final listings = await BackendService.getFavoriteListings(auth.currentUser!.uid);
+      if (mounted) {
+        setState(() {
+          _favouriteListings = listings;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching favourites: $e");
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final favouriteStores = allMockStores
-        .where((store) => favouriteIds.contains(store.id))
-        .toList();
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    return favouriteStores.isEmpty
+    return _favouriteListings.isEmpty
         ? _buildEmptyState()
-        : ListView.builder(
-            padding: const EdgeInsets.all(20),
-            itemCount: favouriteStores.length,
-            itemBuilder: (context, index) {
-              return _buildFavouriteCard(favouriteStores[index]);
-            },
+        : RefreshIndicator(
+            onRefresh: _fetchFavourites,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: _favouriteListings.length,
+              itemBuilder: (context, index) {
+                return _buildFavouriteCard(_favouriteListings[index]);
+              },
+            ),
           );
   }
 
@@ -50,121 +84,131 @@ class BuyerFavouritesPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "Heart a place to save it here!",
+            "Heart a food item to save it here!",
             style: TextStyle(
               color: AppColors.textLight.withOpacity(0.3),
               fontSize: 14,
             ),
           ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _fetchFavourites,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text("Refresh", style: TextStyle(color: Colors.white)),
+          )
         ],
       ),
     );
   }
 
-  Widget _buildFavouriteCard(MockStore store) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  Widget _buildFavouriteCard(Map<String, dynamic> listing) {
+    final List images = listing['images'] ?? [];
+    final String foodName = listing['foodName'] ?? "Food Item";
+    final String uploadedImageUrl = images.isNotEmpty 
+        ? BackendService.formatImageUrl(images[0])
+        : "";
+    
+    final String imageUrl = BackendService.isValidImageUrl(uploadedImageUrl)
+        ? uploadedImageUrl
+        : BackendService.generateFoodImageUrl(foodName);
+
+    final pricing = listing['pricing'] ?? {};
+    final bool isFree = pricing['isFree'] ?? false;
+    final int price = pricing['discountedPrice'] ?? 0;
+    final sellerProfile = listing['sellerProfileId'] ?? {};
+    final String orgName = sellerProfile['orgName'] ?? "Local Seller";
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BuyerFoodDetailPage(listing: listing),
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.horizontal(
-              left: Radius.circular(20),
+        ).then((_) => _fetchFavourites()); // Refresh when coming back
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: Image.network(
-              store.image,
-              height: 100,
-              width: 100,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Container(
-                  height: 100,
-                  width: 100,
-                  color: AppColors.textLight.withOpacity(0.05),
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 100,
-                  width: 100,
-                  color: AppColors.textLight.withOpacity(0.05),
-                  child: Icon(
-                    Icons.image_not_supported_outlined,
-                    color: AppColors.textLight.withOpacity(0.2),
-                    size: 24,
-                  ),
-                );
-              },
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    store.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  Text(
-                    store.type,
-                    style: TextStyle(
-                      color: AppColors.textLight.withOpacity(0.6),
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 14),
-                      const SizedBox(width: 4),
-                      Text(
-                        store.rating,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        store.price,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: store.isFree
-                              ? Colors.green
-                              : AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
+              child: Image.network(
+                imageUrl,
+                height: 110,
+                width: 110,
+                fit: BoxFit.cover,
               ),
             ),
-          ),
-          IconButton(
-            onPressed: () => onToggleFavourite(store.id),
-            icon: const Icon(Icons.favorite, color: Colors.red),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      foodName,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      orgName,
+                      style: TextStyle(color: AppColors.textLight, fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          isFree ? "FREE" : "₹$price",
+                          style: TextStyle(
+                            color: isFree ? Colors.green : AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.favorite, color: Colors.red, size: 20),
+                          onPressed: () async {
+                            final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                            if (auth.currentUser == null) return;
+                            try {
+                              await BackendService.toggleFavoriteListing(
+                                firebaseUid: auth.currentUser!.uid,
+                                listingId: listing['_id'] ?? listing['id'],
+                              );
+                              await auth.refreshMongoUser();
+                              _fetchFavourites();
+                            } catch (e) {
+                              debugPrint("Error unfavoriting: $e");
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

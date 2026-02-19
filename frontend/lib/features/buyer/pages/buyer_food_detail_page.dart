@@ -181,6 +181,42 @@ class BuyerFoodDetailPage extends StatelessWidget {
           ),
         ),
       ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Consumer<AppAuthProvider>(
+            builder: (context, auth, _) {
+              final listingId = listing?['_id'] ?? listing?['id'] ?? store?.id;
+              final profile = auth.mongoProfile;
+              final List? favorites = profile?['favouriteListings'];
+              final bool isFavorited = favorites?.contains(listingId) ?? false;
+
+              return CircleAvatar(
+                backgroundColor: Colors.black.withOpacity(0.3),
+                child: IconButton(
+                  icon: Icon(
+                    isFavorited ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorited ? Colors.red : Colors.white,
+                    size: 20,
+                  ),
+                  onPressed: () async {
+                    if (auth.currentUser == null || listingId == null) return;
+                    try {
+                      await BackendService.toggleFavoriteListing(
+                        firebaseUid: auth.currentUser!.uid,
+                        listingId: listingId,
+                      );
+                      await auth.refreshMongoUser();
+                    } catch (e) {
+                      debugPrint("Error toggling favorite: $e");
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
           fit: StackFit.expand,

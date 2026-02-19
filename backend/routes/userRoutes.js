@@ -14,4 +14,7 @@ router.put("/:uid/buyer-profile", userController.updateBuyerProfile);
 router.put("/:uid/preferences", userController.updatePreferences);
 router.get("/:uid/preferences", userController.getPreferences);
 
+// Favourites
+router.post("/:uid/toggle-favorite-listing", userController.toggleFavoriteListing);
+
 module.exports = router;
