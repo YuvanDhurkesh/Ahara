@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 
 // Middleware - CORS with explicit configuration
 app.use(cors({
-  origin: function(origin, callback) {
+  origin: function (origin, callback) {
     // Allow all origins for development (ngrok, localhost, etc)
     callback(null, true);
   },
@@ -44,7 +44,7 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/payments", paymentRoutes);
 
 // Serve static uploads with ngrok bypass header (best effort)
-app.use("/uploads", (req, res, next) => {
+app.use("/api/uploads", (req, res, next) => {
   res.set("ngrok-skip-browser-warning", "true");
   next();
 }, express.static(path.join(__dirname, "uploads")));
