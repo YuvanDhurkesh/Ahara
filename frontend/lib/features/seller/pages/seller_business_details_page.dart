@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/backend_service.dart';
 
 class SellerBusinessDetailsPage extends StatefulWidget {
   const SellerBusinessDetailsPage({super.key});
@@ -12,27 +15,51 @@ class SellerBusinessDetailsPage extends StatefulWidget {
 class _SellerBusinessDetailsPageState extends State<SellerBusinessDetailsPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final _businessNameController = TextEditingController(
-    text: "The Green Kitchen",
-  );
-  final _fssaiController = TextEditingController(text: "123456789012");
-  final _contactController = TextEditingController(text: "+91 98765 43210");
-  final _addressController = TextEditingController(
-    text: "123, Green Street, Bangalore",
-  );
-  final _hoursController = TextEditingController(text: "09:00 AM - 09:00 PM");
+  late TextEditingController _businessNameController;
+  late TextEditingController _fssaiController;
+  late TextEditingController _contactController;
+  late TextEditingController _addressController;
+  late TextEditingController _hoursController;
 
   bool _isFssaiValid = true;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
+    _businessNameController = TextEditingController();
+    _fssaiController = TextEditingController();
+    _contactController = TextEditingController();
+    _addressController = TextEditingController();
+    _hoursController = TextEditingController();
+
     _fssaiController.addListener(_validateFssai);
+    _hydrateFromBackend();
+  }
+
+  void _hydrateFromBackend() {
+    final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+    final mongoProfile = authProvider.mongoProfile;
+    final mongoUser = authProvider.mongoUser;
+
+    if (mongoProfile != null) {
+      _businessNameController.text = mongoProfile['orgName'] ?? '';
+      _fssaiController.text = mongoProfile['fssai']?['number'] ?? '';
+      _hoursController.text =
+          mongoProfile['pickupHours'] ?? '09:00 AM - 09:00 PM';
+      _validateFssai();
+    }
+
+    if (mongoUser != null) {
+      _contactController.text = mongoUser['phone'] ?? '';
+      _addressController.text = mongoUser['addressText'] ?? '';
+    }
   }
 
   void _validateFssai() {
     setState(() {
-      _isFssaiValid = _fssaiController.text.length == 12;
+      _isFssaiValid =
+          _fssaiController.text.isEmpty || _fssaiController.text.length == 12;
     });
   }
 
@@ -46,12 +73,71 @@ class _SellerBusinessDetailsPageState extends State<SellerBusinessDetailsPage> {
     super.dispose();
   }
 
-  void _saveChanges() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _saveChanges() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (!_isFssaiValid) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text("Business details updated")));
-      Navigator.pop(context);
+      ).showSnackBar(const SnackBar(content: Text("FSSAI must be 12 digits")));
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+      final firebaseUid = authProvider.currentUser?.uid;
+
+      if (firebaseUid == null) {
+        throw Exception("User not authenticated");
+      }
+
+      await BackendService.updateSellerProfile(
+        firebaseUid: firebaseUid,
+        name: _businessNameController.text.isNotEmpty
+            ? _businessNameController.text
+            : null,
+        phone: _contactController.text.isNotEmpty
+            ? _contactController.text
+            : null,
+        addressText: _addressController.text.isNotEmpty
+            ? _addressController.text
+            : null,
+        orgName: _businessNameController.text.isNotEmpty
+            ? _businessNameController.text
+            : null,
+        fssaiNumber: _fssaiController.text.isNotEmpty
+            ? _fssaiController.text
+            : null,
+        pickupHours: _hoursController.text.isNotEmpty
+            ? _hoursController.text
+            : null,
+      );
+
+      if (mounted) {
+        // Refresh profile data
+        await authProvider.refreshMongoUser();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Business details updated successfully"),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -112,7 +198,7 @@ class _SellerBusinessDetailsPageState extends State<SellerBusinessDetailsPage> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: _saveChanges,
+                      onPressed: _isSaving ? null : _saveChanges,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
@@ -120,14 +206,25 @@ class _SellerBusinessDetailsPageState extends State<SellerBusinessDetailsPage> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        "Save Changes",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: _isSaving
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : const Text(
+                              "Save Changes",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -233,7 +330,7 @@ class _SellerBusinessDetailsPageState extends State<SellerBusinessDetailsPage> {
               size: 18,
               color: AppColors.primary.withOpacity(0.7),
             ),
-            suffixIcon: _isFssaiValid
+            suffixIcon: _isFssaiValid && _fssaiController.text.isNotEmpty
                 ? const Icon(
                     Icons.check_circle_rounded,
                     color: Colors.green,

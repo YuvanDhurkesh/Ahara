@@ -63,37 +63,37 @@ The platform focuses on **reducing food waste**, **ensuring public health**, and
 ## CI/CD Pipeline
 
 ### Continuous Integration (CI)
-**Tool:** Jenkins  
+**Tool:** GitHub Actions
 
-The project uses a Jenkins-driven CI pipeline to automate development workflows and maintain code reliability.
+The project uses a **GitHub Actions** driven CI pipeline to automate development workflows and maintain code reliability.
 
-Triggered automatically on every Pull Request and code merge:
+Triggered automatically on **Push to main** and **Pull Requests**:
 
-- Static code quality analysis  
-- Automated backend test execution  
-- Build verification  
-- Dependency validation  
-- Early failure detection to prevent unstable releases  
+- **Static Analysis:** `flutter analyze` for frontend code quality.
+- **Automated Testing:**
+  - Backend: `npm test` (Jest) with in-memory MongoDB.
+  - Frontend: `flutter test` (Unit/Widget).
+- **Dependency Validation:** Ensures `npm install` and `flutter pub get` succeed.
+- **Early Failure Detection:** Prevents broken code from merging.
 
 ---
 
 ### Continuous Deployment (CD)
 
-Jenkins pipelines are configured to support controlled deployment workflows, ensuring that only validated builds progress toward production environments.
+GitHub Actions pipelines are configured to support controlled deployment workflows to production.
 
 Key capabilities include:
 
-- Automated build generation  
-- Environment-based deployment readiness  
-- Scalable pipeline architecture  
-- Reduced manual intervention  
+- **Automated Deployment:** Deploys to AWS EC2 only after tests pass.
+- **Secure Access:** Uses SSH keys enabling secure remote execution.
+- **Zero Downtime:** Uses `pm2` for seamless process restarts.
 
 ---
 
-### Continuous Deployment
-- **Backend Deployment:** Render / Railway  
-- **Database Hosting:** MongoDB Atlas  
-- **Mobile Distribution (Optional):** Firebase App Distribution  
+### Deployment Infrastructure
+- **Backend Hosting:** AWS EC2 (Ubuntu/Linux)
+- **Database Hosting:** MongoDB Atlas
+- **Process Management:** PM2 (Node.js)
 
 ---
 

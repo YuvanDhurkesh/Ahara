@@ -10,91 +10,169 @@ import 'seller_business_details_page.dart';
 import 'seller_verification_page.dart';
 import 'seller_notifications_page.dart';
 
-class SellerProfilePage extends StatelessWidget {
+class SellerProfilePage extends StatefulWidget {
   const SellerProfilePage({super.key});
 
   @override
+  State<SellerProfilePage> createState() => _SellerProfilePageState();
+}
+
+class _SellerProfilePageState extends State<SellerProfilePage> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSellerData();
+  }
+
+  Future<void> _fetchSellerData() async {
+    try {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = true;
+      });
+
+      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+
+      // Ensure mongoProfile is refreshed
+      if (authProvider.mongoProfile == null &&
+          authProvider.currentUser != null) {
+        await authProvider.refreshMongoUser();
+      }
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      debugPrint("Error fetching seller data: $e");
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    return Consumer<AppAuthProvider>(
+      builder: (context, authProvider, _) {
+        final mongoProfile = authProvider.mongoProfile;
+
+        // Fallback values if data isn't loaded
+        final businessName = mongoProfile?['orgName'] ?? "Your Business";
+        final rating = mongoProfile?['stats']?['avgRating'] ?? 0.0;
+        final mealsShared =
+            mongoProfile?['stats']?['totalOrdersCompleted'] ?? 0;
+
+        // Calculate CO2 offset (rough estimate: ~2kg CO2 per meal)
+        final co2Offset = mealsShared * 2;
+
+        return SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Hello, $businessName",
+                          style: GoogleFonts.inter(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => _showManageAccountSheet(context),
+                          icon: const Icon(Icons.settings_outlined, size: 28),
+                          color: AppColors.textDark,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Stats Cards
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildInfoCard(
+                            context,
+                            title: "Trust Score",
+                            value: (mongoProfile?['stats']?['ratingCount'] ?? 0)
+                                .toString(),
+                            subtext: "Ratings received",
+                            icon: Icons.shield_outlined,
+                            color: AppColors.secondary,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _buildInfoCard(
+                            context,
+                            title: "Rating",
+                            value: "${rating.toStringAsFixed(1)}/5",
+                            subtext: "From customers",
+                            icon: Icons.star_outlined,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 40),
+
                     Text(
-                      "Hello, Green Kitchen",
+                      "Business Impact",
                       style: GoogleFonts.inter(
-                        fontSize: 22,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textDark,
                       ),
                     ),
-                    IconButton(
-                      onPressed: () => _showManageAccountSheet(context),
-                      icon: const Icon(Icons.settings_outlined, size: 28),
-                      color: AppColors.textDark,
+                    const SizedBox(height: 16),
+                    Column(
+                      children: [
+                        _buildImpactStat(
+                          "Meals Shared",
+                          "$mealsShared",
+                          Icons.lunch_dining,
+                        ),
+                        _buildImpactStat(
+                          "CO2 Saved",
+                          "${co2Offset.toStringAsFixed(0)} kg",
+                          Icons.eco,
+                        ),
+                        _buildImpactStat(
+                          "Total Listings",
+                          (mongoProfile?['stats']?['totalListings'] ?? 0)
+                              .toString(),
+                          Icons.list_alt_outlined,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
-
-                // Stats Cards
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildInfoCard(
-                        context,
-                        title: "Trust Score",
-                        value: "920",
-                        subtext: "Top 10% Seller",
-                        icon: Icons.shield_outlined,
-                        color: AppColors.secondary,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildInfoCard(
-                        context,
-                        title: "Monthly",
-                        value: "₹12,450",
-                        subtext: "+15% vs last mon",
-                        icon: Icons.payments_outlined,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 40),
-
-                Text(
-                  "Business Impact",
-                  style: GoogleFonts.inter(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Column(
-                  children: [
-                    _buildImpactStat("Meals Shared", "142", Icons.lunch_dining),
-                    _buildImpactStat("CO2 Offset", "52 kg", Icons.co2),
-                    _buildImpactStat("Rating", "4.8/5", Icons.star_outline),
-                  ],
-                ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -260,13 +338,15 @@ class SellerProfilePage extends StatelessWidget {
                       Icons.notifications_outlined,
                       "Notifications",
                     ),
-                    
+
                     const SizedBox(height: 16),
                     _buildSectionHeader("ACCESSIBILITY"),
                     Consumer<LanguageProvider>(
                       builder: (context, langProvider, child) {
                         return SwitchListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                          ),
                           title: Text(
                             "Easy Mode (Simplified)",
                             style: GoogleFonts.inter(
@@ -276,16 +356,22 @@ class SellerProfilePage extends StatelessWidget {
                           ),
                           subtitle: Text(
                             "Large icons and simple flow",
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade500,
+                            ),
                           ),
                           value: langProvider.isSimplified,
                           activeColor: AppColors.primary,
                           onChanged: (val) async {
                             final mode = val ? 'simplified' : 'standard';
                             await langProvider.setUiMode(mode);
-                            
+
                             // Persist to backend
-                            final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                            final auth = Provider.of<AppAuthProvider>(
+                              context,
+                              listen: false,
+                            );
                             if (auth.currentUser != null) {
                               try {
                                 await BackendService.updateUserPreferences(
@@ -323,7 +409,10 @@ class SellerProfilePage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: OutlinedButton(
                         onPressed: () async {
-                          await Provider.of<AppAuthProvider>(context, listen: false).logout();
+                          await Provider.of<AppAuthProvider>(
+                            context,
+                            listen: false,
+                          ).logout();
                           if (context.mounted) {
                             Navigator.pushAndRemoveUntil(
                               context,

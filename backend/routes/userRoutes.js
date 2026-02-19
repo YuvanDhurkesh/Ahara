@@ -6,6 +6,8 @@ const userController = require('../controllers/userController');
 
 router.post("/create", userController.createUser);
 router.get("/firebase/:uid", userController.getUserByFirebaseUid);
+router.put("/:uid/volunteer-profile", userController.updateVolunteerProfile);
+router.put("/:uid/seller-profile", userController.updateSellerProfile);
 
 // Preferences routes
 router.put("/:uid/preferences", userController.updatePreferences);

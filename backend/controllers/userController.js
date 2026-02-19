@@ -265,3 +265,142 @@ exports.updatePreferences = async (req, res) => {
     });
   }
 };
+
+// ======================================================
+// UPDATE VOLUNTEER PROFILE
+// ======================================================
+
+exports.updateVolunteerProfile = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { name, phone, addressText, transportMode } = req.body;
+
+    const user = await User.findOne({ firebaseUid: uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.role !== "volunteer") {
+      return res.status(400).json({ error: "User is not a volunteer" });
+    }
+
+    const validTransportModes = ["walk", "cycle", "bike", "car"];
+    const normalizedTransport = transportMode
+      ? transportMode.toLowerCase().trim()
+      : null;
+
+    if (
+      normalizedTransport &&
+      !validTransportModes.includes(normalizedTransport)
+    ) {
+      return res.status(400).json({
+        error: "Invalid transport mode",
+        allowed: validTransportModes
+      });
+    }
+
+    const userUpdates = {};
+    if (typeof name === "string") userUpdates.name = name.trim();
+    if (typeof phone === "string") userUpdates.phone = phone.trim();
+    if (typeof addressText === "string") userUpdates.addressText = addressText.trim();
+
+    if (Object.keys(userUpdates).length > 0) {
+      await User.findByIdAndUpdate(user._id, { $set: userUpdates });
+    }
+
+    const profileUpdates = {};
+    if (normalizedTransport) {
+      profileUpdates.transportMode = normalizedTransport;
+    }
+
+    let updatedProfile = await VolunteerProfile.findOne({ userId: user._id });
+
+    if (!updatedProfile) {
+      updatedProfile = await VolunteerProfile.create({
+        userId: user._id,
+        transportMode: normalizedTransport || "walk"
+      });
+    } else if (Object.keys(profileUpdates).length > 0) {
+      updatedProfile = await VolunteerProfile.findOneAndUpdate(
+        { userId: user._id },
+        { $set: profileUpdates },
+        { new: true }
+      );
+    }
+
+    const updatedUser = await User.findById(user._id);
+
+    return res.status(200).json({
+      message: "Volunteer profile updated successfully",
+      user: updatedUser,
+      profile: updatedProfile
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Server error",
+      details: error.message
+    });
+  }
+};
+
+exports.updateSellerProfile = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { name, phone, addressText, orgName, fssaiNumber, pickupHours } = req.body;
+
+    const user = await User.findOne({ firebaseUid: uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.role !== "seller") {
+      return res.status(400).json({ error: "User is not a seller" });
+    }
+
+    const userUpdates = {};
+    if (typeof name === "string") userUpdates.name = name.trim();
+    if (typeof phone === "string") userUpdates.phone = phone.trim();
+    if (typeof addressText === "string") userUpdates.addressText = addressText.trim();
+
+    if (Object.keys(userUpdates).length > 0) {
+      await User.findByIdAndUpdate(user._id, { $set: userUpdates });
+    }
+
+    const SellerProfile = require("../models/SellerProfile");
+
+    const profileUpdates = {};
+    if (typeof orgName === "string") profileUpdates.orgName = orgName.trim();
+    if (typeof fssaiNumber === "string") profileUpdates["fssai.number"] = fssaiNumber.trim();
+    if (typeof pickupHours === "string") profileUpdates.pickupHours = pickupHours.trim();
+
+    let updatedProfile = await SellerProfile.findOne({ userId: user._id });
+
+    if (!updatedProfile) {
+      updatedProfile = await SellerProfile.create({
+        userId: user._id,
+        orgName: orgName || "Your Business",
+        orgType: "restaurant",
+        pickupHours: pickupHours || "09:00 AM - 09:00 PM"
+      });
+    } else if (Object.keys(profileUpdates).length > 0) {
+      updatedProfile = await SellerProfile.findOneAndUpdate(
+        { userId: user._id },
+        { $set: profileUpdates },
+        { new: true }
+      );
+    }
+
+    const updatedUser = await User.findById(user._id);
+
+    return res.status(200).json({
+      message: "Seller profile updated successfully",
+      user: updatedUser,
+      profile: updatedProfile
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Server error",
+      details: error.message
+    });
+  }
+};

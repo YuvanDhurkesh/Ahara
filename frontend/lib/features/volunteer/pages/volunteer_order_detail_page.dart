@@ -3,7 +3,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../shared/styles/app_colors.dart';
 
 class VolunteerOrderDetailPage extends StatefulWidget {
-  const VolunteerOrderDetailPage({super.key});
+  final Map<String, dynamic>? order;
+
+  const VolunteerOrderDetailPage({super.key, this.order});
 
   @override
   State<VolunteerOrderDetailPage> createState() =>
@@ -14,8 +16,34 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   late GoogleMapController _mapController;
 
   // Dummy coordinates (replace later with real ones)
-  final LatLng pickupLocation = const LatLng(28.6139, 77.2090); // Delhi
-  final LatLng deliveryLocation = const LatLng(28.5355, 77.3910); // Noida
+  LatLng pickupLocation = const LatLng(28.6139, 77.2090); // Delhi
+  LatLng deliveryLocation = const LatLng(28.5355, 77.3910); // Noida
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocations();
+  }
+
+  void _loadLocations() {
+    final order = widget.order;
+    final pickupCoords = order?['pickup']?['geo']?['coordinates'];
+    final dropCoords = order?['drop']?['geo']?['coordinates'];
+
+    if (pickupCoords is List && pickupCoords.length == 2) {
+      pickupLocation = LatLng(
+        (pickupCoords[1] as num).toDouble(),
+        (pickupCoords[0] as num).toDouble(),
+      );
+    }
+
+    if (dropCoords is List && dropCoords.length == 2) {
+      deliveryLocation = LatLng(
+        (dropCoords[1] as num).toDouble(),
+        (dropCoords[0] as num).toDouble(),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,17 +125,29 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   // ───────────────────────── UI Sections ─────────────────────────
 
   Widget _orderSummary() {
+    final order = widget.order;
+    final listing = order?['listingId'] as Map<String, dynamic>?;
+    final foodName = listing?['foodName'] ?? 'Order';
+    final quantity = order?['quantityOrdered']?.toString() ?? '-';
+    final idText = order?['_id']?.toString();
+    final shortId = idText == null
+        ? null
+        : (idText.length > 8 ? idText.substring(0, 8) : idText);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: _cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text('Order ORD-5523', style: TextStyle(fontWeight: FontWeight.w600)),
-          SizedBox(height: 6),
+        children: [
           Text(
-            'Items: Assorted Pastries (2 boxes)',
-            style: TextStyle(color: AppColors.textLight),
+            shortId != null ? 'Order $shortId' : 'Order Details',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Items: $foodName ($quantity)',
+            style: const TextStyle(color: AppColors.textLight),
           ),
         ],
       ),
@@ -115,22 +155,32 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   }
 
   Widget _pickupCard() {
+    final order = widget.order;
+    final listing = order?['listingId'] as Map<String, dynamic>?;
+    final seller = order?['sellerId'] as Map<String, dynamic>?;
+    final pickupAddress =
+        order?['pickup']?['addressText'] ?? listing?['pickupAddressText'];
+
     return _locationCard(
       title: 'Pickup Location',
-      name: 'Main Street Bakery',
-      address: '123 Bakers Street, Downtown',
+      name: seller?['name']?.toString() ?? 'Pickup Point',
+      address: pickupAddress?.toString() ?? 'Pickup address',
       timeLabel: 'Pickup by',
-      time: '11:00 AM',
+      time: listing?['pickupWindow']?['to']?.toString() ?? 'Scheduled time',
     );
   }
 
   Widget _deliveryCard() {
+    final order = widget.order;
+    final buyer = order?['buyerId'] as Map<String, dynamic>?;
+    final dropAddress = order?['drop']?['addressText'];
+
     return _locationCard(
       title: 'Delivery Location',
-      name: 'Sarah Johnson',
-      address: '456 Oak Avenue, Apt 4B',
+      name: buyer?['name']?.toString() ?? 'Recipient',
+      address: dropAddress?.toString() ?? 'Delivery address',
       timeLabel: 'Deliver by',
-      time: '12:00 PM',
+      time: order?['timeline']?['deliveredAt']?.toString() ?? 'Scheduled time',
     );
   }
 

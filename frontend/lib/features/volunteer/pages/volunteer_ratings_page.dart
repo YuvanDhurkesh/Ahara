@@ -1,11 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../data/providers/app_auth_provider.dart';
 
 class VolunteerRatingsPage extends StatelessWidget {
   const VolunteerRatingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AppAuthProvider>();
+    final stats = auth.mongoProfile?['stats'] as Map<String, dynamic>?;
+
+    final avgRating = (stats?['avgRating'] as num?)?.toDouble() ?? 0;
+    final ratingCount = (stats?['ratingCount'] as num?)?.toInt() ?? 0;
+    final totalCompleted =
+        (stats?['totalDeliveriesCompleted'] as num?)?.toInt() ?? 0;
+    final totalFailed = (stats?['totalDeliveriesFailed'] as num?)?.toInt() ?? 0;
+    final lateDeliveries = (stats?['lateDeliveries'] as num?)?.toInt() ?? 0;
+    final noShows = (stats?['noShows'] as num?)?.toInt() ?? 0;
+
+    final onTimeRate = totalCompleted == 0
+        ? 0.0
+        : ((totalCompleted - lateDeliveries) / totalCompleted)
+              .clamp(0.0, 1.0)
+              .toDouble();
+    final successRateBase = totalCompleted + totalFailed + noShows;
+    final successRate = successRateBase == 0
+        ? 0.0
+        : (totalCompleted / successRateBase).clamp(0.0, 1.0).toDouble();
+
+    final isVerified =
+        (auth.mongoProfile?['badge']?['tickVerified'] as bool?) ?? false;
+    final topVolunteer = avgRating >= 4.5 && totalCompleted >= 10;
+    final fiftyDeliveries = totalCompleted >= 50;
+    final perfectStreak =
+        totalCompleted > 0 && totalFailed == 0 && noShows == 0;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -23,14 +53,23 @@ class VolunteerRatingsPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            _OverallRatingCard(),
-            SizedBox(height: 20),
-            _BadgesSection(),
-            SizedBox(height: 20),
-            _PerformanceStats(),
-            SizedBox(height: 20),
-            _RecentReviews(),
+          children: [
+            _OverallRatingCard(
+              avgRating: avgRating,
+              deliveries: totalCompleted,
+              ratingCount: ratingCount,
+            ),
+            const SizedBox(height: 20),
+            _BadgesSection(
+              isVerified: isVerified,
+              topVolunteer: topVolunteer,
+              fiftyDeliveries: fiftyDeliveries,
+              perfectStreak: perfectStreak,
+            ),
+            const SizedBox(height: 20),
+            _PerformanceStats(onTimeRate: onTimeRate, successRate: successRate),
+            const SizedBox(height: 20),
+            _RecentReviews(hasReviews: false),
           ],
         ),
       ),
@@ -43,7 +82,15 @@ class VolunteerRatingsPage extends StatelessWidget {
 //
 
 class _OverallRatingCard extends StatelessWidget {
-  const _OverallRatingCard();
+  final double avgRating;
+  final int deliveries;
+  final int ratingCount;
+
+  const _OverallRatingCard({
+    required this.avgRating,
+    required this.deliveries,
+    required this.ratingCount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,21 +104,21 @@ class _OverallRatingCard extends StatelessWidget {
         ],
       ),
       child: Column(
-        children: const [
-          Icon(Icons.star, color: Colors.amber, size: 40),
-          SizedBox(height: 8),
+        children: [
+          const Icon(Icons.star, color: Colors.amber, size: 40),
+          const SizedBox(height: 8),
           Text(
-            '4.8',
-            style: TextStyle(
+            avgRating.toStringAsFixed(1),
+            style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
-            'Based on 47 deliveries',
-            style: TextStyle(color: AppColors.textLight),
+            'Based on $deliveries deliveries ($ratingCount ratings)',
+            style: const TextStyle(color: AppColors.textLight),
           ),
         ],
       ),
@@ -84,7 +131,17 @@ class _OverallRatingCard extends StatelessWidget {
 //
 
 class _BadgesSection extends StatelessWidget {
-  const _BadgesSection();
+  final bool isVerified;
+  final bool topVolunteer;
+  final bool fiftyDeliveries;
+  final bool perfectStreak;
+
+  const _BadgesSection({
+    required this.isVerified,
+    required this.topVolunteer,
+    required this.fiftyDeliveries,
+    required this.perfectStreak,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -97,29 +154,29 @@ class _BadgesSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Row(
-          children: const [
+          children: [
             _BadgeCard(
               icon: Icons.verified,
               label: 'Verified\nVolunteer',
-              isActive: true,
+              isActive: isVerified,
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             _BadgeCard(
               icon: Icons.star,
               label: 'Top\nVolunteer',
-              isActive: true,
+              isActive: topVolunteer,
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             _BadgeCard(
               icon: Icons.local_shipping,
               label: '50\nDeliveries',
-              isActive: false,
+              isActive: fiftyDeliveries,
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             _BadgeCard(
               icon: Icons.flash_on,
               label: 'Perfect\nStreak',
-              isActive: false,
+              isActive: perfectStreak,
             ),
           ],
         ),
@@ -176,17 +233,31 @@ class _BadgeCard extends StatelessWidget {
 //
 
 class _PerformanceStats extends StatelessWidget {
-  const _PerformanceStats();
+  final double onTimeRate;
+  final double successRate;
+
+  const _PerformanceStats({
+    required this.onTimeRate,
+    required this.successRate,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: const [
-        _StatBox(title: 'On-Time Rate', value: '95%', color: Colors.green),
-        SizedBox(width: 12),
-        _StatBox(title: 'Success Rate', value: '98%', color: Colors.blue),
-        SizedBox(width: 12),
-        _StatBox(title: 'Avg Time', value: '22 min', color: Colors.orange),
+      children: [
+        _StatBox(
+          title: 'On-Time Rate',
+          value: '${(onTimeRate * 100).toStringAsFixed(0)}%',
+          color: Colors.green,
+        ),
+        const SizedBox(width: 12),
+        _StatBox(
+          title: 'Success Rate',
+          value: '${(successRate * 100).toStringAsFixed(0)}%',
+          color: Colors.blue,
+        ),
+        const SizedBox(width: 12),
+        const _StatBox(title: 'Avg Time', value: 'N/A', color: Colors.orange),
       ],
     );
   }
@@ -239,33 +310,25 @@ class _StatBox extends StatelessWidget {
 //
 
 class _RecentReviews extends StatelessWidget {
-  const _RecentReviews();
+  final bool hasReviews;
+
+  const _RecentReviews({required this.hasReviews});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
-        Text(
+      children: [
+        const Text(
           'Recent Reviews',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
-        SizedBox(height: 12),
-        _ReviewTile(
-          name: 'Sarah Johnson',
-          date: 'Feb 3',
-          review: 'Very professional and on time!',
-        ),
-        _ReviewTile(
-          name: 'Mike Chen',
-          date: 'Feb 2',
-          review: 'Great delivery service, food arrived fresh.',
-        ),
-        _ReviewTile(
-          name: 'Emma Davis',
-          date: 'Feb 1',
-          review: 'Good service, slightly delayed.',
-        ),
+        const SizedBox(height: 12),
+        if (!hasReviews)
+          const Text(
+            'No reviews yet.',
+            style: TextStyle(color: AppColors.textLight),
+          ),
       ],
     );
   }

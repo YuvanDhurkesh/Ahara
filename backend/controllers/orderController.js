@@ -7,10 +7,11 @@ const mongoose = require("mongoose");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+    let session;
     try {
+        console.log("ENTERING createOrder");
+        session = await mongoose.startSession();
+        session.startTransaction();
         const {
             listingId,
             buyerId,
@@ -102,8 +103,10 @@ exports.createOrder = async (req, res) => {
         });
 
     } catch (error) {
-        await session.abortTransaction();
-        session.endSession();
+        if (session) {
+            await session.abortTransaction();
+            session.endSession();
+        }
         console.error("Create Order Error:", error.message);
         console.error("Full error:", error);
         res.status(400).json({ error: error.message });
@@ -190,6 +193,37 @@ exports.getVolunteerRescueRequests = async (req, res) => {
         res.status(200).json(notifications);
     } catch (error) {
         res.status(400).json({ error: error.message });
+    }
+};
+
+// 8b. Get volunteer orders
+exports.getVolunteerOrders = async (req, res) => {
+    try {
+        const { volunteerId } = req.params;
+        const { status } = req.query;
+
+        const query = { volunteerId };
+        if (status) query.status = status;
+
+        const orders = await Order.find(query)
+            .populate({
+                path: "listingId",
+                select: "foodName images pickupAddressText pickupWindow"
+            })
+            .populate({
+                path: "buyerId",
+                select: "name phone"
+            })
+            .populate({
+                path: "sellerId",
+                select: "name phone"
+            })
+            .sort({ createdAt: -1 });
+
+        res.status(200).json(orders);
+    } catch (error) {
+        console.error("Get Volunteer Orders Error:", error);
+        res.status(500).json({ error: error.message });
     }
 };
 

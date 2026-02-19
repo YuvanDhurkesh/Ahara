@@ -16,8 +16,6 @@ describe('Listing Routes Integration Tests', () => {
         await connect();
         
         // Clear collections
-        
-        // Clear collections
         try {
             await User.deleteMany({});
             await SellerProfile.deleteMany({});
