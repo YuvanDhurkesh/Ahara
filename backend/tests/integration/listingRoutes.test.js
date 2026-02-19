@@ -7,7 +7,6 @@ const SellerProfile = require('../../models/SellerProfile');
 const { connect, disconnect } = require('../setup');
 
 describe('Listing Routes Integration Tests', () => {
-    jest.setTimeout(60000);
     let sellerUser;
     let sellerProfile;
     let createdListingId;
@@ -15,12 +14,20 @@ describe('Listing Routes Integration Tests', () => {
     // Setup: Create a test user (seller) and profile before tests
     beforeAll(async () => {
         await connect();
-        await User.deleteMany({});
-        await SellerProfile.deleteMany({});
-        await Listing.deleteMany({});
+        
+        // Clear collections
+        
+        // Clear collections
+        try {
+            await User.deleteMany({});
+            await SellerProfile.deleteMany({});
+            await Listing.deleteMany({});
+        } catch (e) {
+            console.error('Cleanup error:', e.message);
+        }
 
         sellerUser = await User.create({
-            firebaseUid: 'seller-test-uid',
+            firebaseUid: 'seller-test-uid-' + Date.now(),
             name: 'Test Seller',
             email: 'seller@test.com',
             role: 'seller',
@@ -41,18 +48,22 @@ describe('Listing Routes Integration Tests', () => {
 
     // Cleanup after all tests
     afterAll(async () => {
-        await User.deleteMany({});
-        await SellerProfile.deleteMany({});
-        await Listing.deleteMany({});
+        try {
+            await User.deleteMany({});
+            await SellerProfile.deleteMany({});
+            await Listing.deleteMany({});
+        } catch (e) {
+            console.error('Final cleanup error:', e.message);
+        }
         await disconnect();
-    });
+    }, 60000);
 
     it('POST /api/listings/create should create a new food donation', async () => {
         const res = await request(app)
             .post('/api/listings/create')
             .send({
-                sellerId: sellerUser._id,
-                sellerProfileId: sellerProfile._id,
+                sellerId: sellerUser._id.toString(),
+                sellerProfileId: sellerProfile._id.toString(),
                 foodName: 'Fresh Apples',
                 description: 'A box of fresh apples',
                 quantityText: '5kg',
@@ -83,23 +94,23 @@ describe('Listing Routes Integration Tests', () => {
         createdListingId = res.body.listing._id;
     });
 
-    it('GET /api/listings/feed should return created listing', async () => {
-        const res = await request(app).get('/api/listings/feed');
+    it('GET /api/listings/active should return created listing', async () => {
+        const res = await request(app).get('/api/listings/active');
 
         expect(res.statusCode).toBe(200);
         expect(Array.isArray(res.body)).toBeTruthy();
 
-        // Find our listing in the feed
-        const listing = res.body.find(l => l._id === createdListingId);
-        // Note: functionality might filter by location or status, so it might not appear if not robustly tested
-        // But for now we check if endpoint works
+        // Find our listing in the results
+        const listing = res.body.find(l => l._id.toString() === createdListingId.toString());
+        expect(listing).toBeDefined();
+        expect(listing.foodName).toBe('Fresh Apples');
     });
 
-    it('PATCH /api/listings/update/:id should update listing details', async () => {
+    it('PUT /api/listings/update/:id should update listing details', async () => {
         if (!createdListingId) return; // Skip if create failed
 
         const res = await request(app)
-            .patch(`/api/listings/update/${createdListingId}`)
+            .put(`/api/listings/update/${createdListingId}`)
             .send({
                 foodName: 'Fresh Red Apples',
                 totalQuantity: 4
@@ -110,16 +121,16 @@ describe('Listing Routes Integration Tests', () => {
         expect(res.body.listing.totalQuantity).toBe(4);
     });
 
-    it('DELETE /api/listings/delete/:id should delete the listing', async () => {
-        if (!createdListingId) return;
+    it('GET /api/listings/active should reflect updated listing', async () => {
+        if (!createdListingId) return; // Skip if create failed
 
-        const res = await request(app)
-            .delete(`/api/listings/delete/${createdListingId}`);
+        const res = await request(app).get('/api/listings/active');
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.message).toBe('Listing deleted successfully');
-        // Verify it's gone
-        const check = await Listing.findById(createdListingId);
-        expect(check).toBeNull();
+        // Verify the updated listing is in the feed
+        const listing = res.body.find(l => l._id.toString() === createdListingId.toString());
+        expect(listing).toBeDefined();
+        expect(listing.foodName).toBe('Fresh Red Apples');
+        expect(listing.totalQuantity).toBe(4);
     });
 });

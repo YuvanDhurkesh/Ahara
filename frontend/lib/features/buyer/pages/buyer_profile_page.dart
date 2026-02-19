@@ -6,98 +6,13 @@ import 'buyer_account_details_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
 import 'buyer_notifications_page.dart';
 import '../../../data/providers/app_auth_provider.dart';
-import '../../../data/services/backend_service.dart';
 import 'package:provider/provider.dart';
 
-class BuyerProfilePage extends StatefulWidget {
+class BuyerProfilePage extends StatelessWidget {
   const BuyerProfilePage({super.key});
 
   @override
-  State<BuyerProfilePage> createState() => _BuyerProfilePageState();
-}
-
-class _BuyerProfilePageState extends State<BuyerProfilePage> {
-  bool _isLoadingStats = true;
-  String? _statsError;
-  int _ordersPlaced = 0;
-  int _ordersCancelled = 0;
-  double _totalSpent = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchBuyerStats();
-  }
-
-  Future<void> _fetchBuyerStats() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoadingStats = true;
-      _statsError = null;
-    });
-
-    try {
-      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
-
-      if (authProvider.mongoUser == null) {
-        await authProvider.refreshMongoUser();
-      }
-
-      final buyerId = authProvider.mongoUser?['_id'];
-      if (buyerId == null) {
-        throw Exception("Unable to load buyer profile");
-      }
-
-      final orders = await BackendService.getBuyerOrders(buyerId.toString());
-
-      int totalOrders = 0;
-      int cancelledOrders = 0;
-      double totalSpent = 0;
-
-      for (final order in orders) {
-        totalOrders += 1;
-
-        final status = (order['status'] ?? '').toString();
-        if (status == 'cancelled' || status == 'failed') {
-          cancelledOrders += 1;
-        }
-
-        final pricing = order['pricing'];
-        final total = pricing is Map<String, dynamic>
-            ? pricing['total']
-            : (pricing is Map ? pricing['total'] : null);
-
-        if (total is num) {
-          totalSpent += total.toDouble();
-        }
-      }
-
-      if (!mounted) return;
-      setState(() {
-        _ordersPlaced = totalOrders;
-        _ordersCancelled = cancelledOrders;
-        _totalSpent = totalSpent;
-        _isLoadingStats = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _statsError = e.toString();
-        _isLoadingStats = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AppAuthProvider>();
-    final mongoUser = auth.mongoUser;
-    final displayName =
-        (mongoUser?['name'] ?? auth.currentUser?.displayName ?? 'Buyer')
-            .toString();
-    final trustScore = mongoUser?['trustScore'];
-
     return SafeArea(
       child: Center(
         child: ConstrainedBox(
@@ -112,7 +27,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Hello, $displayName",
+                      "Hello, Harishree",
                       style: GoogleFonts.lora(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -134,13 +49,9 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                     Expanded(
                       child: _buildInfoCard(
                         context,
-                        title: "Orders Placed",
-                        value: _isLoadingStats
-                            ? "..."
-                            : _ordersPlaced.toString(),
-                        subtext: _statsError != null
-                            ? "Unable to load"
-                            : "Real backend data",
+                        title: "Rewards",
+                        value: "Gold",
+                        subtext: "2,450 pts",
                         icon: Icons.star_outline,
                         color: AppColors.primary,
                       ),
@@ -150,12 +61,8 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                       child: _buildInfoCard(
                         context,
                         title: "Trust Score",
-                        value: trustScore == null
-                            ? "N/A"
-                            : trustScore.toString(),
-                        subtext: trustScore == null
-                            ? "Not available for buyer"
-                            : "From backend profile",
+                        value: "950",
+                        subtext: "Top 5% Buyer",
                         icon: Icons.shield_outlined,
                         color: AppColors.secondary,
                       ),
@@ -178,21 +85,11 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                 ResponsiveLayout(
                   mobile: Column(
                     children: [
+                      _buildImpactStat("Meals Saved", "12", Icons.lunch_dining),
+                      _buildImpactStat("CO2 Saved", "4.5 kg", Icons.co2),
                       _buildImpactStat(
-                        "Orders Placed",
-                        _isLoadingStats ? "..." : _ordersPlaced.toString(),
-                        Icons.shopping_bag_outlined,
-                      ),
-                      _buildImpactStat(
-                        "Orders Cancelled",
-                        _isLoadingStats ? "..." : _ordersCancelled.toString(),
-                        Icons.cancel_outlined,
-                      ),
-                      _buildImpactStat(
-                        "Total Spent",
-                        _isLoadingStats
-                            ? "..."
-                            : "₹${_totalSpent.toStringAsFixed(0)}",
+                        "Money Saved",
+                        "₹1,200",
                         Icons.savings_outlined,
                       ),
                     ],
@@ -201,26 +98,24 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                     children: [
                       Expanded(
                         child: _buildImpactStat(
-                          "Orders Placed",
-                          _isLoadingStats ? "..." : _ordersPlaced.toString(),
-                          Icons.shopping_bag_outlined,
+                          "Meals Saved",
+                          "12",
+                          Icons.lunch_dining,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildImpactStat(
-                          "Orders Cancelled",
-                          _isLoadingStats ? "..." : _ordersCancelled.toString(),
-                          Icons.cancel_outlined,
+                          "CO2 Saved",
+                          "4.5 kg",
+                          Icons.co2,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildImpactStat(
-                          "Total Spent",
-                          _isLoadingStats
-                              ? "..."
-                              : "₹${_totalSpent.toStringAsFixed(0)}",
+                          "Money Saved",
+                          "₹1,200",
                           Icons.savings_outlined,
                         ),
                       ),
@@ -461,10 +356,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: OutlinedButton(
                         onPressed: () async {
-                          await Provider.of<AppAuthProvider>(
-                            context,
-                            listen: false,
-                          ).logout();
+                          await Provider.of<AppAuthProvider>(context, listen: false).logout();
                           if (context.mounted) {
                             Navigator.pushAndRemoveUntil(
                               context,

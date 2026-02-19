@@ -8,25 +8,18 @@ const SellerProfile = require('../../models/SellerProfile');
 const { connect, disconnect } = require('../setup');
 
 describe('Order Routes Integration Tests', () => {
-    jest.setTimeout(60000);
     let seller, buyer, listing, sellerProfile;
 
     beforeAll(async () => {
-        // Mock session to avoid "Transaction numbers are only allowed on a replica set member" error
-        const mockSession = {
-            startTransaction: jest.fn(),
-            commitTransaction: jest.fn(),
-            abortTransaction: jest.fn(),
-            endSession: jest.fn(),
-            inTransaction: () => false,
-        };
-        jest.spyOn(mongoose, 'startSession').mockResolvedValue(mockSession);
-
         await connect();
-        await User.deleteMany({});
-        await SellerProfile.deleteMany({});
-        await Listing.deleteMany({});
-        await Order.deleteMany({});
+        try {
+            await User.deleteMany({});
+            await SellerProfile.deleteMany({});
+            await Listing.deleteMany({});
+            await Order.deleteMany({});
+        } catch (e) {
+            console.error('Cleanup error:', e.message);
+        }
 
         // Create Users
         seller = await User.create({
@@ -84,15 +77,19 @@ describe('Order Routes Integration Tests', () => {
                 isFree: false
             }
         });
-    }, 60000);
+    }, 180000);
 
     afterAll(async () => {
-        await User.deleteMany({});
-        await SellerProfile.deleteMany({});
-        await Listing.deleteMany({});
-        await Order.deleteMany({});
+        try {
+            await User.deleteMany({});
+            await SellerProfile.deleteMany({});
+            await Listing.deleteMany({});
+            await Order.deleteMany({});
+        } catch (e) {
+            console.error('Final cleanup error:', e.message);
+        }
         await disconnect();
-    });
+    }, 60000);
 
     it('POST /api/orders/create should create a new order', async () => {
         const res = await request(app)

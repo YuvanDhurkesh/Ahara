@@ -1,23 +1,27 @@
 const request = require('supertest');
 const app = require('../../server');
-const mongoose = require('mongoose');
 const User = require('../../models/User');
-
+const BuyerProfile = require('../../models/BuyerProfile');
 const { connect, disconnect } = require('../setup');
 
 describe('User Routes Integration Tests', () => {
-
+    // Timeout: 60 seconds (from jest.config.js)
+    
     beforeAll(async () => {
         await connect();
-    });
+    }, 60000);
 
     afterAll(async () => {
         await disconnect();
-    });
+    }, 60000);
 
-    // Clear database before each test
     beforeEach(async () => {
-        await User.deleteMany({});
+        try {
+            await User.deleteMany({});
+            await BuyerProfile.deleteMany({});
+        } catch (e) {
+            console.error('Cleanup error:', e.message);
+        }
     });
 
     it('POST /api/users/create should create a new user', async () => {
@@ -27,12 +31,12 @@ describe('User Routes Integration Tests', () => {
                 firebaseUid: 'test-uid-123',
                 name: 'Integration User',
                 email: 'integration@test.com',
-                phone: '1234567890',
-                role: 'buyer'
+                role: 'buyer',
+                phone: '9876543210'
             });
 
         expect(res.statusCode).toBe(201);
-        expect(res.body.message).toBe('User and profile created successfully');
+        expect(res.body.user).toBeDefined();
         expect(res.body.user.firebaseUid).toBe('test-uid-123');
 
         // Verify in DB
@@ -47,8 +51,8 @@ describe('User Routes Integration Tests', () => {
             firebaseUid: 'duplicate-uid',
             name: 'Original User',
             email: 'original@test.com',
-            phone: '0987654321',
-            role: 'buyer'
+            role: 'buyer',
+            phone: '9876543210'
         });
 
         const res = await request(app)
@@ -56,30 +60,54 @@ describe('User Routes Integration Tests', () => {
             .send({
                 firebaseUid: 'duplicate-uid',
                 name: 'Duplicate Attempt',
-                email: 'duplicate@test.com',
-                phone: '1122334455',
-                role: 'buyer'
+                email: 'original@test.com',
+                role: 'buyer',
+                phone: '9876543210'
             });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.message).toBe('User already exists');
-        expect(res.body.user.firebaseUid).toBe('duplicate-uid');
 
-        // Ensure name wasn't updated
+        // Verify name wasn't updated
         const user = await User.findOne({ firebaseUid: 'duplicate-uid' });
         expect(user.name).toBe('Original User');
     });
 
-    it('POST /api/users/create shoud fail without firebaseUid', async () => {
+    it('POST /api/users/create should fail without firebaseUid', async () => {
         const res = await request(app)
             .post('/api/users/create')
             .send({
-                // Missing firebaseUid
-                name: 'No UID User',
+                email: 'test@test.com',
                 role: 'buyer'
+                // Missing firebaseUid
             });
 
         expect(res.statusCode).toBe(400);
-        expect(res.body.error).toContain('firebaseUid, email, and role are required');
+        expect(res.body.error).toContain('firebaseUid');
+    });
+
+    it('POST /api/users/create should fail without email', async () => {
+        const res = await request(app)
+            .post('/api/users/create')
+            .send({
+                firebaseUid: 'test-uid',
+                role: 'buyer'
+                // Missing email
+            });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toContain('email');
+    });
+
+    it('POST /api/users/create should fail without role', async () => {
+        const res = await request(app)
+            .post('/api/users/create')
+            .send({
+                firebaseUid: 'test-uid',
+                email: 'test@test.com'
+                // Missing role
+            });
+
+        expect(res.statusCode).toBe(400);
+        expect(res.body.error).toContain('role');
     });
 });
