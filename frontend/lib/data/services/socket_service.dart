@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../../config/api_config.dart';
 
 class SocketService {
-  static IO.Socket? _socket;
+  static io.Socket? _socket;
   
-  static IO.Socket get socket {
+  static io.Socket get socket {
     if (_socket == null) {
       init();
     }
@@ -18,7 +18,7 @@ class SocketService {
         ? baseUrl.substring(0, baseUrl.length - 4) 
         : baseUrl;
 
-    _socket = IO.io(socketUrl, IO.OptionBuilder()
+    _socket = io.io(socketUrl, io.OptionBuilder()
       .setTransports(['websocket']) // Use websocket transport
       .disableAutoConnect()     // Disable auto-connection
       .build());

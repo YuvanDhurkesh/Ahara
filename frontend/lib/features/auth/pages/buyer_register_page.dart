@@ -53,6 +53,8 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
   //---------------------------------------------------------
 
   Future<void> _detectLocation() async {
+    setState(() => _isDetectingLocation = true);
+    
     final result = await Navigator.push<LocationResult>(
       context,
       MaterialPageRoute(
@@ -63,10 +65,17 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
     );
 
     if (result != null) {
-      setState(() {
-        _selectedLocation = result;
-        _locationController.text = result.address;
-      });
+      if (mounted) {
+        setState(() {
+          _selectedLocation = result;
+          _locationController.text = result.address;
+          _isDetectingLocation = false;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() => _isDetectingLocation = false);
+      }
     }
   }
 
