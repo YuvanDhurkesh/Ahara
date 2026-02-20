@@ -77,18 +77,31 @@ exports.createOrder = async (req, res) => {
 
         await listing.save({ session });
 
-        // 6. Notify Seller
-        await Notification.create([{
-            userId: listing.sellerId,
-            type: "order_update",
-            title: "📦 New Order Received",
-            message: `Someone just ordered ${quantityOrdered}x ${listing.foodName}!`,
-            data: {
-                orderId: newOrder._id,
-                listingId: listing._id,
-                action: "view_order"
+        // 6. Notify Seller and Buyer
+        await Notification.create([
+            {
+                userId: listing.sellerId,
+                type: "order_update",
+                title: "📦 New Order Received",
+                message: `Someone just ordered ${quantityOrdered}x ${listing.foodName}!`,
+                data: {
+                    orderId: newOrder._id,
+                    listingId: listing._id,
+                    action: "view_order"
+                }
+            },
+            {
+                userId: buyerId,
+                type: "order_update",
+                title: "✅ Order Placed Successfully",
+                message: `Your order for ${quantityOrdered}x ${listing.foodName} has been placed! ${fulfillment === "volunteer_delivery" ? "A volunteer will be assigned soon." : "You can pick it up at the scheduled time."}`,
+                data: {
+                    orderId: newOrder._id,
+                    listingId: listing._id,
+                    action: "view_order"
+                }
             }
-        }], { session });
+        ], { session, ordered: true });
 
         await session.commitTransaction();
         session.endSession();
@@ -480,16 +493,16 @@ exports.cancelOrder = async (req, res) => {
         const title = "❌ Order Cancelled";
         const message = `Order #${shortId} has been cancelled by the ${cancelledBy}.`;
 
-        // Always notify Buyer if they didn't cancel
-        if (cancelledBy !== "buyer") {
-            notifications.push({
-                userId: order.buyerId,
-                type: "order_update",
-                title,
-                message,
-                data: { orderId: order._id, status: "cancelled" }
-            });
-        }
+        // Always notify Buyer
+        notifications.push({
+            userId: order.buyerId,
+            type: "order_update",
+            title: cancelledBy === "buyer" ? "✅ Order Cancelled" : "❌ Order Cancelled",
+            message: cancelledBy === "buyer" 
+                ? `You have successfully cancelled order #${shortId}.`
+                : `Your order #${shortId} has been cancelled by the ${cancelledBy}.`,
+            data: { orderId: order._id, status: "cancelled" }
+        });
 
         // Always notify Seller if they didn't cancel
         if (cancelledBy !== "seller") {
@@ -561,7 +574,7 @@ exports.reportEmergency = async (req, res) => {
             }
         ];
 
-        await Notification.create(notifications);
+        await Notification.create(notifications, { ordered: true });
 
         // In a real app, you would also notify internal admins or dispatch.
 
@@ -840,7 +853,7 @@ exports.verifyOtp = async (req, res) => {
                     message: "Your food donation has been successfully delivered.",
                     data: { orderId: order._id }
                 }
-            ]);
+            ], { ordered: true });
         }
 
         res.status(200).json({

@@ -816,6 +816,104 @@ class BackendService {
     }
   }
 
+  // ========================= NOTIFICATIONS =========================
+
+  static Future<Map<String, dynamic>> getUserNotifications(String userId, {int page = 1, int limit = 20, bool? isRead}) async {
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+      if (isRead != null) 'isRead': isRead.toString(),
+    };
+
+    final url = Uri.parse("$baseUrl/notifications/user/$userId").replace(queryParameters: queryParams);
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to fetch notifications");
+    }
+  }
+
+  static Future<Map<String, dynamic>> getUnreadNotificationCount(String userId) async {
+    final url = Uri.parse("$baseUrl/notifications/user/$userId/unread-count");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to fetch unread count");
+    }
+  }
+
+  static Future<void> markNotificationAsRead(String notificationId, String userId) async {
+    final url = Uri.parse("$baseUrl/notifications/$notificationId/read");
+
+    final response = await http.patch(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({
+        "userId": userId,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to mark notification as read");
+    }
+  }
+
+  static Future<void> markAllNotificationsAsRead(String userId) async {
+    final url = Uri.parse("$baseUrl/notifications/user/$userId/read-all");
+
+    final response = await http.patch(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to mark all notifications as read");
+    }
+  }
+
+  static Future<void> deleteNotification(String notificationId, String userId) async {
+    final url = Uri.parse("$baseUrl/notifications/$notificationId");
+
+    final response = await http.delete(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({
+        "userId": userId,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Failed to delete notification");
+    }
+  }
+
   // ========================= IMAGE UTILITIES =========================
 
   static String formatImageUrl(String? imageUrl) {
