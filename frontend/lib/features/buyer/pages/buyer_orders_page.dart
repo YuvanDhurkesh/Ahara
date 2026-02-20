@@ -249,7 +249,12 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        // TODO: Navigate to Tracking Page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BuyerOrderTrackPage(order: order),
+                          ),
+                        );
                       },
                       icon: const Icon(Icons.location_on_outlined, size: 18),
                       label: const Text("Track Order"),

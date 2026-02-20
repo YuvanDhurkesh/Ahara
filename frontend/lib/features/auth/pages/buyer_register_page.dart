@@ -10,6 +10,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:flutter/services.dart';
 import '../../../core/localization/language_provider.dart';
 import 'otp_verification_page.dart';
+import '../../location/pages/location_picker_page.dart';
 
 class BuyerRegisterPage extends StatefulWidget {
   final String role;
@@ -33,6 +34,7 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
   bool _isLoading = false;
   bool _isDetectingLocation = false;
   bool _isPhoneVerified = false;
+  LocationResult? _selectedLocation;
 
   //---------------------------------------------------------
 
@@ -52,63 +54,25 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
 
   Future<void> _detectLocation() async {
     setState(() => _isDetectingLocation = true);
+    
+    final result = await Navigator.push<LocationResult>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LocationPickerPage(
+          initialAddress: _locationController.text,
+        ),
+      ),
+    );
 
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
-      if (!serviceEnabled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please enable location services")),
-        );
-        return;
+    if (result != null) {
+      if (mounted) {
+        setState(() {
+          _selectedLocation = result;
+          _locationController.text = result.address;
+          _isDetectingLocation = false;
+        });
       }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-
-        if (permission == LocationPermission.denied) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Location permission denied")),
-          );
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Location permanently denied. Enable from device settings.",
-            ),
-          ),
-        );
-        return;
-      }
-
-      /// Fetch coordinates
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      /// Convert to address
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      Placemark place = placemarks.first;
-
-      String address =
-          "${place.locality ?? ''}, ${place.administrativeArea ?? ''}, ${place.country ?? ''}";
-
-      _locationController.text = address;
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to detect location")),
-      );
-    } finally {
+    } else {
       if (mounted) {
         setState(() => _isDetectingLocation = false);
       }
@@ -179,7 +143,15 @@ class _BuyerRegisterPageState extends State<BuyerRegisterPage> {
         phone: _phoneController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
-        location: _locationController.text.trim(),
+        location: _selectedLocation != null
+            ? {
+                "address": _selectedLocation!.address,
+                "coordinates": [
+                  _selectedLocation!.longitude,
+                  _selectedLocation!.latitude
+                ]
+              }
+            : _locationController.text.trim(),
         language: context.read<LanguageProvider>().locale.languageCode,
       );
 

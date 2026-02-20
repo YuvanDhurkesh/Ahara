@@ -131,8 +131,12 @@ class Listing {
       hygieneStatus: _parseHygieneStatus(json['hygieneStatus']),
       locationAddress: json['pickupAddressText'] ?? json['locationAddress'] ?? '',
       pincode: json['pincode']?.toString(),
-      latitude: 0.0, // Default for now
-      longitude: 0.0, // Default for now
+      latitude: (json['pickupGeo'] != null && json['pickupGeo']['coordinates'] != null)
+          ? (json['pickupGeo']['coordinates'][1] as num).toDouble()
+          : 0.0,
+      longitude: (json['pickupGeo'] != null && json['pickupGeo']['coordinates'] != null)
+          ? (json['pickupGeo']['coordinates'][0] as num).toDouble()
+          : 0.0,
       imageUrl: (json['images'] != null && (json['images'] as List).isNotEmpty)
           ? json['images'][0].toString()
           : '',

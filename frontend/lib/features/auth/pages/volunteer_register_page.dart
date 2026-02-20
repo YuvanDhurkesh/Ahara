@@ -208,8 +208,7 @@ class _VolunteerRegisterPageState
                 : _locationController.text.trim(),
         transportMode: _selectedTransport,
         dateOfBirth: _selectedDate?.toIso8601String(),
-        language:
-            context.read<LanguageProvider>().locale.languageCode,
+        language: context.read<LanguageProvider>().locale.languageCode,
       );
 
       if (!mounted) return;

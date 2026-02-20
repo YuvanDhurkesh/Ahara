@@ -57,6 +57,57 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     return "${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}";
   }
 
+  Future<void> _cancelOrder() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Cancel Order", style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.red)),
+        content: const Text("Are you sure you want to cancel this order? This action cannot be undone."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text("No, Keep it", style: GoogleFonts.inter(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+            child: Text("Yes, Cancel", style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+      barrierColor: Colors.black.withOpacity(0.5),
+    );
+
+    if (confirm == true) {
+      try {
+        await BackendService.cancelOrder(
+          _localOrder['_id'],
+          "buyer",
+          "Cancelled by buyer",
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Order cancelled successfully", style: GoogleFonts.inter(color: Colors.white)),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.pop(context, true); // Pop back to orders list
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Failed to cancel: $e", style: GoogleFonts.inter(color: Colors.white)),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final status = _localOrder['status'] ?? "placed";
@@ -720,7 +771,7 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: _cancelOrder,
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
               child: const Text("Cancel Order"),
@@ -745,18 +796,7 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                   context,
                   MaterialPageRoute(
                     builder: (_) => BuyerOrderTrackPage(
-                      order: MockOrder(
-                        id: _localOrder['_id'],
-                        store: allMockStores[0],
-                        status: OrderStatus.active,
-                        type: OrderType.delivery,
-                        date: "Today",
-                        total: "₹${_localOrder['pricing']?['total'] ?? 0}",
-                        itemsSummary: _localOrder['listingId']?['foodName'] ?? "Items",
-                        volunteerName: _localOrder['volunteerId']?['name'] ?? "Volunteer",
-                        volunteerRating: 4.8,
-                        deliveryTime: "30 mins",
-                      ),
+                      order: _localOrder,
                     ),
                   ),
                 );

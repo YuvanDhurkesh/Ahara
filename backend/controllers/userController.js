@@ -151,7 +151,14 @@ exports.createUser = async (req, res) => {
         }
       }
 
-      profile = await VolunteerProfile.create(volunteerData);
+      profile = await VolunteerProfile.create({
+        ...volunteerData,
+        availability: {
+          isAvailable: true,
+          maxConcurrentOrders: 1,
+          activeOrders: 0
+        }
+      });
     }
 
     return res.status(201).json({
@@ -309,7 +316,7 @@ exports.updatePreferences = async (req, res) => {
 exports.updateVolunteerProfile = async (req, res) => {
   try {
     const { uid } = req.params;
-    const { name, phone, addressText, transportMode } = req.body;
+    const { name, phone, addressText, transportMode, geo } = req.body;
 
     const user = await User.findOne({ firebaseUid: uid });
     if (!user) {
@@ -339,6 +346,7 @@ exports.updateVolunteerProfile = async (req, res) => {
     if (typeof name === "string") userUpdates.name = name.trim();
     if (typeof phone === "string") userUpdates.phone = phone.trim();
     if (typeof addressText === "string") userUpdates.addressText = addressText.trim();
+    if (geo && geo.coordinates) userUpdates.geo = geo;
 
     if (Object.keys(userUpdates).length > 0) {
       await User.findByIdAndUpdate(user._id, { $set: userUpdates });
@@ -382,7 +390,7 @@ exports.updateVolunteerProfile = async (req, res) => {
 exports.updateBuyerProfile = async (req, res) => {
   try {
     const { uid } = req.params;
-    const { name, addressText, gender, dietaryPreferences } = req.body;
+    const { name, addressText, gender, dietaryPreferences, geo } = req.body;
 
     const user = await User.findOne({ firebaseUid: uid });
     if (!user) {
@@ -397,6 +405,7 @@ exports.updateBuyerProfile = async (req, res) => {
     if (typeof name === "string") userUpdates.name = name.trim();
     if (typeof addressText === "string") userUpdates.addressText = addressText.trim();
     if (typeof gender === "string") userUpdates.gender = gender.trim();
+    if (geo && geo.coordinates) userUpdates.geo = geo;
 
     if (Object.keys(userUpdates).length > 0) {
       await User.findByIdAndUpdate(user._id, { $set: userUpdates });
@@ -437,7 +446,7 @@ exports.updateBuyerProfile = async (req, res) => {
 exports.updateSellerProfile = async (req, res) => {
   try {
     const { uid } = req.params;
-    const { name, phone, addressText, orgName, fssaiNumber, pickupHours } = req.body;
+    const { name, phone, addressText, orgName, fssaiNumber, pickupHours, geo } = req.body;
 
     const user = await User.findOne({ firebaseUid: uid });
     if (!user) {
@@ -452,6 +461,7 @@ exports.updateSellerProfile = async (req, res) => {
     if (typeof name === "string") userUpdates.name = name.trim();
     if (typeof phone === "string") userUpdates.phone = phone.trim();
     if (typeof addressText === "string") userUpdates.addressText = addressText.trim();
+    if (geo && geo.coordinates) userUpdates.geo = geo;
 
     if (Object.keys(userUpdates).length > 0) {
       await User.findByIdAndUpdate(user._id, { $set: userUpdates });
@@ -473,7 +483,11 @@ exports.updateSellerProfile = async (req, res) => {
         orgType: "restaurant",
         pickupHours: pickupHours || "09:00 AM - 09:00 PM"
       });
-    } else if (Object.keys(profileUpdates).length > 0) {
+    } else if (Object.keys(profileUpdates).length > 0 || geo) {
+      if (geo && geo.coordinates) {
+        profileUpdates.businessGeo = geo;
+        profileUpdates.businessAddressText = addressText || updatedProfile.businessAddressText;
+      }
       updatedProfile = await SellerProfile.findOneAndUpdate(
         { userId: user._id },
         { $set: profileUpdates },
@@ -541,5 +555,38 @@ exports.toggleFavoriteListing = async (req, res) => {
       error: "Server error toggle favorite",
       details: error.message
     });
+  }
+};
+// ======================================================
+// UPDATE VOLUNTEER AVAILABILITY
+// ======================================================
+
+exports.updateAvailability = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { isAvailable } = req.body;
+
+    const user = await User.findOne({ firebaseUid: uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const profile = await VolunteerProfile.findOneAndUpdate(
+      { userId: user._id },
+      { $set: { "availability.isAvailable": isAvailable } },
+      { new: true }
+    );
+
+    if (!profile) {
+      return res.status(404).json({ error: "Volunteer profile not found" });
+    }
+
+    return res.status(200).json({
+      message: `Availability updated to ${isAvailable}`,
+      availability: profile.availability
+    });
+  } catch (error) {
+    console.error("Update Availability Error:", error);
+    return res.status(500).json({ error: "Server error", details: error.message });
   }
 };
