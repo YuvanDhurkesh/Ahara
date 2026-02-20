@@ -7,6 +7,7 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/services/voice_service.dart';
 import '../../../core/localization/language_provider.dart';
 import '../../common/pages/landing_page.dart';
+import 'volunteer_notifications_page.dart';
 import 'volunteer_profile_page.dart';
 import 'volunteer_ratings_page.dart';
 import 'volunteer_orders_page.dart';
@@ -113,7 +114,8 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
       }
 
       final stats = auth.mongoProfile?['stats'] as Map<String, dynamic>?;
-      final availability = auth.mongoProfile?['availability'] as Map<String, dynamic>?;
+      final availability =
+          auth.mongoProfile?['availability'] as Map<String, dynamic>?;
       final avgRating = (stats?['avgRating'] as num?)?.toDouble() ?? 0;
       final totalDeliveries =
           (stats?['totalDeliveriesCompleted'] as num?)?.toInt() ?? 0;
@@ -197,21 +199,71 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
   Widget _buildHeader(String userName, double width) {
     final isNarrow = width < 520;
 
-    final title = Text(
-      '${AppLocalizations.of(context)!.translate("welcome_back_user")}$userName',
-      style: TextStyle(
-        fontSize: isNarrow ? 20 : 24,
-        fontWeight: FontWeight.w600,
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
+    final welcomeText = AppLocalizations.of(
+      context,
+    )!.translate("welcome_back_user").trimRight();
+
+    final welcomeColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          welcomeText,
+          style: TextStyle(
+            fontSize: isNarrow ? 14 : 16,
+            color: AppColors.textLight,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        Text(
+          userName,
+          style: TextStyle(
+            fontSize: isNarrow ? 20 : 24,
+            fontWeight: FontWeight.w700,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+
+    final actionIcons = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const VolunteerNotificationsPage(),
+              ),
+            );
+          },
+          icon: const Icon(
+            Icons.notifications_outlined,
+            color: AppColors.textDark,
+            size: 22,
+          ),
+          tooltip: "Notifications",
+        ),
+        IconButton(
+          onPressed: _performLogout,
+          icon: const Icon(Icons.logout, color: AppColors.textDark, size: 22),
+          tooltip: "Logout",
+        ),
+      ],
     );
 
     if (isNarrow) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          title,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child: welcomeColumn),
+              actionIcons,
+            ],
+          ),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -224,12 +276,18 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
       );
     }
 
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: title),
-        _voiceModeToggle(),
-        _availabilityToggle(),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(child: welcomeColumn),
+            actionIcons,
+            _voiceModeToggle(),
+            _availabilityToggle(),
+          ],
+        ),
       ],
     );
   }
