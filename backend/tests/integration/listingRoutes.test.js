@@ -105,7 +105,7 @@ describe('Listing Routes Integration Tests', () => {
     });
 
     it('PUT /api/listings/update/:id should update listing details', async () => {
-        if (!createdListingId) return; // Skip if create failed
+        if (!createdListingId) return; 
 
         const res = await request(app)
             .put(`/api/listings/update/${createdListingId}`)
@@ -120,7 +120,7 @@ describe('Listing Routes Integration Tests', () => {
     });
 
     it('GET /api/listings/active should reflect updated listing', async () => {
-        if (!createdListingId) return; // Skip if create failed
+        if (!createdListingId) return; 
 
         const res = await request(app).get('/api/listings/active');
 
