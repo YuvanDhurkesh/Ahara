@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
@@ -32,20 +33,39 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
 
   List<Map<String, dynamic>> _rescueRequests = [];
   List<Map<String, dynamic>> _volunteerOrders = [];
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     _fetchVolunteerData();
+    _startPolling();
   }
 
-  Future<void> _fetchVolunteerData() async {
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (mounted && isAvailable) {
+        _fetchVolunteerData(silent: true);
+      }
+    });
+  }
+
+  Future<void> _fetchVolunteerData({bool silent = false}) async {
     if (!mounted) return;
 
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+    if (!silent) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+    }
 
     try {
       final auth = Provider.of<AppAuthProvider>(context, listen: false);
@@ -93,6 +113,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
       }
 
       final stats = auth.mongoProfile?['stats'] as Map<String, dynamic>?;
+      final availability = auth.mongoProfile?['availability'] as Map<String, dynamic>?;
       final avgRating = (stats?['avgRating'] as num?)?.toDouble() ?? 0;
       final totalDeliveries =
           (stats?['totalDeliveriesCompleted'] as num?)?.toInt() ?? 0;
@@ -107,6 +128,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
         _todayCount = todayCount;
         _avgRating = avgRating;
         _totalDeliveries = totalDeliveries;
+        isAvailable = availability?['isAvailable'] ?? true;
         _isLoading = false;
       });
     } catch (e) {
@@ -287,6 +309,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
   //----------------------------------------------------------
 
   Widget _availabilityToggle() {
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
     return Row(
       children: [
         Text(AppLocalizations.of(context)!.translate("availability")),
@@ -294,7 +317,25 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
         Switch(
           value: isAvailable,
           activeColor: AppColors.primary,
-          onChanged: (value) => setState(() => isAvailable = value),
+          onChanged: (value) async {
+            setState(() => isAvailable = value);
+            try {
+              if (auth.currentUser != null) {
+                await BackendService.updateVolunteerAvailability(
+                  auth.currentUser!.uid,
+                  value,
+                );
+                await auth.refreshMongoUser();
+              }
+            } catch (e) {
+              if (mounted) {
+                setState(() => isAvailable = !value);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to update availability: $e')),
+                );
+              }
+            }
+          },
         ),
       ],
     );

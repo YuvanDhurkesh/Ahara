@@ -121,9 +121,9 @@ exports.getOrderById = async (req, res) => {
         const { id } = req.params;
         const order = await Order.findById(id)
             .populate('listingId')
-            .populate('sellerId', 'email firebaseUid')
-            .populate('buyerId', 'email firebaseUid')
-            .populate('volunteerId', 'email firebaseUid');
+            .populate('sellerId', 'name email phone firebaseUid trustScore role addressText')
+            .populate('buyerId', 'name email phone firebaseUid addressText')
+            .populate('volunteerId', 'name email phone firebaseUid trustScore');
 
         if (!order) {
             return res.status(404).json({ error: "Order not found" });
@@ -172,8 +172,9 @@ exports.getSellerOrders = async (req, res) => {
     try {
         const { sellerId } = req.params;
         const orders = await Order.find({ sellerId })
-            .populate("listingId", "foodName foodType images")
-            .populate("buyerId", "name phone")
+            .populate("listingId", "foodName foodType images pricing pickupAddressText pickupWindow")
+            .populate("buyerId", "name phone addressText")
+            .populate("volunteerId", "name phone trustScore")
             .sort({ createdAt: -1 });
 
         res.status(200).json(orders);
@@ -192,7 +193,26 @@ exports.getVolunteerRescueRequests = async (req, res) => {
             isRead: false
         }).sort({ createdAt: -1 });
 
-        res.status(200).json(notifications);
+        // Filter out notifications where the underlying order is no longer awaiting_volunteer
+        // This handles cases where another volunteer accepted or the order timed out
+        const filteredNotifications = [];
+        for (const notif of notifications) {
+            const orderId = notif.data?.orderId;
+            if (orderId) {
+                const order = await Order.findById(orderId).select('status');
+                if (order && order.status === 'awaiting_volunteer') {
+                    filteredNotifications.push(notif);
+                } else if (order) {
+                    // Auto-mark as read if order is no longer available
+                    notif.isRead = true;
+                    await notif.save();
+                }
+            } else {
+                filteredNotifications.push(notif);
+            }
+        }
+
+        res.status(200).json(filteredNotifications);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -248,40 +268,56 @@ exports.acceptRescueRequest = async (req, res) => {
             throw new Error(`Order cannot be accepted (Status: ${order.status})`);
         }
 
-        // Update order status and assign volunteer
+        // 1. Check volunteer concurrency limits
+        const profile = await VolunteerProfile.findOne({ userId: volunteerId }).session(session);
+        if (!profile) {
+            throw new Error("Volunteer profile not found");
+        }
+
+        if (profile.availability.activeOrders >= profile.availability.maxConcurrentOrders) {
+            throw new Error("You have reached your maximum concurrent rescue limit.");
+        }
+
+        // 2. Update order status and assign volunteer
         order.status = "volunteer_assigned";
         order.volunteerId = volunteerId;
         order.volunteerAssignedAt = new Date();
-        order.timeline.acceptedAt = new Date(); // Using acceptedAt in timeline for volunteer acceptance
+        order.timeline.acceptedAt = new Date();
 
         await order.save({ session });
 
-        // Mark relevant notifications as read for ALL volunteers to prevent multiple acceptances
-        // (In a real app, you'd only mark it for others if you wanted to hide it)
-        // Here we mark it for the specific volunteer who accepted.
+        // 3. Update volunteer active orders
+        profile.availability.activeOrders += 1;
+        // Auto-disable availability if at limit (optional, but helps with matching)
+        if (profile.availability.activeOrders >= profile.availability.maxConcurrentOrders) {
+            profile.availability.isAvailable = false;
+        }
+        await profile.save({ session });
+
+        // 4. Mark relevant notifications as read
         await Notification.updateMany(
             { "data.orderId": id, type: "rescue_request" },
             { isRead: true, readAt: new Date() },
             { session }
         );
 
-        // Notify Buyer
-        await Notification.create([{
-            userId: order.buyerId,
-            type: "order_update",
-            title: "🚚 Volunteer Assigned",
-            message: "A volunteer has accepted your rescue request and is on the way!",
-            data: { orderId: order._id, status: "volunteer_assigned" }
-        }], { session });
-
-        // Notify Seller
-        await Notification.create([{
-            userId: order.sellerId,
-            type: "order_update",
-            title: "🤝 Volunteer Found",
-            message: "A volunteer will arrive shortly to pick up the order.",
-            data: { orderId: order._id, status: "volunteer_assigned" }
-        }], { session });
+        // Notify Buyer & Seller using insertMany for multiple docs in session
+        await Notification.insertMany([
+            {
+                userId: order.buyerId,
+                type: "order_update",
+                title: "🚚 Volunteer Assigned",
+                message: "A volunteer has accepted your rescue request and is on the way!",
+                data: { orderId: order._id, status: "volunteer_assigned" }
+            },
+            {
+                userId: order.sellerId,
+                type: "order_update",
+                title: "🤝 Volunteer Found",
+                message: "A volunteer will arrive shortly to pick up the order.",
+                data: { orderId: order._id, status: "volunteer_assigned" }
+            }
+        ], { session });
 
         await session.commitTransaction();
         session.endSession();
@@ -306,14 +342,33 @@ exports.updateOrder = async (req, res) => {
             return res.status(404).json({ error: "Order not found" });
         }
 
-        // Apply updates
         if (updates.status) {
+            const oldStatus = order.status;
             order.status = updates.status;
-            // Update timeline
-            if (updates.status === "picked_up") order.timeline.pickedUpAt = new Date();
-            if (updates.status === "delivered") order.timeline.deliveredAt = new Date();
-            if (updates.status === "cancelled") order.timeline.cancelledAt = new Date();
-            if (updates.status === "placed") order.timeline.placedAt = new Date();
+
+            // If transitioning to a terminal status from an active one, cleanup volunteer capacity
+            const terminalStatuses = ["delivered", "cancelled"];
+            if (terminalStatuses.includes(updates.status) && !terminalStatuses.includes(oldStatus)) {
+                if (order.volunteerId) {
+                    await VolunteerProfile.findOneAndUpdate(
+                        { userId: order.volunteerId },
+                        {
+                            $inc: { "availability.activeOrders": -1 },
+                            $set: { "availability.isAvailable": true }
+                        }
+                    );
+
+                    if (updates.status === "delivered") {
+                        // Trust Score Bonus (+2)
+                        await User.findByIdAndUpdate(order.volunteerId, { $inc: { trustScore: 2 } });
+                        // Cap at 100
+                        await User.findOneAndUpdate(
+                            { _id: order.volunteerId, trustScore: { $gt: 100 } },
+                            { $set: { trustScore: 100 } }
+                        );
+                    }
+                }
+            }
         }
 
         if (updates.fulfillment) {
@@ -407,6 +462,61 @@ exports.cancelOrder = async (req, res) => {
         order.timeline.cancelledAt = new Date();
         await order.save({ session });
 
+        // If volunteer was assigned, decrement activeOrders and restore availability
+        if (order.volunteerId) {
+            await VolunteerProfile.findOneAndUpdate(
+                { userId: order.volunteerId },
+                {
+                    $inc: { "availability.activeOrders": -1 },
+                    $set: { "availability.isAvailable": true }
+                },
+                { session, returnDocument: 'after' }
+            );
+        }
+
+        // --- Notify Parties ---
+        const notifications = [];
+        const shortId = order._id.toString().slice(-6);
+        const title = "❌ Order Cancelled";
+        const message = `Order #${shortId} has been cancelled by the ${cancelledBy}.`;
+
+        // Always notify Buyer if they didn't cancel
+        if (cancelledBy !== "buyer") {
+            notifications.push({
+                userId: order.buyerId,
+                type: "order_update",
+                title,
+                message,
+                data: { orderId: order._id, status: "cancelled" }
+            });
+        }
+
+        // Always notify Seller if they didn't cancel
+        if (cancelledBy !== "seller") {
+            notifications.push({
+                userId: order.sellerId,
+                type: "order_update",
+                title,
+                message,
+                data: { orderId: order._id, status: "cancelled" }
+            });
+        }
+
+        // Notify Volunteer if they didn't cancel and were assigned
+        if (order.volunteerId && cancelledBy !== "volunteer") {
+            notifications.push({
+                userId: order.volunteerId,
+                type: "order_update",
+                title,
+                message: `The rescue request for #${shortId} was cancelled.`,
+                data: { orderId: order._id, status: "cancelled" }
+            });
+        }
+
+        if (notifications.length > 0) {
+            await Notification.insertMany(notifications, { session });
+        }
+
         await session.commitTransaction();
         session.endSession();
 
@@ -420,79 +530,210 @@ exports.cancelOrder = async (req, res) => {
 };
 
 // Helper: Trigger volunteer matching
+// 12. Report Emergency
+exports.reportEmergency = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { volunteerId, lat, lng, reason } = req.body;
+
+        const order = await Order.findById(id);
+        if (!order) {
+            return res.status(404).json({ error: "Order not found" });
+        }
+
+        console.error(`[EMERGENCY] Order ${id} by Volunteer ${volunteerId} at ${lat}, ${lng}. Reason: ${reason}`);
+
+        // Notify Buyer and Seller
+        const notifications = [
+            {
+                userId: order.buyerId,
+                type: "emergency",
+                title: "⚠️ Delivery Alert",
+                message: "A potential delay or issue has occurred with your delivery. We are looking into it.",
+                data: { orderId: order._id, reason }
+            },
+            {
+                userId: order.sellerId,
+                type: "emergency",
+                title: "⚠️ Delivery Alert",
+                message: "An issue was reported for a rescue pickup. Please contact support if needed.",
+                data: { orderId: order._id, reason }
+            }
+        ];
+
+        await Notification.create(notifications);
+
+        // In a real app, you would also notify internal admins or dispatch.
+
+        res.status(200).json({ message: "Emergency reported and parties notified" });
+
+    } catch (error) {
+        console.error("Report Emergency Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 async function initiateVolunteerMatching(order, listing) {
     try {
         console.log(`[Matching] Starting search for order ${order._id}`);
 
-        // 1. Get pickup location
-        const pickupGeo = listing.pickupGeo;
+        let pickupGeo = listing.pickupGeo;
+
+        // Fallback for legacy listings that might have 'geo' instead of 'pickupGeo'
         if (!pickupGeo || !pickupGeo.coordinates) {
-            console.error("[Matching] Listing has no geo coordinates");
-            return;
-        }
-
-        // 2. Search for active volunteers within 5km
-        const volunteers = await User.find({
-            role: "volunteer",
-            isActive: true,
-            geo: {
-                $near: {
-                    $geometry: pickupGeo,
-                    $maxDistance: 5000 // 5km in meters
-                }
+            const legacyGeo = listing.get ? listing.get('geo') : listing.geo;
+            if (legacyGeo && legacyGeo.coordinates) {
+                console.log(`[Matching] Order ${order._id}: Using legacy 'geo' field for Listing ${listing._id}`);
+                pickupGeo = legacyGeo;
             }
-        }).limit(10); // Notify top 10 nearest
+        }
 
-        console.log(`[Matching] Found ${volunteers.length} nearby volunteers`);
+        console.log(`[Matching] listing.pickupGeo raw:`, JSON.stringify(pickupGeo, null, 2));
 
-        if (volunteers.length === 0) {
-            console.log("[Matching] No volunteers found nearby.");
+        if (!pickupGeo || !pickupGeo.coordinates) {
+            console.error(`[Matching] Order ${order._id}: Listing ${listing._id} has no geo coordinates! Check listing.pickupGeo.`);
+            console.log(`[Matching] listing keys available:`, Object.keys(listing.toObject ? listing.toObject() : listing));
             return;
         }
 
-        // 3. Create Rescue Request notifications
-        const notificationPromises = volunteers.map(v => {
+        console.log(`[Matching] Order ${order._id}: Searching near ${pickupGeo.coordinates}`);
+
+        const totalActiveVolunteers = await User.countDocuments({ role: "volunteer", isActive: true });
+        console.log(`[Matching] [DEBUG] Total active volunteers in DB: ${totalActiveVolunteers}`);
+
+        // 1. Find nearby volunteers with their availability profiles
+        // Using aggregation for better filtering and distance calculation
+        const matchingVolunteers = await User.aggregate([
+            {
+                $geoNear: {
+                    near: pickupGeo,
+                    distanceField: "distance",
+                    maxDistance: 7000, // 7km
+                    query: { role: "volunteer", isActive: true },
+                    spherical: true
+                }
+            },
+            {
+                $lookup: {
+                    from: "volunteerprofiles",
+                    localField: "_id",
+                    foreignField: "userId",
+                    as: "profile"
+                }
+            },
+            { $unwind: "$profile" },
+            {
+                $match: {
+                    "profile.availability.isAvailable": true,
+                    $expr: { $lt: ["$profile.availability.activeOrders", "$profile.availability.maxConcurrentOrders"] }
+                }
+            },
+            {
+                $addFields: {
+                    // Score = (Distance Score 0-70) + (Trust Score 0-30)
+                    distanceScore: {
+                        $multiply: [
+                            { $subtract: [1, { $divide: ["$distance", 7000] }] },
+                            70
+                        ]
+                    },
+                    trustWeight: { $multiply: [{ $ifNull: ["$trustScore", 50] }, 0.3] }
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    distance: 1,
+                    matchScore: { $add: ["$distanceScore", "$trustWeight"] }
+                }
+            },
+            { $sort: { matchScore: -1 } },
+            { $limit: 10 }
+        ]);
+
+        console.log(`[Matching] Order ${order._id}: Step 1 - Found ${matchingVolunteers.length} qualified volunteers within 7km.`);
+
+        // Debug: Log all users found near location regardless of availability/limit
+        const allNearbyVolunteers = await User.aggregate([
+            {
+                $geoNear: {
+                    near: pickupGeo,
+                    distanceField: "distance",
+                    maxDistance: 50000, // 50km for debug
+                    query: { role: "volunteer" },
+                    spherical: true
+                }
+            },
+            {
+                $lookup: {
+                    from: "volunteerprofiles",
+                    localField: "_id",
+                    foreignField: "userId",
+                    as: "profile"
+                }
+            },
+            { $unwind: { path: "$profile", preserveNullAndEmptyArrays: true } }
+        ]);
+
+        console.log(`[Matching] [DEBUG] Volunteers within 50km (any status): ${allNearbyVolunteers.length}`);
+        allNearbyVolunteers.forEach(v => {
+            const avail = v.profile ? v.profile.availability.isAvailable : "NO PROFILE";
+            const active = v.profile ? v.profile.availability.activeOrders : "N/A";
+            const max = v.profile ? v.profile.availability.maxConcurrentOrders : "N/A";
+            console.log(`[Matching] [DEBUG] - ${v.name}: Avail=${avail}, Active=${active}, Max=${max}, Dist=${v.distance.toFixed(0)}m, HasGeo=${!!v.geo}`);
+        });
+
+        if (matchingVolunteers.length > 0) {
+            matchingVolunteers.forEach(v => {
+                console.log(`[Matching] - MATCH: ${v.name}, Score: ${Math.round(v.matchScore)}%, Dist: ${v.distance.toFixed(0)}m`);
+            });
+        }
+
+        if (matchingVolunteers.length === 0) {
+            console.log("[Matching] No qualified volunteers found.");
+            // Keep status as awaiting_volunteer for some time then fallback
+            return;
+        }
+
+        // 2. Create Rescue Request notifications
+        const notificationPromises = matchingVolunteers.map(v => {
             return Notification.create({
                 userId: v._id,
                 type: "rescue_request",
                 title: "🚨 Rescue Request",
-                message: `New delivery available: ${listing.foodName} (${order.quantityOrdered} items). Can you help?`,
+                message: `Nearby rescue available: ${listing.foodName} (${order.quantityOrdered} items). Your match score: ${Math.round(v.matchScore)}%`,
                 data: {
                     orderId: order._id,
                     listingId: listing._id,
-                    distance: "Nearby",
+                    distance: `${(v.distance / 1000).toFixed(1)}km`,
                     action: "view_rescue"
                 }
             });
         });
 
         await Promise.all(notificationPromises);
-        console.log(`[Matching] Notified ${volunteers.length} volunteers`);
+        console.log(`[Matching] Notified ${matchingVolunteers.length} high-match volunteers`);
 
-        // 4. Set fallback timeout (e.g., 30 seconds for demo)
+        // 3. Fallback timeout
         setTimeout(async () => {
-            try {
-                const updatedOrder = await Order.findById(order._id);
-                if (updatedOrder && updatedOrder.status === "awaiting_volunteer") {
-                    console.log(`[Matching] No match found for order ${order._id}. Switching to Self-Pickup.`);
+            const updatedOrder = await Order.findById(order._id);
+            if (updatedOrder && updatedOrder.status === "awaiting_volunteer") {
+                console.log(`[Matching] No volunteer accepted order ${order._id} after 1 min. Falling back.`);
 
-                    updatedOrder.status = "placed";
-                    updatedOrder.fulfillment = "self_pickup";
-                    await updatedOrder.save();
+                updatedOrder.status = "placed";
+                updatedOrder.fulfillment = "self_pickup";
+                await updatedOrder.save();
 
-                    // Notify Buyer
-                    await Notification.create({
-                        userId: order.buyerId,
-                        type: "order_update",
-                        title: "🚚 Delivery Update",
-                        message: "We couldn't find a volunteer nearby. Please arrange for self-pickup.",
-                        data: { orderId: order._id, status: "placed" }
-                    });
-                }
-            } catch (err) {
-                console.error("[Matching] Fallback error:", err);
+                await Notification.create({
+                    userId: order.buyerId,
+                    type: "order_update",
+                    title: "🚚 Delivery Update",
+                    message: "No volunteer available right now. Please arrange for self-pickup.",
+                    data: { orderId: order._id }
+                });
             }
-        }, 30000); // 30 seconds
+        }, 60000); // 1 minute
 
     } catch (error) {
         console.error("[Matching] Error in initiateVolunteerMatching:", error);
@@ -520,14 +761,16 @@ exports.verifyOtp = async (req, res) => {
             }
         } else {
             // Volunteer Delivery has two stages
-            if (["placed", "volunteer_assigned", "volunteer_accepted"].includes(order.status)) {
-                // Stage 1: Handover from Seller to Volunteer
+            // Stage 1: Handover from Seller to Volunteer
+            if (["placed", "volunteer_assigned", "awaiting_volunteer"].includes(order.status)) {
                 if (otp === order.pickupOtp) {
                     isCorrect = true;
+                    // In volunteer delivery, after seller verifies pickupOtp, it's picked_up
                     nextStatus = "picked_up";
                 }
-            } else if (["picked_up", "in_transit"].includes(order.status)) {
-                // Stage 2: Handover from Volunteer to Buyer
+            }
+            // Stage 2: Handover from Volunteer to Buyer
+            else if (["picked_up", "in_transit"].includes(order.status)) {
                 if (otp === order.handoverOtp) {
                     isCorrect = true;
                     nextStatus = "delivered";
@@ -542,7 +785,32 @@ exports.verifyOtp = async (req, res) => {
         // Apply transition
         order.status = nextStatus;
         if (nextStatus === "picked_up") order.timeline.pickedUpAt = new Date();
-        if (nextStatus === "delivered") order.timeline.deliveredAt = new Date();
+        if (nextStatus === "delivered") {
+            order.timeline.deliveredAt = new Date();
+
+            // If volunteer delivery, decrement activeOrders and ADD TRUST SCORE BONUS
+            if (order.volunteerId && order.fulfillment === "volunteer_delivery") {
+                await VolunteerProfile.findOneAndUpdate(
+                    { userId: order.volunteerId },
+                    {
+                        $inc: { "availability.activeOrders": -1 },
+                        $set: { "availability.isAvailable": true } // Re-enable availability
+                    }
+                );
+
+                // Add Trust Score Bonus (+2) to User model
+                await User.findByIdAndUpdate(
+                    order.volunteerId,
+                    { $inc: { trustScore: 2 } }
+                );
+
+                // Ensure Trust Score doesn't exceed 100
+                await User.findOneAndUpdate(
+                    { _id: order.volunteerId, trustScore: { $gt: 100 } },
+                    { $set: { trustScore: 100 } }
+                );
+            }
+        }
 
         await order.save();
 

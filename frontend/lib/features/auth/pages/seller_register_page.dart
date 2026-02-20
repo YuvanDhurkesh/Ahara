@@ -9,6 +9,7 @@ import '../../../shared/widgets/phone_input_field.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
 import 'otp_verification_page.dart';
+import '../../location/pages/location_picker_page.dart';
 
 class SellerRegisterPage extends StatefulWidget {
   const SellerRegisterPage({super.key});
@@ -30,6 +31,7 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
   bool _obscurePassword = true;
   bool _isLoading = false;
   bool _isPhoneVerified = false;
+  LocationResult? _selectedLocation;
 
   final List<String> _sellerTypes = [
     'Restaurant',
@@ -113,14 +115,21 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
         phone: _phoneController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
-        location: _locationController.text.trim().isEmpty
-            ? 'Not specified'
-            : _locationController.text.trim(),
+        location: _selectedLocation != null
+            ? {
+                "address": _selectedLocation!.address,
+                "coordinates": [
+                  _selectedLocation!.longitude,
+                  _selectedLocation!.latitude
+                ]
+              }
+            : _locationController.text.trim().isEmpty
+                ? 'Not specified'
+                : _locationController.text.trim(),
         businessName: _nameController.text.trim(),
         businessType: _selectedType,
         fssaiNumber: _fssaiController.text.trim(),
-        language:
-            context.read<LanguageProvider>().locale.languageCode,
+        language: context.read<LanguageProvider>().locale.languageCode,
       );
 
       if (!mounted) return;
@@ -318,9 +327,28 @@ class _SellerRegisterPageState extends State<SellerRegisterPage> {
                   _buildLabel("LOCATION (OPTIONAL)"),
                   TextFormField(
                     controller: _locationController,
+                    readOnly: true,
+                    onTap: () async {
+                      final result = await Navigator.push<LocationResult>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => LocationPickerPage(
+                            initialAddress: _locationController.text,
+                          ),
+                        ),
+                      );
+
+                      if (result != null) {
+                        setState(() {
+                          _selectedLocation = result;
+                          _locationController.text = result.address;
+                        });
+                      }
+                    },
                     decoration: const InputDecoration(
-                      hintText: "E.g. Bangalore, Karnataka",
+                      hintText: "Select location on map",
                       prefixIcon: Icon(Icons.location_on_outlined),
+                      suffixIcon: Icon(Icons.map_outlined),
                     ),
                   ),
 

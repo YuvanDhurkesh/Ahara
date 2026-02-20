@@ -12,6 +12,8 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const otpRoutes = require("./routes/otpRoutes");
 const verificationRoutes = require("./routes/verificationRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+const socketService = require("./services/socketService");
 
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
@@ -46,6 +48,7 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/otp", otpRoutes);
 app.use("/api/verification", verificationRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 // Serve static uploads with ngrok bypass header (best effort)
 app.use("/api/uploads", (req, res, next) => {
@@ -66,7 +69,13 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, '0.0.0.0', () => {
+  const http = require("http");
+  const server = http.createServer(app);
+
+  // Initialize socket.io
+  socketService.init(server);
+
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
 }

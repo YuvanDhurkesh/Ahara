@@ -192,7 +192,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
           },
           "pickupAddressText": _locationController.text,
           "pincode": _pincodeController.text,
-          "geo": {
+          "pickupGeo": {
             "type": "Point",
             "coordinates": _coordinates != null 
                 ? [_coordinates!['longitude'], _coordinates!['latitude']]

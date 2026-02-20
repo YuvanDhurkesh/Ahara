@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../../data/services/backend_service.dart';
+import '../../../../data/services/socket_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class VolunteerOrderDetailPage extends StatefulWidget {
@@ -20,22 +23,113 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   final TextEditingController _otpController = TextEditingController();
   bool _isVerifying = false;
   late String _currentStatus;
+  StreamSubscription<Position>? _positionStream;
 
   // LatLng from latlong2
   LatLng pickupLocation = const LatLng(28.6139, 77.2090); // Delhi
   LatLng deliveryLocation = const LatLng(28.5355, 77.3910); // Noida
+  LatLng _currentVolunteerPos = const LatLng(28.6139, 77.2090);
 
   @override
   void initState() {
     super.initState();
     _loadLocations();
     _currentStatus = widget.order?['status'] ?? 'placed';
+    _startLocationUpdates();
   }
 
   @override
   void dispose() {
     _otpController.dispose();
+    _positionStream?.cancel();
     super.dispose();
+  }
+
+  void _startLocationUpdates() async {
+    // Only track if in transit
+    if (!['picked_up', 'in_transit'].contains(_currentStatus)) return;
+
+    final permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      await Geolocator.requestPermission();
+    }
+
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10,
+      ),
+    ).listen((Position position) {
+      setState(() {
+        _currentVolunteerPos = LatLng(position.latitude, position.longitude);
+      });
+      
+      // Update Socket
+      if (widget.order?['_id'] != null) {
+        SocketService.updateLocation(
+          widget.order!['_id'],
+          position.latitude,
+          position.longitude,
+        );
+      }
+    });
+  }
+
+  Future<void> _handleEmergencyReport() async {
+    final reasonController = TextEditingController();
+    
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("⚠️ Report Emergency"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Are you facing an issue? This will notify the buyer and seller of a potential delay."),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              decoration: const InputDecoration(
+                hintText: "Reason (Accident, Bike issue, etc.)",
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Report", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await BackendService.reportEmergency(
+          orderId: widget.order!['_id'],
+          volunteerId: widget.order!['volunteerId']['_id'] ?? "", // Assuming it's populated or we have it
+          lat: _currentVolunteerPos.latitude,
+          lng: _currentVolunteerPos.longitude,
+          reason: reasonController.text.trim(),
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(backgroundColor: Colors.red, content: Text("Emergency reported. Assistance is being notified.")),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to report: $e")),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _handleOtpVerification() async {
@@ -60,6 +154,9 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           _currentStatus = response['order']['status'];
           _isVerifying = false;
           _otpController.clear();
+          if (_currentStatus == 'delivered') {
+            _positionStream?.cancel();
+          }
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -82,6 +179,46 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     }
   }
 
+  Future<void> _cancelOrder() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Cancel Rescue", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+        content: const Text("Are you sure you want to cancel this rescue? This will return the order to the pool and notify the buyer/seller."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Keep Rescue")),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text("Cancel Anyway", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await BackendService.cancelOrder(
+          widget.order!['_id'],
+          "volunteer",
+          "Cancelled by volunteer",
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Rescue cancelled"), backgroundColor: Colors.red),
+          );
+          Navigator.pop(context, true);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to cancel: $e")),
+          );
+        }
+      }
+    }
+  }
+
   void _loadLocations() {
     final order = widget.order;
     final pickupCoords = order?['pickup']?['geo']?['coordinates'];
@@ -100,6 +237,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         (dropCoords[0] as num).toDouble(),
       );
     }
+    _currentVolunteerPos = pickupLocation; // Start at pickup
   }
 
   Future<void> _launchNavigation(LatLng destination) async {
@@ -131,6 +269,14 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
       ),
+      floatingActionButton: ['picked_up', 'in_transit'].contains(_currentStatus) 
+        ? FloatingActionButton.extended(
+            onPressed: _handleEmergencyReport,
+            backgroundColor: Colors.red,
+            icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+            label: const Text("HELP", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          )
+        : null,
       body: Column(
         children: [
           // 🗺️ OPEN STREET MAP
@@ -139,8 +285,8 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
             child: FlutterMap(
               mapController: _mapController,
               options: MapOptions(
-                initialCenter: pickupLocation,
-                initialZoom: 12,
+                initialCenter: _currentVolunteerPos,
+                initialZoom: 14,
               ),
               children: [
                 TileLayer(
@@ -153,22 +299,19 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                       point: pickupLocation,
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.location_on, color: AppColors.primary, size: 40),
+                      child: const Icon(Icons.store, color: AppColors.primary, size: 30),
                     ),
                     Marker(
                       point: deliveryLocation,
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+                      child: const Icon(Icons.home, color: Colors.red, size: 30),
                     ),
-                  ],
-                ),
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: [pickupLocation, deliveryLocation],
-                      color: AppColors.primary,
-                      strokeWidth: 4,
+                    Marker(
+                      point: _currentVolunteerPos,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(Icons.delivery_dining, color: Colors.blue, size: 40),
                     ),
                   ],
                 ),
@@ -192,6 +335,19 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                   _buildDeliveryOtpSection(),
                   const SizedBox(height: 24),
                   _openInMapsButton(),
+                  if (_currentStatus != 'delivered' && _currentStatus != 'cancelled') ...[
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: _cancelOrder,
+                        child: const Text(
+                          "Cancel Rescue",
+                          style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -483,3 +639,4 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     );
   }
 }
+

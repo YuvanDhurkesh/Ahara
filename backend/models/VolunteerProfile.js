@@ -18,7 +18,8 @@ const volunteerProfileSchema = new mongoose.Schema(
 
         availability: {
             isAvailable: { type: Boolean, default: false },
-            maxConcurrentOrders: { type: Number, default: 1 }
+            maxConcurrentOrders: { type: Number, default: 1 },
+            activeOrders: { type: Number, default: 0 }
         },
 
         verification: {
