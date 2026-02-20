@@ -105,19 +105,20 @@ class _LandingPageState extends State<LandingPage> {
               onTap: () => _scrollToSection(_impactKey, "impact"),
             ),
           ],
-          const SizedBox(width: 8),
-          ElevatedButton(
+          IconButton(
             onPressed: () => _showAuthOptions(context),
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(
-                horizontal: isMobile ? 16 : 20,
-                vertical: 0,
+            tooltip: AppLocalizations.of(context)!.translate("join_us"),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
               ),
-              minimumSize: const Size(0, 40),
-            ),
-            child: Text(
-              AppLocalizations.of(context)!.translate("join_us"),
-              style: TextStyle(fontSize: isMobile ? 12 : 13),
+              child: const Icon(
+                Icons.login,
+                color: AppColors.textDark,
+                size: 22,
+              ),
             ),
           ),
           if (isMobile)
@@ -247,7 +248,7 @@ class _LandingPageState extends State<LandingPage> {
               ),
               const SizedBox(height: 24),
               const Text(
-                "Join the Ahara Community",
+                "Welcome back to Ahara",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -256,7 +257,7 @@ class _LandingPageState extends State<LandingPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                "Login to your account or register to start sharing.",
+                "Select your role to login or get started.",
                 style: TextStyle(
                   color: AppColors.textLight.withOpacity(0.7),
                   fontSize: 14,
@@ -264,45 +265,139 @@ class _LandingPageState extends State<LandingPage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
-                  },
-                  child: const Text("Login to Ahara"),
-                ),
+
+              // Roles Selection for Login
+              _buildRoleLoginTile(
+                context,
+                title: "Login as Buyer",
+                subtitle: "Find meals and help nearby",
+                icon: Icons.shopping_basket_outlined,
+                color: AppColors.primary,
+                onTap: () => _navigateToLogin(context),
               ),
               const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RegisterSelectionPage(),
+              _buildRoleLoginTile(
+                context,
+                title: "Login as Seller",
+                subtitle: "Share surplus food surplus",
+                icon: Icons.storefront_outlined,
+                color: AppColors.secondary,
+                onTap: () => _navigateToLogin(context),
+              ),
+              const SizedBox(height: 12),
+              _buildRoleLoginTile(
+                context,
+                title: "Login as Volunteer",
+                subtitle: "Help transport or verify meals",
+                icon: Icons.volunteer_activism_outlined,
+                color: Colors.blueGrey,
+                onTap: () => _navigateToLogin(context),
+              ),
+
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 16),
+              
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const RegisterSelectionPage(),
+                    ),
+                  );
+                },
+                child: RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      color: AppColors.textLight,
+                    ),
+                    children: [
+                      const TextSpan(text: "New to Ahara? "),
+                      TextSpan(
+                        text: "Create an Account",
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    );
-                  },
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.primary),
-                    foregroundColor: AppColors.primary,
+                    ],
                   ),
-                  child: const Text("Create New Account"),
                 ),
               ),
-              const SizedBox(height: 16),
-              const SafeArea(top: false, child: SizedBox(height: 12)),
+              const SafeArea(top: false, child: SizedBox(height: 20)),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToLogin(BuildContext context) {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginPage(),
+      ),
+    );
+  }
+
+  Widget _buildRoleLoginTile(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: color.withOpacity(0.2), width: 1.5),
+          borderRadius: BorderRadius.circular(16),
+          color: color.withOpacity(0.05),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      color: AppColors.textLight.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, size: 14, color: color.withOpacity(0.5)),
+          ],
         ),
       ),
     );
