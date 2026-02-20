@@ -12,12 +12,16 @@ class LocationResult {
   final String pincode;
   final double latitude;
   final double longitude;
+  final String? locality;
+  final String? subLocality;
 
   LocationResult({
     required this.address,
     required this.pincode,
     required this.latitude,
     required this.longitude,
+    this.locality,
+    this.subLocality,
   });
 }
 
@@ -43,6 +47,8 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
   LatLng _currentSelectedPos = const LatLng(12.9716, 77.5946); // Bengaluru
   bool _isLocating = false;
   bool _isReverseGeocoding = false;
+  String? _lastLocality;
+  String? _lastSubLocality;
 
   @override
   void initState() {
@@ -115,6 +121,8 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
               setState(() {
                 _addressController.text = address;
                 _pincodeController.text = p.postalCode ?? "";
+                _lastLocality = p.locality;
+                _lastSubLocality = p.subLocality;
               });
               return; // Success
             }
@@ -141,6 +149,8 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
           setState(() {
             _addressController.text = displayName.split(", ").take(4).join(", ");
             _pincodeController.text = postcode ?? "";
+            _lastLocality = addressData?['suburb'] ?? addressData?['city_district'];
+            _lastSubLocality = addressData?['neighbourhood'] ?? addressData?['allotments'];
           });
         }
       } else {
@@ -291,6 +301,8 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
                         pincode: _pincodeController.text,
                         latitude: _currentSelectedPos.latitude,
                         longitude: _currentSelectedPos.longitude,
+                        locality: _lastLocality,
+                        subLocality: _lastSubLocality,
                       ));
                     },
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),

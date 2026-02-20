@@ -17,6 +17,7 @@
     "mongoose": "^9.1.6",
     "multer": "^2.0.2",
     "razorpay": "^2.9.6",
+    "socket.io": "^4.8.3",
     "twilio": "^5.12.2"
   },
   "devDependencies": {

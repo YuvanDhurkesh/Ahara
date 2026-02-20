@@ -16,7 +16,7 @@ class BackendService {
     required String email,
     required String role,
     required String phone,
-    required String location,
+    required dynamic location,
     String? language,
   }) async {
     final url = Uri.parse("$baseUrl/users/create");
@@ -122,6 +122,29 @@ class BackendService {
       return jsonDecode(response.body);
     } else {
       throw Exception("Failed to toggle favorite");
+    }
+  }
+
+  static Future<void> updateVolunteerAvailability(
+    String firebaseUid,
+    bool isAvailable,
+  ) async {
+    final url = Uri.parse("$baseUrl/users/$firebaseUid/availability");
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({"isAvailable": isAvailable}),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = jsonDecode(response.body);
+      throw Exception(
+        errorBody['error'] ?? "Failed to update availability",
+      );
     }
   }
 
@@ -675,6 +698,73 @@ class BackendService {
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body);
       throw Exception(errorBody['error'] ?? "Failed to cancel order");
+    }
+  }
+
+  // ========================= REVIEWS =========================
+
+  static Future<void> submitReview({
+    required String orderId,
+    required String reviewerId,
+    required String targetType,
+    required String targetUserId,
+    required double rating,
+    String? comment,
+    List<String>? tags,
+  }) async {
+    final url = Uri.parse("$baseUrl/reviews");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({
+        "orderId": orderId,
+        "reviewerId": reviewerId,
+        "targetType": targetType,
+        "targetUserId": targetUserId,
+        "rating": rating,
+        "comment": comment,
+        "tags": tags ?? [],
+      }),
+    );
+
+    if (response.statusCode != 201) {
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? "Failed to submit review");
+    }
+  }
+
+  // ========================= EMERGENCY =========================
+
+  static Future<void> reportEmergency({
+    required String orderId,
+    required String volunteerId,
+    required double lat,
+    required double lng,
+    required String reason,
+  }) async {
+    final url = Uri.parse("$baseUrl/orders/$orderId/emergency");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({
+        "volunteerId": volunteerId,
+        "lat": lat,
+        "lng": lng,
+        "reason": reason,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? "Failed to report emergency");
     }
   }
 

@@ -94,6 +94,46 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     }
   }
 
+  Future<void> _cancelOrder() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Cancel Order", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+        content: const Text("Are you sure you want to cancel this order? This will restore listing quantity and notify the buyer."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("No, Keep it")),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text("Yes, Cancel", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await BackendService.cancelOrder(
+          widget.order['_id'],
+          "seller",
+          "Cancelled by seller",
+        );
+        if (mounted) {
+          setState(() => _currentStatus = "cancelled");
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Order cancelled"), backgroundColor: Colors.red),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to cancel: $e")),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -649,13 +689,13 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
             ),
           ),
         ),
-        if (_currentStatus == "placed" || _currentStatus == "pending") ...[
+        if (_currentStatus == "placed" || _currentStatus == "pending" || _currentStatus == "awaiting_volunteer" || _currentStatus == "volunteer_assigned") ...[
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             height: 56,
             child: TextButton(
-              onPressed: () => _updateStatus("cancelled"),
+              onPressed: _cancelOrder,
               child: const Text(
                 "Cancel Order",
                 style: TextStyle(

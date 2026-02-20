@@ -116,7 +116,7 @@ class AppAuthProvider extends ChangeNotifier {
     required String phone,
     required String email,
     required String password,
-    required String location,
+    required dynamic location,
     String? businessName,
     String? businessType,
     String? fssaiNumber,

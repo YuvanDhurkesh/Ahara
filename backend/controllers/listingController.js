@@ -38,6 +38,7 @@ exports.createListing = async (req, res) => {
         console.log("--- CREATE LISTING REQUEST ---");
         console.log("Full Body:", JSON.stringify(req.body, null, 2));
         console.log("Images received:", req.body.images);
+        console.log("pickupGeo in req.body:", req.body.pickupGeo);
 
         const {
             sellerId,
@@ -141,9 +142,9 @@ exports.createListing = async (req, res) => {
             listingData.pickupGeo = geoData;
         }
 
-        console.log("Attempting to save listing to MongoDB...");
+        console.log("Attempting to save listing to MongoDB with pickupGeo:", JSON.stringify(listingData.pickupGeo, null, 2));
         const newListing = await Listing.create(listingData);
-        console.log("!!! SAVE SUCCESS !!! ID:", newListing._id);
+        console.log("!!! SAVE SUCCESS !!! ID:", newListing._id, "has pickupGeo:", !!newListing.pickupGeo);
 
         res.status(201).json({
             message: "Listing created successfully",

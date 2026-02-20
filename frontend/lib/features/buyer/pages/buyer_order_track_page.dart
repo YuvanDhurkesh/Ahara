@@ -5,11 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../data/mock_orders.dart';
+import '../../../../data/services/socket_service.dart';
 
 class BuyerOrderTrackPage extends StatefulWidget {
-  final MockOrder order;
+  final MockOrder? mockOrder;
+  final Map<String, dynamic>? order;
 
-  const BuyerOrderTrackPage({super.key, required this.order});
+  const BuyerOrderTrackPage({super.key, this.mockOrder, this.order});
 
   @override
   State<BuyerOrderTrackPage> createState() => _BuyerOrderTrackPageState();
@@ -18,21 +20,67 @@ class BuyerOrderTrackPage extends StatefulWidget {
 class _BuyerOrderTrackPageState extends State<BuyerOrderTrackPage> {
   final MapController _mapController = MapController();
   late LatLng _volunteerPos;
-  final LatLng _deliveryPos = const LatLng(12.9352, 77.6309); // Koramangala
+  LatLng _deliveryPos = const LatLng(12.9352, 77.6309); // Default: Koramangala
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    // Start volunteer somewhere nearby
-    _volunteerPos = const LatLng(12.9452, 77.6209);
-    _startLiveTracking();
+    _initLocations();
+    _startTracking();
+  }
+
+  void _initLocations() {
+    if (widget.order != null) {
+      final dropCoords = widget.order!['drop']?['geo']?['coordinates'];
+      if (dropCoords is List && dropCoords.length == 2) {
+        _deliveryPos = LatLng(
+          (dropCoords[1] as num).toDouble(),
+          (dropCoords[0] as num).toDouble(),
+        );
+      }
+      
+      final trackingCoords = widget.order!['tracking']?['lastVolunteerGeo']?['coordinates'];
+      if (trackingCoords is List && trackingCoords.length == 2) {
+        _volunteerPos = LatLng(
+          (trackingCoords[1] as num).toDouble(),
+          (trackingCoords[0] as num).toDouble(),
+        );
+      } else {
+        // Fallback or initial
+        _volunteerPos = LatLng(_deliveryPos.latitude + 0.01, _deliveryPos.longitude + 0.01);
+      }
+    } else {
+      // Mock mode
+      _volunteerPos = const LatLng(12.9452, 77.6209);
+    }
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    if (widget.order != null) {
+      SocketService.socket.off("location_updated");
+    }
     super.dispose();
+  }
+
+  void _startTracking() {
+    if (widget.order != null) {
+      final orderId = widget.order!['_id'];
+      SocketService.joinOrderRoom(orderId);
+      SocketService.onLocationUpdate((lat, lng) {
+        if (mounted) {
+          setState(() {
+            _volunteerPos = LatLng(lat, lng);
+            _mapController.move(_volunteerPos, _mapController.camera.zoom);
+          });
+        }
+      });
+    } else {
+      // Keep mock movement for demo
+      _startLiveTracking();
+    }
   }
 
   void _startLiveTracking() {
@@ -125,7 +173,9 @@ class _BuyerOrderTrackPageState extends State<BuyerOrderTrackPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    widget.order.deliveryTime ?? "Unknown",
+                    widget.order != null 
+                        ? (widget.order!['deliveryTime'] ?? "Estimated 30 mins")
+                        : (widget.mockOrder?.deliveryTime ?? "Unknown"),
                     style: GoogleFonts.inter(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.black),
                   ),
                   const SizedBox(height: 32),
@@ -147,7 +197,7 @@ class _BuyerOrderTrackPageState extends State<BuyerOrderTrackPage> {
                   ),
                   _buildTimelineTile(
                     title: "Out for Delivery",
-                    subtitle: "${widget.order.volunteerName} is on the way",
+                    subtitle: "${widget.order != null ? (widget.order!['volunteerId']?['name'] ?? 'Volunteer') : (widget.mockOrder?.volunteerName ?? 'Volunteer')} is on the way",
                     time: "1:00 PM",
                     isActive: true,
                     isCompleted: false,
@@ -188,7 +238,9 @@ class _BuyerOrderTrackPageState extends State<BuyerOrderTrackPage> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                widget.order.volunteerName ?? "Volunteer",
+                                widget.order != null 
+                                    ? (widget.order!['volunteerId']?['name'] ?? "Volunteer")
+                                    : (widget.mockOrder?.volunteerName ?? "Volunteer"),
                                 style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
                               ),
                               Row(
@@ -196,7 +248,9 @@ class _BuyerOrderTrackPageState extends State<BuyerOrderTrackPage> {
                                   const Icon(Icons.star, color: Colors.amber, size: 14),
                                   const SizedBox(width: 4),
                                   Text(
-                                    "${widget.order.volunteerRating}",
+                                    widget.order != null
+                                        ? (widget.order!['volunteerId']?['trustScore']?.toString() ?? "50")
+                                        : "${widget.mockOrder?.volunteerRating ?? 5.0}",
                                     style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black),
                                   ),
                                 ],

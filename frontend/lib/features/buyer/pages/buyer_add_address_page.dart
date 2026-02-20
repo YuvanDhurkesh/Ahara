@@ -68,6 +68,11 @@ class _BuyerAddAddressPageState extends State<BuyerAddAddressPage>
       setState(() {
         _streetController.text = result.address;
         _pincodeController.text = result.pincode;
+        if (result.locality != null && result.locality!.isNotEmpty) {
+          _areaController.text = result.locality!;
+        } else if (result.subLocality != null && result.subLocality!.isNotEmpty) {
+          _areaController.text = result.subLocality!;
+        }
         _coordinates = {
           'latitude': result.latitude,
           'longitude': result.longitude,
