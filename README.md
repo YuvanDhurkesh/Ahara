@@ -104,6 +104,79 @@ Key capabilities include:
 
 ---
 
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+- **Node.js** (v18 or higher) & **npm**
+- **Flutter SDK** (v3.10.8 or higher)
+- **Dart SDK**
+- **MongoDB** (Local or Atlas)
+- **Firebase CLI** (for authentication setup)
+
+---
+
+## Getting Started
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/YuvanDhurkesh/Ahara.git
+cd Ahara
+```
+
+### 2. Backend Setup (Node.js)
+The backend handles API requests, database interactions, and integrations (Twilio, Razorpay).
+
+1. **Navigate to the backend directory:**
+   ```bash
+   cd backend
+   ```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+3. **Configure Environment Variables:**
+   Create a `.env` file in the `backend` folder and add the following:
+   ```env
+   PORT=5000
+   MONGO_URI=your_mongodb_connection_string
+   TWILIO_ACCOUNT_SID=your_twilio_sid
+   TWILIO_AUTH_TOKEN=your_twilio_token
+   TWILIO_PHONE_NUMBER=your_twilio_number
+   ```
+4. **Run the server:**
+   ```bash
+   npm run dev
+   ```
+   The backend will be running at `http://localhost:5000`.
+
+### 3. Frontend Setup (Flutter)
+The frontend is a Flutter-based mobile application.
+
+1. **Navigate to the frontend directory:**
+   ```bash
+   cd frontend
+   ```
+2. **Install dependencies:**
+   ```bash
+   flutter pub get
+   ```
+3. **Configure Environment Variables:**
+   Create a `.env` file in the `frontend` folder:
+   ```env
+   BASE_URL=http://localhost:5000/api
+   TWILIO_ACCOUNT_SID=your_twilio_sid
+   TWILIO_AUTH_TOKEN=your_twilio_token
+   TWILIO_PHONE_NUMBER=your_twilio_number
+   ```
+4. **Run the application:**
+   ```bash
+   flutter run
+   ```
+
+---
+
 ## Development Tools
 - **Git & GitHub** – Version control and collaborative development  
 - **Postman** – API testing and debugging  
