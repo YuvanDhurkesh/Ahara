@@ -64,12 +64,20 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
           controller: widget.controller,
           keyboardType: TextInputType.phone,
           maxLength: widget.maxLength,
+          obscureText: false, // Ensure digits are visible
+          cursorColor: AppColors.primary,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: Colors.black, // Absolute black for contrast
+          ),
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(widget.maxLength),
           ],
           decoration: InputDecoration(
             hintText: widget.hintText,
+            filled: false, // Disable theme fill
             counterText: '',
             prefixIcon: Container(
               margin: const EdgeInsets.only(right: 8),

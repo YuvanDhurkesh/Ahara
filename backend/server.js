@@ -11,10 +11,10 @@ const orderRoutes = require("./routes/orderRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const otpRoutes = require("./routes/otpRoutes");
+const verificationRoutes = require("./routes/verificationRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const socketService = require("./services/socketService");
 
-console.log("MONGO_URI:", process.env.MONGO_URI);
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
 }
@@ -47,6 +47,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/otp", otpRoutes);
+app.use("/api/verification", verificationRoutes);
 app.use("/api/reviews", reviewRoutes);
 
 // Serve static uploads with ngrok bypass header (best effort)

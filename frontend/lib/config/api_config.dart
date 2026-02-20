@@ -14,8 +14,9 @@ class ApiConfig {
       }
 
       // Default fallback for local development
-      //return "http://localhost:5000/api";
-      return "http://10.12.66.118:5000/api";
+      return "http://localhost:5000/api";
+      //return "10.12.249.123:5000/api";
+      //return "http://10.12.66.118:5000/api";
 
     }
 

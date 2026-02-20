@@ -57,7 +57,25 @@ class BackendService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception("Failed to fetch user profile");
+      throw Exception("Failed to fetch Mongo user by Firebase UID");
+    }
+  }
+
+  static Future<Map<String, dynamic>> getUserByPhone(String phone) async {
+    final url = Uri.parse("$baseUrl/users/phone/$phone");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to fetch Mongo user by phone");
     }
   }
 
@@ -699,6 +717,36 @@ class BackendService {
       final errorBody = jsonDecode(response.body);
       throw Exception(errorBody['error'] ?? "Failed to cancel order");
     }
+  }
+
+  // ========================= VERIFICATION =========================
+
+  static Future<Map<String, dynamic>> verifyAadhaarMock({
+    required String phoneNumber,
+    required String aadhaarNumber,
+    String? name,
+  }) async {
+    final url = Uri.parse("$baseUrl/verification/aadhaar");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({
+        "phoneNumber": phoneNumber,
+        "aadhaarNumber": aadhaarNumber,
+        if (name != null) "name": name,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+    if (response.statusCode != 200) {
+      throw Exception(data['error'] ?? "Aadhaar verification failed");
+    }
+
+    return data;
   }
 
   // ========================= REVIEWS =========================
