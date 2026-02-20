@@ -204,6 +204,42 @@ exports.getUserByFirebaseUid = async (req, res) => {
   }
 };
 
+exports.getUserByPhone = async (req, res) => {
+  try {
+    let { phone } = req.params;
+
+    // Remove + prefix for alternate match
+    let p1 = phone;
+    let p2 = phone.startsWith("+") ? phone.substring(1) : "+" + phone;
+
+    const user = await User.findOne({
+      $or: [{ phone: p1 }, { phone: p2 }]
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found with this phone number" });
+    }
+
+    let profile = null;
+
+    if (user.role === "seller") {
+      profile = await SellerProfile.findOne({ userId: user._id });
+    } else if (user.role === "buyer") {
+      profile = await BuyerProfile.findOne({ userId: user._id });
+    } else if (user.role === "volunteer") {
+      profile = await VolunteerProfile.findOne({ userId: user._id });
+    }
+
+    return res.status(200).json({ user, profile });
+
+  } catch (error) {
+    return res.status(500).json({
+      error: "Server error",
+      details: error.message
+    });
+  }
+};
+
 // ======================================================
 // GET USER PREFERENCES
 // ======================================================

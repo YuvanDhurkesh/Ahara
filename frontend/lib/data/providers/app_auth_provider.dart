@@ -187,25 +187,41 @@ Future<String?> getUserRole(String uid) async {
   //---------------------------------------------------------
 
   Future<void> refreshMongoUser() async {
-    if (currentUser == null) return;
+    // 1. Try Firebase Uid First
+    if (_auth.currentUser != null) {
+      try {
+        final data = await BackendService.getUserProfile(_auth.currentUser!.uid);
+        _mongoUser = data['user'];
+        _mongoProfile = data['profile'];
+        notifyListeners();
+        return;
+      } catch (e) {
+        debugPrint("Mongo Fetch by UID Error: $e");
+        // Fallback to phone if exists in previous state
+      }
+    }
 
-    try {
-      final data =
-          await BackendService.getUserProfile(currentUser!.uid);
+    // 2. Try Phone if UID failed or missing
+    final phone = _mongoUser?['phone'];
+    if (phone != null && phone.isNotEmpty) {
+      try {
+        final data = await BackendService.getUserByPhone(phone);
+        _mongoUser = data['user'];
+        _mongoProfile = data['profile'];
+        notifyListeners();
+        return;
+      } catch (e) {
+        debugPrint("Mongo Fetch by Phone Error: $e");
+      }
+    }
 
-      _mongoUser = data['user'];
-      _mongoProfile = data['profile'];
-
-      notifyListeners();
-    } catch (e, stackTrace) {
-      debugPrint("Mongo Fetch Error: $e");
-      debugPrint(stackTrace.toString());
-
+    // fallback for Firestore sync if Firebase UID exists but mongo doesn't.
+    if (_auth.currentUser != null) {
       try {
         // SELF-HEALING: If not in Mongo, check Firestore
         final firestoreDoc = await FirebaseFirestore.instance
             .collection('users')
-            .doc(currentUser!.uid)
+            .doc(_auth.currentUser!.uid)
             .get();
 
         if (firestoreDoc.exists) {
@@ -213,16 +229,16 @@ Future<String?> getUserRole(String uid) async {
           debugPrint("📝 Found Firestore data, attempting auto-sync to Mongo...");
           
           await BackendService.createUser(
-            firebaseUid: currentUser!.uid,
-            name: userData['name'] ?? currentUser!.displayName ?? "User",
-            email: userData['email'] ?? currentUser!.email ?? "",
+            firebaseUid: _auth.currentUser!.uid,
+            name: userData['name'] ?? _auth.currentUser!.displayName ?? "User",
+            email: userData['email'] ?? _auth.currentUser!.email ?? "",
             role: userData['role'] ?? "buyer",
             phone: userData['phone'] ?? "",
             location: userData['location'] ?? "",
           );
 
           // Retry fetching profile
-          final data = await BackendService.getUserProfile(currentUser!.uid);
+          final data = await BackendService.getUserProfile(_auth.currentUser!.uid);
           _mongoUser = data['user'];
           _mongoProfile = data['profile'];
           notifyListeners();

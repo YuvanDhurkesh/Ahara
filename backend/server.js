@@ -11,6 +11,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const otpRoutes = require("./routes/otpRoutes");
+const verificationRoutes = require("./routes/verificationRoutes");
 
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
@@ -44,6 +45,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/otp", otpRoutes);
+app.use("/api/verification", verificationRoutes);
 
 // Serve static uploads with ngrok bypass header (best effort)
 app.use("/api/uploads", (req, res, next) => {

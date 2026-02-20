@@ -8,7 +8,9 @@ import 'login_page.dart';
 import '../../../shared/widgets/phone_input_field.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
+import '../../../data/services/backend_service.dart';
 import 'otp_verification_page.dart';
+import 'volunteer_verification_page.dart';
 
 class VolunteerRegisterPage extends StatefulWidget {
   const VolunteerRegisterPage({super.key});
@@ -27,12 +29,15 @@ class _VolunteerRegisterPageState
   final _passwordController = TextEditingController();
   final _dobController = TextEditingController();
   final _locationController = TextEditingController();
+  final _aadhaarController = TextEditingController();
 
   String? _selectedTransport;
   DateTime? _selectedDate;
   bool _obscurePassword = true;
   bool _isLoading = false;
   bool _isPhoneVerified = false;
+  bool _isAadhaarVerified = false;
+  bool _isAadhaarVerifying = false;
 
   final List<String> _transportModes = [
     'Car',
@@ -49,6 +54,7 @@ class _VolunteerRegisterPageState
     _passwordController.dispose();
     _dobController.dispose();
     _locationController.dispose();
+    _aadhaarController.dispose();
     super.dispose();
   }
 
@@ -93,6 +99,29 @@ class _VolunteerRegisterPageState
     }
   }
 
+  Future<void> _verifyIdentity() async {
+    if (!_isPhoneVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please verify your phone number first")),
+      );
+      return;
+    }
+
+    final success = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VolunteerVerificationPage(
+          phoneNumber: _phoneController.text.trim(),
+          name: _nameController.text.trim(),
+        ),
+      ),
+    );
+
+    if (success == true) {
+      setState(() => _isAadhaarVerified = true);
+    }
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -128,6 +157,13 @@ class _VolunteerRegisterPageState
     if (!_isPhoneVerified) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please verify your contact number with OTP first")),
+      );
+      return;
+    }
+
+    if (!_isAadhaarVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Aadhaar verification is required for volunteers")),
       );
       return;
     }
@@ -406,6 +442,50 @@ class _VolunteerRegisterPageState
                           "E.g. Bangalore",
                       prefixIcon: Icon(Icons
                           .location_on_outlined),
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  _buildLabel("IDENTITY VERIFICATION (AADHAAR)"),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: _isAadhaarVerified ? Colors.green : AppColors.textLight.withOpacity(0.1),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              _isAadhaarVerified ? Icons.check_circle : Icons.security_outlined,
+                              color: _isAadhaarVerified ? Colors.green : AppColors.primary,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              _isAadhaarVerified ? "Aadhaar e-KYC Verified" : "Verify Aadhaar Details",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: _isAadhaarVerified ? Colors.green : AppColors.textDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (!_isAadhaarVerified)
+                          TextButton(
+                            onPressed: _verifyIdentity,
+                            child: const Text("Start"),
+                          )
+                        else
+                          const Icon(Icons.verified, color: Colors.green, size: 20),
+                      ],
                     ),
                   ),
 
