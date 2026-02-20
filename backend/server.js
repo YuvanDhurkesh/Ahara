@@ -14,6 +14,7 @@ const otpRoutes = require("./routes/otpRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const socketService = require("./services/socketService");
 
+console.log("MONGO_URI:", process.env.MONGO_URI);
 if (process.env.NODE_ENV !== 'test') {
   connectDB();
 }

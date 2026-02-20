@@ -26,6 +26,7 @@ dependencies:
   google_sign_in: ^6.2.1
 
 
+
   # State management
   provider: ^6.1.5+1
 
