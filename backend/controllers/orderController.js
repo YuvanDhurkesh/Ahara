@@ -300,7 +300,7 @@ exports.acceptRescueRequest = async (req, res) => {
         const { id } = req.params; // orderId
         const { volunteerId } = req.body;
 
-        const order = await Order.findById(id).session(session);
+        const order = await Order.findById(id).populate('listingId', 'foodName').session(session);
 
         if (!order) {
             throw new Error("Order not found");
@@ -358,6 +358,17 @@ exports.acceptRescueRequest = async (req, res) => {
                 title: "🤝 Volunteer Found",
                 message: "A volunteer will arrive shortly to pick up the order.",
                 data: { orderId: order._id, status: "volunteer_assigned" }
+            },
+            {
+                userId: volunteerId,
+                type: "order_update",
+                title: "📦 Pickup Assignment",
+                message: `You have been assigned to pick up ${order.quantityOrdered}x ${order.listingId?.foodName || 'food items'} from the seller.`,
+                data: { 
+                    orderId: order._id, 
+                    status: "volunteer_assigned",
+                    action: "pickup_from_seller"
+                }
             }
         ], { session });
 
@@ -787,7 +798,7 @@ exports.verifyOtp = async (req, res) => {
         const { id } = req.params;
         const { otp } = req.body;
 
-        const order = await Order.findById(id);
+        const order = await Order.findById(id).populate('listingId', 'foodName');
         if (!order) {
             return res.status(404).json({ error: "Order not found" });
         }
@@ -858,13 +869,26 @@ exports.verifyOtp = async (req, res) => {
 
         // Send Notifications
         if (nextStatus === "picked_up") {
-            await Notification.create({
-                userId: order.buyerId,
-                type: "order_update",
-                title: "🚚 Food Picked Up!",
-                message: "The volunteer has collected your food and is on the way.",
-                data: { orderId: order._id }
-            });
+            await Notification.create([
+                {
+                    userId: order.buyerId,
+                    type: "order_update",
+                    title: "🚚 Food Picked Up!",
+                    message: "The volunteer has collected your food and is on the way.",
+                    data: { orderId: order._id }
+                },
+                {
+                    userId: order.volunteerId,
+                    type: "order_update",
+                    title: "🚚 Delivery Assignment",
+                    message: `Food collected! Now deliver ${order.quantityOrdered}x ${order.listingId?.foodName || 'food items'} to the buyer.`,
+                    data: { 
+                        orderId: order._id, 
+                        status: "picked_up",
+                        action: "deliver_to_buyer"
+                    }
+                }
+            ], { ordered: true });
         } else if (nextStatus === "delivered") {
             // Notify both Buyer and Seller
             await Notification.create([

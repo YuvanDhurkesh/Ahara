@@ -1,38 +1,331 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../../shared/styles/app_colors.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/backend_service.dart';
 
-class VolunteerNotificationsPage extends StatelessWidget {
+class VolunteerNotificationsPage extends StatefulWidget {
   const VolunteerNotificationsPage({super.key});
+
+  @override
+  State<VolunteerNotificationsPage> createState() => _VolunteerNotificationsPageState();
+}
+
+class _VolunteerNotificationsPageState extends State<VolunteerNotificationsPage> {
+  bool _isLoading = true;
+  List<Map<String, dynamic>> _notifications = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotifications();
+  }
+
+  Future<void> _fetchNotifications() async {
+    try {
+      if (!mounted) return;
+      setState(() => _isLoading = true);
+
+      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+      final userId = authProvider.mongoUser?['_id'];
+
+      if (userId == null) throw Exception("User ID not found");
+
+      final response = await BackendService.getUserNotifications(userId);
+
+      if (mounted) {
+        setState(() {
+          _notifications = (response['notifications'] as List)
+              .cast<Map<String, dynamic>>()
+              .map((notification) {
+                // Convert backend notification to frontend format
+                return {
+                  "id": notification['_id'],
+                  "title": notification['title'] ?? "Notification",
+                  "message": notification['message'] ?? "",
+                  "time": _formatTime(notification['createdAt']),
+                  "type": _getNotificationType(notification['type']),
+                  "icon": _getNotificationIcon(notification['type']),
+                  "color": _getNotificationColor(notification['type']),
+                  "isRead": notification['isRead'] ?? false,
+                  "data": notification['data'],
+                };
+              })
+              .toList();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+      debugPrint("Error fetching notifications: $e");
+    }
+  }
+
+  String _formatTime(String? createdAt) {
+    if (createdAt == null) return "Just now";
+    try {
+      final date = DateTime.parse(createdAt);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+
+      if (difference.inDays > 0) {
+        return "${difference.inDays}d ago";
+      } else if (difference.inHours > 0) {
+        return "${difference.inHours}h ago";
+      } else if (difference.inMinutes > 0) {
+        return "${difference.inMinutes}m ago";
+      } else {
+        return "Just now";
+      }
+    } catch (e) {
+      return "Just now";
+    }
+  }
+
+  String _getNotificationType(String? type) {
+    switch (type) {
+      case "rescue_request":
+        return "Rescue";
+      case "order_update":
+        return "Order";
+      case "emergency":
+        return "Alert";
+      default:
+        return "Info";
+    }
+  }
+
+  IconData _getNotificationIcon(String? type) {
+    switch (type) {
+      case "rescue_request":
+        return Icons.local_shipping_rounded;
+      case "order_update":
+        return Icons.assignment_rounded;
+      case "emergency":
+        return Icons.warning_rounded;
+      default:
+        return Icons.info_rounded;
+    }
+  }
+
+  Color _getNotificationColor(String? type) {
+    switch (type) {
+      case "rescue_request":
+        return AppColors.primary;
+      case "order_update":
+        return Colors.blue;
+      case "emergency":
+        return Colors.red;
+      default:
+        return Colors.green;
+    }
+  }
+
+  Future<void> _markAsRead(String notificationId) async {
+    try {
+      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+      final userId = authProvider.mongoUser?['_id'];
+
+      if (userId != null) {
+        await BackendService.markNotificationAsRead(notificationId, userId);
+        // Update local state
+        setState(() {
+          final index = _notifications.indexWhere((n) => n['id'] == notificationId);
+          if (index != -1) {
+            _notifications[index]['isRead'] = true;
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint("Error marking notification as read: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F5EF),
-      appBar: AppBar(title: const Text('Notifications')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: const [
-          _NotificationTile(text: 'New delivery request available'),
-          _NotificationTile(text: 'Delivery completed successfully'),
-        ],
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          "Notifications",
+          style: GoogleFonts.inter(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        centerTitle: true,
       ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            )
+          : RefreshIndicator(
+              onRefresh: _fetchNotifications,
+              color: AppColors.primary,
+              child: _notifications.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.notifications_none,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            "No notifications yet",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(24),
+                      itemCount: _notifications.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final note = _notifications[index];
+                        return _NotificationTile(
+                          notification: note,
+                          onMarkAsRead: () => _markAsRead(note['id']),
+                        );
+                      },
+                    ),
+            ),
     );
   }
 }
 
 class _NotificationTile extends StatelessWidget {
-  final String text;
-  const _NotificationTile({required this.text});
+  final Map<String, dynamic> notification;
+  final VoidCallback? onMarkAsRead;
+
+  const _NotificationTile({
+    required this.notification,
+    this.onMarkAsRead,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+    final isRead = notification['isRead'] ?? false;
+
+    return GestureDetector(
+      onTap: () {
+        if (!isRead && onMarkAsRead != null) {
+          onMarkAsRead!();
+        }
+        // TODO: Handle navigation based on notification data
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: (notification['color'] as Color).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                notification['icon'] as IconData,
+                color: notification['color'] as Color,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        notification['type'] as String,
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: notification['color'] as Color,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          if (!isRead)
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          const SizedBox(width: 8),
+                          Text(
+                            notification['time'] as String,
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    notification['title'] as String,
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    notification['message'] as String,
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: AppColors.textLight.withOpacity(0.8),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      child: Text(text),
     );
   }
 }
