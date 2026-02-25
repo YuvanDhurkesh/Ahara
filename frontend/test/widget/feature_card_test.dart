@@ -13,6 +13,7 @@ void main() {
           body: FeatureCard(
             title: testTitle,
             icon: testIcon,
+            description: 'Test description',
           ),
         ),
       ),
