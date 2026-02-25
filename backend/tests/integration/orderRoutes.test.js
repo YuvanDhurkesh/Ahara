@@ -13,26 +13,15 @@ describe('Order Routes Integration Tests', () => {
 
     beforeAll(async () => {
         await connect();
+        // Collections are pre-created in setup.js, so we just clear them
         try {
             await User.deleteMany({});
             await SellerProfile.deleteMany({});
             await Listing.deleteMany({});
             await Order.deleteMany({});
-
-            // Explicitly create collections to avoid "Cannot create namespace in transaction" error
-            const collections = ['users', 'sellerprofiles', 'listings', 'orders', 'notifications'];
-            const existingCollections = (await mongoose.connection.db.listCollections().toArray()).map(c => c.name);
-
-            if (!existingCollections.includes('users')) await User.createCollection();
-            if (!existingCollections.includes('sellerprofiles')) await SellerProfile.createCollection();
-            if (!existingCollections.includes('listings')) await Listing.createCollection();
-            if (!existingCollections.includes('orders')) await Order.createCollection();
-            if (!existingCollections.includes('notifications')) await Notification.createCollection();
-
-            const cols = await mongoose.connection.db.listCollections().toArray();
-            console.log("✅ Verified Collections:", cols.map(c => c.name));
+            await Notification.deleteMany({});
         } catch (e) {
-            console.error('Cleanup/Setup error:', e.message);
+            console.error('Cleanup error:', e.message);
         }
 
         // Create Users
@@ -105,7 +94,7 @@ describe('Order Routes Integration Tests', () => {
         await disconnect();
     });
 
-    it.skip('POST /api/orders/create should create a new order', async () => {
+    it('POST /api/orders/create should create a new order', async () => {
         const res = await request(app)
             .post('/api/orders/create')
             .send({
