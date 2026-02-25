@@ -140,7 +140,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                             : _ordersPlaced.toString(),
                         subtext: _statsError != null
                             ? "Unable to load"
-                            : "Real backend data",
+                            : "Your Order Journey",
                         icon: Icons.star_outline,
                         color: AppColors.primary,
                       ),
