@@ -22,8 +22,8 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: AHARA_BACKEND # REPLACE with your actual EB App Name
-          environment_name: AHARABACKEND-env # REPLACE with your actual EB Env Name
+          application_name: AHARA_BACKEND 
+          environment_name: AHARABACKEND-env 
           version_label: backend-${{ github.sha }}
           region: ${{ secrets.AWS_REGION }}
           deployment_package: backend-deploy.zip
