@@ -27,3 +27,4 @@ jobs:
           version_label: backend-${{ github.sha }}
           region: ${{ secrets.AWS_REGION }}
           deployment_package: backend-deploy.zip
+          use_existing_version_if_available: true
