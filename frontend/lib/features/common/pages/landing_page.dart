@@ -538,48 +538,62 @@ class HowItWorks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 48),
       child: Column(
         children: [
           const SectionTitle("How It Works"),
           const SizedBox(height: 40),
           ResponsiveLayout(
-            mobile: Column(
-              children: const [
-                FeatureCard(
-                  title: "Give Food",
-                  icon: Icons.shopping_basket_outlined,
-                ),
-                SizedBox(height: 16),
-                FeatureCard(title: "Volunteer", icon: Icons.people_outline),
-                SizedBox(height: 16),
-                FeatureCard(
-                  title: "Find a meal",
-                  icon: Icons.restaurant_outlined,
-                ),
-              ],
+            mobile: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: const [
+                  FeatureCard(
+                    title: "Give Food",
+                    icon: Icons.shopping_basket_outlined,
+                    description: "Share surplus food",
+                  ),
+                  SizedBox(height: 16),
+                  FeatureCard(
+                    title: "Volunteer",
+                    icon: Icons.people_outline,
+                    description: "Transport & verify",
+                  ),
+                  SizedBox(height: 16),
+                  FeatureCard(
+                    title: "Find a meal",
+                    icon: Icons.restaurant_outlined,
+                    description: "Discover local meals",
+                  ),
+                ],
+              ),
             ),
             desktop: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: const [
-                Expanded(
+                Flexible(
                   child: FeatureCard(
                     title: "Give Food",
                     icon: Icons.shopping_basket_outlined,
+                    description: "Share surplus food",
                   ),
                 ),
-                SizedBox(width: 16),
-                Expanded(
+                SizedBox(width: 20),
+                Flexible(
                   child: FeatureCard(
                     title: "Volunteer",
                     icon: Icons.people_outline,
+                    description: "Transport & verify",
                   ),
                 ),
-                SizedBox(width: 16),
-                Expanded(
+                SizedBox(width: 20),
+                Flexible(
                   child: FeatureCard(
                     title: "Find a meal",
                     icon: Icons.restaurant_outlined,
+                    description: "Discover local meals",
                   ),
                 ),
               ],
@@ -602,47 +616,61 @@ class TrustSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 48),
       child: Column(
-        children: const [
-          SectionTitle("Why Trust Us"),
-          SizedBox(height: 40),
+        children: [
+          const SectionTitle("Why Trust Us"),
+          const SizedBox(height: 40),
           ResponsiveLayout(
-            mobile: Column(
-              children: const [
-                FeatureCard(title: "Food Safety", icon: Icons.security),
-                SizedBox(height: 16),
-                FeatureCard(
-                  title: "Verified Staff",
-                  icon: Icons.verified_user_outlined,
-                ),
-                SizedBox(height: 16),
-                FeatureCard(
-                  title: "Transparency",
-                  icon: Icons.visibility_outlined,
-                ),
-              ],
+            mobile: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: const [
+                  FeatureCard(
+                    title: "Food Safety",
+                    icon: Icons.security,
+                    description: "Rigorous safety checks",
+                  ),
+                  SizedBox(height: 16),
+                  FeatureCard(
+                    title: "Verified Staff",
+                    icon: Icons.verified_user_outlined,
+                    description: "Vetted volunteers & partners",
+                  ),
+                  SizedBox(height: 16),
+                  FeatureCard(
+                    title: "Transparency",
+                    icon: Icons.visibility_outlined,
+                    description: "Track donations in real-time",
+                  ),
+                ],
+              ),
             ),
             desktop: Row(
-              children: [
-                Expanded(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Flexible(
                   child: FeatureCard(
                     title: "Food Safety",
                     icon: Icons.security,
+                    description: "Rigorous safety checks",
                   ),
                 ),
-                SizedBox(width: 16),
-                Expanded(
+                SizedBox(width: 20),
+                Flexible(
                   child: FeatureCard(
                     title: "Verified Staff",
                     icon: Icons.verified_user_outlined,
+                    description: "Vetted volunteers & partners",
                   ),
                 ),
-                SizedBox(width: 16),
-                Expanded(
+                SizedBox(width: 20),
+                Flexible(
                   child: FeatureCard(
                     title: "Transparency",
                     icon: Icons.visibility_outlined,
+                    description: "Track donations in real-time",
                   ),
                 ),
               ],
@@ -694,24 +722,25 @@ class ImpactSection extends StatelessWidget {
                 ],
               ),
               desktop: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  Expanded(
+                  Flexible(
                     child: ImpactCard(
                       "5,000+",
                       "Meals Saved",
                       Icons.eco_outlined,
                     ),
                   ),
-                  SizedBox(width: 16),
-                  Expanded(
+                  SizedBox(width: 20),
+                  Flexible(
                     child: ImpactCard(
                       "1.2 Tons",
                       "Waste Reduced",
                       Icons.recycling_outlined,
                     ),
                   ),
-                  SizedBox(width: 16),
-                  Expanded(
+                  SizedBox(width: 20),
+                  Flexible(
                     child: ImpactCard(
                       "150+",
                       "Partners",
@@ -737,38 +766,82 @@ class ImpactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppColors.primary, size: 28),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              number,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontSize: 28,
-                color: AppColors.primary,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: AppColors.textLight.withOpacity(0.8),
-                fontWeight: FontWeight.w500,
-              ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: 200,
+        maxWidth: 250,
+      ),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.white,
+              AppColors.primary.withOpacity(0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
+          border: Border.all(
+            color: AppColors.primary.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary.withOpacity(0.2),
+                      AppColors.primary.withOpacity(0.1),
+                    ],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(icon, color: AppColors.primary, size: 28),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                number,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textLight.withOpacity(0.8),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -806,36 +879,94 @@ class SectionTitle extends StatelessWidget {
 class FeatureCard extends StatelessWidget {
   final String title;
   final IconData icon;
+  final String description;
 
-  const FeatureCard({super.key, required this.title, required this.icon});
+  const FeatureCard({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.description,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, size: 28, color: AppColors.primary),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textDark,
-              ),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minWidth: 200,
+        maxWidth: 250,
+      ),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.white,
+              AppColors.primary.withOpacity(0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
+          border: Border.all(
+            color: AppColors.primary.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary.withOpacity(0.2),
+                      AppColors.primary.withOpacity(0.1),
+                    ],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(icon, size: 28, color: AppColors.primary),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textLight.withOpacity(0.8),
+                  height: 1.3,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
