@@ -36,7 +36,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   DateTime _now = DateTime.now();
   Timer? _countdownTimer;
 
-  // User location state
+  // 🔥 User location state
   String _userLocation = "Detecting location...";
   Position? _livePosition;
   String _firebaseUid = "";
@@ -75,6 +75,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   }
 
   Future<void> _initLocation() async {
+    // 1. Try to get live location first
     final Position? position = await LocationUtil.getCurrentLocation();
     if (position != null) {
       if (mounted) {
@@ -89,6 +90,8 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         return;
       }
     }
+
+    // 2. Fallback to Profile Location
     _loadUserLocation();
   }
 
@@ -652,7 +655,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
     final sellerProfile = listing['sellerProfileId'] ?? {};
     final String orgName = sellerProfile['orgName'] ?? "Local Seller";
-    final double ratingNum = (sellerProfile['stats']?['avgRating'] ?? 0.0)
+    final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0)
         .toDouble();
 
     final String? expiryStr = listing['pickupWindow']?['to'];
@@ -755,7 +758,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                       ),
                     ),
                   ),
-                if (ratingNum > 0)
+                if (rating > 0)
                   Positioned(
                     bottom: 12,
                     right: 12,
@@ -773,7 +776,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                           const Icon(Icons.star, color: Colors.amber, size: 14),
                           const SizedBox(width: 4),
                           Text(
-                            ratingNum.toStringAsFixed(1),
+                            rating.toStringAsFixed(1),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,

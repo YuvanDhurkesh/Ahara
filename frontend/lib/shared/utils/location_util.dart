@@ -1,53 +1,73 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'dart:math' show cos, sqrt, asin;
+import 'package:flutter/foundation.dart';
 
 class LocationUtil {
-  /// Calculates distance between two points in KM
-  static double calculateDistance(
-    double lat1,
-    double lon1,
-    double lat2,
-    double lon2,
-  ) {
-    var p = 0.017453292519943295;
-    var a =
-        0.5 -
-        cos((lat2 - lat1) * p) / 2 +
-        cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2;
-    return 12742 * asin(sqrt(a));
-  }
-
-  /// Gets current user position
+  /// Fetches the current position of the user.
+  /// Handles permission requests automatically.
   static Future<Position?> getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
+    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return null;
+    if (!serviceEnabled) {
+      debugPrint('Location services are disabled.');
+      return null;
+    }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return null;
+      if (permission == LocationPermission.denied) {
+        debugPrint('Location permissions are denied');
+        return null;
+      }
     }
 
-    if (permission == LocationPermission.deniedForever) return null;
+    if (permission == LocationPermission.deniedForever) {
+      debugPrint(
+        'Location permissions are permanently denied, we cannot request permissions.',
+      );
+      return null;
+    }
 
-    return await Geolocator.getCurrentPosition();
+    try {
+      return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+    } catch (e) {
+      debugPrint('Error fetching location: $e');
+      return null;
+    }
   }
 
-  /// Gets city name from coordinates
+  /// Converts coordinates into a human-readable city/area name.
   static Future<String?> getAddressFromCoords(double lat, double lng) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
-        return "${place.locality}, ${place.administrativeArea}";
+        // Priority: Locality (City) -> SubLocality -> Name
+        return place.locality ??
+            place.subLocality ??
+            place.name ??
+            "Unknown Location";
       }
     } catch (e) {
-      return null;
+      debugPrint('Error geocoding: $e');
     }
     return null;
+  }
+
+  /// Calculates distance between two points in kilometers.
+  static double calculateDistance(
+    double startLat,
+    double startLng,
+    double endLat,
+    double endLng,
+  ) {
+    return Geolocator.distanceBetween(startLat, startLng, endLat, endLng) /
+        1000;
   }
 }
