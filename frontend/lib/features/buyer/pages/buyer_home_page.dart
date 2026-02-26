@@ -11,6 +11,7 @@ import '../../../core/localization/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../core/localization/language_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
 
 
@@ -246,7 +247,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
           ),
           const SizedBox(height: 16),
           Text(
-            "No places found in this category",
+            AppLocalizations.of(context)!.translate("no_places_found"),
             style: TextStyle(
               color: AppColors.textLight.withOpacity(0.5),
               fontSize: 14,
@@ -302,8 +303,8 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
               // 🔥 Dynamic Discover Title
               Text(
                 _userLocation == "Loading..."
-                    ? "Discover"
-                    : "Discover ${_userLocation.split(',').last.trim()}",
+                    ? AppLocalizations.of(context)!.translate("discover")
+                    : "${AppLocalizations.of(context)!.translate("discover")} ${_userLocation.split(',').last.trim()}",
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
@@ -450,7 +451,8 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
   // New: Real listing card
   Widget _buildRealListingCard(Map<String, dynamic> listing) {
-    final String name = listing['foodName'] ?? "Unknown Food";
+    final langProvider = Provider.of<LanguageProvider>(context, listen: false);
+    final String name = langProvider.getTranslatedText(context, listing, 'foodName');
     final pricing = listing['pricing'] ?? {};
     final bool isFree = pricing['isFree'] ?? false;
     final int price = pricing['discountedPrice'] ?? 0;
@@ -540,9 +542,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                         color: Colors.green,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text(
-                        "FREE",
-                        style: TextStyle(
+                      child: Text(
+                        AppLocalizations.of(context)!.translate("free").toUpperCase(),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,
                           fontWeight: FontWeight.w900,
@@ -658,7 +660,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                               ),
                             ),
                           Text(
-                            isFree ? "FREE" : "₹$price",
+                            isFree ? AppLocalizations.of(context)!.translate("free").toUpperCase() : "₹$price",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -671,13 +673,21 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   ),
                   const SizedBox(height: 16),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (expiryTime != null) ...[
-                        _buildIconLabel(Icons.timer_outlined, "Ends in ${_formatTimeRemaining(expiryTime)}"),
-                        const SizedBox(width: 16),
-                      ],
-                      _buildIconLabel(Icons.store, orgName),
-                      const Spacer(),
+                      Expanded(
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: [
+                            if (expiryTime != null)
+                              _buildIconLabel(Icons.timer_outlined, "${AppLocalizations.of(context)!.translate("ends_in")}${_formatTimeRemaining(expiryTime)}"),
+                            _buildIconLabel(Icons.store, orgName),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
@@ -685,7 +695,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          isFree ? "Claim Now" : "Reserve",
+                          isFree ? AppLocalizations.of(context)!.translate("claim_now") : AppLocalizations.of(context)!.translate("reserve"),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
@@ -775,7 +785,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                       if (store.discount != null)
                         _buildSpecialBadge(store.discount!, Colors.orange),
                       if (store.isFree)
-                        _buildSpecialBadge("FREE", Colors.green),
+                        _buildSpecialBadge(AppLocalizations.of(context)!.translate("free").toUpperCase(), Colors.green),
                       ...store.badges
                           .map((badge) => _buildBadge(badge))
                           .toList(),
@@ -914,11 +924,20 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   ),
                   const SizedBox(height: 16),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      _buildIconLabel(Icons.timer_outlined, "${AppLocalizations.of(context)!.translate("ends_in")}2h"),
-                      const SizedBox(width: 16),
-                      _buildIconLabel(Icons.directions_walk, "1.2 km"),
-                      const Spacer(),
+                      Expanded(
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: [
+                            _buildIconLabel(Icons.timer_outlined, "${AppLocalizations.of(context)!.translate("ends_in")}2h"),
+                            _buildIconLabel(Icons.directions_walk, "1.2 km"),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -992,15 +1011,19 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
   Widget _buildIconLabel(IconData icon, String text) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 16, color: AppColors.textLight.withOpacity(0.5)),
         const SizedBox(width: 4),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 12,
-            color: AppColors.textLight.withOpacity(0.6),
-            fontWeight: FontWeight.w500,
+        Flexible(
+          child: Text(
+            text,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              color: AppColors.textLight.withOpacity(0.6),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],

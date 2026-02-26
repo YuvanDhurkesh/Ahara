@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../../data/models/listing_model.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../../core/localization/language_provider.dart';
 
 class SellerListingDetailsPage extends StatefulWidget {
   final Listing listing;
@@ -115,7 +117,7 @@ class _SellerListingDetailsPageState extends State<SellerListingDetailsPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    _listing.foodName,
+                    Provider.of<LanguageProvider>(context, listen: false).getTranslatedText(context, _listing.toJson(), 'foodName'),
                     style: GoogleFonts.lora(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -136,7 +138,7 @@ class _SellerListingDetailsPageState extends State<SellerListingDetailsPage> {
                   _buildSectionTitle("Description"),
                   const SizedBox(height: 8),
                   Text(
-                    _listing.description.isEmpty ? "No description provided." : _listing.description,
+                    _listing.description.isEmpty ? "No description provided." : Provider.of<LanguageProvider>(context, listen: false).getTranslatedText(context, _listing.toJson(), 'description'),
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       color: AppColors.textDark.withOpacity(0.7),

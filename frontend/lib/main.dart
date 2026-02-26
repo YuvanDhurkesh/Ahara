@@ -103,13 +103,11 @@ class AuthWrapper extends StatelessWidget {
       if (language != null || uiMode != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           final lp = Provider.of<LanguageProvider>(context, listen: false);
-          if (!lp.isManualSelection) {
-            if (language != null && lp.locale.languageCode != language) {
-              lp.setLanguage(language, isManual: false);
-            }
-            if (uiMode != null && lp.uiMode != uiMode) {
-              lp.setUiMode(uiMode, isManual: false);
-            }
+          if (language != null && lp.locale.languageCode != language) {
+            lp.setLanguage(language, isManual: false);
+          }
+          if (uiMode != null && lp.uiMode != uiMode) {
+            lp.setUiMode(uiMode, isManual: false);
           }
         });
       }

@@ -8,9 +8,10 @@ import '../../../data/services/backend_service.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../core/localization/language_provider.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../shared/widgets/animated_toast.dart';
 
 class BuyerBrowsePage extends StatefulWidget {
@@ -111,7 +112,8 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     results.insertAll(0, _validListings);
 
     return results.where((item) {
-      final name = item is MockStore ? item.name : (item['foodName'] ?? "");
+      final langProvider = Provider.of<LanguageProvider>(context, listen: false);
+      final name = item is MockStore ? item.name : langProvider.getTranslatedText(context, item, 'foodName');
       final type = item is MockStore ? item.type : (item['foodType'] ?? "");
       final rating = item is MockStore ? double.tryParse(item.rating) ?? 0.0 : 0.0; // Real listings don't have ratings yet
       final isFree = item is MockStore ? item.isFree : (item['pricing']?['isFree'] ?? false);
@@ -233,7 +235,7 @@ List<Marker> _buildOSMMarkers() {
             ],
           ),
           child: Text(
-            isFree ? "Free" : price,
+            isFree ? AppLocalizations.of(context)!.translate("free") : price,
             style: GoogleFonts.inter(
               fontWeight: FontWeight.bold,
               fontSize: 14,
@@ -274,7 +276,7 @@ List<Marker> _buildOSMMarkers() {
                     controller: _searchController,
                     onChanged: (val) => setState(() => _searchQuery = val),
                     decoration: InputDecoration(
-                      hintText: "Bangalore",
+                      hintText: AppLocalizations.of(context)!.translate("Bangalore"),
                       hintStyle: GoogleFonts.inter(
                         color: Colors.black,
                         fontWeight: FontWeight.w600,
@@ -304,7 +306,7 @@ List<Marker> _buildOSMMarkers() {
             const Divider(height: 20),
             Row(
               children: [
-                _buildHeaderFilter("Filter", onTap: _showFilterDialog),
+                _buildHeaderFilter(AppLocalizations.of(context)!.translate("Filter"), onTap: _showFilterDialog),
                 const SizedBox(width: 8),
                 if (_minRating > 0) ...[
                   _buildActiveFilterChip("${_minRating}+ ★"),
@@ -316,7 +318,7 @@ List<Marker> _buildOSMMarkers() {
                 ],
                 const Spacer(),
                 Text(
-                  "${_allResults.length} results",
+                  "${_allResults.length} ${AppLocalizations.of(context)!.translate('results')}",
                   style: GoogleFonts.inter(
                     color: Colors.grey.shade600,
                     fontWeight: FontWeight.w500,
@@ -391,7 +393,7 @@ List<Marker> _buildOSMMarkers() {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Filter",
+                    AppLocalizations.of(context)!.translate("Filter"),
                     style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -399,7 +401,7 @@ List<Marker> _buildOSMMarkers() {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    "Rating",
+                    AppLocalizations.of(context)!.translate("Rating"),
                     style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
@@ -424,12 +426,12 @@ List<Marker> _buildOSMMarkers() {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    "Offers",
+                    AppLocalizations.of(context)!.translate("Offers"),
                     style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
                   FilterChip(
-                    label: const Text("Free Food Only"),
+                    label: Text(AppLocalizations.of(context)!.translate("Free Food Only")),
                     selected: _onlyFree,
                     onSelected: (val) {
                       setModalState(() {});
@@ -454,7 +456,7 @@ List<Marker> _buildOSMMarkers() {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text("Apply Filters"),
+                      child: Text(AppLocalizations.of(context)!.translate("Apply Filters")),
                     ),
                   ),
                 ],
@@ -515,6 +517,7 @@ List<Marker> _buildOSMMarkers() {
   }
 
   Widget _buildPopOutCard() {
+    final langProvider = Provider.of<LanguageProvider>(context, listen: false);
     final item = _allResults.firstWhere((s) {
       final id = s is MockStore ? s.id : (s['_id'] ?? "");
       return id == _selectedStoreId;
@@ -546,7 +549,7 @@ List<Marker> _buildOSMMarkers() {
                           ? item.image 
                           : ((item['images'] as List?)?.isNotEmpty == true 
                               ? BackendService.formatImageUrl(item['images'][0]) 
-                              : BackendService.generateFoodImageUrl(item['foodName'] ?? "")),
+                              : BackendService.generateFoodImageUrl(langProvider.getTranslatedText(context, item, 'foodName'))),
                       height: 150,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -579,7 +582,9 @@ List<Marker> _buildOSMMarkers() {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            item is MockStore ? item.name : (item['foodName'] ?? "Unknown Food"),
+                            item is MockStore 
+                                ? item.name 
+                                : Provider.of<LanguageProvider>(context, listen: false).getTranslatedText(context, item, 'foodName'),
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -587,8 +592,8 @@ List<Marker> _buildOSMMarkers() {
                           ),
                           Text(
                             item is MockStore 
-                                ? "${item.rating} ★ • ${item.isFree ? "Free" : item.price}"
-                                : "4.5 ★ • ${item['pricing']?['isFree'] == true ? "Free" : "₹${item['pricing']?['discountedPrice'] ?? 0}"}",
+                                ? "${item.rating} ★ • ${item.isFree ? AppLocalizations.of(context)!.translate("free") : item.price}"
+                                : "4.5 ★ • ${item['pricing']?['isFree'] == true ? AppLocalizations.of(context)!.translate("free") : "₹${item['pricing']?['discountedPrice'] ?? 0}"}",
                             style: GoogleFonts.inter(color: Colors.grey),
                           ),
                         ],
@@ -609,7 +614,7 @@ List<Marker> _buildOSMMarkers() {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text("View"),
+                      child: Text(AppLocalizations.of(context)!.translate("view_details")),
                     ),
                   ],
                 ),
@@ -631,7 +636,8 @@ List<Marker> _buildOSMMarkers() {
 
   Widget _buildRealListingCard(Map<String, dynamic> listing) {
     // Implement real listing card
-    final String name = listing['foodName'] ?? "Unknown Food";
+    final langProvider = Provider.of<LanguageProvider>(context, listen: false);
+    final String name = langProvider.getTranslatedText(context, listing, 'foodName');
     final String type = listing['foodType'] ?? "Meal";
     final pricing = listing['pricing'] ?? {};
     final bool isFree = pricing['isFree'] ?? false;
@@ -808,7 +814,7 @@ List<Marker> _buildOSMMarkers() {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: isFree ? "Free" : "₹$price",
+                          text: isFree ? AppLocalizations.of(context)!.translate("free") : "₹$price",
                           style: GoogleFonts.inter(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

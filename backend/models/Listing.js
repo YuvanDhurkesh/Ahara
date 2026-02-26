@@ -20,6 +20,13 @@ const listingSchema = new mongoose.Schema(
         description: String,
         images: [String],
 
+        // Translations for dynamic localization
+        translations: {
+            hi: { foodName: String, description: String },
+            ta: { foodName: String, description: String },
+            te: { foodName: String, description: String }
+        },
+
         pricing: {
             originalPrice: Number,
             discountedPrice: { type: Number, required: true },

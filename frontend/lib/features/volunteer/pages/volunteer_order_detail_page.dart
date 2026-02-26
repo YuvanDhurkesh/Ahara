@@ -7,6 +7,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../../data/services/backend_service.dart';
 import '../../../../data/services/socket_service.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/localization/language_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class VolunteerOrderDetailPage extends StatefulWidget {
@@ -445,7 +447,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   Widget _orderSummary() {
     final order = widget.order;
     final listing = order?['listingId'] as Map<String, dynamic>?;
-    final foodName = listing?['foodName'] ?? 'Order';
+    final foodName = listing != null ? Provider.of<LanguageProvider>(context, listen: false).getTranslatedText(context, listing, 'foodName') : 'Order';
     final quantity = order?['quantityOrdered']?.toString() ?? '-';
     final idText = order?['_id']?.toString();
     final shortId = idText == null

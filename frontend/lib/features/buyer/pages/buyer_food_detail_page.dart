@@ -10,6 +10,7 @@ import 'buyer_order_confirmation_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../core/localization/language_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
 
 class BuyerFoodDetailPage extends StatelessWidget {
@@ -99,7 +100,8 @@ class BuyerFoodDetailPage extends StatelessWidget {
 
     // Original build logic for active listings
     // Unify data from store or listing
-    final String name = store?.name ?? listing?['foodName'] ?? "Unknown Food";
+    final langProvider = Provider.of<LanguageProvider>(context, listen: false);
+    final String name = store?.name ?? langProvider.getTranslatedText(context, listing, 'foodName');
     final String type = store?.type ?? listing?['foodType'] ?? "Meal";
     
     // Get rating from seller profile or use default
@@ -131,8 +133,9 @@ class BuyerFoodDetailPage extends StatelessWidget {
     };
     
     // Use ingredients if available, else use a placeholder based on description
+    final String descText = langProvider.getTranslatedText(context, listing, 'description');
     final List<String> ingredients = store?.ingredients ?? 
-        (listing?['description']?.toString().split(',') ?? ["Organic", "Healthy", "Fresh"]);
+        (descText != "Unknown" ? descText.split(',') : ["Organic", "Healthy", "Fresh"]);
     
     final bool offersDelivery = store?.offersDelivery ?? (listing?['options']?['deliveryAvailable'] ?? true);
 

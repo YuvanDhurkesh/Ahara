@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
+import '../../../core/localization/language_provider.dart';
 
 class SellerNotificationsPage extends StatefulWidget {
   const SellerNotificationsPage({super.key});
@@ -187,7 +188,7 @@ class _SellerNotificationsPageState extends State<SellerNotificationsPage> {
   }
 
   Widget _buildInventoryAlert(Map<String, dynamic> listing) {
-    final foodName = listing['foodName'] ?? 'Item';
+    final foodName = Provider.of<LanguageProvider>(context, listen: false).getTranslatedText(context, listing, 'foodName');
     final remaining = listing['remainingQuantity'] ?? 0;
     final total = listing['totalQuantity'] ?? 0;
 

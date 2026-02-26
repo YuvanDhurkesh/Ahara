@@ -1026,4 +1026,29 @@ class BackendService {
     // This provides high-quality images and avoids fallback to the cat statue
     return "https://loremflickr.com/800/600/${tags.join(',')}?lock=$seed";
   }
+
+  static Future<String?> translateText(String text, String targetLang) async {
+    try {
+      final url = Uri.parse("$baseUrl/translate");
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+        },
+        body: jsonEncode({
+          "text": text,
+          "targetLang": targetLang,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['translatedText'];
+      }
+    } catch (e) {
+      debugPrint("Dynamic translation failed: $e");
+    }
+    return null;
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../data/services/backend_service.dart';
 
 class AppLocalizations {
   final Locale locale;
@@ -94,6 +95,38 @@ class AppLocalizations {
       'top_volunteer': 'Top Volunteer',
       'fifty_deliveries': '50 Deliveries',
       'perfect_streak': 'Perfect Streak',
+      'hero_pill': 'COMMUNITY-DRIVEN FOOD SHARING',
+      'hero_title': 'Small Acts,\nBig Plates.',
+      'hero_desc': 'Join a community of food donors and volunteers turning local surplus into neighborhood meals with care and transparency.',
+      'how_it_works_title': 'How It Works',
+      'give_food': 'Give Food',
+      'share_surplus': 'Share surplus food',
+      'volunteer_title': 'Volunteer',
+      'transport_verify': 'Transport & verify',
+      'find_meal': 'Find a meal',
+      'discover_local': 'Discover local meals',
+      'trust_title': 'Why Trust Us',
+      'food_safety': 'Food Safety',
+      'rigorous_checks': 'Rigorous safety checks',
+      'verified_staff': 'Verified Staff',
+      'vetted_partners': 'Vetted volunteers & partners',
+      'transparency_title': 'Transparency',
+      'track_realtime': 'Track donations in real-time',
+      'impact_title': 'Our Global Impact',
+      'meals_saved': 'Meals Saved',
+      'waste_reduced': 'Waste Reduced',
+      'partners': 'Partners',
+      'welcome_ahara': 'Welcome back to Ahara',
+      'select_role': 'Select your role to login or get started.',
+      'login_buyer': 'Login as Buyer',
+      'find_meals_nearby': 'Find meals and help nearby',
+      'login_seller': 'Login as Seller',
+      'share_surplus_seller': 'Share surplus food surplus',
+      'login_volunteer': 'Login as Volunteer',
+      'help_transport': 'Help transport or verify meals',
+      'new_to_ahara': 'New to Ahara? ',
+      'create_account': 'Create an Account',
+      'no_places_found': 'No places found in this category',
     },
     'hi': {
       'welcome': 'वापस स्वागत है',
@@ -179,6 +212,38 @@ class AppLocalizations {
       'top_volunteer': 'शीर्ष स्वयंसेवक',
       'fifty_deliveries': '50 डिलीवरी',
       'perfect_streak': 'परफेक्ट स्ट्रीక',
+      'hero_pill': 'समुदाय-संचालित भोजन साझाकरण',
+      'hero_title': 'छोटे कार्य,\nबड़ी थालियाँ।',
+      'hero_desc': 'भोजन दाताओं और स्वयंसेवकों के समुदाय में शामिल हों जो स्थानीय अधिशेष को देखभाल और पारदर्शिता के साथ पड़ोस के भोजन में बदलते हैं।',
+      'how_it_works_title': 'यह कैसे काम करता है',
+      'give_food': 'भोजन दें',
+      'share_surplus': 'अतिरिक्त भोजन साझा करें',
+      'volunteer_title': 'स्वयंसेवक',
+      'transport_verify': 'परिवहन और सत्यापन',
+      'find_meal': 'भोजन खोजें',
+      'discover_local': 'स्थानीय भोजन खोजें',
+      'trust_title': 'हम पर भरोसा क्यों करें',
+      'food_safety': 'खाद्य सुरक्षा',
+      'rigorous_checks': 'कड़ी सुरक्षा जांच',
+      'verified_staff': 'सत्यापित कर्मचारी',
+      'vetted_partners': 'जांचे गए स्वयंसेवक और भागीदार',
+      'transparency_title': 'पारदर्शिता',
+      'track_realtime': 'वास्तविक समय में दान ट्रैक करें',
+      'impact_title': 'हमारा वैश्विक प्रभाव',
+      'meals_saved': 'भोजन बचाया गया',
+      'waste_reduced': 'कचरा कम किया गया',
+      'partners': 'भागीदार',
+      'welcome_ahara': 'Ahara में फिर से स्वागत है',
+      'select_role': 'लॉगिन करने या शुरू करने के लिए अपनी भूमिका चुनें।',
+      'login_buyer': 'खरीदार के रूप में लॉगिन करें',
+      'find_meals_nearby': 'भोजन खोजें और आस-पास मदद करें',
+      'login_seller': 'विक्रेता के रूप में लॉगिन करें',
+      'share_surplus_seller': 'अतिरिक्त भोजन साझा करें',
+      'login_volunteer': 'स्वयंसेवक के रूप में लॉगिन करें',
+      'help_transport': 'परिवहन या भोजन सत्यापित करने में सहायता करें',
+      'new_to_ahara': 'Ahara में नए हैं? ',
+      'create_account': 'खाता बनाएं',
+      'no_places_found': 'इस श्रेणी में कोई स्थान नहीं मिला',
     },
     'ta': {
       'welcome': 'மீண்டும் வருக',
@@ -264,6 +329,38 @@ class AppLocalizations {
       'top_volunteer': 'சிறந்த தன்னார்வலர்',
       'fifty_deliveries': '50 டெலிவரிகள்',
       'perfect_streak': 'சரியான தொடர்ச்சி',
+      'hero_pill': 'சமூகத்தால் நடத்தப்படும் உணவு பகிர்வு',
+      'hero_title': 'சிறிய செயல்கள்,\nபெரிய தட்டுகள்.',
+      'hero_desc': 'கவனிப்பு மற்றும் வெளிப்படைத்தன்மையுடன் உள்ளூர் உபரியை அருகிலுள்ள உணவாக மாற்றும் உணவு நன்கொடையாளர்கள் மற்றும் தன்னார்வலர்களின் சமூகத்தில் சேரவும்.',
+      'how_it_works_title': 'இது எப்படி வேலை செய்கிறது',
+      'give_food': 'உணவு கொடுங்கள்',
+      'share_surplus': 'உபரி உணவை பகிரவும்',
+      'volunteer_title': 'தன்னார்வலர்',
+      'transport_verify': 'போக்குவரத்து & சரிபார்த்தல்',
+      'find_meal': 'உணவைக் கண்டறியவும்',
+      'discover_local': 'உள்ளூர் உணவுகளை கண்டறியவும்',
+      'trust_title': 'எங்களை ஏன் நம்ப வேண்டும்',
+      'food_safety': 'உணவு பாதுகாப்பு',
+      'rigorous_checks': 'கடுமையான பாதுகாப்பு சோதனைகள்',
+      'verified_staff': 'சரிபார்க்கப்பட்ட ஊழியர்கள்',
+      'vetted_partners': 'பரிசோதிக்கப்பட்ட தன்னார்வலர்கள் & கூட்டாளர்கள்',
+      'transparency_title': 'வெளிப்படைத்தன்மை',
+      'track_realtime': 'நன்கொடைகளை நிகழ்நேரத்தில் கண்காணிக்கவும்',
+      'impact_title': 'எங்கள் உலகளாவிய தாக்கம்',
+      'meals_saved': 'காப்பற்றப்பட்ட உணவுகள்',
+      'waste_reduced': 'கழிவுகள் குறைக்கப்பட்டது',
+      'partners': 'கூட்டாளர்கள்',
+      'welcome_ahara': 'Ahara-விற்கு மீண்டும் வரவேற்கிறோம்',
+      'select_role': 'உள்நுழைய அல்லது தொடங்க உங்கள் பங்கைத் தேர்ந்தெடுக்கவும்.',
+      'login_buyer': 'வாங்குபவராக உள்நுழைக',
+      'find_meals_nearby': 'உணவுகளைக் கண்டறிந்து அருகில் உதவுங்கள்',
+      'login_seller': 'விற்பனையாளராக உள்நுழைக',
+      'share_surplus_seller': 'உபரி உணவை பகிரவும்',
+      'login_volunteer': 'தன்னார்வலராக உள்நுழைக',
+      'help_transport': 'போக்குவரத்து அல்லது உணவை சரிபார்க்க உதவுங்கள்',
+      'new_to_ahara': 'Ahara-விற்குப் புதியவரா? ',
+      'create_account': 'கணக்கை உருவாக்கவும்',
+      'no_places_found': 'இந்த பிரிவில் எந்த இடங்களும் காணப்படவில்லை',
     },
     'te': {
       'welcome': 'తిరిగి స్వాగతం',
@@ -349,11 +446,81 @@ class AppLocalizations {
       'top_volunteer': 'టాప్ వాలంటీర్',
       'fifty_deliveries': '50 డెలివరీలు',
       'perfect_streak': 'పర్ఫెక్ట్ స్ట్రీక్',
+      'hero_pill': 'సంఘం-ఆధారిత ఆహార భాగస్వామ్యం',
+      'hero_title': 'చిన్న పనులు,\nపెద్ద కంచాలు.',
+      'hero_desc': 'స్థానిక మిగులు ఆహారాన్ని శ్రద్ధ మరియు పారదర్శకతతో ఇరుగుపొరుగున భోజనంగా మార్చే ఆహార దాతలు మరియు వాలంటీర్ల సంఘంలో చేరండి.',
+      'how_it_works_title': 'ఇది ఎలా పనిచేస్తుంది',
+      'give_food': 'ఆహారం ఇవ్వండి',
+      'share_surplus': 'మిగులు ఆహారాన్ని పంచుకోండి',
+      'volunteer_title': 'వాలంటీర్',
+      'transport_verify': 'రవాణా & ధృవీకరణ',
+      'find_meal': 'భోజనాన్ని కనుగొనండి',
+      'discover_local': 'స్థానిక భోజనాలను కనుగొనండి',
+      'trust_title': 'మమ్మల్ని ఎందుకు నమ్మాలి',
+      'food_safety': 'ఆహార భద్రత',
+      'rigorous_checks': 'కఠినమైన భద్రతా తనిఖీలు',
+      'verified_staff': 'ధృవీకరించబడిన సిబ్బంది',
+      'vetted_partners': 'తనిఖీ చేయబడిన వాలంటీర్లు & భాగస్వాములు',
+      'transparency_title': 'పారదర్శకత',
+      'track_realtime': 'విరాళాలను నిజ సమయంలో ట్రాక్ చేయండి',
+      'impact_title': 'మా ప్రపంచ ప్రభావం',
+      'meals_saved': 'సేవ్ చేయబడిన భోజనాలు',
+      'waste_reduced': 'తగ్గించబడిన వ్యర్థాలు',
+      'partners': 'భాగస్వాములు',
+      'welcome_ahara': 'Ahara కి తిరిగి స్వాగతం',
+      'select_role': 'లాగిన్ చేయడానికి లేదా ప్రారంభించడానికి మీ పాత్రను ఎంచుకోండి.',
+      'login_buyer': 'కొనుగోలుదారుగా లాగిన్ చేయండి',
+      'find_meals_nearby': 'సమీపంలోని భోజనాన్ని కనుగొని, సహాయం చేయండి',
+      'login_seller': 'విక్రేతగా లాగిన్ చేయండి',
+      'share_surplus_seller': 'మిగులు ఆహారాన్ని పంచుకోండి',
+      'login_volunteer': 'వాలంటీర్‌గా లాగిన్ చేయండి',
+      'help_transport': 'రవాణా లేదా భోజనాన్ని ధృవీకరించడంలో సహాయపడండి',
+      'new_to_ahara': 'Ahara కి కొత్తా? ',
+      'create_account': 'ఖాతాను సృష్టించండి',
+      'no_places_found': 'ఈ వర్గంలో ఎలాంటి స్థలాలు కనుగొనబడలేదు',
     },
   };
 
+  static VoidCallback? onDynamicTranslationUpdated;
+  
+  static final Map<String, Map<String, String>> _dynamicCache = {
+    'hi': {}, 'ta': {}, 'te': {}, 'en': {}
+  };
+
   String translate(String key) {
-    return _localizedValues[locale.languageCode]?[key] ?? key;
+    if (locale.languageCode == 'en') return _localizedValues['en']?[key] ?? key;
+    
+    // 1. Check static translations first
+    if (_localizedValues[locale.languageCode]!.containsKey(key)) {
+      return _localizedValues[locale.languageCode]![key]!;
+    }
+    
+    // 2. Identify default English text (or key if not found in English static map)
+    final defaultText = _localizedValues['en']?[key] ?? key;
+    
+    // 3. Check dynamic cache
+    if (_dynamicCache[locale.languageCode]!.containsKey(defaultText)) {
+      return _dynamicCache[locale.languageCode]![defaultText]!;
+    }
+    
+    // 4. Kick off async translation for missing strings
+    _fetchDynamicTranslation(defaultText, locale.languageCode);
+    
+    // Return English text/key while fetching translation in background
+    return defaultText;
+  }
+  
+  static void _fetchDynamicTranslation(String text, String langCode) async {
+    // Save placeholder to prevent duplicate API requests for the same string
+    if (_dynamicCache[langCode]!.containsKey(text)) return;
+    _dynamicCache[langCode]![text] = text; 
+    
+    final translated = await BackendService.translateText(text, langCode);
+    if (translated != null && translated.isNotEmpty && translated != text) {
+      _dynamicCache[langCode]![text] = translated;
+      // Notify listeners (LanguageProvider) to rebuild the UI with translated text
+      onDynamicTranslationUpdated?.call();
+    }
   }
 }
 

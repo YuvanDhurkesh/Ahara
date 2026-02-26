@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'buyer_dashboard_page.dart';
 import '../data/mock_stores.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class BuyerCheckoutPage extends StatefulWidget {
   final MockStore store;
@@ -59,7 +60,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "Checkout",
+          AppLocalizations.of(context)!.translate("checkout") ?? "Checkout",
           style: GoogleFonts.inter(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -78,24 +79,24 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                   // Conditional Delivery Sections
                   if (widget.store.offersDelivery) ...[
                     _buildInteractiveOptionRow(
-                      "SHIPPING",
-                      _selectedAddress,
+                      AppLocalizations.of(context)!.translate("shipping") ?? "SHIPPING",
+                      _selectedAddress == "Add shipping address" ? (AppLocalizations.of(context)!.translate("add_shipping_address") ?? "Add shipping address") : _selectedAddress,
                       onTap: _showAddressSelector,
                     ),
                     const Divider(height: 32, color: Color(0xFFEEEEEE)),
-                    _buildOptionRow("DELIVERY", "Free"),
+                    _buildOptionRow(AppLocalizations.of(context)!.translate("delivery") ?? "DELIVERY", AppLocalizations.of(context)!.translate("free") ?? "Free"),
                     const Divider(height: 32, color: Color(0xFFEEEEEE)),
                   ],
 
                   _buildInteractiveOptionRow(
-                    "PAYMENT",
+                    AppLocalizations.of(context)!.translate("payment") ?? "PAYMENT",
                     _selectedPayment,
                     onTap: _showPaymentSelector,
                   ),
                   const Divider(height: 32, color: Color(0xFFEEEEEE)),
                   _buildInteractiveOptionRow(
-                    "PROMOS",
-                    _promoCode.isEmpty ? "Apply promo code" : _promoCode,
+                    AppLocalizations.of(context)!.translate("promos") ?? "PROMOS",
+                    _promoCode.isEmpty ? (AppLocalizations.of(context)!.translate("apply_promo_code") ?? "Apply promo code") : _promoCode,
                     isPlaceholder: _promoCode.isEmpty,
                     onTap: _showPromoCodeDialog,
                   ),
@@ -107,7 +108,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "ITEMS",
+                        AppLocalizations.of(context)!.translate("items") ?? "ITEMS",
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -116,7 +117,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                         ),
                       ),
                       Text(
-                        "DESCRIPTION",
+                        AppLocalizations.of(context)!.translate("description") ?? "DESCRIPTION",
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -125,7 +126,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                         ),
                       ),
                       Text(
-                        "PRICE",
+                        AppLocalizations.of(context)!.translate("price") ?? "PRICE",
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -185,7 +186,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "Quantity: 01",
+                              "${AppLocalizations.of(context)!.translate("quantity") ?? "Quantity"}: 01",
                               style: GoogleFonts.inter(
                                 fontSize: 14,
                                 color: Colors.black,
@@ -196,7 +197,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                         ),
                       ),
                       Text(
-                        widget.store.isFree ? "Free" : widget.store.price,
+                        widget.store.isFree ? (AppLocalizations.of(context)!.translate("free") ?? "Free") : widget.store.price,
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -211,18 +212,18 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                   const SizedBox(height: 24),
 
                   // Totals
-                  _buildSummaryRow("Subtotal (1)", _formatPrice(_price)),
+                  _buildSummaryRow(AppLocalizations.of(context)!.translate("subtotal") ?? "Subtotal (1)", _formatPrice(context, _price)),
                   const SizedBox(height: 12),
                   _buildSummaryRow(
-                    "Shipping total",
-                    widget.store.offersDelivery ? "Free" : "N/A",
+                    AppLocalizations.of(context)!.translate("shipping_total") ?? "Shipping total",
+                    widget.store.offersDelivery ? (AppLocalizations.of(context)!.translate("free") ?? "Free") : (AppLocalizations.of(context)!.translate("not_applicable") ?? "N/A"),
                   ),
                   const SizedBox(height: 12),
-                  _buildSummaryRow("Taxes", _formatPrice(_taxes)),
+                  _buildSummaryRow(AppLocalizations.of(context)!.translate("taxes") ?? "Taxes", _formatPrice(context, _taxes)),
                   const SizedBox(height: 20),
                   _buildSummaryRow(
-                    "Total",
-                    _formatPrice(_total),
+                    AppLocalizations.of(context)!.translate("total") ?? "Total",
+                    _formatPrice(context, _total),
                     isTotal: true,
                   ),
                 ],
@@ -254,7 +255,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                     elevation: 0,
                   ),
                   child: Text(
-                    "Place order",
+                    AppLocalizations.of(context)!.translate("place_order") ?? "Place order",
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -348,8 +349,8 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
     );
   }
 
-  String _formatPrice(double value) {
-    if (widget.store.isFree && value == 0) return "Free";
+  String _formatPrice(BuildContext context, double value) {
+    if (widget.store.isFree && value == 0) return AppLocalizations.of(context)!.translate("free") ?? "Free";
     return "₹${value.toStringAsFixed(2)}";
   }
 
@@ -369,7 +370,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Select Address",
+                AppLocalizations.of(context)!.translate("select_address") ?? "Select Address",
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -392,7 +393,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.add, color: Colors.blue),
                 title: Text(
-                  "Add New Address",
+                  AppLocalizations.of(context)!.translate("add_new_address") ?? "Add New Address",
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: Colors.blue,
@@ -416,16 +417,16 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Add Address"),
-        content: const TextField(
+        title: Text(AppLocalizations.of(context)!.translate("add_address") ?? "Add Address"),
+        content: TextField(
           decoration: InputDecoration(
-            hintText: "Enter address or pick from map",
+            hintText: AppLocalizations.of(context)!.translate("enter_address_hint") ?? "Enter address or pick from map",
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)!.translate("cancel") ?? "Cancel"),
           ),
           TextButton(
             onPressed: () {
@@ -436,7 +437,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
               });
               Navigator.pop(context);
             },
-            child: const Text("Save"),
+            child: Text(AppLocalizations.of(context)!.translate("save") ?? "Save"),
           ),
         ],
       ),
@@ -462,7 +463,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Payment Method",
+                  AppLocalizations.of(context)!.translate("payment_method") ?? "Payment Method",
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -473,8 +474,8 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                 // UPI Option
                 _buildPaymentOptionTile(
                   icon: Icons.qr_code,
-                  title: "UPI",
-                  subtitle: "Google Pay, PhonePe, Paytm",
+                  title: AppLocalizations.of(context)!.translate("upi") ?? "UPI",
+                  subtitle: AppLocalizations.of(context)!.translate("upi_subtitle") ?? "Google Pay, PhonePe, Paytm",
                   onTap: () {
                     Navigator.pop(context);
                     _showDetailedPaymentSheet("UPI");
@@ -484,8 +485,8 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                 // Card Option
                 _buildPaymentOptionTile(
                   icon: Icons.credit_card,
-                  title: "Credit / Debit Card",
-                  subtitle: "Visa, Mastercard, Rupay",
+                  title: AppLocalizations.of(context)!.translate("credit_debit_card") ?? "Credit / Debit Card",
+                  subtitle: AppLocalizations.of(context)!.translate("card_subtitle") ?? "Visa, Mastercard, Rupay",
                   onTap: () {
                     Navigator.pop(context);
                     _showDetailedPaymentSheet("Card");
@@ -495,8 +496,8 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                 // Cash Option
                 _buildPaymentOptionTile(
                   icon: Icons.money,
-                  title: "Cash",
-                  subtitle: "Pay on delivery / pickup",
+                  title: AppLocalizations.of(context)!.translate("cash") ?? "Cash",
+                  subtitle: AppLocalizations.of(context)!.translate("cash_subtitle") ?? "Pay on delivery / pickup",
                   onTap: () {
                     setState(() => _selectedPayment = "Cash");
                     Navigator.pop(context);
@@ -567,7 +568,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                       },
                     ),
                     Text(
-                      type == "UPI" ? "Enter UPI ID" : "Card Details",
+                      type == "UPI" ? (AppLocalizations.of(context)!.translate("enter_upi_id") ?? "Enter UPI ID") : (AppLocalizations.of(context)!.translate("card_details") ?? "Card Details"),
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -608,8 +609,8 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
             const SizedBox(height: 24),
             TextField(
               decoration: InputDecoration(
-                labelText: "UPI ID",
-                hintText: "example@upi",
+                labelText: AppLocalizations.of(context)!.translate("upi_id") ?? "UPI ID",
+                hintText: AppLocalizations.of(context)!.translate("example_upi") ?? "example@upi",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -631,7 +632,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                   backgroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text("Verify & Pay"),
+                child: Text(AppLocalizations.of(context)!.translate("verify_and_pay") ?? "Verify & Pay"),
               ),
             ),
           ],
@@ -653,7 +654,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
       children: [
         TextField(
           decoration: InputDecoration(
-            labelText: "Card Number",
+            labelText: AppLocalizations.of(context)!.translate("card_number") ?? "Card Number",
             hintText: "0000 0000 0000 0000",
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             prefixIcon: const Icon(Icons.credit_card),
@@ -666,8 +667,8 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
             Expanded(
               child: TextField(
                 decoration: InputDecoration(
-                  labelText: "Expiry Date",
-                  hintText: "MM/YY",
+                  labelText: AppLocalizations.of(context)!.translate("expiry_date") ?? "Expiry Date",
+                  hintText: AppLocalizations.of(context)!.translate("mm_yy") ?? "MM/YY",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -678,7 +679,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
             Expanded(
               child: TextField(
                 decoration: InputDecoration(
-                  labelText: "CVV",
+                  labelText: AppLocalizations.of(context)!.translate("cvv") ?? "CVV",
                   hintText: "123",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -691,7 +692,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
         const SizedBox(height: 16),
         TextField(
           decoration: InputDecoration(
-            labelText: "Cardholder Name",
+            labelText: AppLocalizations.of(context)!.translate("cardholder_name") ?? "Cardholder Name",
             hintText: "John Doe",
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
@@ -708,7 +709,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
               backgroundColor: Colors.black,
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
-            child: const Text("Save Card"),
+            child: Text(AppLocalizations.of(context)!.translate("save_card") ?? "Save Card"),
           ),
         ),
       ],
@@ -719,18 +720,18 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Enter Promo Code"),
+        title: Text(AppLocalizations.of(context)!.translate("enter_promo_code") ?? "Enter Promo Code"),
         content: TextField(
           controller: _promoController,
-          decoration: const InputDecoration(
-            hintText: "e.g., WELCOME50",
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)!.translate("eg_welcome50") ?? "e.g., WELCOME50",
             border: OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)!.translate("cancel") ?? "Cancel"),
           ),
           TextButton(
             onPressed: () {
@@ -744,7 +745,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                 Navigator.pop(context);
               }
             },
-            child: const Text("Apply"),
+            child: Text(AppLocalizations.of(context)!.translate("apply") ?? "Apply"),
           ),
         ],
       ),

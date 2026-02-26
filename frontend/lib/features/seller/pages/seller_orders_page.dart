@@ -5,6 +5,8 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'seller_order_detail_page.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/localization/language_provider.dart';
 
 class SellerOrdersPage extends StatefulWidget {
   const SellerOrdersPage({super.key});
@@ -65,9 +67,9 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          "My Orders",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        title: Text(
+          AppLocalizations.of(context)!.translate("My Orders") ?? "My Orders",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -111,13 +113,13 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
         children: [
           Container(
             color: Colors.white,
-            child: const TabBar(
+            child: TabBar(
               labelColor: AppColors.primary,
               unselectedLabelColor: Colors.grey,
               indicatorColor: AppColors.primary,
               tabs: [
-                Tab(text: "Active"),
-                Tab(text: "History"),
+                Tab(text: AppLocalizations.of(context)!.translate("Active") ?? "Active"),
+                Tab(text: AppLocalizations.of(context)!.translate("History") ?? "History"),
               ],
             ),
           ),
@@ -144,7 +146,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
             height: MediaQuery.of(context).size.height * 0.6,
             child: Center(
               child: Text(
-                "No orders found",
+                AppLocalizations.of(context)!.translate("No orders found") ?? "No orders found",
                 style: TextStyle(color: Colors.grey.shade400),
               ),
             ),
@@ -172,7 +174,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
   }
 
   Widget _buildOrderCard(BuildContext context, Map<String, dynamic> order) {
-    final foodName = order['listingId']?['foodName'] ?? "Unknown Item";
+    final foodName = order['listingId'] != null ? Provider.of<LanguageProvider>(context, listen: false).getTranslatedText(context, order['listingId'], 'foodName') : "Unknown Item";
     final buyerName = order['buyerId']?['name'] ?? "Unknown Buyer";
     final createdAt = DateTime.parse(order['createdAt']);
     final status = order['status'] ?? "pending";
@@ -209,7 +211,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Order #${orderId.substring(orderId.length - 6).toUpperCase()}",
+                    "${AppLocalizations.of(context)!.translate("Order")} #${orderId.substring(orderId.length - 6).toUpperCase()}",
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -260,9 +262,9 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                       color: AppColors.textLight.withOpacity(0.5),
                     ),
                   ),
-                  const Text(
-                    "View Details",
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context)!.translate("View Details") ?? "View Details",
+                    style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,

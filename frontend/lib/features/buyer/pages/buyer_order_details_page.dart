@@ -8,6 +8,8 @@ import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_order_rate_page.dart';
 import 'buyer_order_track_page.dart';
+import 'package:provider/provider.dart';
+import '../../../core/localization/language_provider.dart';
 import '../data/mock_orders.dart';
 import '../data/mock_stores.dart';
 
@@ -575,7 +577,7 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
         children: [
           Text("ORDER SUMMARY", style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.textLight)),
           const SizedBox(height: 16),
-          _buildSummaryLine("${order['quantityOrdered'] ?? 1} × ${listing['foodName'] ?? 'Items'}", "₹${pricing['itemTotal'] ?? 0}"),
+          _buildSummaryLine("${order['quantityOrdered'] ?? 1} × ${Provider.of<LanguageProvider>(context, listen: false).getTranslatedText(context, listing, 'foodName')}", "₹${pricing['itemTotal'] ?? 0}"),
           if (isDelivery) _buildSummaryLine("Delivery Fee", "₹${pricing['deliveryFee'] ?? 0}"),
           _buildSummaryLine("Platform Fee", "₹${pricing['platformFee'] ?? 0}"),
           const Divider(height: 24),

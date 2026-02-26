@@ -5,7 +5,9 @@ import '../../../shared/styles/app_colors.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import '../../common/pages/landing_page.dart';
+import '../../../core/localization/language_selection_page.dart';
 import 'package:provider/provider.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class VolunteerProfilePage extends StatefulWidget {
   const VolunteerProfilePage({super.key});
@@ -57,13 +59,13 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
 
     final mongoUser = auth.mongoUser;
     final mongoProfile = auth.mongoProfile;
-    final name = (mongoUser?['name'] ?? 'Volunteer').toString();
+    final name = (mongoUser?['name'] ?? AppLocalizations.of(context)!.translate('Volunteer')).toString();
     final rating = (mongoProfile?['stats']?['avgRating'] ?? 0).toDouble();
     final totalDeliveries =
         (mongoProfile?['stats']?['totalDeliveriesCompleted'] ?? 0).toString();
     final addressText = _addressController.text.isNotEmpty
         ? _addressController.text
-        : (mongoUser?['addressText'] ?? 'Not set').toString();
+        : (mongoUser?['addressText'] ?? AppLocalizations.of(context)!.translate('Not set')).toString();
     final transportLabel = _transportModeLabel(_transportMode);
 
     return Scaffold(
@@ -78,7 +80,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Hello, $name',
+                    AppLocalizations.of(context)!.translate('Hello, $name'),
                     style: GoogleFonts.ebGaramond(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
@@ -94,7 +96,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                 children: [
                   Expanded(
                     child: _statCard(
-                      label: 'Rating',
+                      label: AppLocalizations.of(context)!.translate('Rating'),
                       value: rating.toStringAsFixed(1),
                       icon: Icons.star_rounded,
                       color: const Color(0xFFD35400),
@@ -103,7 +105,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _statCard(
-                      label: 'Total Deliveries',
+                      label: AppLocalizations.of(context)!.translate('Total Deliveries'),
                       value: totalDeliveries,
                       icon: Icons.local_shipping_rounded,
                       color: AppColors.primary,
@@ -112,16 +114,16 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                 ],
               ),
               const SizedBox(height: 24),
-              _sectionLabel("Details"),
+              _sectionLabel(AppLocalizations.of(context)!.translate("Details")),
               const SizedBox(height: 12),
               _infoTile(
-                label: 'Vehicle Type',
+                label: AppLocalizations.of(context)!.translate('Vehicle Type'),
                 value: transportLabel,
                 icon: Icons.directions_bike_rounded,
               ),
               const SizedBox(height: 16),
               _infoTile(
-                label: 'Address',
+                label: AppLocalizations.of(context)!.translate('Address'),
                 value: addressText,
                 icon: Icons.location_on_rounded,
               ),
@@ -261,7 +263,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Manage account',
+                      AppLocalizations.of(context)!.translate('Manage account'),
                       style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -281,11 +283,11 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   controller: controller,
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   children: [
-                    _buildSectionHeader('SETTINGS'),
+                    _buildSectionHeader(AppLocalizations.of(context)!.translate('SETTINGS')),
                     _buildMenuItem(
                       ctx,
                       Icons.person_outline,
-                      'Account details',
+                      AppLocalizations.of(context)!.translate('Account details'),
                       onTap: () {
                         Navigator.pop(ctx);
                         _openManageAccountPage();
@@ -293,8 +295,22 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                     ),
                     _buildMenuItem(
                       ctx,
+                      Icons.language_outlined,
+                      AppLocalizations.of(context)!.translate('Language'),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LanguageSelectionPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildMenuItem(
+                      ctx,
                       Icons.lock_outline,
-                      'Change password',
+                      AppLocalizations.of(context)!.translate('Change password'),
                       onTap: () {
                         Navigator.pop(ctx);
                         _showChangePasswordDialog();
@@ -316,9 +332,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: const Text(
-                          'Log out',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        child: Text(
+                          AppLocalizations.of(context)!.translate('logout_btn'),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -340,7 +356,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
         builder: (_) => Scaffold(
           appBar: AppBar(
             title: Text(
-              'Manage account',
+              AppLocalizations.of(context)!.translate('Manage account'),
               style: GoogleFonts.inter(fontWeight: FontWeight.bold),
             ),
           ),
@@ -349,40 +365,40 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _sectionTitle('Account details'),
+                _sectionTitle(AppLocalizations.of(context)!.translate('Account details')),
                 const SizedBox(height: 12),
-                _textField(label: 'Name', controller: _nameController),
+                _textField(label: AppLocalizations.of(context)!.translate('Name'), controller: _nameController),
                 const SizedBox(height: 12),
                 _textField(
-                  label: 'Email',
+                  label: AppLocalizations.of(context)!.translate('Email'),
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   readOnly: true,
                 ),
                 const SizedBox(height: 12),
                 _textField(
-                  label: 'Phone number',
+                  label: AppLocalizations.of(context)!.translate('Phone number'),
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 12),
                 _textField(
-                  label: 'Location',
+                  label: AppLocalizations.of(context)!.translate('Location'),
                   controller: _addressController,
                   maxLines: 2,
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: _transportMode,
-                  decoration: const InputDecoration(
-                    labelText: 'Mode of transport',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.translate('Mode of transport'),
+                    border: const OutlineInputBorder(),
                   ),
-                  items: const [
-                    DropdownMenuItem(value: 'walk', child: Text('Walk')),
-                    DropdownMenuItem(value: 'cycle', child: Text('Cycle')),
-                    DropdownMenuItem(value: 'bike', child: Text('Bike')),
-                    DropdownMenuItem(value: 'car', child: Text('Car')),
+                  items: [
+                    DropdownMenuItem(value: 'walk', child: Text(AppLocalizations.of(context)!.translate('Walk'))),
+                    DropdownMenuItem(value: 'cycle', child: Text(AppLocalizations.of(context)!.translate('Cycle'))),
+                    DropdownMenuItem(value: 'bike', child: Text(AppLocalizations.of(context)!.translate('Bike'))),
+                    DropdownMenuItem(value: 'car', child: Text(AppLocalizations.of(context)!.translate('Car'))),
                   ],
                   onChanged: (value) {
                     if (value == null) return;
@@ -415,7 +431,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Save changes'),
+                        : Text(AppLocalizations.of(context)!.translate('Save changes')),
                   ),
                 ),
               ],
@@ -436,19 +452,19 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text('Change password'),
+              title: Text(AppLocalizations.of(context)!.translate('Change password')),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _textField(
-                    label: 'New password',
+                    label: AppLocalizations.of(context)!.translate('New password'),
                     controller: _newPasswordController,
                     obscureText: true,
-                    hint: 'Min 6 characters',
+                    hint: AppLocalizations.of(context)!.translate('Min 6 characters'),
                   ),
                   const SizedBox(height: 12),
                   _textField(
-                    label: 'Confirm new password',
+                    label: AppLocalizations.of(context)!.translate('Confirm new password'),
                     controller: _confirmPasswordController,
                     obscureText: true,
                   ),
@@ -459,7 +475,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   onPressed: _isChangingPassword
                       ? null
                       : () => Navigator.pop(ctx),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context)!.translate('Cancel')),
                 ),
                 ElevatedButton(
                   onPressed: _isChangingPassword
@@ -480,7 +496,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Update'),
+                      : Text(AppLocalizations.of(context)!.translate('Update')),
                 ),
               ],
             );
@@ -709,13 +725,13 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
   String _transportModeLabel(String mode) {
     switch (mode) {
       case 'cycle':
-        return 'Cycle';
+        return AppLocalizations.of(context)!.translate('Cycle');
       case 'bike':
-        return 'Bike';
+        return AppLocalizations.of(context)!.translate('Bike');
       case 'car':
-        return 'Car';
+        return AppLocalizations.of(context)!.translate('Car');
       default:
-        return 'Walk';
+        return AppLocalizations.of(context)!.translate('Walk');
     }
   }
 

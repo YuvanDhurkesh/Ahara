@@ -44,6 +44,7 @@ class Listing {
   final String description;
   final ListingStatus status;
   final BusinessType? businessType;
+  final Map<String, dynamic>? translations;
 
   Listing({
     required this.id,
@@ -65,6 +66,7 @@ class Listing {
     required this.description,
     required this.status,
     this.businessType,
+    this.translations,
   });
 
   Map<String, dynamic> toJson() {
@@ -88,6 +90,7 @@ class Listing {
       'description': description,
       'status': status.name,
       'businessType': businessType?.name,
+      'translations': translations,
     };
   }
 
@@ -143,6 +146,7 @@ class Listing {
       description: json['description'] ?? "",
       status: _parseStatus(json['status']),
       businessType: _parseBusinessType(json['businessType']),
+      translations: json['translations'] as Map<String, dynamic>?,
     );
   }
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../../data/services/backend_service.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/localization/language_provider.dart';
 
 class SellerOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -171,7 +173,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
   }
 
   Widget _buildOrderHeader() {
-    final foodName = widget.order['listingId']?['foodName'] ?? "Unknown Item";
+    final foodName = widget.order['listingId'] != null ? Provider.of<LanguageProvider>(context, listen: false).getTranslatedText(context, widget.order['listingId'], 'foodName') : "Unknown Item";
     final orderId = widget.order['_id'].toString();
     final createdAt = DateTime.parse(widget.order['createdAt']);
     final totalAmount = widget.order['pricing']?['total'] ?? 0;

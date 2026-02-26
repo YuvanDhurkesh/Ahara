@@ -3,9 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../data/services/backend_service.dart';
+import '../../../core/localization/language_provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import 'buyer_food_detail_page.dart';
 import '../../../shared/widgets/animated_toast.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class BuyerFavouritesPage extends StatefulWidget {
   final VoidCallback? onDiscoverMore;
@@ -96,8 +98,8 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
       backgroundColor: AppColors.background,
       elevation: 0,
       centerTitle: true,
-      title: const Text(
-        "Favorite Restaurants",
+      title: Text(
+        AppLocalizations.of(context)!.translate("Favorite Restaurants"),
         style: TextStyle(
           color: AppColors.textDark,
           fontWeight: FontWeight.w900,
@@ -116,19 +118,18 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
           Icon(Icons.favorite_border, size: 80, color: AppColors.textLight.withOpacity(0.1)),
           const SizedBox(height: 16),
           Text(
-            "No favorite restaurants yet",
+            AppLocalizations.of(context)!.translate("No favorite restaurants yet"),
             style: TextStyle(color: AppColors.textLight.withOpacity(0.5), fontSize: 16, fontWeight: FontWeight.w500),
           ),
-          const SizedBox(height: 8),
           Text(
-            "Follow your favorite places to see their items here!",
+            AppLocalizations.of(context)!.translate("Follow your favorite places to see their items here!"),
             style: TextStyle(color: AppColors.textLight.withOpacity(0.3), fontSize: 14),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: widget.onDiscoverMore ?? () => _fetchFavorites(),
             icon: const Icon(Icons.search_rounded, size: 20, color: Colors.white),
-            label: const Text("Discover More", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            label: Text(AppLocalizations.of(context)!.translate("Discover More"), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -207,7 +208,7 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              hasListings ? "LIVE" : "QUIET",
+                              hasListings ? AppLocalizations.of(context)!.translate("LIVE") : AppLocalizations.of(context)!.translate("QUIET"),
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
@@ -256,7 +257,7 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                       if (mounted) {
                         AnimatedToast.show(
                           context,
-                          "Removed $orgName from favorites",
+                          AppLocalizations.of(context)!.translate("Removed $orgName from favorites"),
                           type: ToastType.info,
                         );
                         _fetchInitialData(); // Refresh list and listings
@@ -275,7 +276,7 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                       color: AppColors.primary,
                     ),
                     Text(
-                      isExpanded ? "Close" : "Items",
+                      isExpanded ? AppLocalizations.of(context)!.translate("Close") : AppLocalizations.of(context)!.translate("Items"),
                       style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -308,7 +309,7 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
             Icon(Icons.info_outline, color: AppColors.textLight.withOpacity(0.5), size: 18),
             const SizedBox(width: 8),
             Text(
-              "No active listings currently",
+              AppLocalizations.of(context)!.translate("No active listings currently"),
               style: TextStyle(fontStyle: FontStyle.italic, color: AppColors.textLight.withOpacity(0.5)),
             ),
           ],
@@ -358,7 +359,7 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                   ),
                 ),
                 title: Text(
-                  listing['foodName'] ?? "Unnamed Item",
+                  Provider.of<LanguageProvider>(context, listen: false).getTranslatedText(context, listing, 'foodName'),
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 subtitle: Text(

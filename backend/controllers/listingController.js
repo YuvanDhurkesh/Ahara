@@ -3,6 +3,7 @@ const Order = require("../models/Order");
 const SellerProfile = require("../models/SellerProfile");
 const PerishabilityEngine = require("../utils/perishabilityEngine");
 const { generateDefaultImageUrl } = require("../utils/imageGenerator");
+const { translateText } = require("../services/translationService");
 
 // Helper: Ensure listing has an image. If not, generate one and save it.
 async function ensureListingHasImage(listing) {
@@ -103,7 +104,7 @@ exports.createListing = async (req, res) => {
             };
         }
 
-        // 5. Handle images - generate default if none provided
+        // 6. Handle images - generate default if none provided
         let imageList = images || [];
         if (!imageList || imageList.length === 0) {
             const defaultImageUrl = generateDefaultImageUrl(foodName, normalizedCategory);
@@ -111,7 +112,20 @@ exports.createListing = async (req, res) => {
             console.log(`Generated default image for ${foodName}: ${defaultImageUrl}`);
         }
 
-        // 6. Build the object
+        // 7. Translate Dynamic Content
+        console.log(`Translating content for listing: ${foodName}`);
+        const [foodNameTranslations, descriptionTranslations] = await Promise.all([
+            translateText(foodName),
+            description ? translateText(description) : Promise.resolve({ hi: "", ta: "", te: "" })
+        ]);
+
+        const translations = {
+            hi: { foodName: foodNameTranslations.hi, description: descriptionTranslations.hi },
+            ta: { foodName: foodNameTranslations.ta, description: descriptionTranslations.ta },
+            te: { foodName: foodNameTranslations.te, description: descriptionTranslations.te }
+        };
+
+        // 8. Build the object
         const listingData = {
             sellerId,
             sellerProfileId,
@@ -131,6 +145,7 @@ exports.createListing = async (req, res) => {
             pickupAddressText: pickupAddressText || "",
             description: description || "",
             images: imageList,
+            translations,
             options: options || { selfPickupAvailable: true, deliveryAvailable: true },
             status: "active",
             isSafetyValidated: true,
@@ -177,9 +192,34 @@ exports.updateListing = async (req, res) => {
         console.log("Full Body:", JSON.stringify(req.body, null, 2));
         console.log("Images in update:", req.body.images);
 
+        let updateData = { ...req.body };
+
+        // Handle Translations if foodName or description changed
+        if (updateData.foodName || updateData.description) {
+            const currentListing = await Listing.findById(id);
+            if (!currentListing) {
+                return res.status(404).json({ error: "Listing not found" });
+            }
+
+            const foodNameToTranslate = updateData.foodName || currentListing.foodName;
+            const descToTranslate = updateData.description !== undefined ? updateData.description : currentListing.description;
+
+            console.log(`Re-translating modified content for updated listing [ID: ${id}]`);
+            const [foodNameTranslations, descriptionTranslations] = await Promise.all([
+                translateText(foodNameToTranslate),
+                descToTranslate ? translateText(descToTranslate) : Promise.resolve({ hi: "", ta: "", te: "" })
+            ]);
+
+            updateData.translations = {
+                hi: { foodName: foodNameTranslations.hi, description: descriptionTranslations.hi },
+                ta: { foodName: foodNameTranslations.ta, description: descriptionTranslations.ta },
+                te: { foodName: foodNameTranslations.te, description: descriptionTranslations.te }
+            };
+        }
+
         const updatedListing = await Listing.findByIdAndUpdate(
             id,
-            { $set: req.body },
+            { $set: updateData },
             { new: true, runValidators: true }
         );
 

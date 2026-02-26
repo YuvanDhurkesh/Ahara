@@ -14,6 +14,7 @@ const otpRoutes = require("./routes/otpRoutes");
 const verificationRoutes = require("./routes/verificationRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const translationRoutes = require("./routes/translationRoutes");
 const socketService = require("./services/socketService");
 
 if (process.env.NODE_ENV !== 'test') {
@@ -51,6 +52,7 @@ app.use("/api/otp", otpRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/translate", translationRoutes);
 
 // Serve static uploads with ngrok bypass header (best effort)
 app.use("/api/uploads", (req, res, next) => {

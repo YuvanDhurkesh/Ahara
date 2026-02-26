@@ -9,8 +9,9 @@ import 'package:provider/provider.dart';
 import '../../location/pages/location_picker_page.dart';
 import '../../../data/models/listing_model.dart';
 import '../../../data/providers/app_auth_provider.dart';
-import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../data/services/backend_service.dart';
 
 class CreateListingPage extends StatefulWidget {
   final Listing? listing;
@@ -121,7 +122,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt_outlined),
-              title: const Text("Take a photo"),
+              title: Text(AppLocalizations.of(context)!.translate("take_a_photo") ?? "Take a photo"),
               onTap: () async {
                 Navigator.pop(context);
                 final XFile? image = await _picker.pickImage(
@@ -135,7 +136,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text("Choose from gallery"),
+              title: Text(AppLocalizations.of(context)!.translate("choose_from_gallery") ?? "Choose from gallery"),
               onTap: () async {
                 Navigator.pop(context);
                 final XFile? image = await _picker.pickImage(
@@ -250,7 +251,9 @@ class _CreateListingPageState extends State<CreateListingPage> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          widget.listing != null ? "Edit Listing" : "Create Listing",
+          widget.listing != null 
+              ? AppLocalizations.of(context)!.translate("edit_listing") ?? "Edit Listing" 
+              : AppLocalizations.of(context)!.translate("create_listing") ?? "Create Listing",
           style: GoogleFonts.lora(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         backgroundColor: Colors.white,
@@ -268,26 +271,26 @@ class _CreateListingPageState extends State<CreateListingPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionTitle("Food Image"),
+                    _buildSectionTitle(AppLocalizations.of(context)!.translate("food_image") ?? "Food Image"),
                     const SizedBox(height: 12),
                     _buildImagePicker(),
                     const SizedBox(height: 24),
                     _buildSectionTitle("Business Information"),
                     const SizedBox(height: 16),
                     _buildDropdown<BusinessType>(
-                      label: "Type of Business",
+                      label: AppLocalizations.of(context)!.translate("type_of_business") ?? "Type of Business",
                       value: _businessType,
                       items: BusinessType.values,
                       onChanged: (v) => setState(() => _businessType = v!),
                       itemToString: (e) => _getBusinessTypeLabel(e),
                     ),
                     const SizedBox(height: 24),
-                    _buildSectionTitle("Basic Information"),
+                    _buildSectionTitle(AppLocalizations.of(context)!.translate("basic_info") ?? "Basic Information"),
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _foodNameController,
-                      label: "Food Name",
-                      hint: "e.g. Mixed Veg Curry",
+                      label: AppLocalizations.of(context)!.translate("food_name") ?? "Food Name",
+                      hint: AppLocalizations.of(context)!.translate("food_name_hint") ?? "e.g. Mixed Veg Curry",
                       validator: (v) => v?.isEmpty ?? true ? "Required" : null,
                     ),
                     const SizedBox(height: 16),
@@ -299,7 +302,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
                           flex: 2,
                           child: _buildTextField(
                             controller: _quantityController,
-                            label: "Quantity",
+                            label: AppLocalizations.of(context)!.translate("quantity") ?? "Quantity",
                             hint: "0.0",
                             keyboardType: TextInputType.number,
                             validator: (v) =>
@@ -310,7 +313,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
                         Expanded(
                           flex: 1,
                           child: _buildDropdown<String>(
-                            label: "Unit",
+                            label: AppLocalizations.of(context)!.translate("unit") ?? "Unit",
                             value: _selectedUnit,
                             items: _units,
                             onChanged: (v) =>
@@ -321,15 +324,15 @@ class _CreateListingPageState extends State<CreateListingPage> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    _buildSectionTitle("Redistribution Details"),
+                    _buildSectionTitle(AppLocalizations.of(context)!.translate("redistribution_details") ?? "Redistribution Details"),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        _buildModeRadio(RedistributionMode.free, "Free"),
+                        _buildModeRadio(RedistributionMode.free, AppLocalizations.of(context)!.translate("free_food") ?? "Free"),
                         const SizedBox(width: 24),
                         _buildModeRadio(
                           RedistributionMode.discounted,
-                          "Discounted",
+                          AppLocalizations.of(context)!.translate("discounted") ?? "Discounted",
                         ),
                       ],
                     ),
@@ -353,7 +356,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     _buildDateTimePicker(),
                     const SizedBox(height: 16),
                     _buildDropdown<HygieneStatus>(
-                      label: "Hygiene Status",
+                      label: AppLocalizations.of(context)!.translate("hygiene_status") ?? "Hygiene Status",
                       value: _hygieneStatus,
                       items: HygieneStatus.values,
                       onChanged: (v) => setState(() => _hygieneStatus = v!),
@@ -364,13 +367,13 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     const SizedBox(height: 24),
                     _buildTextField(
                       controller: _descriptionController,
-                      label: "Description",
+                      label: AppLocalizations.of(context)!.translate("description") ?? "Description",
                       hint:
                           "e.g. Ingredients, allergens, or special instructions",
                       maxLines: 3,
                     ),
                     const SizedBox(height: 20),
-                    _buildSectionTitle("Food Diet"),
+                    _buildSectionTitle(AppLocalizations.of(context)!.translate("food_diet") ?? "Food Diet"),
                     const SizedBox(height: 12),
                     _buildDietarySelector(),
 
@@ -391,8 +394,8 @@ class _CreateListingPageState extends State<CreateListingPage> {
                         ),
                         child: Text(
                           widget.listing != null
-                              ? "Update Listing"
-                              : "Create Listing",
+                              ? AppLocalizations.of(context)!.translate("update_listing") ?? "Update Listing"
+                              : AppLocalizations.of(context)!.translate("create_listing") ?? "Create Listing",
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -616,7 +619,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Prepared At",
+          AppLocalizations.of(context)!.translate("prepared_at") ?? "Prepared At",
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
@@ -686,16 +689,16 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     color: AppColors.primary.withOpacity(0.5),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    "Add food pictures",
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context)!.translate("add_food_pictures") ?? "Add food pictures",
+                    style: const TextStyle(
                       color: AppColors.textLight,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "Capture or upload from gallery",
+                    AppLocalizations.of(context)!.translate("capture_or_upload") ?? "Capture or upload from gallery",
                     style: TextStyle(
                       color: AppColors.textLight.withOpacity(0.5),
                       fontSize: 12,
@@ -735,7 +738,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Category",
+          AppLocalizations.of(context)!.translate("category") ?? "Category",
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,

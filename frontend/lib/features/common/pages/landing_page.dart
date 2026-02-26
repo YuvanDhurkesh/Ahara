@@ -171,15 +171,15 @@ class _LandingPageState extends State<LandingPage> {
                 ),
               ),
             ),
-            _buildDrawerItem("How it works", () {
+            _buildDrawerItem(AppLocalizations.of(context)!.translate("how_it_works"), () {
               Navigator.pop(context);
               _scrollToSection(_howItWorksKey, "howitworks");
             }),
-            _buildDrawerItem("Trust", () {
+            _buildDrawerItem(AppLocalizations.of(context)!.translate("trust"), () {
               Navigator.pop(context);
               _scrollToSection(_trustKey, "trust");
             }),
-            _buildDrawerItem("Impact", () {
+            _buildDrawerItem(AppLocalizations.of(context)!.translate("impact"), () {
               Navigator.pop(context);
               _scrollToSection(_impactKey, "impact");
             }),
@@ -247,9 +247,9 @@ class _LandingPageState extends State<LandingPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                "Welcome back to Ahara",
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.translate("welcome_ahara"),
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
@@ -257,7 +257,7 @@ class _LandingPageState extends State<LandingPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                "Select your role to login or get started.",
+                AppLocalizations.of(context)!.translate("select_role"),
                 style: TextStyle(
                   color: AppColors.textLight.withOpacity(0.7),
                   fontSize: 14,
@@ -269,8 +269,8 @@ class _LandingPageState extends State<LandingPage> {
               // Roles Selection for Login
               _buildRoleLoginTile(
                 context,
-                title: "Login as Buyer",
-                subtitle: "Find meals and help nearby",
+                title: AppLocalizations.of(context)!.translate("login_buyer"),
+                subtitle: AppLocalizations.of(context)!.translate("find_meals_nearby"),
                 icon: Icons.shopping_basket_outlined,
                 color: AppColors.primary,
                 onTap: () => _navigateToLogin(context),
@@ -278,8 +278,8 @@ class _LandingPageState extends State<LandingPage> {
               const SizedBox(height: 12),
               _buildRoleLoginTile(
                 context,
-                title: "Login as Seller",
-                subtitle: "Share surplus food surplus",
+                title: AppLocalizations.of(context)!.translate("login_seller"),
+                subtitle: AppLocalizations.of(context)!.translate("share_surplus_seller"),
                 icon: Icons.storefront_outlined,
                 color: AppColors.secondary,
                 onTap: () => _navigateToLogin(context),
@@ -287,8 +287,8 @@ class _LandingPageState extends State<LandingPage> {
               const SizedBox(height: 12),
               _buildRoleLoginTile(
                 context,
-                title: "Login as Volunteer",
-                subtitle: "Help transport or verify meals",
+                title: AppLocalizations.of(context)!.translate("login_volunteer"),
+                subtitle: AppLocalizations.of(context)!.translate("help_transport"),
                 icon: Icons.volunteer_activism_outlined,
                 color: Colors.blueGrey,
                 onTap: () => _navigateToLogin(context),
@@ -315,10 +315,10 @@ class _LandingPageState extends State<LandingPage> {
                       color: AppColors.textLight,
                     ),
                     children: [
-                      const TextSpan(text: "New to Ahara? "),
+                      TextSpan(text: AppLocalizations.of(context)!.translate("new_to_ahara")),
                       TextSpan(
-                        text: "Create an Account",
-                        style: TextStyle(
+                        text: AppLocalizations.of(context)!.translate("create_account"),
+                        style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                         ),
@@ -460,9 +460,9 @@ class HeroSection extends StatelessWidget {
             color: AppColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Text(
-            "COMMUNITY-DRIVEN FOOD SHARING",
-            style: TextStyle(
+          child: Text(
+            AppLocalizations.of(context)!.translate("hero_pill"),
+            style: const TextStyle(
               color: AppColors.primary,
               fontWeight: FontWeight.w800,
               fontSize: 10,
@@ -472,7 +472,7 @@ class HeroSection extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          "Small Acts,\nBig Plates.",
+          AppLocalizations.of(context)!.translate("hero_title"),
           textAlign: isMobile ? TextAlign.center : TextAlign.left,
           style: Theme.of(context).textTheme.displayLarge?.copyWith(
             fontSize: isMobile ? 44 : 64,
@@ -481,7 +481,7 @@ class HeroSection extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          "Join a community of food donors and volunteers turning local surplus into neighborhood meals with care and transparency.",
+          AppLocalizations.of(context)!.translate("hero_desc"),
           textAlign: isMobile ? TextAlign.center : TextAlign.left,
           style: TextStyle(
             fontSize: 17,
@@ -538,62 +538,63 @@ class HowItWorks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 48),
       child: Column(
         children: [
-          const SectionTitle("How It Works"),
+          SectionTitle(loc.translate("how_it_works_title")),
           const SizedBox(height: 40),
           ResponsiveLayout(
             mobile: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
-                children: const [
+                children: [
                   FeatureCard(
-                    title: "Give Food",
+                    title: loc.translate("give_food"),
                     icon: Icons.shopping_basket_outlined,
-                    description: "Share surplus food",
+                    description: loc.translate("share_surplus"),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   FeatureCard(
-                    title: "Volunteer",
+                    title: loc.translate("volunteer_title"),
                     icon: Icons.people_outline,
-                    description: "Transport & verify",
+                    description: loc.translate("transport_verify"),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   FeatureCard(
-                    title: "Find a meal",
+                    title: loc.translate("find_meal"),
                     icon: Icons.restaurant_outlined,
-                    description: "Discover local meals",
+                    description: loc.translate("discover_local"),
                   ),
                 ],
               ),
             ),
             desktop: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Flexible(
                   child: FeatureCard(
-                    title: "Give Food",
+                    title: loc.translate("give_food"),
                     icon: Icons.shopping_basket_outlined,
-                    description: "Share surplus food",
+                    description: loc.translate("share_surplus"),
                   ),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Flexible(
                   child: FeatureCard(
-                    title: "Volunteer",
+                    title: loc.translate("volunteer_title"),
                     icon: Icons.people_outline,
-                    description: "Transport & verify",
+                    description: loc.translate("transport_verify"),
                   ),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Flexible(
                   child: FeatureCard(
-                    title: "Find a meal",
+                    title: loc.translate("find_meal"),
                     icon: Icons.restaurant_outlined,
-                    description: "Discover local meals",
+                    description: loc.translate("discover_local"),
                   ),
                 ),
               ],
@@ -614,63 +615,64 @@ class TrustSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       color: Colors.white,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 48),
       child: Column(
         children: [
-          const SectionTitle("Why Trust Us"),
+          SectionTitle(loc.translate("trust_title")),
           const SizedBox(height: 40),
           ResponsiveLayout(
             mobile: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
-                children: const [
+                children: [
                   FeatureCard(
-                    title: "Food Safety",
+                    title: loc.translate("food_safety"),
                     icon: Icons.security,
-                    description: "Rigorous safety checks",
+                    description: loc.translate("rigorous_checks"),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   FeatureCard(
-                    title: "Verified Staff",
+                    title: loc.translate("verified_staff"),
                     icon: Icons.verified_user_outlined,
-                    description: "Vetted volunteers & partners",
+                    description: loc.translate("vetted_partners"),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   FeatureCard(
-                    title: "Transparency",
+                    title: loc.translate("transparency_title"),
                     icon: Icons.visibility_outlined,
-                    description: "Track donations in real-time",
+                    description: loc.translate("track_realtime"),
                   ),
                 ],
               ),
             ),
             desktop: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Flexible(
                   child: FeatureCard(
-                    title: "Food Safety",
+                    title: loc.translate("food_safety"),
                     icon: Icons.security,
-                    description: "Rigorous safety checks",
+                    description: loc.translate("rigorous_checks"),
                   ),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Flexible(
                   child: FeatureCard(
-                    title: "Verified Staff",
+                    title: loc.translate("verified_staff"),
                     icon: Icons.verified_user_outlined,
-                    description: "Vetted volunteers & partners",
+                    description: loc.translate("vetted_partners"),
                   ),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Flexible(
                   child: FeatureCard(
-                    title: "Transparency",
+                    title: loc.translate("transparency_title"),
                     icon: Icons.visibility_outlined,
-                    description: "Track donations in real-time",
+                    description: loc.translate("track_realtime"),
                   ),
                 ),
               ],
@@ -691,13 +693,14 @@ class ImpactSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Container(
       color: AppColors.surface,
       padding: const EdgeInsets.symmetric(vertical: 60),
       child: Column(
         children: [
           Text(
-            "Our Global Impact",
+            loc.translate("impact_title"),
             style: GoogleFonts.inter(
               fontSize: 32,
               fontWeight: FontWeight.bold,
@@ -709,41 +712,41 @@ class ImpactSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: ResponsiveLayout(
               mobile: Column(
-                children: const [
-                  ImpactCard("5,000+", "Meals Saved", Icons.eco_outlined),
-                  SizedBox(height: 16),
+                children: [
+                  ImpactCard("5,000+", loc.translate("meals_saved"), Icons.eco_outlined),
+                  const SizedBox(height: 16),
                   ImpactCard(
                     "1.2 Tons",
-                    "Waste Reduced",
+                    loc.translate("waste_reduced"),
                     Icons.recycling_outlined,
                   ),
-                  SizedBox(height: 16),
-                  ImpactCard("150+", "Partners", Icons.handshake_outlined),
+                  const SizedBox(height: 16),
+                  ImpactCard("150+", loc.translate("partners"), Icons.handshake_outlined),
                 ],
               ),
               desktop: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Flexible(
                     child: ImpactCard(
                       "5,000+",
-                      "Meals Saved",
+                      loc.translate("meals_saved"),
                       Icons.eco_outlined,
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Flexible(
                     child: ImpactCard(
                       "1.2 Tons",
-                      "Waste Reduced",
+                      loc.translate("waste_reduced"),
                       Icons.recycling_outlined,
                     ),
                   ),
-                  SizedBox(width: 20),
+                  const SizedBox(width: 20),
                   Flexible(
                     child: ImpactCard(
                       "150+",
-                      "Partners",
+                      loc.translate("partners"),
                       Icons.handshake_outlined,
                     ),
                   ),

@@ -8,6 +8,8 @@ import 'buyer_notifications_page.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import 'package:provider/provider.dart';
+import '../../../core/localization/language_selection_page.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class BuyerProfilePage extends StatefulWidget {
   const BuyerProfilePage({super.key});
@@ -134,13 +136,13 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                     Expanded(
                       child: _buildInfoCard(
                         context,
-                        title: "Orders Placed",
+                        title: AppLocalizations.of(context)!.translate("Orders Placed"),
                         value: _isLoadingStats
                             ? "..."
                             : _ordersPlaced.toString(),
                         subtext: _statsError != null
-                            ? "Unable to load"
-                            : "Your Order Journey",
+                            ? AppLocalizations.of(context)!.translate("Unable to load")
+                            : AppLocalizations.of(context)!.translate("Your Order Journey"),
                         icon: Icons.star_outline,
                         color: AppColors.primary,
                       ),
@@ -149,13 +151,13 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                     Expanded(
                       child: _buildInfoCard(
                         context,
-                        title: "Trust Score",
+                        title: AppLocalizations.of(context)!.translate("Trust Score"),
                         value: trustScore == null
                             ? "N/A"
                             : trustScore.toString(),
                         subtext: trustScore == null
-                            ? "Not available for buyer"
-                            : "From backend profile",
+                            ? AppLocalizations.of(context)!.translate("Not available for buyer")
+                            : AppLocalizations.of(context)!.translate("From backend profile"),
                         icon: Icons.shield_outlined,
                         color: AppColors.secondary,
                       ),
@@ -167,7 +169,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
 
                 // Recent Activity or other profile content could go here
                 Text(
-                  "Your Impact",
+                  AppLocalizations.of(context)!.translate("Your Impact"),
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -179,17 +181,17 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   mobile: Column(
                     children: [
                       _buildImpactStat(
-                        "Orders Placed",
+                        AppLocalizations.of(context)!.translate("Orders Placed"),
                         _isLoadingStats ? "..." : _ordersPlaced.toString(),
                         Icons.shopping_bag_outlined,
                       ),
                       _buildImpactStat(
-                        "Orders Cancelled",
+                        AppLocalizations.of(context)!.translate("Orders Cancelled"),
                         _isLoadingStats ? "..." : _ordersCancelled.toString(),
                         Icons.cancel_outlined,
                       ),
                       _buildImpactStat(
-                        "Total Spent",
+                        AppLocalizations.of(context)!.translate("Total Spent"),
                         _isLoadingStats
                             ? "..."
                             : "₹${_totalSpent.toStringAsFixed(0)}",
@@ -201,7 +203,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                     children: [
                       Expanded(
                         child: _buildImpactStat(
-                          "Orders Placed",
+                          AppLocalizations.of(context)!.translate("Orders Placed"),
                           _isLoadingStats ? "..." : _ordersPlaced.toString(),
                           Icons.shopping_bag_outlined,
                         ),
@@ -209,7 +211,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildImpactStat(
-                          "Orders Cancelled",
+                          AppLocalizations.of(context)!.translate("Orders Cancelled"),
                           _isLoadingStats ? "..." : _ordersCancelled.toString(),
                           Icons.cancel_outlined,
                         ),
@@ -217,7 +219,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: _buildImpactStat(
-                          "Total Spent",
+                          AppLocalizations.of(context)!.translate("Total Spent"),
                           _isLoadingStats
                               ? "..."
                               : "₹${_totalSpent.toStringAsFixed(0)}",
@@ -372,7 +374,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Manage account",
+                      AppLocalizations.of(context)!.translate("Manage account"),
                       style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -392,69 +394,74 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   controller: controller,
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   children: [
-                    _buildSectionHeader("SETTINGS"),
+                    _buildSectionHeader(AppLocalizations.of(context)!.translate("SETTINGS")),
                     _buildMenuItem(
                       context,
                       Icons.person_outline,
-                      "Account details",
+                      AppLocalizations.of(context)!.translate("Account details"),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      Icons.language_outlined,
+                      AppLocalizations.of(context)!.translate("Language"),
                     ),
                     _buildMenuItem(
                       context,
                       Icons.credit_card_outlined,
-                      "Payment cards",
+                      AppLocalizations.of(context)!.translate("Payment cards"),
                     ),
                     _buildMenuItem(
                       context,
                       Icons.confirmation_number_outlined,
-                      "Vouchers",
+                      AppLocalizations.of(context)!.translate("Vouchers"),
                     ),
                     _buildMenuItem(
                       context,
                       Icons.card_giftcard,
-                      "Special Rewards",
+                      AppLocalizations.of(context)!.translate("Special Rewards"),
                     ),
                     _buildMenuItem(
                       context,
                       Icons.notifications_outlined,
-                      "Notifications",
+                      AppLocalizations.of(context)!.translate("Notifications"),
                     ),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader("COMMUNITY"),
+                    _buildSectionHeader(AppLocalizations.of(context)!.translate("COMMUNITY")),
                     _buildMenuItem(
                       context,
                       Icons.favorite_border,
-                      "Invite your friends",
+                      AppLocalizations.of(context)!.translate("Invite your friends"),
                     ),
                     _buildMenuItem(
                       context,
                       Icons.storefront,
-                      "Recommend a store",
+                      AppLocalizations.of(context)!.translate("Recommend a store"),
                     ),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader("SUPPORT"),
+                    _buildSectionHeader(AppLocalizations.of(context)!.translate("SUPPORT")),
                     _buildMenuItem(
                       context,
                       Icons.shopping_bag_outlined,
-                      "Help with an order",
+                      AppLocalizations.of(context)!.translate("Help with an order"),
                     ),
                     _buildMenuItem(
                       context,
                       Icons.help_outline,
-                      "How Ahara works",
+                      AppLocalizations.of(context)!.translate("How Ahara works"),
                     ),
-                    _buildMenuItem(context, Icons.work_outline, "Careers"),
+                    _buildMenuItem(context, Icons.work_outline, AppLocalizations.of(context)!.translate("Careers")),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader("OTHER"),
+                    _buildSectionHeader(AppLocalizations.of(context)!.translate("OTHER")),
                     _buildMenuItem(
                       context,
                       Icons.visibility_off_outlined,
-                      "Hidden Stores",
+                      AppLocalizations.of(context)!.translate("Hidden Stores"),
                     ),
-                    _buildMenuItem(context, Icons.article_outlined, "Blog"),
-                    _buildMenuItem(context, Icons.gavel_outlined, "Legal"),
+                    _buildMenuItem(context, Icons.article_outlined, AppLocalizations.of(context)!.translate("Blog")),
+                    _buildMenuItem(context, Icons.gavel_outlined, AppLocalizations.of(context)!.translate("Legal")),
 
                     const SizedBox(height: 40),
                     Padding(
@@ -483,9 +490,9 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: const Text(
-                          "Log out",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        child: Text(
+                          AppLocalizations.of(context)!.translate("logout_btn"),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -529,18 +536,25 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
       ),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
       onTap: () {
-        if (title == "Account details") {
+        if (title == AppLocalizations.of(context)!.translate("Account details")) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const BuyerAccountDetailsPage(),
             ),
           );
-        } else if (title == "Notifications") {
+        } else if (title == AppLocalizations.of(context)!.translate("Notifications")) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const BuyerNotificationsPage(),
+            ),
+          );
+        } else if (title == AppLocalizations.of(context)!.translate("Language")) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LanguageSelectionPage(),
             ),
           );
         }

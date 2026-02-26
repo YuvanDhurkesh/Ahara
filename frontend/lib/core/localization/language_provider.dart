@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'app_localizations.dart';
 
 class LanguageProvider extends ChangeNotifier {
   Locale _locale = const Locale('en');
@@ -16,6 +17,9 @@ class LanguageProvider extends ChangeNotifier {
 
   LanguageProvider() {
     _loadFromPrefs();
+    AppLocalizations.onDynamicTranslationUpdated = () {
+      notifyListeners();
+    };
   }
 
   Future<void> setLanguage(String languageCode, {bool isManual = true}) async {
@@ -55,6 +59,34 @@ class LanguageProvider extends ChangeNotifier {
       _isManualSelection = true;
     }
     notifyListeners();
+  }
+
+  String getTranslatedText(BuildContext context, Map<String, dynamic>? itemData, String defaultKey) {
+    if (itemData == null) return "Unknown";
+    final text = itemData[defaultKey] ?? "Unknown";
+    final String rawString = text.toString();
+    
+    // If English or translations missing, return default (English) text fallback
+    if (_locale.languageCode == 'en') return rawString;
+    
+    final translations = itemData['translations'];
+    if (translations != null && translations[_locale.languageCode] != null) {
+      final translated = translations[_locale.languageCode][defaultKey];
+      if (translated != null && translated.toString().isNotEmpty) {
+        return translated.toString();
+      }
+    }
+    
+    // Fall back to dynamic translation via AppLocalizations
+    final localizations = AppLocalizations.of(context);
+    if (localizations != null) {
+      final dynTranslation = localizations.translate(rawString);
+      if (dynTranslation != null && dynTranslation.isNotEmpty) {
+        return dynTranslation;
+      }
+    }
+    
+    return rawString;
   }
 
   String getLanguageName() {

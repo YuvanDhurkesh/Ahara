@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class VolunteerRatingsPage extends StatelessWidget {
   const VolunteerRatingsPage({super.key});
@@ -59,7 +60,7 @@ class VolunteerRatingsPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Ratings & Badges',
+          AppLocalizations.of(context)!.translate("ratings_and_badges") ?? 'Ratings & Badges',
           style: GoogleFonts.ebGaramond(
             color: const Color(0xFF1A1A1A),
             fontWeight: FontWeight.w800,
@@ -86,11 +87,11 @@ class VolunteerRatingsPage extends StatelessWidget {
               perfectStreak: perfectStreak,
             ),
             const SizedBox(height: 32),
-            _sectionLabel("Performance"),
+            _sectionLabel(AppLocalizations.of(context)!.translate("performance") ?? "Performance"),
             const SizedBox(height: 16),
             _PerformanceStats(onTimeRate: onTimeRate, successRate: successRate),
             const SizedBox(height: 32),
-            _sectionLabel("Recent Feedback"),
+            _sectionLabel(AppLocalizations.of(context)!.translate("recent_feedback") ?? "Recent Feedback"),
             _RecentReviews(hasReviews: false),
           ],
         ),
@@ -164,7 +165,7 @@ class _OverallRatingCard extends StatelessWidget {
               ),
             ),
             Text(
-              'Average Rating',
+              AppLocalizations.of(context)!.translate("average_rating") ?? 'Average Rating',
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.grey.shade500,
                 fontWeight: FontWeight.w700,
@@ -173,7 +174,7 @@ class _OverallRatingCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Based on $deliveries deliveries',
+              "${AppLocalizations.of(context)!.translate("based_on") ?? "Based on"} $deliveries ${AppLocalizations.of(context)!.translate("deliveries_lower") ?? "deliveries"}",
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.grey.shade300,
                 fontSize: 10,
@@ -210,7 +211,7 @@ class _BadgesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Your Achievements',
+          AppLocalizations.of(context)!.translate("your_achievements") ?? 'Your Achievements',
           style: GoogleFonts.ebGaramond(
             fontSize: 24,
             fontWeight: FontWeight.w800,
@@ -228,23 +229,23 @@ class _BadgesSection extends StatelessWidget {
           children: [
             _BadgeCard(
               icon: Icons.verified_rounded,
-              label: 'Verified',
+              label: AppLocalizations.of(context)!.translate("verified") ?? 'Verified',
               isActive: isVerified,
               activeColor: const Color(0xFFFEEDE1), // Rich warm orange-tinted ivory
             ),
             _BadgeCard(
               icon: Icons.auto_awesome_rounded,
-              label: 'Top Volunteer',
+              label: AppLocalizations.of(context)!.translate("top_volunteer") ?? 'Top Volunteer',
               isActive: topVolunteer,
             ),
             _BadgeCard(
               icon: Icons.local_shipping_rounded,
-              label: '50+ Deliveries',
+              label: AppLocalizations.of(context)!.translate("50_plus_deliveries") ?? '50+ Deliveries',
               isActive: fiftyDeliveries,
             ),
             _BadgeCard(
               icon: Icons.bolt_rounded,
-              label: 'Perfect Streak',
+              label: AppLocalizations.of(context)!.translate("perfect_streak") ?? 'Perfect Streak',
               isActive: perfectStreak,
             ),
           ],
@@ -333,14 +334,14 @@ class _PerformanceStats extends StatelessWidget {
     return Row(
       children: [
         _StatBox(
-          title: 'On-Time',
+          title: AppLocalizations.of(context)!.translate("on_time") ?? 'On-Time',
           value: '${(onTimeRate * 100).toStringAsFixed(0)}%',
           color: Colors.green,
           icon: Icons.timer_rounded,
         ),
         const SizedBox(width: 16),
         _StatBox(
-          title: 'Success',
+          title: AppLocalizations.of(context)!.translate("success") ?? 'Success',
           value: '${(successRate * 100).toStringAsFixed(0)}%',
           color: Colors.blue,
           icon: Icons.check_circle_rounded,
@@ -428,7 +429,7 @@ class _RecentReviews extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Recent Reviews',
+          AppLocalizations.of(context)!.translate("recent_reviews") ?? 'Recent Reviews',
           style: GoogleFonts.ebGaramond(
             fontSize: 24,
             fontWeight: FontWeight.w800,
@@ -463,7 +464,7 @@ class _RecentReviews extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "No reviews yet",
+                  AppLocalizations.of(context)!.translate("no_reviews_yet") ?? "No reviews yet",
                   style: GoogleFonts.plusJakartaSans(
                     color: Colors.grey.shade400,
                     fontWeight: FontWeight.w700,
@@ -472,7 +473,7 @@ class _RecentReviews extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "Complete more deliveries to see feedback",
+                  AppLocalizations.of(context)!.translate("complete_more_deliveries") ?? "Complete more deliveries to see feedback",
                   style: GoogleFonts.plusJakartaSans(
                     color: Colors.grey.shade300,
                     fontSize: 12,

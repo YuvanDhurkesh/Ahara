@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../localization/language_provider.dart';
 import '../localization/app_localizations.dart';
-
+import '../../data/providers/app_auth_provider.dart';
+import '../../data/services/backend_service.dart';
 class LanguageSelectionPage extends StatelessWidget {
   const LanguageSelectionPage({super.key});
 
@@ -49,8 +50,22 @@ class LanguageSelectionPage extends StatelessWidget {
                     final isSelected = languageProvider.locale.languageCode == lang['code'];
 
                     return InkWell(
-                      onTap: () {
-                        languageProvider.setLanguage(lang['code']!);
+                      onTap: () async {
+                        await languageProvider.setLanguage(lang['code']!);
+                        
+                        // Sync preference to backend if logged in
+                        final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                        if (auth.currentUser != null) {
+                          try {
+                            await BackendService.updateUserPreferences(
+                              firebaseUid: auth.currentUser!.uid,
+                              language: lang['code'],
+                            );
+                            auth.refreshMongoUser(); // Refresh the provider state
+                          } catch (e) {
+                            debugPrint("Failed to sync language to backend: $e");
+                          }
+                        }
                       },
                       borderRadius: BorderRadius.circular(16),
                       child: Container(

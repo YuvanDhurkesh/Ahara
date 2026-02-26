@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../common/pages/landing_page.dart';
 import '../../../core/localization/language_provider.dart';
+import '../../../core/localization/language_selection_page.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import 'seller_business_details_page.dart';
@@ -69,7 +71,7 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
         final mongoProfile = authProvider.mongoProfile;
 
         // Fallback values if data isn't loaded
-        final businessName = mongoProfile?['orgName'] ?? "Your Business";
+        final businessName = mongoProfile?['orgName'] ?? AppLocalizations.of(context)!.translate("Your Business");
         final rating = mongoProfile?['stats']?['avgRating'] ?? 0.0;
         final mealsShared =
             mongoProfile?['stats']?['totalOrdersCompleted'] ?? 0;
@@ -91,7 +93,7 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Hello, $businessName",
+                          AppLocalizations.of(context)!.translate("Hello, $businessName"),
                           style: GoogleFonts.inter(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -113,10 +115,10 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                         Expanded(
                           child: _buildInfoCard(
                             context,
-                            title: "Trust Score",
+                            title: AppLocalizations.of(context)!.translate("Trust Score"),
                             value: (mongoProfile?['stats']?['ratingCount'] ?? 0)
                                 .toString(),
-                            subtext: "Ratings received",
+                            subtext: AppLocalizations.of(context)!.translate("Ratings received"),
                             icon: Icons.shield_outlined,
                             color: AppColors.secondary,
                           ),
@@ -125,9 +127,9 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                         Expanded(
                           child: _buildInfoCard(
                             context,
-                            title: "Rating",
+                            title: AppLocalizations.of(context)!.translate("Rating"),
                             value: "${rating.toStringAsFixed(1)}/5",
-                            subtext: "From customers",
+                            subtext: AppLocalizations.of(context)!.translate("From customers"),
                             icon: Icons.star_outlined,
                             color: AppColors.primary,
                           ),
@@ -138,7 +140,7 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                     const SizedBox(height: 40),
 
                     Text(
-                      "Business Impact",
+                      AppLocalizations.of(context)!.translate("Business Impact"),
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -149,17 +151,17 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                     Column(
                       children: [
                         _buildImpactStat(
-                          "Meals Shared",
+                          AppLocalizations.of(context)!.translate("Meals Shared"),
                           "$mealsShared",
                           Icons.lunch_dining,
                         ),
                         _buildImpactStat(
-                          "CO2 Saved",
+                          AppLocalizations.of(context)!.translate("CO2 Saved"),
                           "${co2Offset.toStringAsFixed(0)} kg",
                           Icons.eco,
                         ),
                         _buildImpactStat(
-                          "Total Listings",
+                          AppLocalizations.of(context)!.translate("Total Listings"),
                           (mongoProfile?['stats']?['totalListings'] ?? 0)
                               .toString(),
                           Icons.list_alt_outlined,
@@ -308,7 +310,7 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Manage account",
+                      AppLocalizations.of(context)!.translate("Manage account"),
                       style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -327,20 +329,25 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                   controller: controller,
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   children: [
-                    _buildSectionHeader("SETTINGS"),
+                    _buildSectionHeader(AppLocalizations.of(context)!.translate("SETTINGS")),
                     _buildMenuItem(
                       context,
                       Icons.business_outlined,
-                      "Business details",
+                      AppLocalizations.of(context)!.translate("Business details"),
                     ),
                     _buildMenuItem(
                       context,
                       Icons.notifications_outlined,
-                      "Notifications",
+                      AppLocalizations.of(context)!.translate("Notifications"),
                     ),
 
                     const SizedBox(height: 16),
-                    _buildSectionHeader("ACCESSIBILITY"),
+                    _buildSectionHeader(AppLocalizations.of(context)!.translate("ACCESSIBILITY")),
+                    _buildMenuItem(
+                      context,
+                      Icons.language_outlined,
+                      AppLocalizations.of(context)!.translate("Language"),
+                    ),
                     Consumer<LanguageProvider>(
                       builder: (context, langProvider, child) {
                         return SwitchListTile(
@@ -348,14 +355,14 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                             horizontal: 24,
                           ),
                           title: Text(
-                            "Easy Mode (Simplified)",
+                            AppLocalizations.of(context)!.translate("Easy Mode (Simplified)"),
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           subtitle: Text(
-                            "Large icons and simple flow",
+                            AppLocalizations.of(context)!.translate("Large icons and simple flow"),
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey.shade500,
@@ -388,21 +395,21 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                     ),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader("TRUST & VERIFICATION"),
+                    _buildSectionHeader(AppLocalizations.of(context)!.translate("TRUST & VERIFICATION")),
                     _buildMenuItem(
                       context,
                       Icons.verified_user_outlined,
-                      "Get Verified",
+                      AppLocalizations.of(context)!.translate("Get Verified"),
                     ),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader("SUPPORT"),
+                    _buildSectionHeader(AppLocalizations.of(context)!.translate("SUPPORT")),
                     _buildMenuItem(
                       context,
                       Icons.help_outline,
-                      "Help with orders",
+                      AppLocalizations.of(context)!.translate("Help with orders"),
                     ),
-                    _buildMenuItem(context, Icons.info_outline, "How it works"),
+                    _buildMenuItem(context, Icons.info_outline, AppLocalizations.of(context)!.translate("How it works")),
 
                     const SizedBox(height: 40),
                     Padding(
@@ -431,7 +438,7 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: const Text("Log out"),
+                        child: Text(AppLocalizations.of(context)!.translate("logout_btn")),
                       ),
                     ),
                   ],
@@ -473,25 +480,32 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
       ),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
       onTap: () {
-        if (title == "Business details") {
+        if (title == AppLocalizations.of(context)!.translate("Business details")) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const SellerBusinessDetailsPage(),
             ),
           );
-        } else if (title == "Get Verified") {
+        } else if (title == AppLocalizations.of(context)!.translate("Get Verified")) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const SellerVerificationPage(),
             ),
           );
-        } else if (title == "Notifications") {
+        } else if (title == AppLocalizations.of(context)!.translate("Notifications")) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const SellerNotificationsPage(),
+            ),
+          );
+        } else if (title == AppLocalizations.of(context)!.translate("Language")) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LanguageSelectionPage(),
             ),
           );
         }

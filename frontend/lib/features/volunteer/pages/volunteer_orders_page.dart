@@ -6,6 +6,7 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import 'volunteer_order_detail_page.dart';
+import '../../../core/localization/language_provider.dart';
 
 class VolunteerOrdersPage extends StatefulWidget {
   const VolunteerOrdersPage({super.key});
@@ -141,7 +142,7 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
             Icon(Icons.inbox_outlined, size: 48, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Text(
-              'No new requests',
+              localizations.translate('no_new_requests') ?? 'No new requests',
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.grey.shade400,
                 fontWeight: FontWeight.w700,
@@ -179,7 +180,7 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
                 size: 48, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Text(
-              'No active deliveries',
+              localizations.translate('no_active_deliveries') ?? 'No active deliveries',
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.grey.shade400,
                 fontWeight: FontWeight.w700,
@@ -217,7 +218,7 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
                 size: 48, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Text(
-              'No completed deliveries',
+              localizations.translate('no_completed_deliveries') ?? 'No completed deliveries',
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.grey.shade400,
                 fontWeight: FontWeight.w700,
@@ -349,7 +350,7 @@ class _DeliveryCard extends StatelessWidget {
     final listing = order['listingId'] as Map<String, dynamic>?;
     final buyer = order['buyerId'] as Map<String, dynamic>?;
 
-    final title = listing?['foodName'] ?? 'Delivery';
+    final title = listing != null ? Provider.of<LanguageProvider>(context, listen: false).getTranslatedText(context, listing, 'foodName') : 'Delivery';
     final pickup =
         order['pickup']?['addressText'] ?? listing?['pickupAddressText'];
     final drop =

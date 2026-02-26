@@ -241,7 +241,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.translate("seller_dashboard"),
+                      AppLocalizations.of(context)!.translate("seller_dashboard") ?? "Seller Dashboard",
                       style: GoogleFonts.inter(
                         fontWeight: FontWeight.bold,
                         color: AppColors.textDark,
@@ -294,7 +294,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                   size: 20,
                 ),
               ),
-              tooltip: "Notifications",
+              tooltip: AppLocalizations.of(context)!.translate("notifications") ?? "Notifications",
             ),
             IconButton(
               onPressed: () {
@@ -324,7 +324,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                   size: 20,
                 ),
               ),
-              tooltip: "Logout",
+              tooltip: AppLocalizations.of(context)!.translate("logout") ?? "Logout",
             ),
           ],
         ),
@@ -346,7 +346,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
           const Icon(Icons.error_outline, color: Colors.red, size: 32),
           const SizedBox(height: 12),
           Text(
-            "Failed to load statistics",
+            AppLocalizations.of(context)!.translate("failed_to_load_stats") ?? "Failed to load statistics",
             style: GoogleFonts.inter(
               fontWeight: FontWeight.bold,
               color: Colors.red.shade900,
@@ -366,7 +366,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text("Retry"),
+            child: Text(AppLocalizations.of(context)!.translate("retry") ?? "Retry"),
           ),
         ],
       ),
@@ -397,28 +397,28 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
           children: [
             _buildStatCard(
               context,
-              AppLocalizations.of(context)!.translate("active_listings"),
+              AppLocalizations.of(context)!.translate("active_listings") ?? "Active Listings",
               activeListings,
               Icons.inventory_2_rounded,
               const [Color(0xFF6B8E23), Color(0xFF8DB600)],
             ),
             _buildStatCard(
               context,
-              AppLocalizations.of(context)!.translate("pending_orders"),
+              AppLocalizations.of(context)!.translate("pending_orders") ?? "Pending Orders",
               pendingOrders,
               Icons.pending_actions_rounded,
               const [Color(0xFFCD853F), Color(0xFFD2B48C)],
             ),
             _buildStatCard(
               context,
-              AppLocalizations.of(context)!.translate("avg_rating"),
+              AppLocalizations.of(context)!.translate("avg_rating") ?? "Avg Rating",
               avgRating,
               Icons.star_rounded,
               const [Color(0xFF2E8B57), Color(0xFF3CB371)],
             ),
             _buildStatCard(
               context,
-              AppLocalizations.of(context)!.translate("monthly_earnings"),
+              AppLocalizations.of(context)!.translate("monthly_earnings") ?? "Monthly Earnings",
               earningsText,
               Icons.account_balance_wallet_rounded,
               const [Color(0xFF4682B4), Color(0xFF5F9EA0)],

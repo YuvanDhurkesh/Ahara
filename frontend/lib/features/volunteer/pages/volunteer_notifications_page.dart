@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class VolunteerNotificationsPage extends StatefulWidget {
   const VolunteerNotificationsPage({super.key});
@@ -42,7 +43,7 @@ class _VolunteerNotificationsPageState extends State<VolunteerNotificationsPage>
                 // Convert backend notification to frontend format
                 return {
                   "id": notification['_id'],
-                  "title": notification['title'] ?? "Notification",
+                  "title": notification['title'] ?? (AppLocalizations.of(context)!.translate("notification") ?? "Notification"),
                   "message": notification['message'] ?? "",
                   "time": _formatTime(notification['createdAt']),
                   "type": _getNotificationType(notification['type']),
@@ -65,36 +66,36 @@ class _VolunteerNotificationsPageState extends State<VolunteerNotificationsPage>
   }
 
   String _formatTime(String? createdAt) {
-    if (createdAt == null) return "Just now";
+    if (createdAt == null) return AppLocalizations.of(context)?.translate("just_now") ?? "Just now";
     try {
       final date = DateTime.parse(createdAt);
       final now = DateTime.now();
       final difference = now.difference(date);
 
       if (difference.inDays > 0) {
-        return "${difference.inDays}d ago";
+        return "${difference.inDays}${AppLocalizations.of(context)?.translate("d_ago") ?? "d ago"}";
       } else if (difference.inHours > 0) {
-        return "${difference.inHours}h ago";
+        return "${difference.inHours}${AppLocalizations.of(context)?.translate("h_ago") ?? "h ago"}";
       } else if (difference.inMinutes > 0) {
-        return "${difference.inMinutes}m ago";
+        return "${difference.inMinutes}${AppLocalizations.of(context)?.translate("m_ago") ?? "m ago"}";
       } else {
-        return "Just now";
+        return AppLocalizations.of(context)?.translate("just_now") ?? "Just now";
       }
     } catch (e) {
-      return "Just now";
+      return AppLocalizations.of(context)?.translate("just_now") ?? "Just now";
     }
   }
 
   String _getNotificationType(String? type) {
     switch (type) {
       case "rescue_request":
-        return "Rescue";
+        return AppLocalizations.of(context)?.translate("rescue") ?? "Rescue";
       case "order_update":
-        return "Order";
+        return AppLocalizations.of(context)?.translate("order") ?? "Order";
       case "emergency":
-        return "Alert";
+        return AppLocalizations.of(context)?.translate("alert") ?? "Alert";
       default:
-        return "Info";
+        return AppLocalizations.of(context)?.translate("info") ?? "Info";
     }
   }
 
@@ -160,7 +161,7 @@ class _VolunteerNotificationsPageState extends State<VolunteerNotificationsPage>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "Notifications",
+          AppLocalizations.of(context)!.translate("notifications") ?? "Notifications",
           style: GoogleFonts.ebGaramond(
             fontSize: 24,
             fontWeight: FontWeight.w800,
@@ -195,7 +196,7 @@ class _VolunteerNotificationsPageState extends State<VolunteerNotificationsPage>
                           ),
                           const SizedBox(height: 20),
                           Text(
-                            "No notifications yet",
+                            AppLocalizations.of(context)!.translate("no_notifications_yet") ?? "No notifications yet",
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
