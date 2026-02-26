@@ -167,19 +167,11 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     final List<String> dietaryPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
 
     return results.where((item) {
-<<<<<<< HEAD
       final langProvider = Provider.of<LanguageProvider>(context, listen: false);
       final name = item is MockStore ? item.name : langProvider.getTranslatedText(context, item, 'foodName');
       final type = item is MockStore ? item.type : (item['foodType'] ?? "");
-      final rating = item is MockStore ? double.tryParse(item.rating) ?? 0.0 : 0.0; // Real listings don't have ratings yet
+      final rating = item is MockStore ? double.tryParse(item.rating) ?? 0.0 : 0.0;
       final isFree = item is MockStore ? item.isFree : (item['pricing']?['isFree'] ?? false);
-=======
-      final isMock = item is MockStore;
-      final name = isMock ? item.name : (item['foodName'] ?? "");
-      final type = isMock ? item.type : (item['foodType'] ?? "");
-      final rating = isMock ? double.tryParse(item.rating) ?? 0.0 : 0.0; // Real listings don't have ratings yet
-      final isFree = isMock ? item.isFree : (item['pricing']?['isFree'] ?? false);
->>>>>>> origin/main
 
       // 1. Search Query
       if (_searchQuery.isNotEmpty) {
@@ -594,11 +586,8 @@ Widget _buildFloatingButton({
                     controller: _searchController,
                     onChanged: (val) => setState(() => _searchQuery = val),
                     decoration: InputDecoration(
-<<<<<<< HEAD
-                      hintText: AppLocalizations.of(context)!.translate("Bangalore"),
-=======
-                      hintText: "Search city, food or category...",
->>>>>>> origin/main
+                      label: Text(AppLocalizations.of(context)!.translate("bangalore") ?? "Bangalore"),
+                      hintText: AppLocalizations.of(context)!.translate("search_city_food_category") ?? "Search city, food or category...",
                       hintStyle: GoogleFonts.inter(
                         color: AppColors.textLight.withOpacity(0.5),
                         fontWeight: FontWeight.w500,
