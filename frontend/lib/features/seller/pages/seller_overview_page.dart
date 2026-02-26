@@ -21,6 +21,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
   bool _isLoading = true;
   String? _error;
   Map<String, dynamic>? _stats;
+  List<Map<String, dynamic>> _activities = [];
 
   @override
   void initState() {
@@ -49,11 +50,20 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
         throw Exception("Unable to load user profile. Please log in again.");
       }
 
-      final stats = await BackendService.getSellerStats(sellerId);
+      // Fetch stats and orders in parallel
+      final statsFuture = BackendService.getSellerStats(sellerId);
+      final ordersFuture = BackendService.getSellerOrders(sellerId);
+
+      final stats = await statsFuture;
+      final orders = await ordersFuture;
+
+      // Build activities from orders
+      final activities = _buildActivitiesFromData(orders);
 
       if (mounted) {
         setState(() {
           _stats = stats;
+          _activities = activities;
           _isLoading = false;
         });
       }
@@ -65,6 +75,80 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
         });
       }
     }
+  }
+
+  List<Map<String, dynamic>> _buildActivitiesFromData(
+    List<Map<String, dynamic>> orders,
+  ) {
+    final activities = <Map<String, dynamic>>[];
+
+    // Add order-related activities
+    for (var order in orders.take(10)) {
+      final status = order['status']?.toString().toLowerCase() ?? 'unknown';
+      final buyerId = order['buyerId'];
+      final buyerName = buyerId is Map ? buyerId['name'] ?? 'Buyer' : 'Buyer';
+      final listingId = order['listingId'];
+      final listingName =
+          listingId is Map ? listingId['name'] ?? 'Item' : 'Item';
+      final createdAt = order['createdAt'];
+      final DateTime orderDate =
+          createdAt is String ? DateTime.parse(createdAt) : DateTime.now();
+
+      if (status == 'pending') {
+        activities.add({
+          'type': 'order_pending',
+          'title': AppLocalizations.of(context)!.translate("new_order_received"),
+          'subtitle': '$listingName • ${buyerName ?? "Customer"}',
+          'timestamp': orderDate,
+          'icon': Icons.shopping_basket_rounded,
+          'color': Colors.orange,
+        });
+      } else if (status == 'completed') {
+        activities.add({
+          'type': 'order_completed',
+          'title': AppLocalizations.of(context)!.translate("order_completed"),
+          'subtitle': '$listingName • ₹${order['totalPrice'] ?? "0"}',
+          'timestamp': orderDate,
+          'icon': Icons.check_circle_outline_rounded,
+          'color': Colors.green,
+        });
+      } else if (status == 'cancelled') {
+        activities.add({
+          'type': 'order_cancelled',
+          'title': AppLocalizations.of(context)!.translate("order_cancelled"),
+          'subtitle': '$listingName • ${buyerName ?? "Customer"}',
+          'timestamp': orderDate,
+          'icon': Icons.cancel_outlined,
+          'color': Colors.red,
+        });
+      }
+
+      // If order has reviews, add review activity
+      final reviews = order['reviews'];
+      if (reviews is List && reviews.isNotEmpty) {
+        final review = reviews.first as Map<String, dynamic>;
+        final rating = review['rating'] ?? 0;
+        final comment = review['comment'];
+        activities.add({
+          'type': 'new_feedback',
+          'title': AppLocalizations.of(context)!.translate("new_feedback"),
+          'subtitle':
+              '${'⭐' * rating.toInt()} ${comment ?? "Seller review received"}',
+          'timestamp': createdAt is String
+              ? DateTime.parse(createdAt)
+              : DateTime.now(),
+          'icon': Icons.star_rounded,
+          'color': Colors.teal,
+        });
+      }
+    }
+
+    // Sort by most recent
+    activities.sort(
+      (a, b) => (b['timestamp'] as DateTime).compareTo(a['timestamp']),
+    );
+
+    return activities.take(4).toList();
   }
 
   @override
@@ -353,41 +437,25 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
   }
 
   Widget _buildRecentActivityList() {
-    // Note: These will remain static as per the design for now, 
-    // or we could implement an activity feed later.
-    final List<Map<String, dynamic>> activities = [
-      {
-        'title': AppLocalizations.of(context)!.translate("new_order_received"),
-        'subtitle': 'Mixed Veg Curry • 2 portions',
-        'time': '10 ${AppLocalizations.of(context)!.translate("mins_ago")}',
-        'icon': Icons.shopping_basket_rounded,
-        'color': Colors.orange,
-      },
-      {
-        'title': AppLocalizations.of(context)!.translate("listing_expiring_soon"),
-        'subtitle': 'Organic Carrots • 1.5 kg remaining',
-        'time': '2 ${AppLocalizations.of(context)!.translate("hours_ago")}',
-        'icon': Icons.timer_outlined,
-        'color': Colors.redAccent,
-      },
-      {
-        'title': AppLocalizations.of(context)!.translate("payment_confirmed"),
-        'subtitle': '₹450 credited to wallet',
-        'time': '5 ${AppLocalizations.of(context)!.translate("hours_ago")}',
-        'icon': Icons.check_circle_outline_rounded,
-        'color': Colors.green,
-      },
-      {
-        'title': AppLocalizations.of(context)!.translate("new_feedback"),
-        'subtitle': '⭐⭐⭐⭐⭐ "Fresh and delicious!"',
-        'time': AppLocalizations.of(context)!.translate("yesterday"),
-        'icon': Icons.star_rounded,
-        'color': Colors.teal,
-      },
-    ];
+    if (_activities.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 32),
+          child: Text(
+            AppLocalizations.of(context)!.translate("no_recent_activity"),
+            style: TextStyle(
+              color: AppColors.textLight.withOpacity(0.5),
+              fontSize: 14,
+            ),
+          ),
+        ),
+      );
+    }
 
     return Column(
-      children: activities.map((activity) {
+      children: _activities.map((activity) {
+        final timeString = _getTimeAgoString(activity['timestamp'] as DateTime);
+
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),
@@ -453,6 +521,8 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -461,7 +531,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    activity['time'],
+                    timeString,
                     style: TextStyle(
                       color: AppColors.textLight.withOpacity(0.5),
                       fontSize: 11,
@@ -481,6 +551,28 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
         );
       }).toList(),
     );
+  }
+
+  String _getTimeAgoString(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inMinutes < 1) {
+      return AppLocalizations.of(context)!.translate("just_now") ?? "Just now";
+    } else if (difference.inMinutes < 60) {
+      final mins = difference.inMinutes;
+      return '$mins ${AppLocalizations.of(context)!.translate("mins_ago") ?? "mins ago"}';
+    } else if (difference.inHours < 24) {
+      final hours = difference.inHours;
+      return '$hours ${AppLocalizations.of(context)!.translate("hours_ago") ?? "hours ago"}';
+    } else if (difference.inDays == 1) {
+      return AppLocalizations.of(context)!.translate("yesterday") ?? "Yesterday";
+    } else if (difference.inDays < 7) {
+      final days = difference.inDays;
+      return '$days ${AppLocalizations.of(context)!.translate("days_ago") ?? "days ago"}';
+    } else {
+      return dateTime.toString().split(' ')[0];
+    }
   }
 
   Widget _buildStatCard(
