@@ -4,8 +4,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../shared/utils/location_util.dart';
+import 'package:geolocator/geolocator.dart';
 import 'buyer_order_rate_page.dart';
 import 'buyer_order_track_page.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +31,7 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
   int _otpExpirySeconds = 492; // Mock 8:12
   Timer? _otpTimer;
   final MapController _mapController = MapController();
+  Position? _buyerPosition; // 🔥 Live buyer GPS position
 
   @override
   void initState() {
@@ -35,6 +39,14 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     _localOrder = widget.order;
     _isCancelled = _localOrder['status'] == 'cancelled';
     _startOtpTimer();
+    _fetchBuyerLocation(); // 🔥 Fetch buyer's live location
+  }
+
+  Future<void> _fetchBuyerLocation() async {
+    final pos = await LocationUtil.getCurrentLocation();
+    if (pos != null && mounted) {
+      setState(() => _buyerPosition = pos);
+    }
   }
 
   void _startOtpTimer() {
@@ -178,55 +190,171 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
   }
 
   Widget _buildPickupMap(Map<String, dynamic> listing) {
-    final geo = listing['geo']?['coordinates'] as List?;
-    final LatLng pickupPos = (geo != null && geo.length == 2) 
-        ? LatLng(geo[1].toDouble(), geo[0].toDouble()) 
-        : const LatLng(12.9716, 77.5946); // Default Bangalore
+    // 1. Primary: use order.pickup.geo (always set correctly at order creation time)
+    List? geo = (_localOrder['pickup']?['geo']?['coordinates']) as List?;
+    // 2. Fallback: listing.pickupGeo (may be missing from some API responses)
+    geo ??= listing['pickupGeo']?['coordinates'] as List?;
+    geo ??= listing['geo']?['coordinates'] as List?;
 
-    return Container(
-      height: 180,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: FlutterMap(
-          mapController: _mapController,
-          options: MapOptions(
-            initialCenter: pickupPos,
-            initialZoom: 15,
+    // GeoJSON format: coordinates = [longitude, latitude] — so geo[1]=lat, geo[0]=lng
+    final LatLng pickupPos = (geo != null && geo.length == 2)
+        ? LatLng((geo[1] as num).toDouble(), (geo[0] as num).toDouble())
+        : const LatLng(20.5937, 78.9629); // India center as last resort
+
+    // 2. Buyer's live GPS position
+    final LatLng? buyerPos = _buyerPosition != null
+        ? LatLng(_buyerPosition!.latitude, _buyerPosition!.longitude)
+        : null;
+
+    // 3. Map center: midpoint if both positions available
+    final LatLng center = buyerPos != null
+        ? LatLng(
+            (pickupPos.latitude + buyerPos.latitude) / 2,
+            (pickupPos.longitude + buyerPos.longitude) / 2,
+          )
+        : pickupPos;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          height: 220,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
           ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.ahara.app',
-            ),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: pickupPos,
-                  width: 40,
-                  height: 40,
-                  child: const Icon(Icons.location_on, color: AppColors.primary, size: 40),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: center,
+                initialZoom: buyerPos != null ? 12 : 15,
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.ahara.app',
+                ),
+
+                // 📍 Straight-line route polyline
+                if (buyerPos != null)
+                  PolylineLayer(
+                    polylines: [
+                      Polyline(
+                        points: [buyerPos, pickupPos],
+                        strokeWidth: 3.0,
+                        color: AppColors.primary.withOpacity(0.6),
+                        isDotted: true,
+                      ),
+                    ],
+                  ),
+
+                MarkerLayer(
+                  markers: [
+                    // 🏪 Pickup location marker
+                    Marker(
+                      point: pickupPos,
+                      width: 50,
+                      height: 60,
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.store, color: Colors.white, size: 18),
+                          ),
+                          const Icon(Icons.arrow_drop_down, color: AppColors.primary, size: 24),
+                        ],
+                      ),
+                    ),
+                    // 🔵 Buyer's current location
+                    if (buyerPos != null)
+                      Marker(
+                        point: buyerPos,
+                        width: 30,
+                        height: 30,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Container(
+                              width: 14,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 2),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+
+                // Re-center button
+                Positioned(
+                  bottom: 12,
+                  right: 12,
+                  child: FloatingActionButton.small(
+                    heroTag: "recenter",
+                    onPressed: () => _mapController.move(center, buyerPos != null ? 12 : 15),
+                    backgroundColor: Colors.white,
+                    child: const Icon(Icons.my_location, color: AppColors.primary, size: 18),
+                  ),
                 ),
               ],
             ),
-            Positioned(
-              bottom: 12,
-              right: 12,
-              child: FloatingActionButton.small(
-                onPressed: () => _mapController.move(pickupPos, 15),
-                backgroundColor: Colors.white,
-                child: const Icon(Icons.my_location, color: AppColors.primary, size: 18),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+
+        // 🗺 Open in Google Maps button
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _openInGoogleMaps(pickupPos, buyerPos),
+            icon: const Icon(Icons.directions, size: 18),
+            label: const Text("Get Directions"),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: const BorderSide(color: AppColors.primary),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ),
+      ],
     );
   }
+
+  Future<void> _openInGoogleMaps(LatLng destination, LatLng? origin) async {
+    String url;
+    if (origin != null) {
+      // With origin: show route from buyer to seller
+      url = 'https://www.google.com/maps/dir/?api=1'
+          '&origin=${origin.latitude},${origin.longitude}'
+          '&destination=${destination.latitude},${destination.longitude}'
+          '&travelmode=walking';
+    } else {
+      // Just show destination pin
+      url = 'https://www.google.com/maps/search/?api=1'
+          '&query=${destination.latitude},${destination.longitude}';
+    }
+
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
 
   Widget _buildStatusBanner(String status) {
     final bannerConfig = {

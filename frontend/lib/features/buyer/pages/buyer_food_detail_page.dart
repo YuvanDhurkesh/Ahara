@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
@@ -103,35 +105,43 @@ class BuyerFoodDetailPage extends StatelessWidget {
     final langProvider = Provider.of<LanguageProvider>(context, listen: false);
     final String name = store?.name ?? langProvider.getTranslatedText(context, listing, 'foodName');
     final String type = store?.type ?? listing?['foodType'] ?? "Meal";
-    
+
     // Get rating from seller profile or use default
     final sellerProfile = listing?['sellerProfileId'] ?? {};
-    final double sellerRating = (sellerProfile['stats']?['avgRating'] ?? 0.0).toDouble();
+    final double sellerRating = (sellerProfile['stats']?['avgRating'] ?? 0.0)
+        .toDouble();
     final int ratingCount = sellerProfile['stats']?['ratingCount'] ?? 0;
-    final String rating = store?.rating ?? (sellerRating > 0 ? sellerRating.toStringAsFixed(1) : "4.5");
-    
-    final bool isFree = store?.isFree ?? (listing?['pricing']?['isFree'] ?? false);
-    final String price = store?.price ?? "₹${listing?['pricing']?['discountedPrice'] ?? 0}";
-    
+    final String rating =
+        store?.rating ??
+        (sellerRating > 0 ? sellerRating.toStringAsFixed(1) : "4.5");
+
+    final bool isFree =
+        store?.isFree ?? (listing?['pricing']?['isFree'] ?? false);
+    final String price =
+        store?.price ?? "₹${listing?['pricing']?['discountedPrice'] ?? 0}";
+
     final List images = listing?['images'] ?? [];
-    final String foodName = store?.name ?? (listing?['foodName'] ?? "Food Item");
+    final String foodName =
+        store?.name ?? (listing?['foodName'] ?? "Food Item");
     final String uploadedImageUrl = images.isNotEmpty
         ? BackendService.formatImageUrl(images[0])
         : "";
-    final String imageUrl = store?.image ?? (BackendService.isValidImageUrl(uploadedImageUrl) 
-        ? uploadedImageUrl 
-        : BackendService.generateFoodImageUrl(foodName));
+    final String imageUrl =
+        store?.image ??
+        (BackendService.isValidImageUrl(uploadedImageUrl)
+            ? uploadedImageUrl
+            : BackendService.generateFoodImageUrl(foodName));
 
-    final String address = store?.address ?? (listing?['pickupAddressText'] ?? "Bangalore");
-    final String orgName = store?.name ?? (listing?['sellerProfileId']?['orgName'] ?? "Local Seller");
-    
-    final Map<String, double> reviews = store?.reviews ?? {
-      "Collection": 4.5,
-      "Quality": 4.8,
-      "Variety": 4.2,
-      "Quantity": 4.7,
-    };
-    
+    final String address =
+        store?.address ?? (listing?['pickupAddressText'] ?? "Bangalore");
+    final String orgName =
+        store?.name ??
+        (listing?['sellerProfileId']?['orgName'] ?? "Local Seller");
+
+    final Map<String, double> reviews =
+        store?.reviews ??
+        {"Collection": 4.5, "Quality": 4.8, "Variety": 4.2, "Quantity": 4.7};
+
     // Use ingredients if available, else use a placeholder based on description
     final String descText = langProvider.getTranslatedText(context, listing, 'description');
     final List<String> ingredients = store?.ingredients ?? 
@@ -150,7 +160,14 @@ class BuyerFoodDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeaderInfo(context, type, rating, name, address, orgName),
+                  _buildHeaderInfo(
+                    context,
+                    type,
+                    rating,
+                    name,
+                    address,
+                    orgName,
+                  ),
                   const SizedBox(height: 32),
                   _buildDirectionsButton(),
                   const SizedBox(height: 48),
@@ -165,7 +182,12 @@ class BuyerFoodDetailPage extends StatelessWidget {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _buildReserveButton(context, isFree, price, offersDelivery),
+      floatingActionButton: _buildReserveButton(
+        context,
+        isFree,
+        price,
+        offersDelivery,
+      ),
     );
   }
 
@@ -214,8 +236,12 @@ class BuyerFoodDetailPage extends StatelessWidget {
                       if (context.mounted) {
                         AnimatedToast.show(
                           context,
-                          isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
-                          type: isFavorited ? ToastType.info : ToastType.success,
+                          isFavorited
+                              ? "Removed restaurant from favorites"
+                              : "Added restaurant to favorites",
+                          type: isFavorited
+                              ? ToastType.info
+                              : ToastType.success,
                         );
                       }
                     } catch (e) {
@@ -233,15 +259,14 @@ class BuyerFoodDetailPage extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             Image.network(
-              imageUrl, 
+              imageUrl,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => 
-                Container(
-                  color: Colors.grey.shade300,
-                  child: const Center(
-                    child: Icon(Icons.image_not_supported, size: 64),
-                  ),
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Colors.grey.shade300,
+                child: const Center(
+                  child: Icon(Icons.image_not_supported, size: 64),
                 ),
+              ),
             ),
             Container(
               decoration: BoxDecoration(
@@ -262,7 +287,14 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderInfo(BuildContext context, String type, String rating, String name, String address, String orgName) {
+  Widget _buildHeaderInfo(
+    BuildContext context,
+    String type,
+    String rating,
+    String name,
+    String address,
+    String orgName,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -339,7 +371,11 @@ class BuyerFoodDetailPage extends StatelessWidget {
             CircleAvatar(
               backgroundColor: AppColors.primary.withOpacity(0.1),
               radius: 20,
-              child: const Icon(Icons.store, color: AppColors.primary, size: 20),
+              child: const Icon(
+                Icons.store,
+                color: AppColors.primary,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -394,7 +430,11 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReviewSection(BuildContext context, String rating, Map<String, double> reviews) {
+  Widget _buildReviewSection(
+    BuildContext context,
+    String rating,
+    Map<String, double> reviews,
+  ) {
     final bool isMobile = ResponsiveLayout.isMobile(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -714,7 +754,8 @@ class BuyerFoodDetailPage extends StatelessWidget {
                             AnimatedToast.show(
                               context,
                               "Checkout for real listings coming soon!", // Keeping original message
-                              type: ToastType.info, // Using info as it's not success/error
+                              type: ToastType
+                                  .info, // Using info as it's not success/error
                             );
                           }
                         }
@@ -796,7 +837,12 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReserveButton(BuildContext context, bool isFree, String price, bool offersDelivery) {
+  Widget _buildReserveButton(
+    BuildContext context,
+    bool isFree,
+    String price,
+    bool offersDelivery,
+  ) {
     // Only show button for real listings (not mock stores)
     if (listing == null) {
       return const SizedBox.shrink();
@@ -841,23 +887,79 @@ class BuyerFoodDetailPage extends StatelessWidget {
               ],
             ),
           ),
-          ElevatedButton(
-            onPressed: () => _showOrderDialog(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isFree ? Colors.green : AppColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            child: Text(
-              isFree ? 'Claim Now' : 'Order Now',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
+          Builder(
+            builder: (context) {
+              final fromStr = listing?['pickupWindow']?['from'];
+              final fromDt = fromStr != null
+                  ? DateTime.tryParse(fromStr)
+                  : null;
+              bool _checkUpcoming(DateTime? start) {
+                if (start == null) return false;
+                final now = DateTime.now();
+                if (!start.isAfter(now)) return false;
+
+                // Healing legacy "tomorrow-shifted" bug listings
+                if (start.difference(now).inHours < 24) {
+                  final todayStart = DateTime(
+                    now.year,
+                    now.month,
+                    now.day,
+                    start.hour,
+                    start.minute,
+                  );
+                  if (!todayStart.isAfter(now)) return false;
+                }
+                return true;
+              }
+
+              final isUpcoming = _checkUpcoming(fromDt);
+
+              return ElevatedButton(
+                onPressed: () {
+                  if (isUpcoming) {
+                    _showRescueWindowCountdown(context, fromDt!);
+                  } else {
+                    _showOrderDialog(context);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isUpcoming
+                      ? Colors.orange.shade700
+                      : (isFree ? Colors.green : AppColors.primary),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: isUpcoming ? 0 : 2,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isUpcoming) ...[
+                      const Icon(
+                        Icons.lock_clock_outlined,
+                        size: 18,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      isUpcoming
+                          ? 'Opens at ${DateFormat('hh:mm a').format(fromDt!)}'
+                          : (isFree ? 'Claim Now' : 'Order Now'),
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -867,10 +969,12 @@ class BuyerFoodDetailPage extends StatelessWidget {
   void _showOrderDialog(BuildContext context) {
     int quantity = 1;
     final maxQuantity = listing!['remainingQuantity'] ?? 1;
-    final pricePerItem = (listing!['pricing']?['discountedPrice'] ?? 0).toDouble();
+    final pricePerItem = (listing!['pricing']?['discountedPrice'] ?? 0)
+        .toDouble();
     final isFree = listing!['pricing']?['isFree'] ?? false;
 
-    int currentStep = 1; // 1: Quantity, 2: Logistics, 3: Address (optional), 4: Summary/Matching
+    int currentStep =
+        1; // 1: Quantity, 2: Logistics, 3: Address (optional), 4: Summary/Matching
     String fulfillment = "self_pickup";
     Map<String, dynamic>? dropAddressData;
     final instructionsController = TextEditingController();
@@ -903,9 +1007,13 @@ class BuyerFoodDetailPage extends StatelessWidget {
                       return Expanded(
                         child: Container(
                           height: 4,
-                          margin: EdgeInsets.only(right: index == totalSteps - 1 ? 0 : 4),
+                          margin: EdgeInsets.only(
+                            right: index == totalSteps - 1 ? 0 : 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: isActive ? AppColors.primary : Colors.grey.shade200,
+                            color: isActive
+                                ? AppColors.primary
+                                : Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -916,10 +1024,28 @@ class BuyerFoodDetailPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Step $currentStep of $totalSteps', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
                       Text(
-                        currentStep == 1 ? 'Quantity' : currentStep == 2 ? 'Logistics' : currentStep == 3 && fulfillment == "volunteer_delivery" ? 'Address' : 'Review',
-                        style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+                        'Step $currentStep of $totalSteps',
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      Text(
+                        currentStep == 1
+                            ? 'Quantity'
+                            : currentStep == 2
+                            ? 'Logistics'
+                            : currentStep == 3 &&
+                                  fulfillment == "volunteer_delivery"
+                            ? 'Address'
+                            : 'Review',
+                        style: GoogleFonts.inter(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -942,7 +1068,9 @@ class BuyerFoodDetailPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.textDark.withOpacity(0.05)),
+                  border: Border.all(
+                    color: AppColors.textDark.withOpacity(0.05),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -973,7 +1101,11 @@ class BuyerFoodDetailPage extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                    const Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: Colors.grey,
+                    ),
                   ],
                 ),
               ),
@@ -996,8 +1128,11 @@ class BuyerFoodDetailPage extends StatelessWidget {
               }
 
               try {
-                final updatedOrder = await BackendService.getOrderById(order['_id']);
-                if (updatedOrder['status'] == 'volunteer_assigned' || updatedOrder['status'] == 'volunteer_accepted') {
+                final updatedOrder = await BackendService.getOrderById(
+                  order['_id'],
+                );
+                if (updatedOrder['status'] == 'volunteer_assigned' ||
+                    updatedOrder['status'] == 'volunteer_accepted') {
                   setState(() {
                     matchingStatus = "matched";
                     matchingOrder = updatedOrder;
@@ -1005,7 +1140,8 @@ class BuyerFoodDetailPage extends StatelessWidget {
                   return false;
                 }
                 // Check if backend auto-switched to self_pickup
-                if (updatedOrder['fulfillment'] == 'self_pickup' && updatedOrder['status'] == 'placed') {
+                if (updatedOrder['fulfillment'] == 'self_pickup' &&
+                    updatedOrder['status'] == 'placed') {
                   setState(() {
                     matchingStatus = "timeout";
                     matchingOrder = updatedOrder;
@@ -1028,24 +1164,46 @@ class BuyerFoodDetailPage extends StatelessWidget {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Select Quantity', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  'Select Quantity',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton(
-                      onPressed: quantity > 1 ? () => setState(() => quantity--) : null,
+                      onPressed: quantity > 1
+                          ? () => setState(() => quantity--)
+                          : null,
                       icon: const Icon(Icons.remove_circle_outline),
                       color: AppColors.primary,
                       iconSize: 32,
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                      decoration: BoxDecoration(border: Border.all(color: AppColors.primary), borderRadius: BorderRadius.circular(8)),
-                      child: Text('$quantity', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.bold)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.primary),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '$quantity',
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                     IconButton(
-                      onPressed: quantity < maxQuantity ? () => setState(() => quantity++) : null,
+                      onPressed: quantity < maxQuantity
+                          ? () => setState(() => quantity++)
+                          : null,
                       icon: const Icon(Icons.add_circle_outline),
                       color: AppColors.primary,
                       iconSize: 32,
@@ -1053,7 +1211,13 @@ class BuyerFoodDetailPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text('Max available: $maxQuantity', style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade600)),
+                Text(
+                  'Max available: $maxQuantity',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
               ],
             );
           }
@@ -1063,7 +1227,13 @@ class BuyerFoodDetailPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Choose Delivery Method', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  'Choose Delivery Method',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 RadioListTile<String>(
                   title: const Text('Self-Pickup'),
@@ -1090,12 +1260,20 @@ class BuyerFoodDetailPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Delivery Address', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  'Delivery Address',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 buildSelectionItem(
                   icon: Icons.location_on_outlined,
                   title: "Drop Location",
-                  value: dropAddressData?["addressText"] ?? "Tap to select address",
+                  value:
+                      dropAddressData?["addressText"] ??
+                      "Tap to select address",
                   onTap: () async {
                     final result = await Navigator.push(
                       context,
@@ -1111,20 +1289,41 @@ class BuyerFoodDetailPage extends StatelessWidget {
                 if (dropAddressData == null)
                   Padding(
                     padding: const EdgeInsets.only(top: 8.0, left: 4.0),
-                    child: Text('Please select a delivery address', style: TextStyle(color: Colors.red.shade700, fontSize: 12)),
+                    child: Text(
+                      'Please select a delivery address',
+                      style: TextStyle(
+                        color: Colors.red.shade700,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                 const SizedBox(height: 24),
-                Text('Special Instructions', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.bold)),
+                Text(
+                  'Special Instructions',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: instructionsController,
                   decoration: InputDecoration(
                     hintText: 'Gate code, floor, landmark...',
-                    hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                    hintStyle: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade400,
+                    ),
                     filled: true,
                     fillColor: AppColors.surface,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                   style: const TextStyle(fontSize: 14),
                   maxLines: 2,
@@ -1141,20 +1340,39 @@ class BuyerFoodDetailPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   const CircularProgressIndicator(),
                   const SizedBox(height: 20),
-                  Text('Finding a volunteer nearby...', style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
+                  Text(
+                    'Finding a volunteer nearby...',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 10),
-                  Text('Time remaining: ${secondsLeft}s', style: const TextStyle(color: Colors.grey)),
+                  Text(
+                    'Time remaining: ${secondsLeft}s',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 ],
               );
             } else if (matchingStatus == "timeout") {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.timer_off_outlined, size: 48, color: Colors.orange),
+                  const Icon(
+                    Icons.timer_off_outlined,
+                    size: 48,
+                    color: Colors.orange,
+                  ),
                   const SizedBox(height: 16),
-                  Text('No volunteers found', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    'No volunteers found',
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  const Text('We couldn\'t find a volunteer to deliver this order right now.', textAlign: TextAlign.center),
+                  const Text(
+                    'We couldn\'t find a volunteer to deliver this order right now.',
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               );
             } else if (matchingStatus == "matched") {
@@ -1163,9 +1381,18 @@ class BuyerFoodDetailPage extends StatelessWidget {
                 children: [
                   const Icon(Icons.check_circle, size: 48, color: Colors.green),
                   const SizedBox(height: 16),
-                  Text('Volunteer Found!', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(
+                    'Volunteer Found!',
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text('A volunteer has accepted your delivery request.', textAlign: TextAlign.center),
+                  Text(
+                    'A volunteer has accepted your delivery request.',
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               );
             }
@@ -1179,18 +1406,35 @@ class BuyerFoodDetailPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Order Summary', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(
+                  'Order Summary',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text('Subtotal ($quantity items):'), Text(isFree ? 'FREE' : '₹$total')],
+                  children: [
+                    Text('Subtotal ($quantity items):'),
+                    Text(isFree ? 'FREE' : '₹$total'),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [const Text('Logistics:'), Text(fulfillment == 'self_pickup' ? 'Self-Pickup' : 'Volunteer Delivery')],
+                  children: [
+                    const Text('Logistics:'),
+                    Text(
+                      fulfillment == 'self_pickup'
+                          ? 'Self-Pickup'
+                          : 'Volunteer Delivery',
+                    ),
+                  ],
                 ),
-                if (fulfillment == 'volunteer_delivery' && dropAddressData != null) ...[
+                if (fulfillment == 'volunteer_delivery' &&
+                    dropAddressData != null) ...[
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1198,7 +1442,16 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     children: [
                       const Text('Drop At:'),
                       const SizedBox(width: 16),
-                      Expanded(child: Text(dropAddressData!["addressText"], textAlign: TextAlign.right, style: const TextStyle(fontSize: 12, color: Colors.grey))),
+                      Expanded(
+                        child: Text(
+                          dropAddressData!["addressText"],
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -1208,21 +1461,37 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Est. Delivery Time:'),
-                      Text('15-25 mins', style: GoogleFonts.inter(color: Colors.orange.shade700, fontWeight: FontWeight.bold)),
+                      Text(
+                        '15-25 mins',
+                        style: GoogleFonts.inter(
+                          color: Colors.orange.shade700,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.blue.withOpacity(0.05), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Row(
                       children: [
-                        const Icon(Icons.security, size: 20, color: Colors.blue),
+                        const Icon(
+                          Icons.security,
+                          size: 20,
+                          color: Colors.blue,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'You will receive a 4-digit OTP to share with the volunteer for safe delivery.',
-                            style: GoogleFonts.inter(fontSize: 11, color: Colors.blue.shade800),
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: Colors.blue.shade800,
+                            ),
                           ),
                         ),
                       ],
@@ -1233,8 +1502,18 @@ class BuyerFoodDetailPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Total Amount:', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                    Text(isFree ? 'FREE' : '₹$total', style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.bold, color: isFree ? Colors.green : AppColors.primary)),
+                    Text(
+                      'Total Amount:',
+                      style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      isFree ? 'FREE' : '₹$total',
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isFree ? Colors.green : AppColors.primary,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -1245,7 +1524,8 @@ class BuyerFoodDetailPage extends StatelessWidget {
                       width: 24,
                       child: Checkbox(
                         value: isConsentGiven,
-                        onChanged: (val) => setState(() => isConsentGiven = val!),
+                        onChanged: (val) =>
+                            setState(() => isConsentGiven = val!),
                         activeColor: AppColors.primary,
                       ),
                     ),
@@ -1263,43 +1543,62 @@ class BuyerFoodDetailPage extends StatelessWidget {
           }
 
           return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (matchingStatus == "idle") buildProgressBar(),
-                currentStep == 1 
-                    ? buildQuantityStep() 
-                    : currentStep == 2 
-                        ? buildLogisticsStep() 
-                        : (currentStep == 3 && fulfillment == "volunteer_delivery")
-                            ? buildAddressStep()
-                            : buildSummaryStep(),
+                currentStep == 1
+                    ? buildQuantityStep()
+                    : currentStep == 2
+                    ? buildLogisticsStep()
+                    : (currentStep == 3 && fulfillment == "volunteer_delivery")
+                    ? buildAddressStep()
+                    : buildSummaryStep(),
               ],
             ),
             actions: [
               if (currentStep > 1 && matchingStatus == "idle")
-                TextButton(onPressed: () => setState(() => currentStep--), child: const Text('Back')),
+                TextButton(
+                  onPressed: () => setState(() => currentStep--),
+                  child: const Text('Back'),
+                ),
               if (matchingStatus == "timeout")
                 TextButton(
                   onPressed: () async {
                     if (matchingOrder != null) {
-                      await BackendService.cancelOrder(matchingOrder!['_id'], 'buyer', 'No volunteer found');
+                      await BackendService.cancelOrder(
+                        matchingOrder!['_id'],
+                        'buyer',
+                        'No volunteer found',
+                      );
                     }
                     Navigator.pop(context);
                   },
-                  child: const Text('Cancel Order', style: TextStyle(color: Colors.red)),
+                  child: const Text(
+                    'Cancel Order',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ),
               if (currentStep < totalSteps)
                 ElevatedButton(
                   onPressed: () {
-                    if (currentStep == 3 && fulfillment == "volunteer_delivery" && dropAddressData == null) {
+                    if (currentStep == 3 &&
+                        fulfillment == "volunteer_delivery" &&
+                        dropAddressData == null) {
                       return;
                     }
                     setState(() => currentStep++);
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                  child: const Text('Next', style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                  ),
+                  child: const Text(
+                    'Next',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               if (currentStep == totalSteps)
                 ElevatedButton(
@@ -1308,49 +1607,74 @@ class BuyerFoodDetailPage extends StatelessWidget {
                       : () async {
                           if (matchingStatus == "idle") {
                             if (fulfillment == "volunteer_delivery") {
-                                setState(() => isPlacing = true);
-                                final response = await _createInitialOrder(
-                                  context, 
-                                  quantity, 
-                                  fulfillment, 
-                                  dropAddressData: dropAddressData,
-                                  specialInstructions: instructionsController.text,
-                                );
-                                if (response != null) {
-                                  final order = response['order'];
-                                  setState(() {
-                                    matchingOrder = order;
-                                  });
-                                  startMatching(order);
-                                  setState(() => isPlacing = false);
-                                }
-                              } else {
-                                // Self Pickup logic
-                                if (!isFree) {
-                                  final method = await Navigator.push(context, MaterialPageRoute(builder: (_) => const BuyerPaymentPage()));
-                                  if (method == null) return;
-                                }
-                                setState(() => isPlacing = true);
-                                await _placeOrder(
-                                  context, 
-                                  quantity, 
-                                  fulfillment, 
-                                  dropAddressData: dropAddressData,
-                                  specialInstructions: instructionsController.text,
-                                );
+                              setState(() => isPlacing = true);
+                              final response = await _createInitialOrder(
+                                context,
+                                quantity,
+                                fulfillment,
+                                dropAddressData: dropAddressData,
+                                specialInstructions:
+                                    instructionsController.text,
+                              );
+                              if (response != null) {
+                                final order = response['order'];
+                                setState(() {
+                                  matchingOrder = order;
+                                });
+                                startMatching(order);
+                                setState(() => isPlacing = false);
                               }
+                            } else {
+                              // Self Pickup logic
+                              if (!isFree) {
+                                final method = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const BuyerPaymentPage(),
+                                  ),
+                                );
+                                if (method == null) return;
+                              }
+                              setState(() => isPlacing = true);
+                              await _placeOrder(
+                                context,
+                                quantity,
+                                fulfillment,
+                                dropAddressData: dropAddressData,
+                                specialInstructions:
+                                    instructionsController.text,
+                              );
+                            }
                           } else if (matchingStatus == "matched") {
                             if (!isFree) {
-                                final method = await Navigator.push(context, MaterialPageRoute(builder: (_) => const BuyerPaymentPage()));
-                                if (method == null) return;
-                                // Update order payment status
-                                await BackendService.updateOrder(matchingOrder!['_id'], {
-                                  "payment": {"status": "paid", "method": method}
-                                });
+                              final method = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const BuyerPaymentPage(),
+                                ),
+                              );
+                              if (method == null) return;
+                              // Update order payment status
+                              await BackendService.updateOrder(
+                                matchingOrder!['_id'],
+                                {
+                                  "payment": {
+                                    "status": "paid",
+                                    "method": method,
+                                  },
+                                },
+                              );
                             }
                             if (context.mounted) {
                               Navigator.pop(context);
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => BuyerOrderConfirmationPage(order: {"order": matchingOrder!})));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BuyerOrderConfirmationPage(
+                                    order: {"order": matchingOrder!},
+                                  ),
+                                ),
+                              );
                             }
                           } else if (matchingStatus == "timeout") {
                             // Switch to self-pickup
@@ -1358,29 +1682,67 @@ class BuyerFoodDetailPage extends StatelessWidget {
                               isPlacing = true;
                               fulfillment = "self_pickup";
                             });
-                            await BackendService.updateOrder(matchingOrder!['_id'], {"fulfillment": "self_pickup", "status": "placed"});
+                            await BackendService.updateOrder(
+                              matchingOrder!['_id'],
+                              {
+                                "fulfillment": "self_pickup",
+                                "status": "placed",
+                              },
+                            );
                             if (!isFree) {
-                                final method = await Navigator.push(context, MaterialPageRoute(builder: (_) => const BuyerPaymentPage()));
-                                if (method != null) {
-                                   await BackendService.updateOrder(matchingOrder!['_id'], {"payment": {"status": "paid", "method": method}});
-                                }
+                              final method = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const BuyerPaymentPage(),
+                                ),
+                              );
+                              if (method != null) {
+                                await BackendService.updateOrder(
+                                  matchingOrder!['_id'],
+                                  {
+                                    "payment": {
+                                      "status": "paid",
+                                      "method": method,
+                                    },
+                                  },
+                                );
+                              }
                             }
                             if (context.mounted) {
-                              final finalOrder = await BackendService.getOrderById(matchingOrder!['_id']);
+                              final finalOrder =
+                                  await BackendService.getOrderById(
+                                    matchingOrder!['_id'],
+                                  );
                               Navigator.pop(context);
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => BuyerOrderConfirmationPage(order: {"order": finalOrder})));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BuyerOrderConfirmationPage(
+                                    order: {"order": finalOrder},
+                                  ),
+                                ),
+                              );
                             }
                           }
                         },
-                  style: ElevatedButton.styleFrom(backgroundColor: isFree ? Colors.green : AppColors.primary),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isFree ? Colors.green : AppColors.primary,
+                  ),
                   child: isPlacing
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                       : Text(
                           matchingStatus == "idle"
                               ? (isFree ? 'Claim' : 'Confirm Order')
                               : matchingStatus == "timeout"
-                                  ? 'Switch to Pickup'
-                                  : 'Finalize Order',
+                              ? 'Switch to Pickup'
+                              : 'Finalize Order',
                           style: const TextStyle(color: Colors.white),
                         ),
                 ),
@@ -1391,13 +1753,23 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Future<Map<String, dynamic>?> _createInitialOrder(BuildContext context, int quantity, String fulfillment, {Map<String, dynamic>? dropAddressData, String? specialInstructions}) async {
+  Future<Map<String, dynamic>?> _createInitialOrder(
+    BuildContext context,
+    int quantity,
+    String fulfillment, {
+    Map<String, dynamic>? dropAddressData,
+    String? specialInstructions,
+  }) async {
     try {
       final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
       final buyerId = authProvider.mongoUser?['_id'];
       if (buyerId == null) throw Exception('User not logged in');
 
-      final discountedPrice = (listing!['pricing']?['discountedPrice'] ?? listing!['pricing']?['originalPrice'] ?? 0).toDouble();
+      final discountedPrice =
+          (listing!['pricing']?['discountedPrice'] ??
+                  listing!['pricing']?['originalPrice'] ??
+                  0)
+              .toDouble();
       final itemTotal = discountedPrice * quantity;
 
       final orderData = {
@@ -1407,14 +1779,18 @@ class BuyerFoodDetailPage extends StatelessWidget {
         "fulfillment": fulfillment,
         "specialInstructions": specialInstructions,
         "pickup": {
-          "addressText": listing!['pickupAddressText'] ?? listing!['pickupAddress']?['addressText'] ?? 'Pickup location',
+          "addressText":
+              listing!['pickupAddressText'] ??
+              listing!['pickupAddress']?['addressText'] ??
+              'Pickup location',
           "scheduledAt": listing!['pickupWindow']?['to'],
           if (listing!['pickupGeo'] != null) "geo": listing!['pickupGeo'],
         },
-        if (dropAddressData != null) "drop": {
-          "addressText": dropAddressData["addressText"],
-          if (dropAddressData["geo"] != null) "geo": dropAddressData["geo"],
-        },
+        if (dropAddressData != null)
+          "drop": {
+            "addressText": dropAddressData["addressText"],
+            if (dropAddressData["geo"] != null) "geo": dropAddressData["geo"],
+          },
         "pricing": {
           "itemTotal": itemTotal,
           "deliveryFee": 0.0,
@@ -1425,12 +1801,23 @@ class BuyerFoodDetailPage extends StatelessWidget {
 
       return await BackendService.createOrder(orderData);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to initialize: $e'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to initialize: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return null;
     }
   }
 
-  Future<void> _placeOrder(BuildContext context, int quantity, String fulfillment, {Map<String, dynamic>? dropAddressData, String? specialInstructions}) async {
+  Future<void> _placeOrder(
+    BuildContext context,
+    int quantity,
+    String fulfillment, {
+    Map<String, dynamic>? dropAddressData,
+    String? specialInstructions,
+  }) async {
     try {
       // Get buyer ID from auth provider
       final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
@@ -1443,11 +1830,13 @@ class BuyerFoodDetailPage extends StatelessWidget {
       // Ensure IDs are strings
       final listingIdStr = listing!['_id'].toString();
       final buyerIdStr = buyerId.toString();
-      
+
       // Calculate pricing with fallbacks
-      final discountedPrice = (listing!['pricing']?['discountedPrice'] ?? 
-                               listing!['pricing']?['originalPrice'] ?? 
-                               0).toDouble();
+      final discountedPrice =
+          (listing!['pricing']?['discountedPrice'] ??
+                  listing!['pricing']?['originalPrice'] ??
+                  0)
+              .toDouble();
       final itemTotal = discountedPrice * quantity;
 
       final orderData = {
@@ -1457,14 +1846,18 @@ class BuyerFoodDetailPage extends StatelessWidget {
         "fulfillment": fulfillment,
         "specialInstructions": specialInstructions,
         "pickup": {
-          "addressText": listing!['pickupAddressText'] ?? listing!['pickupAddress']?['addressText'] ?? 'Pickup location',
+          "addressText":
+              listing!['pickupAddressText'] ??
+              listing!['pickupAddress']?['addressText'] ??
+              'Pickup location',
           "scheduledAt": listing!['pickupWindow']?['to'],
           if (listing!['pickupGeo'] != null) "geo": listing!['pickupGeo'],
         },
-        if (dropAddressData != null) "drop": {
-          "addressText": dropAddressData["addressText"],
-          if (dropAddressData["geo"] != null) "geo": dropAddressData["geo"],
-        },
+        if (dropAddressData != null)
+          "drop": {
+            "addressText": dropAddressData["addressText"],
+            if (dropAddressData["geo"] != null) "geo": dropAddressData["geo"],
+          },
         "pricing": {
           "itemTotal": itemTotal,
           "deliveryFee": 0.0,
@@ -1477,14 +1870,15 @@ class BuyerFoodDetailPage extends StatelessWidget {
       print("=== ORDER DATA ===");
       print("Order data: $orderData");
       print("Listing pricing: ${listing!['pricing']}");
-      if (listing!['pickupGeo'] != null) print("Pickup Geo: ${listing!['pickupGeo']}");
+      if (listing!['pickupGeo'] != null)
+        print("Pickup Geo: ${listing!['pickupGeo']}");
       print("==================");
 
       final response = await BackendService.createOrder(orderData);
 
       if (context.mounted) {
         Navigator.pop(context); // Close dialog
-        
+
         // Navigate to confirmation page
         Navigator.push(
           context,
@@ -1496,7 +1890,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         Navigator.pop(context); // Close dialog
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to place order: $e'),
@@ -1505,5 +1899,183 @@ class BuyerFoodDetailPage extends StatelessWidget {
         );
       }
     }
+  }
+
+  void _showRescueWindowCountdown(BuildContext context, DateTime openTime) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => _RescueCountdownContent(
+        openTime: openTime,
+        onOpened: () {
+          if (context.mounted) {
+            Navigator.pop(context);
+            _showOrderDialog(context);
+          }
+        },
+      ),
+    );
+  }
+}
+
+class _RescueCountdownContent extends StatefulWidget {
+  final DateTime openTime;
+  final VoidCallback onOpened;
+
+  const _RescueCountdownContent({
+    required this.openTime,
+    required this.onOpened,
+  });
+
+  @override
+  State<_RescueCountdownContent> createState() =>
+      _RescueCountdownContentState();
+}
+
+class _RescueCountdownContentState extends State<_RescueCountdownContent> {
+  Timer? _timer;
+  late DateTime _now;
+
+  @override
+  void initState() {
+    super.initState();
+    _now = DateTime.now();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _now = DateTime.now();
+      });
+
+      if (_now.isAfter(widget.openTime)) {
+        timer.cancel();
+        widget.onOpened();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final diff = widget.openTime.difference(_now);
+
+    String timerStr = "";
+    if (diff.isNegative) {
+      timerStr = "0s";
+    } else if (diff.inHours > 0) {
+      timerStr =
+          "${diff.inHours}h ${diff.inMinutes % 60}m ${diff.inSeconds % 60}s";
+    } else if (diff.inMinutes > 0) {
+      timerStr = "${diff.inMinutes}m ${diff.inSeconds % 60}s";
+    } else {
+      timerStr = "${diff.inSeconds}s";
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 32),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.timer_outlined,
+              size: 48,
+              color: Colors.orange.shade700,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            "Rescue Window Not Open Yet",
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "This listing is part of a scheduled rescue window. You can place your order in:",
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              timerStr,
+              style: GoogleFonts.jetBrainsMono(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            "Opens exactly at ${DateFormat('hh:mm a').format(widget.openTime)}",
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade500,
+            ),
+          ),
+          const SizedBox(height: 40),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                "Got it, I'll wait",
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
