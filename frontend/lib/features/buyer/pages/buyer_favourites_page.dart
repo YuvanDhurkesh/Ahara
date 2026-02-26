@@ -5,9 +5,11 @@ import '../../../shared/styles/app_colors.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import 'buyer_food_detail_page.dart';
+import '../../../shared/widgets/animated_toast.dart';
 
 class BuyerFavouritesPage extends StatefulWidget {
-  const BuyerFavouritesPage({super.key});
+  final VoidCallback? onDiscoverMore;
+  const BuyerFavouritesPage({super.key, this.onDiscoverMore});
 
   @override
   State<BuyerFavouritesPage> createState() => _BuyerFavouritesPageState();
@@ -15,18 +17,37 @@ class BuyerFavouritesPage extends StatefulWidget {
 
 class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
   List<Map<String, dynamic>> _favoriteSellers = [];
+  List<Map<String, dynamic>> _allActiveListings = [];
   bool _isLoading = true;
   String? _expandedSellerId;
 
   @override
   void initState() {
     super.initState();
-    _fetchFavorites();
+    _fetchInitialData();
+  }
+
+  Future<void> _fetchInitialData() async {
+    setState(() => _isLoading = true);
+    await Future.wait([
+      _fetchFavorites(),
+      _fetchAllListings(),
+    ]);
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  Future<void> _fetchAllListings() async {
+    try {
+      final listings = await BackendService.getAllActiveListings();
+      if (mounted) {
+        setState(() => _allActiveListings = listings);
+      }
+    } catch (e) {
+      debugPrint("Error fetching all listings: $e");
+    }
   }
 
   Future<void> _fetchFavorites() async {
-    if (!mounted) return;
-    setState(() => _isLoading = true);
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
@@ -34,13 +55,11 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
         if (mounted) {
           setState(() {
             _favoriteSellers = sellers;
-            _isLoading = false;
           });
         }
       }
     } catch (e) {
       debugPrint("Error fetching favorite sellers: $e");
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -106,13 +125,16 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
             style: TextStyle(color: AppColors.textLight.withOpacity(0.3), fontSize: 14),
           ),
           const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _fetchFavorites,
+          ElevatedButton.icon(
+            onPressed: widget.onDiscoverMore ?? () => _fetchFavorites(),
+            icon: const Icon(Icons.search_rounded, size: 20, color: Colors.white),
+            label: const Text("Discover More", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              elevation: 4,
             ),
-            child: const Text("Refresh", style: TextStyle(color: Colors.white)),
           )
         ],
       ),
@@ -162,6 +184,45 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                     const SizedBox(width: 4),
                     Text(rating.toStringAsFixed(1), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                     const SizedBox(width: 12),
+                    (() {
+                      final hasListings = _allActiveListings.any((l) => 
+                        (l['sellerProfileId']?['userId'] ?? l['sellerProfileId']) == sellerId);
+                      
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: hasListings ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: hasListings ? Colors.green : Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              hasListings ? "LIVE" : "QUIET",
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: hasListings ? Colors.green : Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    })(),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
                     Icon(Icons.location_on, color: AppColors.textLight.withOpacity(0.4), size: 14),
                     const SizedBox(width: 4),
                     Expanded(
@@ -176,16 +237,48 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                 ),
               ],
             ),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                  color: AppColors.primary,
+                IconButton(
+                  icon: const Icon(Icons.favorite, color: Colors.red, size: 24),
+                  onPressed: () async {
+                    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                    if (auth.currentUser == null) return;
+                    
+                    try {
+                      await BackendService.toggleFavoriteSeller(
+                        firebaseUid: auth.currentUser!.uid,
+                        sellerId: sellerId,
+                      );
+                      await auth.refreshMongoUser();
+                      
+                      if (mounted) {
+                        AnimatedToast.show(
+                          context,
+                          "Removed $orgName from favorites",
+                          type: ToastType.info,
+                        );
+                        _fetchInitialData(); // Refresh list and listings
+                      }
+                    } catch (e) {
+                      debugPrint("Error removing favorite: $e");
+                    }
+                  },
                 ),
-                Text(
-                  isExpanded ? "Close" : "View Items",
-                  style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
+                const SizedBox(width: 8),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                      color: AppColors.primary,
+                    ),
+                    Text(
+                      isExpanded ? "Close" : "Items",
+                      style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -202,49 +295,38 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
   }
 
   Widget _buildSellerListings(String sellerId) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: BackendService.getAllActiveListings(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 32),
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          );
-        }
+    final sellerListings = _allActiveListings
+            .where((l) => (l['sellerProfileId']?['userId'] ?? l['sellerProfileId']) == sellerId)
+            .toList();
 
-        final sellerListings = snapshot.data
-                ?.where((l) => (l['sellerProfileId']?['userId'] ?? l['sellerProfileId']) == sellerId)
-                .toList() ??
-            [];
-
-        if (sellerListings.isEmpty) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.info_outline, color: AppColors.textLight.withOpacity(0.5), size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  "No active listings currently",
-                  style: TextStyle(fontStyle: FontStyle.italic, color: AppColors.textLight.withOpacity(0.5)),
-                ),
-              ],
+    if (sellerListings.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.info_outline, color: AppColors.textLight.withOpacity(0.5), size: 18),
+            const SizedBox(width: 8),
+            Text(
+              "No active listings currently",
+              style: TextStyle(fontStyle: FontStyle.italic, color: AppColors.textLight.withOpacity(0.5)),
             ),
-          );
-        }
+          ],
+        ),
+      );
+    }
 
-        return Container(
-          decoration: BoxDecoration(
-            color: AppColors.surface.withOpacity(0.5),
-            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-          ),
-          child: ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: sellerListings.length,
-            separatorBuilder: (context, index) => Divider(height: 1, color: AppColors.textDark.withOpacity(0.05)),
-            itemBuilder: (context, index) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface.withOpacity(0.5),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: sellerListings.length,
+        separatorBuilder: (context, index) => Divider(height: 1, color: AppColors.textDark.withOpacity(0.05)),
+        itemBuilder: (context, index) {
               final listing = sellerListings[index];
               final pricing = listing['pricing'] ?? {};
               final bool isFree = pricing['isFree'] ?? false;
@@ -298,7 +380,5 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
             },
           ),
         );
-      },
-    );
   }
 }
