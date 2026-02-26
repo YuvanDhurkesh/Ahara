@@ -39,6 +39,11 @@ class _CreateListingPageState extends State<CreateListingPage> {
   final ImagePicker _picker = ImagePicker();
   String _dietaryType = "vegetarian";
 
+  // Rescue Window state
+  bool _rescueWindowEnabled = false;
+  TimeOfDay _rescueWindowFrom = const TimeOfDay(hour: 22, minute: 0);
+  TimeOfDay _rescueWindowTo = const TimeOfDay(hour: 23, minute: 0);
+
   final TextEditingController _pincodeController = TextEditingController();
   Map<String, double>? _coordinates;
 
@@ -153,6 +158,59 @@ class _CreateListingPageState extends State<CreateListingPage> {
     );
   }
 
+  /// Converts a TimeOfDay to a full DateTime on "today's" date.
+  DateTime _timeOfDayToDateTime(TimeOfDay t) {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, t.hour, t.minute);
+  }
+
+  /// Calculates the actual start/end for the rescue window,
+  /// handling midnight crossings and date shifting as a cohesive window.
+  (DateTime, DateTime) _getRescueWindow() {
+    final now = DateTime.now();
+    DateTime from = _timeOfDayToDateTime(_rescueWindowFrom);
+    DateTime to = _timeOfDayToDateTime(_rescueWindowTo);
+
+    // Handle midnight crossing: if to <= from, 'to' must be tomorrow
+    if (!to.isAfter(from)) {
+      to = to.add(const Duration(days: 1));
+    }
+
+    // Shift entire window to tomorrow only if the window has fully passed today
+    // (with a small 5-min grace period for currently opening windows)
+    if (now.isAfter(to.add(const Duration(minutes: 5)))) {
+      from = from.add(const Duration(days: 1));
+      to = to.add(const Duration(days: 1));
+    }
+
+    return (from, to);
+  }
+
+  Future<void> _pickRescueTime({required bool isFrom}) async {
+    final initial = isFrom ? _rescueWindowFrom : _rescueWindowTo;
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (ctx, child) => Transform.scale(scale: 0.9, child: child),
+    );
+    if (picked == null) return;
+    setState(() {
+      if (isFrom) {
+        _rescueWindowFrom = picked;
+        // Auto-push 'to' to at least 30 min after 'from'
+        final fromDt = _timeOfDayToDateTime(picked);
+        final toDt = _timeOfDayToDateTime(_rescueWindowTo);
+        if (!toDt.isAfter(fromDt.add(const Duration(minutes: 5)))) {
+          _rescueWindowTo = TimeOfDay.fromDateTime(
+            fromDt.add(const Duration(minutes: 30)),
+          );
+        }
+      } else {
+        _rescueWindowTo = picked;
+      }
+    });
+  }
+
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       // 🔥 Validate that a location has been pinned
@@ -169,16 +227,84 @@ class _CreateListingPageState extends State<CreateListingPage> {
 
       try {
         final expiryTime = Listing.calculateExpiryTime(
+      // Rescue window validation
+      if (_rescueWindowEnabled) {
+        final window = _getRescueWindow();
+        final fromDt = window.$1;
+        final toDt = window.$2;
+
+        // 1. Close must be after open
+        if (!toDt.isAfter(fromDt)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Rescue Window closing time must be after opening time.',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          return;
+        }
+
+        // 2. Max window = 4 hours (prevents abuse)
+        if (toDt.difference(fromDt).inHours >= 4) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Rescue Window cannot exceed 4 hours.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          return;
+        }
+
+        // 3. Safety threshold: close ≤ preparedAt + safetyHours(foodType)
+        final safetyThreshold = Listing.calculateExpiryTime(
           _selectedFoodType,
           _preparedAt,
         );
+        if (toDt.isAfter(safetyThreshold)) {
+          final fmt = DateFormat('hh:mm a').format(safetyThreshold);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Food expires at $fmt for this type. Rescue window must close before then.',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
 
-        // 1. Get real user IDs
-        final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+      try {
+        // 1. Compute pickup window
+        DateTime pickupFrom;
+        DateTime pickupTo;
+
+        if (_rescueWindowEnabled) {
+          // Use the scheduled rescue times
+          final window = _getRescueWindow();
+          pickupFrom = window.$1;
+          pickupTo = window.$2;
+        } else {
+          pickupFrom = _preparedAt;
+          pickupTo = Listing.calculateExpiryTime(
+            _selectedFoodType,
+            _preparedAt,
+          );
+        }
+
+        // 2. Get real user IDs
+        final authProvider = Provider.of<AppAuthProvider>(
+          context,
+          listen: false,
+        );
         final firebaseUser = authProvider.currentUser;
         if (firebaseUser == null) throw Exception("User not logged in");
 
-        final profileData = await BackendService.getUserProfile(firebaseUser.uid);
+        final profileData = await BackendService.getUserProfile(
+          firebaseUser.uid,
+        );
         final realSellerId = profileData['user']['_id'];
         final realSellerProfileId = profileData['profile']['_id'];
 
@@ -188,47 +314,56 @@ class _CreateListingPageState extends State<CreateListingPage> {
           "foodName": _foodNameController.text,
           "foodType": _selectedFoodType.name,
           "dietaryType": _dietaryType,
-          "category": "cooked", 
+          "category": "cooked",
           "quantityText": "${_quantityController.text} ${_selectedUnit}",
           "totalQuantity": double.parse(_quantityController.text),
           "description": _descriptionController.text,
           "pricing": {
-            "discountedPrice": _redistributionMode == RedistributionMode.discounted 
-                ? double.tryParse(_priceController.text) ?? 0 
+            "discountedPrice":
+                _redistributionMode == RedistributionMode.discounted
+                ? double.tryParse(_priceController.text) ?? 0
                 : 0,
             "isFree": _redistributionMode == RedistributionMode.free,
           },
           "pickupWindow": {
-            "from": _preparedAt.toIso8601String(),
-            "to": expiryTime.toIso8601String(),
+            "from": pickupFrom.toIso8601String(),
+            "to": pickupTo.toIso8601String(),
           },
           "pickupAddressText": _locationController.text,
           "pincode": _pincodeController.text,
           "pickupGeo": {
             "type": "Point",
-            "coordinates": _coordinates != null 
+            "coordinates": _coordinates != null
                 ? [_coordinates!['longitude'], _coordinates!['latitude']]
-                : [77.5946, 12.9716] // Fallback to Bangalore center
+                : [77.5946, 12.9716],
           },
         };
 
         debugPrint('--- SUBMIT FORM ---');
+        debugPrint('Rescue Window: $_rescueWindowEnabled');
+        debugPrint('Pickup Window from=$pickupFrom  to=$pickupTo');
         debugPrint('Initial listingMap: ${jsonEncode(listingMap)}');
-        debugPrint('_pickedXFile status: ${_pickedXFile != null ? "HAS IMAGE" : "NO IMAGE"}');
+        debugPrint(
+          '_pickedXFile status: ${_pickedXFile != null ? "HAS IMAGE" : "NO IMAGE"}',
+        );
 
-        // 2. Upload image if picked
+        // 3. Upload image if picked
         if (_pickedXFile != null) {
           debugPrint('Uploading image: ${_pickedXFile!.name}...');
           try {
             final bytes = await _pickedXFile!.readAsBytes();
-            final imageUrl = await BackendService.uploadImage(bytes, _pickedXFile!.name);
+            final imageUrl = await BackendService.uploadImage(
+              bytes,
+              _pickedXFile!.name,
+            );
             debugPrint('Upload success! URL: $imageUrl');
             listingMap["images"] = [imageUrl];
           } catch (e) {
             debugPrint('!!! IMAGE UPLOAD FAILED: $e');
             rethrow;
           }
-        } else if (widget.listing != null && widget.listing!.imageUrl.isNotEmpty) {
+        } else if (widget.listing != null &&
+            widget.listing!.imageUrl.isNotEmpty) {
           debugPrint('Keeping existing image: ${widget.listing!.imageUrl}');
           listingMap["images"] = [widget.listing!.imageUrl];
         }
@@ -243,7 +378,13 @@ class _CreateListingPageState extends State<CreateListingPage> {
 
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.listing != null ? 'Listing updated successfully!' : 'Listing created successfully!')),
+          SnackBar(
+            content: Text(
+              widget.listing != null
+                  ? 'Listing updated successfully!'
+                  : 'Listing created successfully!',
+            ),
+          ),
         );
         Navigator.pop(context);
       } catch (e) {
@@ -364,6 +505,8 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     const SizedBox(height: 24),
                     _buildDateTimePicker(),
                     const SizedBox(height: 16),
+                    _buildRescueWindowSection(),
+                    const SizedBox(height: 16),
                     _buildDropdown<HygieneStatus>(
                       label: "Hygiene Status",
                       value: _hygieneStatus,
@@ -426,10 +569,30 @@ class _CreateListingPageState extends State<CreateListingPage> {
 
   Widget _buildDietarySelector() {
     final diets = [
-      {"label": "Veg", "value": "vegetarian", "icon": Icons.eco_outlined, "color": Colors.green},
-      {"label": "Non-Veg", "value": "non_veg", "icon": Icons.kebab_dining_outlined, "color": Colors.red},
-      {"label": "Vegan", "value": "vegan", "icon": Icons.grass_outlined, "color": Colors.teal},
-      {"label": "Jain", "icon": Icons.spa_outlined, "value": "jain", "color": Colors.orange},
+      {
+        "label": "Veg",
+        "value": "vegetarian",
+        "icon": Icons.eco_outlined,
+        "color": Colors.green,
+      },
+      {
+        "label": "Non-Veg",
+        "value": "non_veg",
+        "icon": Icons.kebab_dining_outlined,
+        "color": Colors.red,
+      },
+      {
+        "label": "Vegan",
+        "value": "vegan",
+        "icon": Icons.grass_outlined,
+        "color": Colors.teal,
+      },
+      {
+        "label": "Jain",
+        "icon": Icons.spa_outlined,
+        "value": "jain",
+        "color": Colors.orange,
+      },
     ];
 
     return Wrap(
@@ -440,11 +603,12 @@ class _CreateListingPageState extends State<CreateListingPage> {
           label: Text(diet['label'] as String),
           selected: isSelected,
           onSelected: (selected) {
-            if (selected) setState(() => _dietaryType = diet['value'] as String);
+            if (selected)
+              setState(() => _dietaryType = diet['value'] as String);
           },
           avatar: Icon(
-            diet['icon'] as IconData, 
-            size: 16, 
+            diet['icon'] as IconData,
+            size: 16,
             color: isSelected ? Colors.white : (diet['color'] as Color),
           ),
           selectedColor: diet['color'] as Color,
@@ -456,7 +620,9 @@ class _CreateListingPageState extends State<CreateListingPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
             side: BorderSide(
-              color: isSelected ? (diet['color'] as Color) : AppColors.textLight.withOpacity(0.2),
+              color: isSelected
+                  ? (diet['color'] as Color)
+                  : AppColors.textLight.withOpacity(0.2),
             ),
           ),
         );
@@ -669,6 +835,237 @@ class _CreateListingPageState extends State<CreateListingPage> {
     );
   }
 
+  Widget _buildRescueWindowSection() {
+    final amber = const Color(0xFFF59E0B);
+    final amberLight = const Color(0xFFFEF3C7);
+
+    String _fmtTime(TimeOfDay t) {
+      final h = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
+      final m = t.minute.toString().padLeft(2, '0');
+      final period = t.period == DayPeriod.am ? 'AM' : 'PM';
+      return '$h:$m $period';
+    }
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: _rescueWindowEnabled ? amberLight : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: _rescueWindowEnabled
+              ? amber.withOpacity(0.6)
+              : AppColors.textLight.withOpacity(0.1),
+          width: _rescueWindowEnabled ? 1.5 : 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Toggle header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _rescueWindowEnabled
+                        ? amber.withOpacity(0.15)
+                        : AppColors.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.schedule_rounded,
+                    size: 18,
+                    color: _rescueWindowEnabled ? amber : AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Schedule Rescue Window",
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: _rescueWindowEnabled
+                              ? const Color(0xFF92400E)
+                              : AppColors.textDark,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        "Allow pickup only during your closing time",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: _rescueWindowEnabled
+                              ? const Color(0xFFB45309)
+                              : AppColors.textLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: _rescueWindowEnabled,
+                  onChanged: (v) => setState(() => _rescueWindowEnabled = v),
+                  activeColor: amber,
+                  activeTrackColor: amber.withOpacity(0.3),
+                ),
+              ],
+            ),
+          ),
+
+          // Time pickers (visible when enabled)
+          if (_rescueWindowEnabled) ...[
+            Divider(height: 1, color: amber.withOpacity(0.25)),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "📍 Buyers can order only during this window",
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: const Color(0xFFB45309),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildTimeChip(
+                          label: "Opens At",
+                          timeStr: _fmtTime(_rescueWindowFrom),
+                          icon: Icons.login_rounded,
+                          color: amber,
+                          onTap: () => _pickRescueTime(isFrom: true),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildTimeChip(
+                          label: "Closes At",
+                          timeStr: _fmtTime(_rescueWindowTo),
+                          icon: Icons.logout_rounded,
+                          color: const Color(0xFFEF4444),
+                          onTap: () => _pickRescueTime(isFrom: false),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Live safety hint
+                  Builder(
+                    builder: (_) {
+                      final safetyDt = Listing.calculateExpiryTime(
+                        _selectedFoodType,
+                        _preparedAt,
+                      );
+                      final window = _getRescueWindow();
+                      final toDt = window.$2;
+                      final isSafe = !toDt.isAfter(safetyDt);
+                      final safeStr = DateFormat('hh:mm a').format(safetyDt);
+                      return Row(
+                        children: [
+                          Icon(
+                            isSafe
+                                ? Icons.check_circle_outline
+                                : Icons.warning_amber_rounded,
+                            size: 13,
+                            color: isSafe ? Colors.green : Colors.red,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              isSafe
+                                  ? 'Safe ✓  Food stays fresh until $safeStr'
+                                  : '⚠ Window exceeds safety limit ($safeStr for ${_selectedFoodType.name.replaceAll("_", " ")})',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: isSafe
+                                    ? Colors.green.shade700
+                                    : Colors.red,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimeChip({
+    required String label,
+    required String timeStr,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withOpacity(0.35)),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    timeStr,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1F2937),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.edit_outlined, size: 13, color: color.withOpacity(0.6)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildImagePicker() {
     return GestureDetector(
       onTap: _pickImage,
@@ -681,9 +1078,9 @@ class _CreateListingPageState extends State<CreateListingPage> {
           border: Border.all(color: AppColors.textLight.withOpacity(0.1)),
           image: _pickedXFile != null
               ? DecorationImage(
-                  image: kIsWeb 
-                    ? NetworkImage(_pickedXFile!.path) as ImageProvider
-                    : FileImage(io.File(_pickedXFile!.path)),
+                  image: kIsWeb
+                      ? NetworkImage(_pickedXFile!.path) as ImageProvider
+                      : FileImage(io.File(_pickedXFile!.path)),
                   fit: BoxFit.cover,
                 )
               : null,
