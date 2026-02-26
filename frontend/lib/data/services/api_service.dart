@@ -1,1 +1,1 @@
-const String BASE_URL = "http://10.0.2.2:3000";
+const String BASE_URL = "http://aharabackend-env.eba-nn8ggm5m.ap-south-1.elasticbeanstalk.com/api";
