@@ -110,11 +110,15 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     // 2. Add only valid (non-expired) real listings
     results.insertAll(0, _validListings);
 
+    final auth = context.watch<AppAuthProvider>();
+    final List<String> dietaryPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
+
     return results.where((item) {
-      final name = item is MockStore ? item.name : (item['foodName'] ?? "");
-      final type = item is MockStore ? item.type : (item['foodType'] ?? "");
-      final rating = item is MockStore ? double.tryParse(item.rating) ?? 0.0 : 0.0; // Real listings don't have ratings yet
-      final isFree = item is MockStore ? item.isFree : (item['pricing']?['isFree'] ?? false);
+      final isMock = item is MockStore;
+      final name = isMock ? item.name : (item['foodName'] ?? "");
+      final type = isMock ? item.type : (item['foodType'] ?? "");
+      final rating = isMock ? double.tryParse(item.rating) ?? 0.0 : 0.0; // Real listings don't have ratings yet
+      final isFree = isMock ? item.isFree : (item['pricing']?['isFree'] ?? false);
 
       // 1. Search Query
       if (_searchQuery.isNotEmpty) {
@@ -131,12 +135,47 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
       // 3. Price Filters
       if (_onlyFree && !isFree) return false;
 
+      // 🔥 NEW: Filter by User Dietary Preferences (Strict Filtering)
+      if (dietaryPrefs.isNotEmpty) {
+        String itemDietary = "vegetarian"; 
+        if (isMock) {
+          final cat = item.category.toLowerCase();
+          if (cat.contains("vegan")) itemDietary = "vegan";
+          else if (cat.contains("non-veg")) itemDietary = "non_veg";
+          else if (cat.contains("vegetarian")) itemDietary = "vegetarian";
+          else if (cat.contains("jain")) itemDietary = "jain";
+        } else {
+          itemDietary = (item['dietaryType'] ?? "vegetarian").toString().toLowerCase();
+        }
+        
+        // 1. If user has only one preference, act as a specific filter
+        if (dietaryPrefs.length == 1) {
+          final pref = dietaryPrefs.first;
+          if (pref == "vegan" && itemDietary != "vegan") return false;
+          if (pref == "jain" && itemDietary != "jain") return false;
+          if (pref == "vegetarian" && (itemDietary == "non_veg" || itemDietary == "not_specified")) return false;
+          if (pref == "non_veg" && itemDietary != "non_veg") return false;
+        } else {
+          // 2. If multiple, ensure item matches ANY of the allowed types (e.g. user eats Veg + Non-Veg)
+          // But strict exclusions apply:
+          if (dietaryPrefs.contains("vegan") && !dietaryPrefs.contains("non_veg")) {
+             if (itemDietary == "non_veg") return false;
+          }
+           if (dietaryPrefs.contains("vegetarian") && !dietaryPrefs.contains("non_veg")) {
+             if (itemDietary == "non_veg") return false;
+          }
+        }
+      }
+
       return true;
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AppAuthProvider>();
+    final List<String> dietaryPrefs = List<String>.from(auth.mongoUser?['profile']?['dietaryPreferences'] ?? []);
+
     return Scaffold(
       body: Stack(
         children: [

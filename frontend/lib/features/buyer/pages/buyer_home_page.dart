@@ -49,6 +49,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     "Vegan",
     "Vegetarian",
     "Non-vegetarian",
+    "Jain",
   ];
 
   @override
@@ -149,12 +150,15 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AppAuthProvider>();
     // Combine mock stores and real listings
     final allItems = <dynamic>[
       ..._validListings,
       ...allMockStores,
     ];
     
+    final List<String> dietaryPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
+
     final filteredItems = allItems.where((item) {
       // Check if it's a mock store or real listing
       final isMock = item is MockStore;
@@ -167,13 +171,88 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         matchesMain = isMock ? (item.discount != null) : ((item['pricing']?['originalPrice'] ?? 0) > (item['pricing']?['discountedPrice'] ?? 0));
       }
 
-      // Filter by Sub Category (Food Type)
+      // Filter by Sub Category (Food Type or Dietary Type)
       bool matchesSub = true;
       if (_subCategory != "All") {
-        matchesSub = isMock ? (item.category == _subCategory) : (item['foodType'] == _subCategory);
+        if (isMock) {
+          // Mock data handling
+          final String subLower = _subCategory.toLowerCase();
+          final String catLower = item.category.toLowerCase();
+          
+          if (subLower == "meals") {
+            matchesSub = catLower.contains("meals") || catLower.contains("cafe") || catLower.contains("restaurant");
+          } else if (subLower == "bread & pastries") {
+            matchesSub = catLower.contains("bakery") || catLower.contains("pastry");
+          } else if (subLower == "groceries") {
+            matchesSub = catLower.contains("grocery") || catLower.contains("supermarket") || catLower.contains("pet food");
+          } else if (subLower == "vegan") {
+            matchesSub = catLower.contains("vegan");
+          } else if (subLower == "vegetarian") {
+            matchesSub = catLower.contains("vegetarian") || catLower.contains("veg") || catLower.contains("vegan") || catLower.contains("jain");
+          } else if (subLower == "non-vegetarian") {
+            matchesSub = catLower.contains("non-veg") || catLower.contains("steak") || catLower.contains("grill");
+          } else {
+            matchesSub = (item.category == _subCategory);
+          }
+        } else {
+          final String dietaryType = (item['dietaryType'] ?? "").toString().toLowerCase();
+          final String foodType = (item['foodType'] ?? "").toString();
+          
+          final String subLower = _subCategory.toLowerCase();
+          if (subLower == "non-vegetarian") {
+            matchesSub = (dietaryType == "non_veg" || foodType == "non_veg");
+          } else if (subLower == "vegetarian") {
+            matchesSub = (dietaryType == "vegetarian" || foodType == "vegetarian");
+          } else if (subLower == "vegan") {
+            matchesSub = (dietaryType == "vegan" || foodType == "vegan");
+          } else if (subLower == "jain") {
+            matchesSub = (dietaryType == "jain" || foodType == "jain");
+          } else if (subLower == "meals") {
+            matchesSub = (foodType == "prepared_meal");
+          } else if (subLower == "bread & pastries") {
+            matchesSub = (foodType == "bakery_item");
+          } else if (subLower == "groceries") {
+            matchesSub = (foodType == "fresh_produce" || foodType == "packaged_food" || foodType == "dairy_product");
+          } else {
+            matchesSub = (foodType == _subCategory);
+          }
+        }
       }
 
-      return matchesMain && matchesSub;
+      // 🔥 NEW: Filter by User Dietary Preferences (Strict Filtering)
+      bool matchesDietary = true;
+      if (dietaryPrefs.isNotEmpty) {
+        String itemDietary = "vegetarian"; 
+        if (isMock) {
+          final cat = item.category.toLowerCase();
+          if (cat.contains("vegan")) itemDietary = "vegan";
+          else if (cat.contains("non-veg")) itemDietary = "non_veg";
+          else if (cat.contains("vegetarian")) itemDietary = "vegetarian";
+          else if (cat.contains("jain")) itemDietary = "jain";
+        } else {
+          itemDietary = (item['dietaryType'] ?? "vegetarian").toString().toLowerCase();
+        }
+        
+        // 1. If user has only one preference, act as a specific filter
+        if (dietaryPrefs.length == 1) {
+          final pref = dietaryPrefs.first;
+          if (pref == "vegan" && itemDietary != "vegan") matchesDietary = false;
+          if (pref == "jain" && itemDietary != "jain") matchesDietary = false;
+          if (pref == "vegetarian" && (itemDietary == "non_veg" || itemDietary == "not_specified")) matchesDietary = false;
+          if (pref == "non_veg" && itemDietary != "non_veg") matchesDietary = false;
+        } else {
+          // 2. If multiple, ensure item matches ANY of the allowed types (e.g. user eats Veg + Non-Veg)
+          // But strict exclusions apply:
+          if (dietaryPrefs.contains("vegan") && !dietaryPrefs.contains("non_veg")) {
+             if (itemDietary == "non_veg") matchesDietary = false;
+          }
+           if (dietaryPrefs.contains("vegetarian") && !dietaryPrefs.contains("non_veg")) {
+             if (itemDietary == "non_veg") matchesDietary = false;
+          }
+        }
+      }
+
+      return matchesMain && matchesSub && matchesDietary;
     }).toList();
 
     return SafeArea(
@@ -186,48 +265,54 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : filteredItems.isEmpty
-                    ? _buildEmptyState()
-                    : ResponsiveLayout(
-                        mobile: ListView.builder(
-                          padding: const EdgeInsets.all(20),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 24),
-                              child: _buildItemCard(filteredItems[index]),
-                            );
-                          },
-                        ),
-                        tablet: GridView.builder(
-                          padding: const EdgeInsets.all(20),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 1.1,
-                                crossAxisSpacing: 20,
-                                mainAxisSpacing: 20,
-                              ),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            return _buildItemCard(filteredItems[index]);
-                          },
-                        ),
-                        desktop: GridView.builder(
-                          padding: const EdgeInsets.all(20),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                childAspectRatio: 1.0,
-                                crossAxisSpacing: 20,
-                                mainAxisSpacing: 20,
-                              ),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            return _buildItemCard(filteredItems[index]);
-                          },
-                        ),
-                      ),
+                : RefreshIndicator(
+                    onRefresh: _fetchRealListings,
+                    child: filteredItems.isEmpty
+                        ? _buildEmptyState()
+                        : ResponsiveLayout(
+                            mobile: ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(20),
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 24),
+                                  child: _buildItemCard(filteredItems[index]),
+                                );
+                              },
+                            ),
+                            tablet: GridView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(20),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    childAspectRatio: 1.1,
+                                    crossAxisSpacing: 20,
+                                    mainAxisSpacing: 20,
+                                  ),
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                return _buildItemCard(filteredItems[index]);
+                              },
+                            ),
+                            desktop: GridView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(20),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    childAspectRatio: 1.0,
+                                    crossAxisSpacing: 20,
+                                    mainAxisSpacing: 20,
+                                  ),
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                return _buildItemCard(filteredItems[index]);
+                              },
+                            ),
+                          ),
+                  ),
           ),
         ],
       ),
