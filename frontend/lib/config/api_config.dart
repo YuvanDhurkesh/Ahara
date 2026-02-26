@@ -6,7 +6,13 @@ class ApiConfig {
     final envUrl = dotenv.env['BASE_URL'];
 
     if (envUrl == null || envUrl.isEmpty) {
-      throw Exception("BASE_URL not configured in .env");
+      if (kDebugMode) {
+        print("⚠️ BASE_URL not found in .env, using fallback.");
+      }
+
+      // Default fallback for local development
+      return "http://aharabackend-env.eba-nn8ggm5m.ap-south-1.elasticbeanstalk.com/api";
+      //return "http://localhost:5000/api";
     }
 
     return envUrl;

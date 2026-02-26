@@ -556,20 +556,28 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   child: Consumer<AppAuthProvider>(
                     builder: (context, auth, _) {
                       final profile = auth.mongoProfile;
-                      final listingId = listing['_id'] ?? listing['id'];
-                      final List? favorites = profile?['favouriteListings'];
-                      final bool isFavorited = favorites?.contains(listingId) ?? false;
+                      final sellerId = sellerProfile['userId'] ?? "";
+                      final List? favorites = profile?['favouriteSellers'];
+                      final bool isFavorited = favorites?.contains(sellerId) ?? false;
 
                       return GestureDetector(
                         onTap: () async {
-                          if (auth.currentUser == null) return;
+                          if (auth.currentUser == null || sellerId.isEmpty) return;
                           try {
-                            await BackendService.toggleFavoriteListing(
+                            await BackendService.toggleFavoriteSeller(
                                 firebaseUid: auth.currentUser!.uid,
-                                listingId: listingId);
+                                sellerId: sellerId);
                             await auth.refreshMongoUser();
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites"),
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            }
                           } catch (e) {
-                            debugPrint("Error toggling favorite: $e");
+                            debugPrint("Error toggling favorite restaurant: $e");
                           }
                         },
                         child: Container(

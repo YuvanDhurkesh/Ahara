@@ -143,6 +143,52 @@ class BackendService {
     }
   }
 
+  static Future<Map<String, dynamic>> toggleFavoriteSeller({
+    required String firebaseUid,
+    required String sellerId,
+  }) async {
+    final url = Uri.parse("$baseUrl/users/$firebaseUid/toggle-favorite-seller");
+
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      body: jsonEncode({"sellerId": sellerId}),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to toggle favorite seller");
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getFavoriteSellers(
+    String firebaseUid,
+  ) async {
+    final url = Uri.parse("$baseUrl/users/$firebaseUid/favorite-sellers");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is Map && data.containsKey('sellers')) {
+        return List<Map<String, dynamic>>.from(data['sellers']);
+      }
+      return [];
+    } else {
+      throw Exception("Failed to fetch favorite sellers");
+    }
+  }
+
   static Future<void> updateVolunteerAvailability(
     String firebaseUid,
     bool isAvailable,

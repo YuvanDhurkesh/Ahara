@@ -20,5 +20,7 @@ router.put("/:uid/availability", userController.updateAvailability);
 
 // Favourites
 router.post("/:uid/toggle-favorite-listing", userController.toggleFavoriteListing);
+router.post("/:uid/toggle-favorite-seller", userController.toggleFavoriteSeller);
+router.get("/:uid/favorite-sellers", userController.getFavoriteSellers);
 
 module.exports = router;
