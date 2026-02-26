@@ -213,7 +213,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // 🔥 Validate that a location has been pinned
+      // 1. Validate that a location has been pinned
       if (_coordinates == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -225,15 +225,12 @@ class _CreateListingPageState extends State<CreateListingPage> {
         return;
       }
 
-      try {
-        final expiryTime = Listing.calculateExpiryTime(
-      // Rescue window validation
+      // 2. Rescue window validation
       if (_rescueWindowEnabled) {
         final window = _getRescueWindow();
         final fromDt = window.$1;
         final toDt = window.$2;
 
-        // 1. Close must be after open
         if (!toDt.isAfter(fromDt)) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -246,7 +243,6 @@ class _CreateListingPageState extends State<CreateListingPage> {
           return;
         }
 
-        // 2. Max window = 4 hours (prevents abuse)
         if (toDt.difference(fromDt).inHours >= 4) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -257,7 +253,6 @@ class _CreateListingPageState extends State<CreateListingPage> {
           return;
         }
 
-        // 3. Safety threshold: close ≤ preparedAt + safetyHours(foodType)
         final safetyThreshold = Listing.calculateExpiryTime(
           _selectedFoodType,
           _preparedAt,
@@ -282,7 +277,6 @@ class _CreateListingPageState extends State<CreateListingPage> {
         DateTime pickupTo;
 
         if (_rescueWindowEnabled) {
-          // Use the scheduled rescue times
           final window = _getRescueWindow();
           pickupFrom = window.$1;
           pickupTo = window.$2;
