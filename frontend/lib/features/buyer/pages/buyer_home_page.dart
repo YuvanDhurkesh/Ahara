@@ -12,6 +12,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
+import '../../../shared/utils/location_util.dart';
+import 'package:geolocator/geolocator.dart';
 
 
 
@@ -36,7 +38,8 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   Timer? _countdownTimer;
 
   // 🔥 NEW: User location state
-  String _userLocation = "Loading...";
+  String _userLocation = "Detecting location...";
+  Position? _livePosition;
   String _firebaseUid = "";
 
   final List<String> _mainCategories = ["All", "Free", "Discounted"];
@@ -60,7 +63,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       _firebaseUid = user.uid;
-      _loadUserLocation();
+      _initLocation();
     }
 
     _fetchRealListings();
@@ -73,29 +76,41 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
       }
     });
   }
-  Future<void> _loadUserLocation() async {
-  try {
-    final response =
-        await BackendService.getUserProfile(_firebaseUid);
-
-    print("FULL RESPONSE: $response");
-
-    if (mounted) {
-      setState(() {
-        _userLocation =
-            response['user']?['addressText'] ??
-            "Unknown location";
-      });
+  Future<void> _initLocation() async {
+    // 1. Try to get live location first (Swiggy style)
+    final Position? position = await LocationUtil.getCurrentLocation();
+    if (position != null) {
+      if (mounted) {
+        setState(() => _livePosition = position);
+      }
+      final city = await LocationUtil.getAddressFromCoords(position.latitude, position.longitude);
+      if (city != null && mounted) {
+        setState(() => _userLocation = "Current Location: $city");
+        return; // Success with live location
+      }
     }
-  } catch (e) {
-    print("Location fetch error: $e");
-    if (mounted) {
-      setState(() {
-        _userLocation = "Location unavailable";
-      });
+
+    // 2. Fallback to Profile Location if GPS fails or is denied
+    _loadUserLocation();
+  }
+
+  Future<void> _loadUserLocation() async {
+    try {
+      final response = await BackendService.getUserProfile(_firebaseUid);
+      if (mounted) {
+        setState(() {
+          _userLocation = response['user']?['addressText'] ?? "Unknown location";
+        });
+      }
+    } catch (e) {
+      debugPrint("Location fetch error: $e");
+      if (mounted) {
+        setState(() {
+          _userLocation = "Location unavailable";
+        });
+      }
     }
   }
-}
 
 
   @override
@@ -255,6 +270,37 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
       return matchesMain && matchesSub && matchesDietary;
     }).toList();
 
+    // 🔥 NEW: Sort by Proximity to Live Position
+    if (_livePosition != null) {
+      filteredItems.sort((a, b) {
+        double distA = 9999.0;
+        double distB = 9999.0;
+
+        // Get coordinates for A
+        if (a is! MockStore) {
+          final coords = a['pickupGeo']?['coordinates'];
+          if (coords != null && coords is List && coords.length >= 2) {
+            distA = LocationUtil.calculateDistance(_livePosition!.latitude, _livePosition!.longitude, (coords[1] as num).toDouble(), (coords[0] as num).toDouble());
+          }
+        } else {
+           // Mock store proximity (assume they are in Bangalore for now)
+           distA = LocationUtil.calculateDistance(_livePosition!.latitude, _livePosition!.longitude, 12.9716, 77.5946);
+        }
+
+        // Get coordinates for B
+        if (b is! MockStore) {
+          final coords = b['pickupGeo']?['coordinates'];
+          if (coords != null && coords is List && coords.length >= 2) {
+            distB = LocationUtil.calculateDistance(_livePosition!.latitude, _livePosition!.longitude, (coords[1] as num).toDouble(), (coords[0] as num).toDouble());
+          }
+        } else {
+           distB = LocationUtil.calculateDistance(_livePosition!.latitude, _livePosition!.longitude, 12.9716, 77.5946);
+        }
+
+        return distA.compareTo(distB);
+      });
+    }
+
     return SafeArea(
       child: Column(
         children: [
@@ -386,9 +432,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
               // 🔥 Dynamic Discover Title
               Text(
-                _userLocation == "Loading..."
+                _userLocation == "Detecting location..."
                     ? "Discover"
-                    : "Discover ${_userLocation.split(',').last.trim()}",
+                    : (_livePosition != null ? "Discover Near You" : "Discover ${_userLocation.split(',').last.trim()}"),
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
