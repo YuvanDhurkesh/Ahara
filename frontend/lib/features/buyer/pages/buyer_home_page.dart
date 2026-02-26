@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
+import '../../../shared/utils/location_util.dart';
+import 'package:geolocator/geolocator.dart';
 
 
 
@@ -37,7 +39,8 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   Timer? _countdownTimer;
 
   // 🔥 NEW: User location state
-  String _userLocation = "Loading...";
+  String _userLocation = "Detecting location...";
+  Position? _livePosition;
   String _firebaseUid = "";
 
   final List<String> _mainCategories = ["All", "Free", "Discounted"];
@@ -50,6 +53,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     "Vegan",
     "Vegetarian",
     "Non-vegetarian",
+    "Jain",
   ];
 
   @override
@@ -60,7 +64,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       _firebaseUid = user.uid;
-      _loadUserLocation();
+      _initLocation();
     }
 
     _fetchRealListings();
@@ -73,29 +77,41 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
       }
     });
   }
-  Future<void> _loadUserLocation() async {
-  try {
-    final response =
-        await BackendService.getUserProfile(_firebaseUid);
-
-    print("FULL RESPONSE: $response");
-
-    if (mounted) {
-      setState(() {
-        _userLocation =
-            response['user']?['addressText'] ??
-            "Unknown location";
-      });
+  Future<void> _initLocation() async {
+    // 1. Try to get live location first (Swiggy style)
+    final Position? position = await LocationUtil.getCurrentLocation();
+    if (position != null) {
+      if (mounted) {
+        setState(() => _livePosition = position);
+      }
+      final city = await LocationUtil.getAddressFromCoords(position.latitude, position.longitude);
+      if (city != null && mounted) {
+        setState(() => _userLocation = "Current Location: $city");
+        return; // Success with live location
+      }
     }
-  } catch (e) {
-    print("Location fetch error: $e");
-    if (mounted) {
-      setState(() {
-        _userLocation = "Location unavailable";
-      });
+
+    // 2. Fallback to Profile Location if GPS fails or is denied
+    _loadUserLocation();
+  }
+
+  Future<void> _loadUserLocation() async {
+    try {
+      final response = await BackendService.getUserProfile(_firebaseUid);
+      if (mounted) {
+        setState(() {
+          _userLocation = response['user']?['addressText'] ?? "Unknown location";
+        });
+      }
+    } catch (e) {
+      debugPrint("Location fetch error: $e");
+      if (mounted) {
+        setState(() {
+          _userLocation = "Location unavailable";
+        });
+      }
     }
   }
-}
 
 
   @override
@@ -150,12 +166,15 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AppAuthProvider>();
     // Combine mock stores and real listings
     final allItems = <dynamic>[
       ..._validListings,
       ...allMockStores,
     ];
     
+    final List<String> dietaryPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
+
     final filteredItems = allItems.where((item) {
       // Check if it's a mock store or real listing
       final isMock = item is MockStore;
@@ -168,14 +187,120 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         matchesMain = isMock ? (item.discount != null) : ((item['pricing']?['originalPrice'] ?? 0) > (item['pricing']?['discountedPrice'] ?? 0));
       }
 
-      // Filter by Sub Category (Food Type)
+      // Filter by Sub Category (Food Type or Dietary Type)
       bool matchesSub = true;
       if (_subCategory != "All") {
-        matchesSub = isMock ? (item.category == _subCategory) : (item['foodType'] == _subCategory);
+        if (isMock) {
+          // Mock data handling
+          final String subLower = _subCategory.toLowerCase();
+          final String catLower = item.category.toLowerCase();
+          
+          if (subLower == "meals") {
+            matchesSub = catLower.contains("meals") || catLower.contains("cafe") || catLower.contains("restaurant");
+          } else if (subLower == "bread & pastries") {
+            matchesSub = catLower.contains("bakery") || catLower.contains("pastry");
+          } else if (subLower == "groceries") {
+            matchesSub = catLower.contains("grocery") || catLower.contains("supermarket") || catLower.contains("pet food");
+          } else if (subLower == "vegan") {
+            matchesSub = catLower.contains("vegan");
+          } else if (subLower == "vegetarian") {
+            matchesSub = catLower.contains("vegetarian") || catLower.contains("veg") || catLower.contains("vegan") || catLower.contains("jain");
+          } else if (subLower == "non-vegetarian") {
+            matchesSub = catLower.contains("non-veg") || catLower.contains("steak") || catLower.contains("grill");
+          } else {
+            matchesSub = (item.category == _subCategory);
+          }
+        } else {
+          final String dietaryType = (item['dietaryType'] ?? "").toString().toLowerCase();
+          final String foodType = (item['foodType'] ?? "").toString();
+          
+          final String subLower = _subCategory.toLowerCase();
+          if (subLower == "non-vegetarian") {
+            matchesSub = (dietaryType == "non_veg" || foodType == "non_veg");
+          } else if (subLower == "vegetarian") {
+            matchesSub = (dietaryType == "vegetarian" || foodType == "vegetarian");
+          } else if (subLower == "vegan") {
+            matchesSub = (dietaryType == "vegan" || foodType == "vegan");
+          } else if (subLower == "jain") {
+            matchesSub = (dietaryType == "jain" || foodType == "jain");
+          } else if (subLower == "meals") {
+            matchesSub = (foodType == "prepared_meal");
+          } else if (subLower == "bread & pastries") {
+            matchesSub = (foodType == "bakery_item");
+          } else if (subLower == "groceries") {
+            matchesSub = (foodType == "fresh_produce" || foodType == "packaged_food" || foodType == "dairy_product");
+          } else {
+            matchesSub = (foodType == _subCategory);
+          }
+        }
       }
 
-      return matchesMain && matchesSub;
+      // 🔥 NEW: Filter by User Dietary Preferences (Strict Filtering)
+      bool matchesDietary = true;
+      if (dietaryPrefs.isNotEmpty) {
+        String itemDietary = "vegetarian"; 
+        if (isMock) {
+          final cat = item.category.toLowerCase();
+          if (cat.contains("vegan")) itemDietary = "vegan";
+          else if (cat.contains("non-veg")) itemDietary = "non_veg";
+          else if (cat.contains("vegetarian")) itemDietary = "vegetarian";
+          else if (cat.contains("jain")) itemDietary = "jain";
+        } else {
+          itemDietary = (item['dietaryType'] ?? "vegetarian").toString().toLowerCase();
+        }
+        
+        // 1. If user has only one preference, act as a specific filter
+        if (dietaryPrefs.length == 1) {
+          final pref = dietaryPrefs.first;
+          if (pref == "vegan" && itemDietary != "vegan") matchesDietary = false;
+          if (pref == "jain" && itemDietary != "jain") matchesDietary = false;
+          if (pref == "vegetarian" && (itemDietary == "non_veg" || itemDietary == "not_specified")) matchesDietary = false;
+          if (pref == "non_veg" && itemDietary != "non_veg") matchesDietary = false;
+        } else {
+          // 2. If multiple, ensure item matches ANY of the allowed types (e.g. user eats Veg + Non-Veg)
+          // But strict exclusions apply:
+          if (dietaryPrefs.contains("vegan") && !dietaryPrefs.contains("non_veg")) {
+             if (itemDietary == "non_veg") matchesDietary = false;
+          }
+           if (dietaryPrefs.contains("vegetarian") && !dietaryPrefs.contains("non_veg")) {
+             if (itemDietary == "non_veg") matchesDietary = false;
+          }
+        }
+      }
+
+      return matchesMain && matchesSub && matchesDietary;
     }).toList();
+
+    // 🔥 NEW: Sort by Proximity to Live Position
+    if (_livePosition != null) {
+      filteredItems.sort((a, b) {
+        double distA = 9999.0;
+        double distB = 9999.0;
+
+        // Get coordinates for A
+        if (a is! MockStore) {
+          final coords = a['pickupGeo']?['coordinates'];
+          if (coords != null && coords is List && coords.length >= 2) {
+            distA = LocationUtil.calculateDistance(_livePosition!.latitude, _livePosition!.longitude, (coords[1] as num).toDouble(), (coords[0] as num).toDouble());
+          }
+        } else {
+           // Mock store proximity (assume they are in Bangalore for now)
+           distA = LocationUtil.calculateDistance(_livePosition!.latitude, _livePosition!.longitude, 12.9716, 77.5946);
+        }
+
+        // Get coordinates for B
+        if (b is! MockStore) {
+          final coords = b['pickupGeo']?['coordinates'];
+          if (coords != null && coords is List && coords.length >= 2) {
+            distB = LocationUtil.calculateDistance(_livePosition!.latitude, _livePosition!.longitude, (coords[1] as num).toDouble(), (coords[0] as num).toDouble());
+          }
+        } else {
+           distB = LocationUtil.calculateDistance(_livePosition!.latitude, _livePosition!.longitude, 12.9716, 77.5946);
+        }
+
+        return distA.compareTo(distB);
+      });
+    }
 
     return SafeArea(
       child: Column(
@@ -187,48 +312,54 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : filteredItems.isEmpty
-                    ? _buildEmptyState()
-                    : ResponsiveLayout(
-                        mobile: ListView.builder(
-                          padding: const EdgeInsets.all(20),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 24),
-                              child: _buildItemCard(filteredItems[index]),
-                            );
-                          },
-                        ),
-                        tablet: GridView.builder(
-                          padding: const EdgeInsets.all(20),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 1.1,
-                                crossAxisSpacing: 20,
-                                mainAxisSpacing: 20,
-                              ),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            return _buildItemCard(filteredItems[index]);
-                          },
-                        ),
-                        desktop: GridView.builder(
-                          padding: const EdgeInsets.all(20),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                childAspectRatio: 1.0,
-                                crossAxisSpacing: 20,
-                                mainAxisSpacing: 20,
-                              ),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            return _buildItemCard(filteredItems[index]);
-                          },
-                        ),
-                      ),
+                : RefreshIndicator(
+                    onRefresh: _fetchRealListings,
+                    child: filteredItems.isEmpty
+                        ? _buildEmptyState()
+                        : ResponsiveLayout(
+                            mobile: ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(20),
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 24),
+                                  child: _buildItemCard(filteredItems[index]),
+                                );
+                              },
+                            ),
+                            tablet: GridView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(20),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    childAspectRatio: 1.1,
+                                    crossAxisSpacing: 20,
+                                    mainAxisSpacing: 20,
+                                  ),
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                return _buildItemCard(filteredItems[index]);
+                              },
+                            ),
+                            desktop: GridView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(20),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    childAspectRatio: 1.0,
+                                    crossAxisSpacing: 20,
+                                    mainAxisSpacing: 20,
+                                  ),
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                return _buildItemCard(filteredItems[index]);
+                              },
+                            ),
+                          ),
+                  ),
           ),
         ],
       ),
@@ -302,9 +433,11 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
               // 🔥 Dynamic Discover Title
               Text(
-                _userLocation == "Loading..."
-                    ? AppLocalizations.of(context)!.translate("discover")
-                    : "${AppLocalizations.of(context)!.translate("discover")} ${_userLocation.split(',').last.trim()}",
+                _userLocation == "Detecting location..."
+                    ? AppLocalizations.of(context)!.translate("discover") ?? "Discover"
+                    : (_livePosition != null 
+                        ? (AppLocalizations.of(context)!.translate("discover_near_you") ?? "Discover Near You")
+                        : "${AppLocalizations.of(context)!.translate("discover") ?? "Discover"} ${_userLocation.split(',').last.trim()}"),
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,

@@ -13,6 +13,8 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../shared/widgets/animated_toast.dart';
+import '../../../shared/utils/location_util.dart';
+import 'package:geolocator/geolocator.dart';
 
 class BuyerBrowsePage extends StatefulWidget {
   const BuyerBrowsePage({super.key});
@@ -35,6 +37,10 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
 
   // Map Interaction State
   String? _selectedStoreId;
+  bool _showSearchInArea = false;
+  bool _hasVisibleResults = true;
+  LatLng? _lastCenter;
+  Position? _livePosition;
 
   // Real Data State
   List<Map<String, dynamic>> _realListings = [];
@@ -48,12 +54,58 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   void initState() {
     super.initState();
     _fetchRealListings();
+    
     // Update countdown every 30 seconds
     _countdownTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted) {
         setState(() => _now = DateTime.now());
       }
     });
+
+    // 🔥 NEW: Center map on user location after a short delay to allow provider initialization
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _centerOnUserLocation();
+    });
+  }
+
+  Future<void> _centerOnUserLocation() async {
+    if (!mounted) return;
+    
+    // 1. Try to get live location first
+    final Position? position = await LocationUtil.getCurrentLocation();
+    if (position != null) {
+      if (mounted) {
+        setState(() => _livePosition = position);
+        debugPrint("📍 Centering map on LIVE user location: [${position.latitude}, ${position.longitude}]");
+        _mapController.move(LatLng(position.latitude, position.longitude), 14);
+        return;
+      }
+    }
+
+    // 2. Fallback to profile location
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+    final coords = auth.mongoUser?['geo']?['coordinates'];
+    
+    if (coords != null && coords is List && coords.length >= 2) {
+      final double lng = (coords[0] as num).toDouble();
+      final double lat = (coords[1] as num).toDouble();
+      
+      debugPrint("📍 Centering map on profile location: [$lat, $lng]");
+      _mapController.move(LatLng(lat, lng), 13);
+    } else {
+       debugPrint("📍 User location not found in profile, defaulting to Bangalore");
+    }
+  }
+
+  Future<void> _goToLiveLocation() async {
+    final Position? position = await LocationUtil.getCurrentLocation();
+    if (position != null) {
+      setState(() => _livePosition = position);
+      _mapController.move(LatLng(position.latitude, position.longitude), 14);
+      AnimatedToast.show(context, "Centered on current location", type: ToastType.info);
+    } else {
+      AnimatedToast.show(context, "Could not fetch location", type: ToastType.error);
+    }
   }
 
   Future<void> _fetchRealListings() async {
@@ -111,12 +163,23 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     // 2. Add only valid (non-expired) real listings
     results.insertAll(0, _validListings);
 
+    final auth = context.watch<AppAuthProvider>();
+    final List<String> dietaryPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
+
     return results.where((item) {
+<<<<<<< HEAD
       final langProvider = Provider.of<LanguageProvider>(context, listen: false);
       final name = item is MockStore ? item.name : langProvider.getTranslatedText(context, item, 'foodName');
       final type = item is MockStore ? item.type : (item['foodType'] ?? "");
       final rating = item is MockStore ? double.tryParse(item.rating) ?? 0.0 : 0.0; // Real listings don't have ratings yet
       final isFree = item is MockStore ? item.isFree : (item['pricing']?['isFree'] ?? false);
+=======
+      final isMock = item is MockStore;
+      final name = isMock ? item.name : (item['foodName'] ?? "");
+      final type = isMock ? item.type : (item['foodType'] ?? "");
+      final rating = isMock ? double.tryParse(item.rating) ?? 0.0 : 0.0; // Real listings don't have ratings yet
+      final isFree = isMock ? item.isFree : (item['pricing']?['isFree'] ?? false);
+>>>>>>> origin/main
 
       // 1. Search Query
       if (_searchQuery.isNotEmpty) {
@@ -133,12 +196,47 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
       // 3. Price Filters
       if (_onlyFree && !isFree) return false;
 
+      // 🔥 NEW: Filter by User Dietary Preferences (Strict Filtering)
+      if (dietaryPrefs.isNotEmpty) {
+        String itemDietary = "vegetarian"; 
+        if (isMock) {
+          final cat = item.category.toLowerCase();
+          if (cat.contains("vegan")) itemDietary = "vegan";
+          else if (cat.contains("non-veg")) itemDietary = "non_veg";
+          else if (cat.contains("vegetarian")) itemDietary = "vegetarian";
+          else if (cat.contains("jain")) itemDietary = "jain";
+        } else {
+          itemDietary = (item['dietaryType'] ?? "vegetarian").toString().toLowerCase();
+        }
+        
+        // 1. If user has only one preference, act as a specific filter
+        if (dietaryPrefs.length == 1) {
+          final pref = dietaryPrefs.first;
+          if (pref == "vegan" && itemDietary != "vegan") return false;
+          if (pref == "jain" && itemDietary != "jain") return false;
+          if (pref == "vegetarian" && (itemDietary == "non_veg" || itemDietary == "not_specified")) return false;
+          if (pref == "non_veg" && itemDietary != "non_veg") return false;
+        } else {
+          // 2. If multiple, ensure item matches ANY of the allowed types (e.g. user eats Veg + Non-Veg)
+          // But strict exclusions apply:
+          if (dietaryPrefs.contains("vegan") && !dietaryPrefs.contains("non_veg")) {
+             if (itemDietary == "non_veg") return false;
+          }
+           if (dietaryPrefs.contains("vegetarian") && !dietaryPrefs.contains("non_veg")) {
+             if (itemDietary == "non_veg") return false;
+          }
+        }
+      }
+
       return true;
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AppAuthProvider>();
+    final List<String> dietaryPrefs = List<String>.from(auth.mongoUser?['profile']?['dietaryPreferences'] ?? []);
+
     return Scaffold(
       body: Stack(
         children: [
@@ -155,11 +253,95 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
             child: _buildFloatingSearchHeader(),
           ),
 
+          // 🔥 NEW: Search in this area button
+          if (_showSearchInArea)
+            Positioned(
+              top: 130,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: _buildFloatingButton(
+                  icon: Icons.refresh,
+                  label: "Search in this area",
+                  onTap: () {
+                    setState(() => _showSearchInArea = false);
+                    _fetchRealListings();
+                    AnimatedToast.show(context, "Searching in this area...", type: ToastType.info);
+                  },
+                ),
+              ),
+            ),
+
+          // 🔥 NEW: Empty State Prompt
+          if ((_allResults.isEmpty || !_hasVisibleResults) && !_isListingsLoading)
+            Positioned(
+              top: 130,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 40),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.location_off_outlined, color: AppColors.primary, size: 36),
+                      const SizedBox(height: 12),
+                      Text(
+                        "No listings here yet",
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _allResults.isEmpty 
+                            ? "Try changing your filters or searching another area."
+                            : "Invite sellers in this area to encourage community growth!",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: AppColors.textLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
           // 4. Draggable Bottom Sheet
           _buildBottomSheetList(),
 
           // 5. Pop-out Card
           if (_selectedStoreId != null) _buildPopOutCard(),
+
+          // 🔥 NEW: Locate Me Button
+          Positioned(
+            bottom: 220,
+            right: 20,
+            child: FloatingActionButton(
+              heroTag: "locateMe",
+              onPressed: _goToLiveLocation,
+              backgroundColor: Colors.white,
+              mini: true,
+              child: const Icon(Icons.my_location, color: AppColors.primary),
+            ),
+          ),
         ],
       ),
     );
@@ -171,6 +353,27 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     options: MapOptions(
       initialCenter: const LatLng(12.9716, 77.5946), // Bangalore default
       initialZoom: 13,
+      onPositionChanged: (position, hasGesture) {
+        if (position.center != null) {
+          // 1. Check for visible results
+          final bool visible = _checkVisibleResults(position.bounds);
+          if (visible != _hasVisibleResults) {
+            setState(() => _hasVisibleResults = visible);
+          }
+
+          // 2. Show "Search in area" button if gestured
+          if (hasGesture) {
+            if (_lastCenter == null || 
+                (position.center!.latitude - _lastCenter!.latitude).abs() > 0.01 ||
+                (position.center!.longitude - _lastCenter!.longitude).abs() > 0.01) {
+              setState(() {
+                _showSearchInArea = true;
+                _lastCenter = position.center;
+              });
+            }
+          }
+        }
+      },
       onTap: (_, __) {
         if (_selectedStoreId != null) {
           setState(() => _selectedStoreId = null);
@@ -190,62 +393,177 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
 }
 
 List<Marker> _buildOSMMarkers() {
-  return _allResults.map((item) {
-    final String id =
-        item is MockStore ? item.id : (item['_id'] ?? "");
-
+  final List<Marker> markers = _allResults.map((item) {
+    final String id = item is MockStore ? item.id : (item['_id'] ?? "");
     final bool isSelected = _selectedStoreId == id;
-    final bool isFree = item is MockStore
-        ? item.isFree
-        : (item['pricing']?['isFree'] ?? false);
+    final bool isFree = item is MockStore ? item.isFree : (item['pricing']?['isFree'] ?? false);
+    final String price = item is MockStore ? item.price : "₹${item['pricing']?['discountedPrice'] ?? 0}";
 
-    final String price = item is MockStore
-        ? item.price
-        : "₹${item['pricing']?['discountedPrice'] ?? 0}";
+    // 🔥 Real coordinates from pickupGeo
+    double lat = 12.9716;
+    double lng = 77.5946;
 
-    // TEMP coordinates (replace with real lat/lng from backend later)
-    final double lat = item is MockStore
-        ? 12.9716 + (_allResults.indexOf(item) * 0.005)
-        : 12.9716 + (_allResults.indexOf(item) * 0.005);
-
-    final double lng = item is MockStore
-        ? 77.5946 + (_allResults.indexOf(item) * 0.005)
-        : 77.5946 + (_allResults.indexOf(item) * 0.005);
+    if (item is MockStore) {
+      // Distribute mock stores slightly for demo
+      lat = 12.9716 + (_allResults.indexOf(item) * 0.005);
+      lng = 77.5946 + (_allResults.indexOf(item) * 0.005);
+    } else {
+      final coords = item['pickupGeo']?['coordinates'];
+      if (coords != null && coords is List && coords.length >= 2) {
+        lng = (coords[0] as num).toDouble();
+        lat = (coords[1] as num).toDouble();
+      }
+    }
 
     return Marker(
-      width: 100,
-      height: 50,
+      width: isSelected ? 120 : 100,
+      height: isSelected ? 60 : 50,
       point: LatLng(lat, lng),
       child: GestureDetector(
         onTap: () {
           setState(() => _selectedStoreId = id);
+          _mapController.move(LatLng(lat, lng), 14); // Focus on marker
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.black : Colors.white,
+            color: isSelected ? AppColors.primary : Colors.white,
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? Colors.white : AppColors.primary.withOpacity(0.3),
+              width: 2,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: (isSelected ? AppColors.primary : Colors.black).withOpacity(0.2),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Text(
-            isFree ? AppLocalizations.of(context)!.translate("free") : price,
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: isSelected ? Colors.white : Colors.black,
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                item is MockStore ? Icons.store_outlined : Icons.restaurant_menu,
+                size: 14,
+                color: isSelected ? Colors.white : AppColors.primary,
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  isFree ? AppLocalizations.of(context)!.translate("free") : price,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: isSelected ? Colors.white : AppColors.textDark,
+                  ),
+                ),
+              ),
+            ],
+          ),
           ),
         ),
       ),
     );
   }).toList();
+
+  // 🔥 NEW: Add User's "Blue Dot" position
+  if (_livePosition != null) {
+    markers.add(
+      Marker(
+        width: 24,
+        height: 24,
+        point: LatLng(_livePosition!.latitude, _livePosition!.longitude),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(0.3),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  return markers;
+}
+
+bool _checkVisibleResults(LatLngBounds? bounds) {
+  if (bounds == null) return true;
+  if (_allResults.isEmpty) return false;
+
+  for (final item in _allResults) {
+    double lat = 12.9716;
+    double lng = 77.5946;
+
+    if (item is MockStore) {
+      lat = 12.9716 + (_allResults.indexOf(item) * 0.005);
+      lng = 77.5946 + (_allResults.indexOf(item) * 0.005);
+    } else {
+      final coords = item['pickupGeo']?['coordinates'];
+      if (coords != null && coords is List && coords.length >= 2) {
+        lng = (coords[0] as num).toDouble();
+        lat = (coords[1] as num).toDouble();
+      }
+    }
+
+    if (bounds.contains(LatLng(lat, lng))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+Widget _buildFloatingButton({
+  required IconData icon,
+  required String label,
+  required VoidCallback onTap,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
   
   Widget _buildFloatingSearchHeader() {
@@ -276,10 +594,14 @@ List<Marker> _buildOSMMarkers() {
                     controller: _searchController,
                     onChanged: (val) => setState(() => _searchQuery = val),
                     decoration: InputDecoration(
+<<<<<<< HEAD
                       hintText: AppLocalizations.of(context)!.translate("Bangalore"),
+=======
+                      hintText: "Search city, food or category...",
+>>>>>>> origin/main
                       hintStyle: GoogleFonts.inter(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
+                        color: AppColors.textLight.withOpacity(0.5),
+                        fontWeight: FontWeight.w500,
                         fontSize: 16,
                       ),
                       border: InputBorder.none,
