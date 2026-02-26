@@ -129,31 +129,54 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
   Widget _buildHeader(BuildContext context) {
     final authProvider = Provider.of<AppAuthProvider>(context);
     final userName = authProvider.mongoUser?['name'] ?? "Seller";
+    final initials = userName.trim().isNotEmpty
+        ? userName.trim().split(' ').map((s) => s[0]).take(2).join()
+        : 'S';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
-                "${AppLocalizations.of(context)!.translate("welcome_back_user")}$userName",
-                style: GoogleFonts.inter(
-                  color: AppColors.textLight.withOpacity(0.7),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: AppColors.primary,
+                child: Text(
+                  initials.toUpperCase(),
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                AppLocalizations.of(context)!.translate("seller_dashboard"),
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                  fontSize: 20,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.translate("seller_dashboard"),
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                        fontSize: 20,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "${AppLocalizations.of(context)!.translate("welcome_back_user")}, $userName",
+                      style: GoogleFonts.inter(
+                        color: AppColors.textLight.withOpacity(0.7),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -322,6 +345,13 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
     );
   }
 
+  String _getCurrentMonthLabel() {
+    final now = DateTime.now();
+    final months = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    return '${months[now.month - 1]} ${now.year}';
+  }
+
   Widget _buildRecentActivityList() {
     // Note: These will remain static as per the design for now, 
     // or we could implement an activity feed later.
@@ -380,17 +410,24 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      activity['color'].withOpacity(0.12),
-                      activity['color'].withOpacity(0.06),
+                      activity['color'].withOpacity(0.18),
+                      activity['color'].withOpacity(0.08),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: activity['color'].withOpacity(0.12),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Icon(
                   activity['icon'],
-                  color: activity['color'],
+                  color: activity['color'].shade700 ?? activity['color'],
                   size: 18,
                 ),
               ),
@@ -426,16 +463,16 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                   Text(
                     activity['time'],
                     style: TextStyle(
-                      color: AppColors.textLight.withOpacity(0.4),
-                      fontSize: 10,
+                      color: AppColors.textLight.withOpacity(0.5),
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Icon(
                     Icons.chevron_right_rounded,
-                    size: 16,
-                    color: AppColors.textLight.withOpacity(0.2),
+                    size: 18,
+                    color: AppColors.textLight.withOpacity(0.35),
                   ),
                 ],
               ),
@@ -453,82 +490,110 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
     IconData icon,
     List<Color> gradientColors,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: gradientColors[0].withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -10,
-            top: -10,
-            child: Icon(
-              icon,
-              size: 60,
-              color: gradientColors[0].withOpacity(0.03),
+    return InkWell(
+      onTap: () {},
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: gradientColors[0].withOpacity(0.06),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: gradientColors,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -6,
+              top: -6,
+              child: Icon(
+                icon,
+                size: 56,
+                color: gradientColors[0].withOpacity(0.04),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: gradientColors,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: gradientColors[0].withOpacity(0.22),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: gradientColors[0].withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                    child: Icon(icon, color: Colors.white, size: 16),
+                  ),
+                  const SizedBox(height: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        value,
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textDark,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textLight.withOpacity(0.65),
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.2,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.textLight.withOpacity(0.06),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              _getCurrentMonthLabel(),
+                              style: TextStyle(
+                                color: AppColors.textLight.withOpacity(0.6),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  child: Icon(icon, color: Colors.white, size: 16),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      value,
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textDark,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textLight.withOpacity(0.6),
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
