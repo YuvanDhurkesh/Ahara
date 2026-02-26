@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../data/mock_stores.dart';
@@ -35,7 +35,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   DateTime _now = DateTime.now();
   Timer? _countdownTimer;
 
-  // 🔥 User location state
+  // ðŸ”¥ User location state
   String _userLocation = "Detecting location...";
   Position? _livePosition;
   String _firebaseUid = "";
@@ -391,8 +391,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                         style: TextStyle(color: AppColors.textLight.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                     ),
-<<<<<<< HEAD
-                  ),
 
                   const Icon(
                     Icons.keyboard_arrow_down,
@@ -403,7 +401,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
               ),
               const SizedBox(height: 4),
 
-              // 🔥 Dynamic Discover Title
+              // ðŸ”¥ Dynamic Discover Title
               Text(
                 _userLocation == "Detecting location..."
                     ? AppLocalizations.of(context)!.translate("discover") ?? "Discover"
@@ -415,17 +413,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   fontWeight: FontWeight.w900,
                   color: AppColors.textDark,
                   letterSpacing: -0.5,
-=======
-                    const Icon(Icons.keyboard_arrow_down, color: AppColors.primary, size: 14),
-                  ],
->>>>>>> origin/main
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _userLocation == "Detecting location..."
-                      ? "Discover"
-                      : (_livePosition != null ? "Discover Near You" : "Discover ${_userLocation.split(',').last.trim()}"),
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textDark, letterSpacing: -0.5),
                 ),
               ],
             ),
@@ -589,7 +576,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                 ),
                 if (isFree)
                   Positioned(
-<<<<<<< HEAD
                     top: 12,
                     left: 12,
                     child: Container(
@@ -607,10 +593,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                         ),
                       ),
                     ),
-=======
-                    top: 12, left: 12,
-                    child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10)), child: const Text("FREE", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900))),
->>>>>>> origin/main
                   ),
                 if (rating > 0)
                   Positioned(bottom: 12, right: 12, child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)), child: Row(children: [const Icon(Icons.star, color: Colors.amber, size: 14), const SizedBox(width: 4), Text(rating.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]))),
@@ -630,7 +612,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                         children: [
                           if (originalPrice != null && originalPrice > price)
                             Text(
-                              "₹$originalPrice",
+                              "â‚¹$originalPrice",
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textLight.withOpacity(0.5),
@@ -638,14 +620,13 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                               ),
                             ),
                           Text(
-                            isFree ? AppLocalizations.of(context)!.translate("free").toUpperCase() : "₹$price",
+                            isFree ? AppLocalizations.of(context)!.translate("free").toUpperCase() : "â‚¹$price",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
                               color: isFree ? Colors.green : AppColors.primary,
                             ),
                           ),
-                        ],
                         ],
                       ),
                     ],
@@ -709,7 +690,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   ),
                 ),
                 Positioned(
-<<<<<<< HEAD
                   top: 12,
                   left: 12,
                   child: Wrap(
@@ -808,12 +788,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                       ],
                     ),
                   ),
-=======
-                  top: 12, left: 12,
-                  child: Wrap(spacing: 6, runSpacing: 6, children: [if (store.discount != null) _buildSpecialBadge(store.discount!, Colors.orange), if (store.isFree) _buildSpecialBadge("FREE", Colors.green), ...store.badges.map((badge) => _buildBadge(badge)).toList()]),
->>>>>>> origin/main
                 ),
-                Positioned(bottom: 12, right: 12, child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)), child: Row(children: [const Icon(Icons.star, color: Colors.amber, size: 14), const SizedBox(width: 4), Text(store.rating, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]))),
               ],
             ),
             Padding(
