@@ -1,17 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../shared/styles/app_colors.dart';
-import '../data/mock_stores.dart';
-import '../../common/pages/landing_page.dart';
-import 'buyer_food_detail_page.dart';
-import 'buyer_notifications_page.dart';
-import '../../../../core/utils/responsive_layout.dart';
-import '../../../data/services/backend_service.dart';
-import '../../../core/localization/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import '../../../data/providers/app_auth_provider.dart';
-import '../../../shared/widgets/animated_toast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
+
+// Package imports
+import 'package:frontend/shared/styles/app_colors.dart';
+import 'package:frontend/features/buyer/data/mock_stores.dart';
+import 'package:frontend/features/common/pages/landing_page.dart';
+import 'package:frontend/features/buyer/pages/buyer_food_detail_page.dart';
+import 'package:frontend/features/buyer/pages/buyer_notifications_page.dart';
+import 'package:frontend/core/utils/responsive_layout.dart';
+import 'package:frontend/data/services/backend_service.dart';
+import 'package:frontend/core/localization/app_localizations.dart';
+import 'package:frontend/data/providers/app_auth_provider.dart';
+import 'package:frontend/shared/utils/location_util.dart';
 
 class BuyerHomePage extends StatefulWidget {
   const BuyerHomePage({super.key});
@@ -32,8 +36,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   DateTime _now = DateTime.now();
   Timer? _countdownTimer;
 
-  // 🔥 NEW: User location state
-  String _userLocation = "Loading...";
+  // User location state
+  String _userLocation = "Detecting location...";
+  Position? _livePosition;
   String _firebaseUid = "";
 
   final List<String> _mainCategories = ["All", "Free", "Discounted"];
@@ -46,17 +51,17 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     "Vegan",
     "Vegetarian",
     "Non-vegetarian",
+    "Jain",
   ];
 
   @override
   void initState() {
     super.initState();
 
-    // 🔥 Get Firebase UID
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       _firebaseUid = user.uid;
-      _loadUserLocation();
+      _initLocation();
     }
 
     _fetchRealListings();
@@ -69,12 +74,27 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     });
   }
 
+  Future<void> _initLocation() async {
+    final Position? position = await LocationUtil.getCurrentLocation();
+    if (position != null) {
+      if (mounted) {
+        setState(() => _livePosition = position);
+      }
+      final city = await LocationUtil.getAddressFromCoords(
+        position.latitude,
+        position.longitude,
+      );
+      if (city != null && mounted) {
+        setState(() => _userLocation = "Current Location: $city");
+        return;
+      }
+    }
+    _loadUserLocation();
+  }
+
   Future<void> _loadUserLocation() async {
     try {
       final response = await BackendService.getUserProfile(_firebaseUid);
-
-      print("FULL RESPONSE: $response");
-
       if (mounted) {
         setState(() {
           _userLocation =
@@ -82,7 +102,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         });
       }
     } catch (e) {
-      print("Location fetch error: $e");
+      debugPrint("Location fetch error: $e");
       if (mounted) {
         setState(() {
           _userLocation = "Location unavailable";
@@ -98,6 +118,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   }
 
   Future<void> _fetchRealListings() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     try {
       final listings = await BackendService.getAllActiveListings();
@@ -115,7 +136,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     }
   }
 
-  // Filter out expired listings
   List<Map<String, dynamic>> get _validListings {
     final now = DateTime.now();
     return _realListings.where((listing) {
@@ -130,7 +150,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     }).toList();
   }
 
-  // Format time remaining
   String _formatTimeRemaining(DateTime expiryTime) {
     final diff = expiryTime.difference(_now);
     if (diff.isNegative) return "Expired";
@@ -140,16 +159,46 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     return "Soon";
   }
 
+  bool _checkUpcoming(DateTime? start) {
+    if (start == null) return false;
+    if (!start.isAfter(_now)) return false;
+
+    // Healing logic: If it's shifted to tomorrow but the time hasn't passed today,
+    // treat it as starting today.
+    if (start.difference(_now).inHours < 24) {
+      final todayStart = DateTime(
+        _now.year,
+        _now.month,
+        _now.day,
+        start.hour,
+        start.minute,
+      );
+      if (!todayStart.isAfter(_now)) return false;
+    }
+    return true;
+  }
+
+  String _fmt12(DateTime dt) {
+    final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final m = dt.minute.toString().padLeft(2, '0');
+    final p = dt.hour >= 12 ? 'PM' : 'AM';
+    return '$h:$m $p';
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Combine mock stores and real listings
+    final auth = context.watch<AppAuthProvider>();
+
     final allItems = <dynamic>[..._validListings, ...allMockStores];
 
+    final List<String> dietaryPrefs = List<String>.from(
+      auth.mongoProfile?['dietaryPreferences'] ?? [],
+    );
+
     final filteredItems = allItems.where((item) {
-      // Check if it's a mock store or real listing
       final isMock = item is MockStore;
 
-      // Filter by Main Category (Free/Discounted)
+      // 1. Filter by Main Category (Free/Discounted)
       bool matchesMain = true;
       if (_mainCategory == "Free") {
         matchesMain = isMock
@@ -162,16 +211,164 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   (item['pricing']?['discountedPrice'] ?? 0));
       }
 
-      // Filter by Sub Category (Food Type)
+      // 2. Filter by Sub Category (Meals, Groceries, etc.)
       bool matchesSub = true;
       if (_subCategory != "All") {
-        matchesSub = isMock
-            ? (item.category == _subCategory)
-            : (item['foodType'] == _subCategory);
+        if (isMock) {
+          final String subLower = _subCategory.toLowerCase();
+          final String catLower = item.category.toLowerCase();
+
+          if (subLower == "meals") {
+            matchesSub =
+                catLower.contains("meals") ||
+                catLower.contains("cafe") ||
+                catLower.contains("restaurant");
+          } else if (subLower == "bread & pastries") {
+            matchesSub =
+                catLower.contains("bakery") || catLower.contains("pastry");
+          } else if (subLower == "groceries") {
+            matchesSub =
+                catLower.contains("grocery") ||
+                catLower.contains("supermarket") ||
+                catLower.contains("pet food");
+          } else if (subLower == "vegan") {
+            matchesSub = catLower.contains("vegan");
+          } else if (subLower == "vegetarian") {
+            matchesSub =
+                catLower.contains("vegetarian") ||
+                catLower.contains("veg") ||
+                catLower.contains("vegan") ||
+                catLower.contains("jain");
+          } else if (subLower == "non-vegetarian") {
+            matchesSub =
+                catLower.contains("non-veg") ||
+                catLower.contains("steak") ||
+                catLower.contains("grill");
+          } else {
+            matchesSub = (item.category == _subCategory);
+          }
+        } else {
+          final String dietaryType = (item['dietaryType'] ?? "")
+              .toString()
+              .toLowerCase();
+          final String foodType = (item['foodType'] ?? "").toString();
+
+          final String subLower = _subCategory.toLowerCase();
+          if (subLower == "non-vegetarian") {
+            matchesSub = (dietaryType == "non_veg" || foodType == "non_veg");
+          } else if (subLower == "vegetarian") {
+            matchesSub =
+                (dietaryType == "vegetarian" || foodType == "vegetarian");
+          } else if (subLower == "vegan") {
+            matchesSub = (dietaryType == "vegan" || foodType == "vegan");
+          } else if (subLower == "jain") {
+            matchesSub = (dietaryType == "jain" || foodType == "jain");
+          } else if (subLower == "meals") {
+            matchesSub = (foodType == "prepared_meal");
+          } else if (subLower == "bread & pastries") {
+            matchesSub = (foodType == "bakery_item");
+          } else if (subLower == "groceries") {
+            matchesSub =
+                (foodType == "fresh_produce" ||
+                foodType == "packaged_food" ||
+                foodType == "dairy_product");
+          } else {
+            matchesSub = (foodType == _subCategory);
+          }
+        }
       }
 
-      return matchesMain && matchesSub;
+      // 3. Filter by User Dietary Preferences
+      // 🔥 Only apply strict background filtering if NO manual subcategory is selected
+      // This allows a user to "bypass" their profile preference by clicking a specific filter.
+      bool matchesDietary = true;
+      if (dietaryPrefs.isNotEmpty && _subCategory == "All") {
+        String itemDietary = "vegetarian";
+        if (isMock) {
+          final cat = item.category.toLowerCase();
+          if (cat.contains("vegan"))
+            itemDietary = "vegan";
+          else if (cat.contains("non-veg"))
+            itemDietary = "non_veg";
+          else if (cat.contains("vegetarian"))
+            itemDietary = "vegetarian";
+          else if (cat.contains("jain"))
+            itemDietary = "jain";
+        } else {
+          itemDietary = (item['dietaryType'] ?? "vegetarian")
+              .toString()
+              .toLowerCase();
+        }
+
+        if (dietaryPrefs.length == 1) {
+          final pref = dietaryPrefs.first;
+          if (pref == "vegan" && itemDietary != "vegan") matchesDietary = false;
+          if (pref == "jain" && itemDietary != "jain") matchesDietary = false;
+          if (pref == "vegetarian" && (itemDietary == "non_veg"))
+            matchesDietary = false;
+          if (pref == "non_veg" && itemDietary != "non_veg")
+            matchesDietary = false;
+        } else {
+          if (dietaryPrefs.contains("vegan") &&
+              !dietaryPrefs.contains("non_veg")) {
+            if (itemDietary == "non_veg") matchesDietary = false;
+          }
+          if (dietaryPrefs.contains("vegetarian") &&
+              !dietaryPrefs.contains("non_veg")) {
+            if (itemDietary == "non_veg") matchesDietary = false;
+          }
+        }
+      }
+
+      return matchesMain && matchesSub && matchesDietary;
     }).toList();
+
+    // 4. Sort by Proximity to Live Position
+    if (_livePosition != null) {
+      filteredItems.sort((a, b) {
+        double distA = 9999.0;
+        double distB = 9999.0;
+
+        if (a is! MockStore) {
+          final coords = a['pickupGeo']?['coordinates'];
+          if (coords != null && coords is List && coords.length >= 2) {
+            distA = LocationUtil.calculateDistance(
+              _livePosition!.latitude,
+              _livePosition!.longitude,
+              (coords[1] as num).toDouble(),
+              (coords[0] as num).toDouble(),
+            );
+          }
+        } else {
+          distA = LocationUtil.calculateDistance(
+            _livePosition!.latitude,
+            _livePosition!.longitude,
+            12.9716,
+            77.5946,
+          );
+        }
+
+        if (b is! MockStore) {
+          final coords = b['pickupGeo']?['coordinates'];
+          if (coords != null && coords is List && coords.length >= 2) {
+            distB = LocationUtil.calculateDistance(
+              _livePosition!.latitude,
+              _livePosition!.longitude,
+              (coords[1] as num).toDouble(),
+              (coords[0] as num).toDouble(),
+            );
+          }
+        } else {
+          distB = LocationUtil.calculateDistance(
+            _livePosition!.latitude,
+            _livePosition!.longitude,
+            12.9716,
+            77.5946,
+          );
+        }
+        return distA.compareTo(distB);
+      });
+    }
 
     return SafeArea(
       child: Column(
@@ -183,47 +380,53 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : filteredItems.isEmpty
-                ? _buildEmptyState()
-                : ResponsiveLayout(
-                    mobile: ListView.builder(
-                      padding: const EdgeInsets.all(20),
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 24),
-                          child: _buildItemCard(filteredItems[index]),
-                        );
-                      },
-                    ),
-                    tablet: GridView.builder(
-                      padding: const EdgeInsets.all(20),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 1.1,
-                            crossAxisSpacing: 20,
-                            mainAxisSpacing: 20,
+                : RefreshIndicator(
+                    onRefresh: _fetchRealListings,
+                    child: filteredItems.isEmpty
+                        ? _buildEmptyState()
+                        : ResponsiveLayout(
+                            mobile: ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(20),
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 24),
+                                  child: _buildItemCard(filteredItems[index]),
+                                );
+                              },
+                            ),
+                            tablet: GridView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(20),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    childAspectRatio: 1.1,
+                                    crossAxisSpacing: 20,
+                                    mainAxisSpacing: 20,
+                                  ),
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                return _buildItemCard(filteredItems[index]);
+                              },
+                            ),
+                            desktop: GridView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.all(20),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    childAspectRatio: 1.0,
+                                    crossAxisSpacing: 20,
+                                    mainAxisSpacing: 20,
+                                  ),
+                              itemCount: filteredItems.length,
+                              itemBuilder: (context, index) {
+                                return _buildItemCard(filteredItems[index]);
+                              },
+                            ),
                           ),
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        return _buildItemCard(filteredItems[index]);
-                      },
-                    ),
-                    desktop: GridView.builder(
-                      padding: const EdgeInsets.all(20),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            childAspectRatio: 1.0,
-                            crossAxisSpacing: 20,
-                            mainAxisSpacing: 20,
-                          ),
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        return _buildItemCard(filteredItems[index]);
-                      },
-                    ),
                   ),
           ),
         ],
@@ -273,8 +476,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                       size: 18,
                     ),
                     const SizedBox(width: 4),
-
-                    // 🔥 Dynamic Location
                     Expanded(
                       child: Text(
                         _userLocation,
@@ -286,7 +487,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                         ),
                       ),
                     ),
-
                     const Icon(
                       Icons.keyboard_arrow_down,
                       color: AppColors.primary,
@@ -295,12 +495,12 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   ],
                 ),
                 const SizedBox(height: 4),
-
-                // 🔥 Dynamic Discover Title
                 Text(
-                  _userLocation == "Loading..."
+                  _userLocation == "Detecting location..."
                       ? "Discover"
-                      : "Discover ${_userLocation.split(',').last.trim()}",
+                      : (_livePosition != null
+                            ? "Discover Near You"
+                            : "Discover ${_userLocation.split(',').last.trim()}"),
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
@@ -325,11 +525,11 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
               color: AppColors.textDark,
               size: 22,
             ),
-            tooltip: "Notifications",
           ),
           IconButton(
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
+              if (!mounted) return;
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const LandingPage()),
@@ -337,7 +537,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
               );
             },
             icon: const Icon(Icons.logout, color: AppColors.textDark, size: 22),
-            tooltip: "Logout",
           ),
         ],
       ),
@@ -436,7 +635,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     );
   }
 
-  // Unified card builder for both mock and real data
   Widget _buildItemCard(dynamic item) {
     if (item is MockStore) {
       return _buildRestaurantCard(item);
@@ -445,7 +643,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     }
   }
 
-  // New: Real listing card
   Widget _buildRealListingCard(Map<String, dynamic> listing) {
     final String name = listing['foodName'] ?? "Unknown Food";
     final pricing = listing['pricing'] ?? {};
@@ -455,55 +652,28 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
     final sellerProfile = listing['sellerProfileId'] ?? {};
     final String orgName = sellerProfile['orgName'] ?? "Local Seller";
-    final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0)
+    final double ratingNum = (sellerProfile['stats']?['avgRating'] ?? 0.0)
         .toDouble();
-    final int ratingCount = sellerProfile['stats']?['ratingCount'] ?? 0;
 
     final String? expiryStr = listing['pickupWindow']?['to'];
     final DateTime? expiryTime = expiryStr != null
         ? DateTime.tryParse(expiryStr)
         : null;
 
-    // --- Rescue Window detection ---
     final String? pickupFromStr = listing['pickupWindow']?['from'];
     final DateTime? pickupFrom = pickupFromStr != null
         ? DateTime.tryParse(pickupFromStr)
         : null;
-    bool _checkUpcoming(DateTime? start) {
-      if (start == null) return false;
-      if (!start.isAfter(_now)) return false;
-
-      // Healing logic: If it's shifted to tomorrow but the time has already passed today
-      if (start.difference(_now).inHours < 24) {
-        final todayStart = DateTime(
-          _now.year,
-          _now.month,
-          _now.day,
-          start.hour,
-          start.minute,
-        );
-        if (!todayStart.isAfter(_now)) return false;
-      }
-      return true;
-    }
 
     final bool isRescueUpcoming = _checkUpcoming(pickupFrom);
-
-    String _fmt12(DateTime dt) {
-      final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-      final m = dt.minute.toString().padLeft(2, '0');
-      final p = dt.hour >= 12 ? 'PM' : 'AM';
-      return '$h:$m $p';
-    }
 
     final List images = listing['images'] ?? [];
     final String uploadedImageUrl = images.isNotEmpty
         ? BackendService.formatImageUrl(images[0])
         : "";
-    final String foodName = listing['foodName'] ?? "Food Item";
     final String imageUrl = BackendService.isValidImageUrl(uploadedImageUrl)
         ? uploadedImageUrl
-        : BackendService.generateFoodImageUrl(foodName);
+        : BackendService.generateFoodImageUrl(name);
 
     return GestureDetector(
       onTap: () {
@@ -550,18 +720,16 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                         ),
                       );
                     },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 180,
-                        width: double.infinity,
-                        color: AppColors.textLight.withOpacity(0.05),
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          color: AppColors.textLight.withOpacity(0.2),
-                          size: 32,
-                        ),
-                      );
-                    },
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 180,
+                      width: double.infinity,
+                      color: AppColors.textLight.withOpacity(0.05),
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        color: AppColors.textLight.withOpacity(0.2),
+                        size: 32,
+                      ),
+                    ),
                   ),
                 ),
                 if (isFree)
@@ -587,73 +755,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                       ),
                     ),
                   ),
-                // Favorite Button
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Consumer<AppAuthProvider>(
-                    builder: (context, auth, _) {
-                      final profile = auth.mongoProfile;
-                      final sellerId = sellerProfile['userId'] ?? "";
-                      final List? favorites = profile?['favouriteSellers'];
-                      final bool isFavorited =
-                          favorites?.contains(sellerId) ?? false;
-
-                      return GestureDetector(
-                        onTap: () async {
-                          if (auth.currentUser == null || sellerId.isEmpty)
-                            return;
-                          try {
-                            await BackendService.toggleFavoriteSeller(
-                              firebaseUid: auth.currentUser!.uid,
-                              sellerId: sellerId,
-                            );
-                            await auth.refreshMongoUser();
-                            if (mounted) {
-                              AnimatedToast.show(
-                                context,
-                                isFavorited
-                                    ? "Removed restaurant from favorites"
-                                    : "Added restaurant to favorites",
-                                type: isFavorited
-                                    ? ToastType.info
-                                    : ToastType.success,
-                              );
-                            }
-                          } catch (e) {
-                            debugPrint(
-                              "Error toggling favorite restaurant: $e",
-                            );
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            isFavorited
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: isFavorited
-                                ? Colors.red
-                                : AppColors.textLight,
-                            size: 20,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                if (rating > 0)
+                if (ratingNum > 0)
                   Positioned(
                     bottom: 12,
                     right: 12,
@@ -671,7 +773,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                           const Icon(Icons.star, color: Colors.amber, size: 14),
                           const SizedBox(width: 4),
                           Text(
-                            rating.toStringAsFixed(1),
+                            ratingNum.toStringAsFixed(1),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
@@ -729,7 +831,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   Row(
                     children: [
                       if (isRescueUpcoming) ...[
-                        // Amber "Opens at" badge
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -772,7 +873,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                       Expanded(child: _buildIconLabel(Icons.store, orgName)),
                       const SizedBox(width: 8),
                       if (isRescueUpcoming)
-                        // Locked button
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
@@ -843,7 +943,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         );
       },
       child: Container(
-        // margin: const EdgeInsets.only(bottom: 24), // Managed by GridView spacing
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
@@ -858,7 +957,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image and Badges
             Stack(
               children: [
                 ClipRRect(
@@ -870,27 +968,25 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                     height: 180,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        height: 180,
-                        color: AppColors.textLight.withOpacity(0.05),
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 180,
-                        color: AppColors.textLight.withOpacity(0.05),
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          color: AppColors.textLight.withOpacity(0.2),
-                          size: 32,
-                        ),
-                      );
-                    },
+                    loadingBuilder: (context, child, loadingProgress) =>
+                        loadingProgress == null
+                        ? child
+                        : Container(
+                            height: 180,
+                            color: AppColors.textLight.withOpacity(0.05),
+                            child: const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 180,
+                      color: AppColors.textLight.withOpacity(0.05),
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        color: AppColors.textLight.withOpacity(0.2),
+                        size: 32,
+                      ),
+                    ),
                   ),
                 ),
                 Positioned(
@@ -908,72 +1004,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                           .map((badge) => _buildBadge(badge))
                           .toList(),
                     ],
-                  ),
-                ),
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Consumer<AppAuthProvider>(
-                    builder: (context, auth, _) {
-                      final profile = auth.mongoProfile;
-                      final List? favorites = profile?['favouriteSellers'];
-                      // Mock stores don't have MongoDB listings, so we use their ID
-                      // Note: This might fail on backend if store.id is not a valid ObjectId
-                      // but we'll use it to trigger the UI and toast for consistency.
-                      final bool isFavorited =
-                          favorites?.contains(store.id) ?? false;
-
-                      return GestureDetector(
-                        onTap: () async {
-                          if (auth.currentUser == null) return;
-                          try {
-                            await BackendService.toggleFavoriteSeller(
-                              firebaseUid: auth.currentUser!.uid,
-                              sellerId: store.id,
-                            );
-                            await auth.refreshMongoUser();
-                            if (mounted) {
-                              AnimatedToast.show(
-                                context,
-                                isFavorited
-                                    ? "Removed restaurant from favorites"
-                                    : "Added restaurant to favorites",
-                                type: isFavorited
-                                    ? ToastType.info
-                                    : ToastType.success,
-                              );
-                            }
-                          } catch (e) {
-                            debugPrint(
-                              "Error toggling favorite for mock store: $e",
-                            );
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            isFavorited
-                                ? Icons.favorite
-                                : Icons.favorite_outline,
-                            color: isFavorited
-                                ? Colors.red
-                                : AppColors.textLight.withOpacity(0.6),
-                            size: 20,
-                          ),
-                        ),
-                      );
-                    },
                   ),
                 ),
                 Positioned(
@@ -1005,7 +1035,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                 ),
               ],
             ),
-            // Info
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(

@@ -1,0 +1,7 @@
+[error] Target of URI doesn't exist: 'package:frontend/shared/utils/location_util.dart' (c:\github_ahara\ahara\frontend\lib\features\buyer\pages\buyer_home_page.dart:18:8)
+[error] Undefined name 'LocationUtil' (c:\github_ahara\ahara\frontend\lib\features\buyer\pages\buyer_home_page.dart:78:38)
+[error] Undefined name 'LocationUtil' (c:\github_ahara\ahara\frontend\lib\features\buyer\pages\buyer_home_page.dart:83:26)
+[error] Undefined name 'LocationUtil' (c:\github_ahara\ahara\frontend\lib\features\buyer\pages\buyer_home_page.dart:335:21)
+[error] Undefined name 'LocationUtil' (c:\github_ahara\ahara\frontend\lib\features\buyer\pages\buyer_home_page.dart:343:19)
+[error] Undefined name 'LocationUtil' (c:\github_ahara\ahara\frontend\lib\features\buyer\pages\buyer_home_page.dart:354:21)
+[error] Undefined name 'LocationUtil' (c:\github_ahara\ahara\frontend\lib\features\buyer\pages\buyer_home_page.dart:362:19)
