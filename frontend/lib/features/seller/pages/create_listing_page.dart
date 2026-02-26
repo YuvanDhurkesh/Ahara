@@ -155,6 +155,18 @@ class _CreateListingPageState extends State<CreateListingPage> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      // 🔥 Validate that a location has been pinned
+      if (_coordinates == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please pin your exact pickup location on the map."),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
       try {
         final expiryTime = Listing.calculateExpiryTime(
           _selectedFoodType,
@@ -915,33 +927,52 @@ class _CreateListingPageState extends State<CreateListingPage> {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: _coordinates != null 
+                  ? AppColors.primary.withOpacity(0.05) 
+                  : Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.textLight.withOpacity(0.1)),
+              border: Border.all(
+                color: _coordinates != null 
+                    ? AppColors.primary.withOpacity(0.4) 
+                    : AppColors.textLight.withOpacity(0.1),
+              ),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: (_coordinates != null ? AppColors.primary : AppColors.primary).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    Icons.location_on_rounded,
+                  child: Icon(
+                    _coordinates != null ? Icons.check_circle_rounded : Icons.location_on_rounded,
                     size: 20,
                     color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    "Pin exact location on map",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textDark,
-                    ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _coordinates != null ? "Location pinned ✓" : "Pin exact location on map *",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: _coordinates != null ? AppColors.primary : AppColors.textDark,
+                        ),
+                      ),
+                      if (_coordinates != null)
+                        Text(
+                          "${_coordinates!['latitude']!.toStringAsFixed(4)}, ${_coordinates!['longitude']!.toStringAsFixed(4)}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textLight.withOpacity(0.7),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 const Icon(Icons.chevron_right, color: AppColors.textLight),

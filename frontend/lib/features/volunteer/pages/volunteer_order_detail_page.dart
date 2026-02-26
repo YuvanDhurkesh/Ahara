@@ -27,9 +27,9 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   StreamSubscription<Position>? _positionStream;
 
   // LatLng from latlong2
-  LatLng pickupLocation = const LatLng(28.6139, 77.2090); // Delhi
-  LatLng deliveryLocation = const LatLng(28.5355, 77.3910); // Noida
-  LatLng _currentVolunteerPos = const LatLng(28.6139, 77.2090);
+  LatLng pickupLocation = const LatLng(20.5937, 78.9629); // India center
+  LatLng deliveryLocation = const LatLng(20.5937, 78.9629); // India center
+  LatLng _currentVolunteerPos = const LatLng(20.5937, 78.9629);
 
   @override
   void initState() {
@@ -273,7 +273,12 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
 
   void _loadLocations() {
     final order = widget.order;
-    final pickupCoords = order?['pickup']?['geo']?['coordinates'];
+    final listing = order?['listingId'] as Map<String, dynamic>?;
+
+    // Pickup: check order.pickup.geo, then listing.pickupGeo
+    final pickupCoords = order?['pickup']?['geo']?['coordinates']
+        ?? listing?['pickupGeo']?['coordinates'];
+    // Drop: check order.drop.geo, then buyer's geo from order
     final dropCoords = order?['drop']?['geo']?['coordinates'];
 
     if (pickupCoords is List && pickupCoords.length == 2) {
