@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
@@ -52,15 +53,24 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
     }).toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFFFFBF7),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Color(0xFF1A1A1A),
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           localizations.translate('my_deliveries'),
-          style: const TextStyle(
-            color: AppColors.textDark,
-            fontWeight: FontWeight.w600,
+          style: GoogleFonts.ebGaramond(
+            color: const Color(0xFF1A1A1A),
+            fontWeight: FontWeight.w800,
+            fontSize: 24,
           ),
         ),
         bottom: PreferredSize(
@@ -71,9 +81,17 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
               controller: _tabController,
               isScrollable: true,
               labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.textLight,
+              unselectedLabelColor: Colors.grey.shade400,
               indicatorColor: AppColors.primary,
               indicatorWeight: 3,
+              labelStyle: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+              ),
+              unselectedLabelStyle: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
               tabs: [
                 _TabLabel(
                   title: localizations.translate('new_requests'),
@@ -92,12 +110,9 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
           ),
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 900),
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _error != null
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          : _error != null
               ? Center(
                   child: Text(
                     'Error: $_error',
@@ -112,8 +127,6 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
                     _completedTab(localizations, completedOrders),
                   ],
                 ),
-        ),
-      ),
     );
   }
 
@@ -122,15 +135,25 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
   Widget _newRequestsTab(AppLocalizations localizations) {
     if (_requests.isEmpty) {
       return Center(
-        child: Text(
-          'No requests',
-          style: const TextStyle(color: AppColors.textLight),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inbox_outlined, size: 48, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'No new requests',
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       );
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       children: [
         ..._requests.map(
           (request) => _RequestCard(
@@ -149,15 +172,26 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
   ) {
     if (orders.isEmpty) {
       return Center(
-        child: Text(
-          'No active deliveries',
-          style: const TextStyle(color: AppColors.textLight),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.local_shipping_outlined,
+                size: 48, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'No active deliveries',
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       );
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       children: [
         ...orders.map(
           (order) => _DeliveryCard(
@@ -176,15 +210,26 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
   ) {
     if (orders.isEmpty) {
       return Center(
-        child: Text(
-          'No completed deliveries',
-          style: const TextStyle(color: AppColors.textLight),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.check_circle_outline,
+                size: 48, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'No completed deliveries',
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       );
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       children: [
         ...orders.map(
           (order) => _DeliveryCard(
@@ -261,15 +306,23 @@ class _TabLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tab(
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(title),
-          const SizedBox(width: 6),
-          CircleAvatar(
-            radius: 10,
-            backgroundColor: AppColors.primary.withOpacity(0.15),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: Text(
               count.toString(),
-              style: const TextStyle(fontSize: 11, color: AppColors.primary),
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                color: AppColors.primary,
+              ),
             ),
           ),
         ],
@@ -295,7 +348,6 @@ class _DeliveryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final listing = order['listingId'] as Map<String, dynamic>?;
     final buyer = order['buyerId'] as Map<String, dynamic>?;
-    final seller = order['sellerId'] as Map<String, dynamic>?;
 
     final title = listing?['foodName'] ?? 'Delivery';
     final pickup =
@@ -304,55 +356,162 @@ class _DeliveryCard extends StatelessWidget {
         order['drop']?['addressText'] ?? buyer?['name'] ?? 'Delivery address';
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12),
+          BoxShadow(
+            color: const Color(0xFF9E7E6B).withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-
-          if (status != null) ...[
-            const SizedBox(height: 6),
-            Text(status!, style: const TextStyle(color: AppColors.textLight)),
-          ],
-
-          if (pickup != null && drop != null) ...[
-            const SizedBox(height: 12),
-            Text('${localizations.translate('pickup')}: $pickup'),
-            Text('${localizations.translate('delivery_label')}: $drop'),
-          ],
-
-          if (showAction) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              VolunteerOrderDetailPage(order: order),
-                        ),
-                      );
-                    },
-                    child: Text(localizations.translate('view_details')),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.ebGaramond(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF1A1A1A),
                   ),
                 ),
-              ],
+              ),
+              if (status != null)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: status == localizations.translate('active')
+                        ? const Color(0xFFE8F5E9)
+                        : const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    status!.toUpperCase(),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: status == localizations.translate('active')
+                          ? Colors.green.shade700
+                          : Colors.grey.shade600,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _AddressRow(
+            icon: Icons.location_on_outlined,
+            label: localizations.translate('pickup'),
+            address: pickup ?? 'N/A',
+            color: const Color(0xFFE67E22),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(left: 11),
+            child: SizedBox(
+              height: 20,
+              child: VerticalDivider(width: 1, thickness: 1, color: Color(0xFFF5F5F5)),
+            ),
+          ),
+          _AddressRow(
+            icon: Icons.flag_outlined,
+            label: localizations.translate('delivery_label'),
+            address: drop ?? 'N/A',
+            color: Colors.green,
+          ),
+          if (showAction) ...[
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => VolunteerOrderDetailPage(order: order),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: Text(
+                  localizations.translate('view_details'),
+                  style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
             ),
           ],
         ],
       ),
+    );
+  }
+}
+
+class _AddressRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String address;
+  final Color color;
+
+  const _AddressRow({
+    required this.icon,
+    required this.label,
+    required this.address,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 22, color: color),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label.toUpperCase(),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.grey.shade400,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                address,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF2D3436),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -377,24 +536,61 @@ class _RequestCard extends StatelessWidget {
     final orderId = request['data']?['orderId']?.toString();
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(32),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12),
+          BoxShadow(
+            color: const Color(0xFFE67E22).withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
         ],
+        border: Border.all(color: const Color(0xFFFFF7ED), width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-          if (message.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(message, style: const TextStyle(color: AppColors.textLight)),
-          ],
-          const SizedBox(height: 12),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFF7ED),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.bolt_rounded,
+                    color: Color(0xFFE67E22), size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.ebGaramond(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    if (message.isNotEmpty)
+                      Text(
+                        message,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -402,12 +598,21 @@ class _RequestCard extends StatelessWidget {
                   ? null
                   : () => onAccept(orderId, volunteerId),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: const Color(0xFFE67E22),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: Text(localizations.translate('accept_delivery')),
+              child: Text(
+                localizations.translate('accept_delivery'),
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                ),
+              ),
             ),
           ),
         ],
