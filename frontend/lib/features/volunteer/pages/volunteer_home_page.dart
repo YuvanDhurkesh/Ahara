@@ -468,7 +468,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
     final stats = context.watch<AppAuthProvider>().mongoProfile?['stats'] as Map<String, dynamic>?;
     final totalCompleted = (stats?['totalDeliveriesCompleted'] as num?)?.toInt() ?? 0;
     
-    return Container(
+    return SizedBox(
       height: 120,
       child: ListView(
         scrollDirection: Axis.horizontal,
