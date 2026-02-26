@@ -628,7 +628,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-<<<<<<< HEAD
                           if (originalPrice != null && originalPrice > price)
                             Text(
                               "₹$originalPrice",
@@ -646,10 +645,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                               color: isFree ? Colors.green : AppColors.primary,
                             ),
                           ),
-=======
-                          if (originalPrice != null && originalPrice > price) Text("₹$originalPrice", style: TextStyle(fontSize: 12, color: AppColors.textLight.withOpacity(0.5), decoration: TextDecoration.lineThrough)),
-                          Text(isFree ? "FREE" : "₹$price", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: isFree ? Colors.green : AppColors.primary)),
->>>>>>> origin/main
+                        ],
                         ],
                       ),
                     ],
@@ -658,53 +654,29 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-<<<<<<< HEAD
                       Expanded(
                         child: Wrap(
                           crossAxisAlignment: WrapCrossAlignment.center,
                           spacing: 12,
                           runSpacing: 8,
                           children: [
-                            if (expiryTime != null)
+                            if (isRescueUpcoming)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4))),
+                                child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.schedule_rounded, size: 11, color: Color(0xFFB45309)), const SizedBox(width: 4), Text('${AppLocalizations.of(context)!.translate("opens_at")} ${_fmt12(pickupFrom!)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E)))]),
+                              )
+                            else if (expiryTime != null)
                               _buildIconLabel(Icons.timer_outlined, "${AppLocalizations.of(context)!.translate("ends_in")}${_formatTimeRemaining(expiryTime)}"),
                             _buildIconLabel(Icons.store, orgName),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isFree ? Colors.green : AppColors.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          isFree ? AppLocalizations.of(context)!.translate("claim_now") : AppLocalizations.of(context)!.translate("reserve"),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-=======
-                      if (isRescueUpcoming) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4))),
-                          child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.schedule_rounded, size: 11, color: Color(0xFFB45309)), const SizedBox(width: 4), Text('Opens ${_fmt12(pickupFrom!)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E)))]),
-                        ),
-                      ] else if (expiryTime != null) ...[
-                        _buildIconLabel(Icons.timer_outlined, 'Ends ${_formatTimeRemaining(expiryTime)}'),
-                      ],
-                      const SizedBox(width: 8),
-                      Expanded(child: _buildIconLabel(Icons.store, orgName)),
                       const SizedBox(width: 8),
                       if (isRescueUpcoming)
-                        Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12)), child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.lock_clock_outlined, size: 13, color: Colors.grey.shade500), const SizedBox(width: 4), Text('Locked', style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold))]))
+                        Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12)), child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.lock_clock_outlined, size: 13, color: Colors.grey.shade500), const SizedBox(width: 4), Text(AppLocalizations.of(context)!.translate("locked") ?? 'Locked', style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold))]))
                       else
-                        Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), decoration: BoxDecoration(color: isFree ? Colors.green : AppColors.primary, borderRadius: BorderRadius.circular(12)), child: Text(isFree ? 'Claim Now' : 'Reserve', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
->>>>>>> origin/main
+                        Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), decoration: BoxDecoration(color: isFree ? Colors.green : AppColors.primary, borderRadius: BorderRadius.circular(12)), child: Text(isFree ? (AppLocalizations.of(context)!.translate("claim_now") ?? 'Claim Now') : (AppLocalizations.of(context)!.translate("reserve") ?? 'Reserve'), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
                     ],
                   ),
                 ],
@@ -866,7 +838,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-<<<<<<< HEAD
                       Expanded(
                         child: Wrap(
                           crossAxisAlignment: WrapCrossAlignment.center,
@@ -901,13 +872,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                           ),
                         ),
                       ),
-=======
-                      _buildIconLabel(Icons.timer_outlined, "${AppLocalizations.of(context)!.translate("ends_in")}2h"),
-                      const SizedBox(width: 16),
-                      _buildIconLabel(Icons.directions_walk, "1.2 km"),
-                      const Spacer(),
-                      Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), decoration: BoxDecoration(color: store.isFree ? Colors.green : AppColors.primary, borderRadius: BorderRadius.circular(12)), child: Text(store.isFree ? AppLocalizations.of(context)!.translate("claim_now") : AppLocalizations.of(context)!.translate("reserve"), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
->>>>>>> origin/main
                     ],
                   ),
                 ],
@@ -928,7 +892,6 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   }
 
   Widget _buildIconLabel(IconData icon, String text) {
-<<<<<<< HEAD
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -947,8 +910,5 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         ),
       ],
     );
-=======
-    return Row(children: [Icon(icon, size: 16, color: AppColors.textLight.withOpacity(0.5)), const SizedBox(width: 4), Text(text, style: TextStyle(fontSize: 12, color: AppColors.textLight.withOpacity(0.6), fontWeight: FontWeight.w500))]);
->>>>>>> origin/main
   }
 }
