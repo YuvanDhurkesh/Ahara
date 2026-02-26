@@ -12,7 +12,7 @@ router.use((err, req, res, next) => {
     if (err.message === 'Only images are allowed') {
         return res.status(400).json({ error: "Only image files are allowed" });
     }
-    console.error("Upload error:", err);
+    console.error("Upload error:", err.message);
     res.status(500).json({ error: err.message || "Upload failed" });
 });
 

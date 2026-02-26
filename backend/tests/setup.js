@@ -11,6 +11,9 @@ exports.connect = async () => {
 
         if (!replSet) {
             replSet = await MongoMemoryReplSet.create({
+                binary: {
+                    version: '7.0.5', // Specify version to force a fresh download/bypass corrupted cache
+                },
                 replSet: {
                     count: 1,
                     storageEngine: 'wiredTiger'

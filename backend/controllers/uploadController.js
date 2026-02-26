@@ -23,7 +23,6 @@ const upload = multer({
     storage: storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
     fileFilter: (req, file, cb) => {
-        console.log("Filtering file:", file.originalname, "Mime:", file.mimetype);
         const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
         const extension = path.extname(file.originalname).toLowerCase();
 
@@ -38,20 +37,12 @@ const upload = multer({
 exports.uploadImage = upload.single('image');
 
 exports.sendUploadResponse = (req, res) => {
-    console.log("--- IMAGE UPLOAD REQUEST RECEIVED ---");
-
     if (!req.file) {
-        console.error("No file found in request. Body:", req.body);
         return res.status(400).json({ error: "No file uploaded" });
     }
 
-    console.log("File saved to:", req.file.path);
-
-    // Calculate the URL
-    // Note: For production, this should be the full URL. 
-    // For local/ngrok, we'll return a relative path that the client can combine with baseUrl
+    // Return a relative path with a leading slash for client-side prefixing
     const imageUrl = `/uploads/${req.file.filename}`;
-    console.log("Generated URL:", imageUrl);
 
     res.status(200).json({
         message: "Image uploaded successfully",
