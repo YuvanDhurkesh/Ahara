@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../../data/services/backend_service.dart';
 import '../../../../data/services/socket_service.dart';
@@ -60,10 +61,12 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         distanceFilter: 10,
       ),
     ).listen((Position position) {
-      setState(() {
-        _currentVolunteerPos = LatLng(position.latitude, position.longitude);
-      });
-      
+      if (mounted) {
+        setState(() {
+          _currentVolunteerPos = LatLng(position.latitude, position.longitude);
+        });
+      }
+
       // Update Socket
       if (widget.order?['_id'] != null) {
         SocketService.updateLocation(
@@ -77,32 +80,58 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
 
   Future<void> _handleEmergencyReport() async {
     final reasonController = TextEditingController();
-    
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("⚠️ Report Emergency"),
+        backgroundColor: const Color(0xFFFFFBF7),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        title: Text(
+          "⚠️ Report Emergency",
+          style: GoogleFonts.ebGaramond(
+              fontWeight: FontWeight.w800, color: Colors.red),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Are you facing an issue? This will notify the buyer and seller of a potential delay."),
+            Text(
+              "Are you facing an issue? This will notify the buyer and seller of a potential delay.",
+              style: GoogleFonts.plusJakartaSans(fontSize: 14),
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: reasonController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: "Reason (Accident, Bike issue, etc.)",
-                border: OutlineInputBorder(),
+                hintStyle: GoogleFonts.plusJakartaSans(fontSize: 14),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
               ),
               maxLines: 2,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text("Cancel",
+                style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w700, color: Colors.grey)),
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("Report", style: TextStyle(color: Colors.white)),
+            child: Text("Report",
+                style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w700, color: Colors.white)),
           ),
         ],
       ),
@@ -112,14 +141,16 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
       try {
         await BackendService.reportEmergency(
           orderId: widget.order!['_id'],
-          volunteerId: widget.order!['volunteerId']['_id'] ?? "", // Assuming it's populated or we have it
+          volunteerId: widget.order!['volunteerId']['_id'] ?? "",
           lat: _currentVolunteerPos.latitude,
           lng: _currentVolunteerPos.longitude,
           reason: reasonController.text.trim(),
         );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(backgroundColor: Colors.red, content: Text("Emergency reported. Assistance is being notified.")),
+            const SnackBar(
+                backgroundColor: Colors.red,
+                content: Text("Emergency reported. Assistance is notified.")),
           );
         }
       } catch (e) {
@@ -183,14 +214,34 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Cancel Rescue", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-        content: const Text("Are you sure you want to cancel this rescue? This will return the order to the pool and notify the buyer/seller."),
+        backgroundColor: const Color(0xFFFFFBF7),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        title: Text(
+          "Cancel Rescue",
+          style: GoogleFonts.ebGaramond(
+              fontWeight: FontWeight.w800, color: Colors.red),
+        ),
+        content: Text(
+          "Are you sure you want to cancel this rescue? This will return the order to the pool and notify everyone.",
+          style: GoogleFonts.plusJakartaSans(fontSize: 14),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Keep Rescue")),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text("Keep It",
+                style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w700, color: Colors.grey)),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text("Cancel Anyway", style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text("Cancel",
+                style: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w700, color: Colors.white)),
           ),
         ],
       ),
@@ -205,7 +256,8 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Rescue cancelled"), backgroundColor: Colors.red),
+            const SnackBar(
+                content: Text("Rescue cancelled"), backgroundColor: Colors.red),
           );
           Navigator.pop(context, true);
         }
@@ -237,11 +289,12 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         (dropCoords[0] as num).toDouble(),
       );
     }
-    _currentVolunteerPos = pickupLocation; // Start at pickup
+    _currentVolunteerPos = pickupLocation;
   }
 
   Future<void> _launchNavigation(LatLng destination) async {
-    final url = 'https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}';
+    final url =
+        'https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}';
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
     } else {
@@ -256,32 +309,54 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFFFFBF7),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFFFFBF7),
         elevation: 0,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF1A1A1A), size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Order Details',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+        title: Text(
+          'Rescue Details',
+          style: GoogleFonts.ebGaramond(
+            color: const Color(0xFF1A1A1A),
+            fontWeight: FontWeight.w800,
+            fontSize: 22,
+          ),
         ),
       ),
-      floatingActionButton: ['picked_up', 'in_transit'].contains(_currentStatus) 
-        ? FloatingActionButton.extended(
-            onPressed: _handleEmergencyReport,
-            backgroundColor: Colors.red,
-            icon: const Icon(Icons.warning_amber_rounded, color: Colors.white),
-            label: const Text("HELP", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          )
-        : null,
+      floatingActionButton: ['picked_up', 'in_transit'].contains(_currentStatus)
+          ? FloatingActionButton.extended(
+              onPressed: _handleEmergencyReport,
+              backgroundColor: Colors.red,
+              elevation: 4,
+              icon:
+                  const Icon(Icons.warning_amber_rounded, color: Colors.white),
+              label: Text("GET HELP",
+                  style: GoogleFonts.plusJakartaSans(
+                      color: Colors.white, fontWeight: FontWeight.w800)),
+            )
+          : null,
       body: Column(
         children: [
-          // 🗺️ OPEN STREET MAP
-          SizedBox(
+          // 🗺️ MAP SECTION
+          Container(
             height: 280,
+            margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF9E7E6B).withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
             child: FlutterMap(
               mapController: _mapController,
               options: MapOptions(
@@ -299,19 +374,22 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                       point: pickupLocation,
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.store, color: AppColors.primary, size: 30),
+                      child: const Icon(Icons.store,
+                          color: Color(0xFFE67E22), size: 30),
                     ),
                     Marker(
                       point: deliveryLocation,
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.home, color: Colors.red, size: 30),
+                      child: const Icon(Icons.location_on,
+                          color: Colors.red, size: 30),
                     ),
                     Marker(
                       point: _currentVolunteerPos,
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.delivery_dining, color: Colors.blue, size: 40),
+                      child:
+                          const Icon(Icons.delivery_dining, color: Colors.blue, size: 40),
                     ),
                   ],
                 ),
@@ -322,28 +400,33 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           // 📋 DETAILS
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _orderSummary(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   _pickupCard(),
                   const SizedBox(height: 16),
                   _deliveryCard(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   _buildDeliveryOtpSection(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   _openInMapsButton(),
-                  if (_currentStatus != 'delivered' && _currentStatus != 'cancelled') ...[
+                  if (_currentStatus != 'delivered' &&
+                      _currentStatus != 'cancelled') ...[
                     const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
                       child: TextButton(
                         onPressed: _cancelOrder,
-                        child: const Text(
-                          "Cancel Rescue",
-                          style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                        child: Text(
+                          "Cancel This Rescue",
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.red.shade300,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ),
@@ -372,7 +455,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     final pickupOtp = order?['pickupOtp']?.toString();
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       decoration: _cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,46 +467,206 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    shortId != null ? 'Order $shortId' : 'Order Details',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    shortId != null ? 'RESCUE #$shortId' : 'RESCUE DETAILS',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.grey.shade400,
+                      letterSpacing: 1.0,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Items: $foodName ($quantity)',
-                    style: const TextStyle(color: AppColors.textLight, fontSize: 13),
+                    foodName,
+                    style: GoogleFonts.ebGaramond(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1A1A1A),
+                    ),
                   ),
                 ],
               ),
-              if (['placed', 'volunteer_assigned', 'volunteer_accepted'].contains(_currentStatus) && pickupOtp != null)
+              if (_currentStatus != 'delivered' &&
+                  _currentStatus != 'cancelled' &&
+                  pickupOtp != null)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.shade200),
+                    color: const Color(0xFFFFF7ED),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFFFEBD8)),
                   ),
                   child: Column(
                     children: [
-                      const Text(
-                        "PICKUP OTP",
-                        style: TextStyle(
+                      Text(
+                        'PICKUP CODE',
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFFE67E22),
                         ),
                       ),
                       Text(
                         pickupOtp,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 2,
-                          color: AppColors.textDark,
+                        style: GoogleFonts.ebGaramond(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFFE67E22),
                         ),
                       ),
                     ],
                   ),
                 ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              _buildSmallBadge(
+                  _currentStatus.replaceAll('_', ' ').toUpperCase(),
+                  const Color(0xFFE8F5E9),
+                  Colors.green.shade700),
+              const SizedBox(width: 12),
+              _buildSmallBadge('$quantity ITEMS', const Color(0xFFF3E5F5),
+                  Colors.purple.shade700),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSmallBadge(String text, Color bgColor, Color textColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _pickupCard() {
+    final seller = widget.order?['sellerId'];
+    final name = seller?['name'] ?? 'The Provider';
+    final address =
+        widget.order?['pickup']?['addressText'] ?? 'Pickup Address';
+    final phone = seller?['phoneNumber'] ?? '-';
+
+    return _addressDetailCard(
+      title: "PICKUP FROM",
+      name: name,
+      address: address,
+      phone: phone,
+      icon: Icons.store_rounded,
+      iconColor: const Color(0xFFE67E22),
+    );
+  }
+
+  Widget _deliveryCard() {
+    final buyer = widget.order?['buyerId'];
+    final name = buyer?['name'] ?? 'Recipient';
+    final address =
+        widget.order?['drop']?['addressText'] ?? 'Delivery Address';
+    final phone = buyer?['phoneNumber'] ?? '-';
+
+    return _addressDetailCard(
+      title: "DELIVER TO",
+      name: name,
+      address: address,
+      phone: phone,
+      icon: Icons.home_rounded,
+      iconColor: Colors.green,
+    );
+  }
+
+  Widget _addressDetailCard({
+    required String title,
+    required String name,
+    required String address,
+    required String phone,
+    required IconData icon,
+    required Color iconColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: _cardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: iconColor, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.grey.shade400,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            name,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1A1A1A),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            address,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => launchUrl(Uri.parse('tel:$phone')),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.phone_rounded,
+                            size: 16, color: Colors.blue.shade700),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Call Contact",
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ],
@@ -437,33 +680,38 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.verified_user, color: AppColors.primary, size: 20),
-              const SizedBox(width: 12),
-              const Text(
-                "Secure Delivery",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-            ],
+          Text(
+            "ORDER VERIFICATION",
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              color: Colors.white.withOpacity(0.5),
+              letterSpacing: 1.0,
+            ),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            "Ask the Buyer for their 4-digit Delivery OTP once you reach the drop location.",
-            style: TextStyle(fontSize: 12, color: AppColors.textLight),
+          const SizedBox(height: 16),
+          Text(
+            "Enter Delivery OTP",
+            style: GoogleFonts.ebGaramond(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 20),
           Row(
@@ -473,46 +721,45 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                   controller: _otpController,
                   keyboardType: TextInputType.number,
                   maxLength: 4,
-                  style: const TextStyle(
+                  style: GoogleFonts.ebGaramond(
                     fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 8,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 16,
                   ),
                   decoration: InputDecoration(
                     counterText: "",
-                    hintText: "0000",
-                    hintStyle: TextStyle(color: AppColors.textLight.withOpacity(0.2)),
                     filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.all(12),
+                    fillColor: Colors.white.withOpacity(0.1),
+                    hintText: "••••",
+                    hintStyle: const TextStyle(
+                        color: Colors.white30, letterSpacing: 8),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppColors.primary.withOpacity(0.2)),
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 16),
               SizedBox(
-                height: 56,
+                height: 58,
                 child: ElevatedButton(
                   onPressed: _isVerifying ? null : _handleOtpVerification,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: const Color(0xFFE67E22),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                   ),
                   child: _isVerifying
                       ? const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
                         )
-                      : const Text("Verify", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      : const Icon(Icons.check_rounded, color: Colors.white),
                 ),
               ),
             ],
@@ -522,107 +769,34 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     );
   }
 
-  Widget _pickupCard() {
-    final order = widget.order;
-    final listing = order?['listingId'] as Map<String, dynamic>?;
-    final seller = order?['sellerId'] as Map<String, dynamic>?;
-    final pickupAddress =
-        order?['pickup']?['addressText'] ?? listing?['pickupAddressText'];
-
-    return _locationCard(
-      title: 'Pickup Location',
-      name: seller?['name']?.toString() ?? 'Pickup Point',
-      address: pickupAddress?.toString() ?? 'Pickup address',
-      timeLabel: 'Pickup by',
-      time: listing?['pickupWindow']?['to']?.toString() ?? 'Scheduled time',
-    );
-  }
-
-  Widget _deliveryCard() {
-    final order = widget.order;
-    final buyer = order?['buyerId'] as Map<String, dynamic>?;
-    final dropAddress = order?['drop']?['addressText'];
-
-    return _locationCard(
-      title: 'Delivery Location',
-      name: buyer?['name']?.toString() ?? 'Recipient',
-      address: dropAddress?.toString() ?? 'Delivery address',
-      timeLabel: 'Deliver by',
-      time: order?['timeline']?['deliveredAt']?.toString() ?? 'Scheduled time',
-    );
-  }
-
-  Widget _locationCard({
-    required String title,
-    required String name,
-    required String address,
-    required String timeLabel,
-    required String time,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: _cardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
-          Text(address, style: const TextStyle(color: AppColors.textLight)),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.access_time, size: 16),
-              const SizedBox(width: 6),
-              Text('$timeLabel: $time'),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _contactButton(Icons.call, 'Call'),
-              const SizedBox(width: 12),
-              _contactButton(Icons.message, 'Text'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _contactButton(IconData icon, String label) {
-    return Expanded(
-      child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: Icon(icon, size: 18),
-        label: Text(label),
-      ),
-    );
-  }
-
   Widget _openInMapsButton() {
+    final dest = _currentStatus == 'picked_up' || _currentStatus == 'in_transit'
+        ? deliveryLocation
+        : pickupLocation;
+    final label = _currentStatus == 'picked_up' || _currentStatus == 'in_transit'
+        ? "Navigate to Dropoff"
+        : "Navigate to Pickup";
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: () {
-          final target = ['placed', 'volunteer_assigned', 'volunteer_accepted'].contains(_currentStatus)
-              ? pickupLocation
-              : deliveryLocation;
-          _launchNavigation(target);
-        },
-        icon: const Icon(Icons.navigation, color: Colors.white),
-        label: const Text('Open in Navigation', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        onPressed: () => _launchNavigation(dest),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF1A1A1A),
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 20),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Color(0xFFEEEEEE)),
+          ),
+        ),
+        icon: const Icon(Icons.directions_rounded),
+        label: Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
           ),
         ),
       ),
@@ -632,9 +806,13 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   BoxDecoration _cardDecoration() {
     return BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(32),
       boxShadow: [
-        BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12),
+        BoxShadow(
+          color: const Color(0xFF9E7E6B).withOpacity(0.06),
+          blurRadius: 20,
+          offset: const Offset(0, 10),
+        ),
       ],
     );
   }

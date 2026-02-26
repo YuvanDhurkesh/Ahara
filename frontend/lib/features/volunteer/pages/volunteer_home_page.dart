@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
@@ -20,7 +21,7 @@ class VolunteerHomePage extends StatefulWidget {
   State<VolunteerHomePage> createState() => _VolunteerHomePageState();
 }
 
-class _VolunteerHomePageState extends State<VolunteerHomePage> {
+class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTickerProviderStateMixin {
   bool isAvailable = true;
   bool _isLoading = true;
   String? _error;
@@ -35,10 +36,15 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
   List<Map<String, dynamic>> _rescueRequests = [];
   List<Map<String, dynamic>> _volunteerOrders = [];
   Timer? _pollingTimer;
+  late AnimationController _pulseController;
 
   @override
   void initState() {
     super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
     _fetchVolunteerData();
     _startPolling();
   }
@@ -46,6 +52,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
   @override
   void dispose() {
     _pollingTimer?.cancel();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -147,43 +154,73 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
     final auth = context.watch<AppAuthProvider>();
     final userName = auth.mongoUser?['name'] ?? "Volunteer";
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final horizontalPadding = screenWidth < 380 ? 12.0 : 16.0;
+    final horizontalPadding = screenWidth < 380 ? 20.0 : 24.0;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFFFFBF7),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1000),
-            child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                12,
-                horizontalPadding,
-                16,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(userName.toString(), screenWidth),
+            child: RefreshIndicator(
+              onRefresh: () => _fetchVolunteerData(),
+              color: AppColors.primary,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  20,
+                  horizontalPadding,
+                  40,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(userName.toString(), screenWidth),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 32),
 
-                  if (!isAvailable) _inactiveState(),
+                    if (isAvailable) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _sectionTitle("Your Statistics"),
+                          Text(
+                            "Last updated: Just now",
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              color: Colors.grey.shade500,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      _dashboardCards(screenWidth),
+                      
+                      const SizedBox(height: 36),
+                      _sectionTitle("Achievements"),
+                      const SizedBox(height: 16),
+                      _badgeSection(),
+                      
+                      const SizedBox(height: 36),
+                      _alertBanner(),
+                      
+                      const SizedBox(height: 32),
+                      _sectionTitle("Quick Access"),
+                      const SizedBox(height: 16),
+                      _quickActions(screenWidth),
 
-                  if (isAvailable) ...[
-                    _dashboardCards(screenWidth),
-                    const SizedBox(height: 20),
-                    _badgeSection(),
-                    const SizedBox(height: 24),
-                    _alertBanner(),
-                    const SizedBox(height: 24),
-                    _rescueRequestsSection(),
-                    const SizedBox(height: 24),
-                    _quickActions(screenWidth),
+                      const SizedBox(height: 36),
+                      _sectionTitle("Incoming Requests"),
+                      const SizedBox(height: 16),
+                      _rescueRequestsSection(),
+                    ] else ...[
+                      _inactiveState(),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -192,115 +229,605 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
     );
   }
 
-  //----------------------------------------------------------
-  // VOICE MODE
-  //----------------------------------------------------------
+  Widget _sectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.ebGaramond(
+        fontSize: 24,
+        fontWeight: FontWeight.w800,
+        color: const Color(0xFF1A1A1A),
+        letterSpacing: -0.2,
+      ),
+    );
+  }
 
   Widget _buildHeader(String userName, double width) {
-    final isNarrow = width < 520;
-
-    final welcomeText = AppLocalizations.of(
-      context,
-    )!.translate("welcome_back_user").trimRight();
-
-    final welcomeColumn = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+    return Row(
       children: [
-        Text(
-          welcomeText,
-          style: TextStyle(
-            fontSize: isNarrow ? 14 : 16,
-            color: AppColors.textLight,
-            fontWeight: FontWeight.w400,
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF9E7E6B).withOpacity(0.1),
+                blurRadius: 10,
+              )
+            ],
+            image: const DecorationImage(
+              image: NetworkImage("https://ui-avatars.com/api/?background=E67E22&color=fff&name=V"),
+              fit: BoxFit.cover,
+            ),
           ),
         ),
-        Text(
-          userName,
-          style: TextStyle(
-            fontSize: isNarrow ? 20 : 24,
-            fontWeight: FontWeight.w700,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-
-    final actionIcons = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const VolunteerNotificationsPage(),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: isAvailable ? Colors.green : Colors.grey.shade400,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    isAvailable ? "Online" : "Away",
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      color: isAvailable ? Colors.green : Colors.grey.shade400,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
               ),
-            );
-          },
-          icon: const Icon(
-            Icons.notifications_outlined,
-            color: AppColors.textDark,
-            size: 22,
+              Text(
+                userName,
+                style: GoogleFonts.ebGaramond(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1A1A1A),
+                  letterSpacing: -0.5,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
-          tooltip: "Notifications",
         ),
-        IconButton(
-          onPressed: _performLogout,
-          icon: const Icon(Icons.logout, color: AppColors.textDark, size: 22),
-          tooltip: "Logout",
+        Transform.scale(
+          scale: 0.8,
+          child: Switch.adaptive(
+            value: isAvailable,
+            activeColor: AppColors.primary,
+            onChanged: (value) async {
+              setState(() => isAvailable = value);
+              try {
+                if (auth.currentUser != null) {
+                  await BackendService.updateVolunteerAvailability(
+                    auth.currentUser!.uid,
+                    value,
+                  );
+                  await auth.refreshMongoUser();
+                }
+              } catch (e) {
+                if (mounted) {
+                  setState(() => isAvailable = !value);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to update: $e')),
+                  );
+                }
+              }
+            },
+          ),
         ),
+        const SizedBox(width: 4),
+        _voiceModeIndicator(),
+        const SizedBox(width: 8),
+        _headerIconButton(Icons.notifications_none_rounded, () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const VolunteerNotificationsPage()));
+        }),
       ],
     );
+  }
 
-    if (isNarrow) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(child: welcomeColumn),
-              actionIcons,
-            ],
+  Widget _voiceModeIndicator() {
+    final voiceService = Provider.of<VoiceService>(context);
+    final isActive = voiceService.isListening;
+    
+    return GestureDetector(
+      onTap: _toggleVoiceMode,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFFFF4B2B).withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF9E7E6B).withOpacity(0.05),
+              blurRadius: 10,
+            )
+          ],
+          border: Border.all(
+            color: isActive ? const Color(0xFFFF4B2B).withOpacity(0.2) : Colors.grey.shade100,
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              _voiceModeToggle(),
-              const Spacer(),
-              _availabilityToggle(),
-            ],
+        ),
+        child: Row(
+          children: [
+            if (isActive)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: RotationTransition(
+                  turns: _pulseController,
+                  child: const Icon(Icons.graphic_eq, size: 18, color: Color(0xFFFF4B2B)),
+                ),
+              ),
+            Icon(
+              isActive ? Icons.mic_rounded : Icons.mic_none_rounded,
+              size: 22,
+              color: isActive ? const Color(0xFFFF4B2B) : const Color(0xFF1A1A1A),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _headerIconButton(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF9E7E6B).withOpacity(0.05),
+              blurRadius: 10,
+            )
+          ],
+          border: Border.all(color: Colors.grey.shade100),
+        ),
+        child: Icon(icon, size: 22, color: const Color(0xFF1A1A1A)),
+      ),
+    );
+  }
+
+  Widget _dashboardCards(double width) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF9E7E6B).withOpacity(0.08),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
           ),
         ],
-      );
-    }
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _statItem("Deliveries", _totalDeliveries.toString(), Icons.local_shipping_outlined, AppColors.primary),
+          Container(height: 40, width: 1, color: Colors.grey.shade100),
+          _statItem("Today", _todayCount.toString(), Icons.calendar_today_outlined, const Color(0xFFE67E22)),
+          Container(height: 40, width: 1, color: Colors.grey.shade100),
+          _statItem("Rating", _avgRating.toStringAsFixed(1), Icons.star_border_rounded, const Color(0xFFD35400)),
+        ],
+      ),
+    );
+  }
 
+  Widget _statItem(String label, String value, IconData icon, Color color) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(child: welcomeColumn),
-            actionIcons,
-            _voiceModeToggle(),
-            _availabilityToggle(),
-          ],
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: color, size: 20),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          value,
+          style: GoogleFonts.ebGaramond(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF1A1A1A),
+            letterSpacing: -0.5,
+          ),
+        ),
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade500,
+          ),
         ),
       ],
     );
   }
 
-  Widget _voiceModeToggle() {
-    final voiceService = Provider.of<VoiceService>(context);
-
-    return IconButton(
-      icon: Icon(
-        voiceService.isListening ? Icons.mic : Icons.mic_none,
-        color: voiceService.isListening ? Colors.red : AppColors.primary,
+  Widget _badgeSection() {
+    final stats = context.watch<AppAuthProvider>().mongoProfile?['stats'] as Map<String, dynamic>?;
+    final totalCompleted = (stats?['totalDeliveriesCompleted'] as num?)?.toInt() ?? 0;
+    
+    return SizedBox(
+      height: 120,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        children: [
+          _badgeItem(Icons.verified_user_rounded, "Verified", true),
+          _badgeItem(Icons.auto_awesome_rounded, "Top Star", _avgRating >= 4.5),
+          _badgeItem(Icons.local_fire_department_rounded, "20+ Club", totalCompleted >= 20),
+          _badgeItem(Icons.handshake_rounded, "Social Hero", totalCompleted >= 5),
+        ],
       ),
-      onPressed: _toggleVoiceMode,
+    );
+  }
+
+  Widget _badgeItem(IconData icon, String label, bool active) {
+    return Container(
+      width: 90,
+      margin: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: active ? Colors.white : Colors.grey.shade50.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: active ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+        ),
+        boxShadow: active ? [
+          BoxShadow(
+            color: const Color(0xFF9E7E6B).withOpacity(0.06),
+            blurRadius: 10,
+          )
+        ] : null,
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: active ? AppColors.primary : Colors.grey.shade300,
+            size: 28,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: active ? const Color(0xFF1A1A1A) : Colors.grey.shade400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _alertBanner() {
+    if (_newRequests == 0) return const SizedBox.shrink();
+    
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.primary, const Color(0xFFD35400)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.notifications_active_rounded, color: Colors.white, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "New Requests Nearby",
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  "$_newRequests tasks are waiting for you",
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _rescueRequestsSection() {
+    if (_rescueRequests.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFFFF7ED)),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF9E7E6B).withOpacity(0.03),
+              blurRadius: 20,
+            )
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF7ED),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.radar_rounded, size: 32, color: Color(0xFFE67E22)),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "No requests nearby",
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.grey.shade500,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "You'll see alerts when something pops up",
+              style: GoogleFonts.plusJakartaSans(
+                color: Colors.grey.shade400,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: _rescueRequests.map((req) => _rescueRequestCard(req)).toList(),
+    );
+  }
+
+  Widget _rescueRequestCard(Map<String, dynamic> req) {
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+    final volunteerId = auth.mongoUser?['_id'];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF9E7E6B).withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade50),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF7ED),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.fastfood_rounded, color: Color(0xFFE67E22), size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  req['title'] ?? "Rescue Request",
+                  style: GoogleFonts.ebGaramond(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 20,
+                    color: const Color(0xFF1A1A1A),
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  req['message'] ?? "Urgent pickup needed",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.grey.shade500,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: () => _acceptRescueRequest(req['data']?['orderId'], volunteerId),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              elevation: 0,
+            ),
+            child: Text(
+              "Accept",
+              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _quickActions(double width) {
+    return Row(
+      children: [
+        _quickActionItem(Icons.receipt_long_rounded, "Orders", const VolunteerOrdersPage()),
+        const SizedBox(width: 16),
+        _quickActionItem(Icons.auto_awesome_rounded, "Badges", const VolunteerRatingsPage()),
+        const SizedBox(width: 16),
+        _quickActionItem(Icons.settings_suggest_rounded, "Settings", const VolunteerProfilePage()),
+      ],
+    );
+  }
+
+  Widget _quickActionItem(IconData icon, String title, Widget page) {
+    return Expanded(
+      child: InkWell(
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.grey.shade100),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF9E7E6B).withOpacity(0.04),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              )
+            ],
+          ),
+          child: Column(
+            children: [
+              Icon(icon, color: AppColors.primary, size: 28),
+              const SizedBox(height: 10),
+              Text(
+                title,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1A1A1A),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _inactiveState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(48),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(32),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF9E7E6B).withOpacity(0.05),
+            blurRadius: 40,
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.nightlight_round_rounded, size: 48, color: Colors.grey.shade300),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            "Shift is Off",
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF1A1A1A),
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "Go Online to receive rescue requests and view your live statistics dashboard",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              color: Colors.grey.shade500,
+              height: 1.6,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => setState(() => isAvailable = true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
+              ),
+              child: Text(
+                "Go Online",
+                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -360,334 +887,6 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> {
         (route) => false,
       );
     }
-  }
-
-  //----------------------------------------------------------
-  // AVAILABILITY
-  //----------------------------------------------------------
-
-  Widget _availabilityToggle() {
-    final auth = Provider.of<AppAuthProvider>(context, listen: false);
-    return Row(
-      children: [
-        Text(AppLocalizations.of(context)!.translate("availability")),
-        const SizedBox(width: 8),
-        Switch(
-          value: isAvailable,
-          activeColor: AppColors.primary,
-          onChanged: (value) async {
-            setState(() => isAvailable = value);
-            try {
-              if (auth.currentUser != null) {
-                await BackendService.updateVolunteerAvailability(
-                  auth.currentUser!.uid,
-                  value,
-                );
-                await auth.refreshMongoUser();
-              }
-            } catch (e) {
-              if (mounted) {
-                setState(() => isAvailable = !value);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Failed to update availability: $e')),
-                );
-              }
-            }
-          },
-        ),
-      ],
-    );
-  }
-
-  //----------------------------------------------------------
-  // INACTIVE UI
-  //----------------------------------------------------------
-
-  Widget _inactiveState() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.pause_circle_outline, color: Colors.grey),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              AppLocalizations.of(context)!.translate('inactive_msg'),
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //----------------------------------------------------------
-  // DASHBOARD CARDS
-  //----------------------------------------------------------
-
-  Widget _dashboardCards(double width) {
-    int crossAxisCount = 3;
-    if (width < 520) {
-      crossAxisCount = 1;
-    } else if (width < 820) {
-      crossAxisCount = 2;
-    }
-
-    double childAspectRatio;
-    if (crossAxisCount == 1) {
-      childAspectRatio = 3.4;
-    } else if (crossAxisCount == 2) {
-      childAspectRatio = 2.5;
-    } else {
-      childAspectRatio = 2.0;
-    }
-
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: crossAxisCount,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: childAspectRatio,
-      children: [
-        _statCard(
-          "deliveries",
-          _isLoading ? "..." : _totalDeliveries.toString(),
-          Colors.blue,
-          width,
-        ),
-        _statCard(
-          "today",
-          _isLoading ? "..." : _todayCount.toString(),
-          Colors.green,
-          width,
-        ),
-        _statCard(
-          "ratings",
-          _isLoading ? "..." : _avgRating.toStringAsFixed(1),
-          Colors.orange,
-          width,
-        ),
-      ],
-    );
-  }
-
-  Widget _statCard(String key, String value, Color color, double width) {
-    final compact = width < 380;
-
-    return Container(
-      padding: EdgeInsets.all(compact ? 10 : 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: compact ? 18 : 20,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            AppLocalizations.of(context)!.translate(key),
-            style: TextStyle(fontSize: compact ? 11 : 12, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //----------------------------------------------------------
-  // BADGES
-  //----------------------------------------------------------
-
-  Widget _badgeSection() {
-    final stats =
-        context.watch<AppAuthProvider>().mongoProfile?['stats']
-            as Map<String, dynamic>?;
-    final badgeData =
-        context.watch<AppAuthProvider>().mongoProfile?['badge']
-            as Map<String, dynamic>?;
-
-    final totalCompleted =
-        (stats?['totalDeliveriesCompleted'] as num?)?.toInt() ?? 0;
-    final failed = (stats?['totalDeliveriesFailed'] as num?)?.toInt() ?? 0;
-    final noShows = (stats?['noShows'] as num?)?.toInt() ?? 0;
-    final avgRating = (stats?['avgRating'] as num?)?.toDouble() ?? 0;
-
-    final isVerified = (badgeData?['tickVerified'] as bool?) ?? false;
-    final topVolunteer = avgRating >= 4.5 && totalCompleted >= 10;
-    final fiftyDeliveries = totalCompleted >= 50;
-    final perfectStreak = totalCompleted > 0 && failed == 0 && noShows == 0;
-
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        _badge(Icons.verified, 'verified_volunteer', isActive: isVerified),
-        _badge(Icons.star, 'top_volunteer', isActive: topVolunteer),
-        _badge(
-          Icons.local_shipping,
-          'fifty_deliveries',
-          isActive: fiftyDeliveries,
-        ),
-        _badge(Icons.flash_on, 'perfect_streak', isActive: perfectStreak),
-      ],
-    );
-  }
-
-  Widget _badge(IconData icon, String key, {bool isActive = false}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primary.withOpacity(0.12) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isActive
-              ? AppColors.primary.withOpacity(0.3)
-              : Colors.grey.shade200,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: isActive ? AppColors.primary : Colors.grey,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            AppLocalizations.of(context)!.translate(key),
-            style: TextStyle(
-              fontSize: 12,
-              color: isActive ? AppColors.primary : Colors.grey,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //----------------------------------------------------------
-  // QUICK ACTIONS
-  //----------------------------------------------------------
-
-  Widget _quickActions(double width) {
-    final cardWidth = width < 520 ? (width - 48) / 2 : (width - 56) / 3;
-
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        _action(Icons.list_alt, const VolunteerOrdersPage(), width: cardWidth),
-        _action(Icons.star, const VolunteerRatingsPage(), width: cardWidth),
-        _action(Icons.person, const VolunteerProfilePage(), width: cardWidth),
-      ],
-    );
-  }
-
-  Widget _action(IconData icon, Widget page, {double? width}) {
-    return SizedBox(
-      width: width,
-      child: InkWell(
-        onTap: () =>
-            Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, size: 32, color: AppColors.primary),
-        ),
-      ),
-    );
-  }
-
-  //----------------------------------------------------------
-  // ALERT BANNER
-  //----------------------------------------------------------
-
-  Widget _alertBanner() {
-    final bannerText = _newRequests > 0
-        ? 'You have $_newRequests new delivery request${_newRequests == 1 ? '' : 's'} waiting!'
-        : 'No new delivery requests right now.';
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.info_outline, color: AppColors.primary, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              bannerText,
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //----------------------------------------------------------
-  // RESCUE REQUESTS
-  //----------------------------------------------------------
-
-  Widget _rescueRequestsSection() {
-    final auth = Provider.of<AppAuthProvider>(context, listen: false);
-    final volunteerId = auth.mongoUser?['_id'];
-
-    if (volunteerId == null) return const SizedBox.shrink();
-
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_error != null) {
-      return Text("Error: $_error", style: const TextStyle(color: Colors.red));
-    }
-
-    if (_rescueRequests.isEmpty) {
-      return const Text("No active rescue requests nearby.");
-    }
-
-    return Column(
-      children: _rescueRequests
-          .map(
-            (req) => ListTile(
-              title: Text(req['title'] ?? "Rescue Request"),
-              subtitle: Text(req['message'] ?? ""),
-              trailing: ElevatedButton(
-                onPressed: () =>
-                    _acceptRescueRequest(req['data']?['orderId'], volunteerId),
-                child: const Text("Accept"),
-              ),
-            ),
-          )
-          .toList(),
-    );
   }
 
   Future<void> _acceptRescueRequest(String? orderId, String volunteerId) async {

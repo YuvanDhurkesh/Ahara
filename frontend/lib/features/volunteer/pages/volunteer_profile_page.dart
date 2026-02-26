@@ -67,71 +67,101 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
     final transportLabel = _transportModeLabel(_transportMode);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFFFFBF7),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Hello, $name',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: _openSettingsSheet,
-                        icon: const Icon(Icons.settings_outlined, size: 28),
-                        color: AppColors.textDark,
-                      ),
-                    ],
+                  Text(
+                    'Hello, $name',
+                    style: GoogleFonts.ebGaramond(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1A1A1A),
+                      letterSpacing: -0.5,
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _statCard(
-                          label: 'Rating',
-                          value: rating.toStringAsFixed(1),
-                          icon: Icons.star_outline,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _statCard(
-                          label: 'Total Deliveries',
-                          value: totalDeliveries,
-                          icon: Icons.local_shipping_outlined,
-                        ),
-                      ),
-                    ],
+                  _headerIconButton(Icons.settings_outlined, _openSettingsSheet),
+                ],
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: _statCard(
+                      label: 'Rating',
+                      value: rating.toStringAsFixed(1),
+                      icon: Icons.star_rounded,
+                      color: const Color(0xFFD35400),
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  _infoTile(
-                    label: 'Vehicle Type',
-                    value: transportLabel,
-                    icon: Icons.directions_bike_outlined,
-                  ),
-                  const SizedBox(height: 12),
-                  _infoTile(
-                    label: 'Address',
-                    value: addressText,
-                    icon: Icons.location_on_outlined,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _statCard(
+                      label: 'Total Deliveries',
+                      value: totalDeliveries,
+                      icon: Icons.local_shipping_rounded,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: 24),
+              _sectionLabel("Details"),
+              const SizedBox(height: 12),
+              _infoTile(
+                label: 'Vehicle Type',
+                value: transportLabel,
+                icon: Icons.directions_bike_rounded,
+              ),
+              const SizedBox(height: 16),
+              _infoTile(
+                label: 'Address',
+                value: addressText,
+                icon: Icons.location_on_rounded,
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _headerIconButton(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF9E7E6B).withOpacity(0.06),
+              blurRadius: 10,
+            )
+          ],
+          border: Border.all(color: Colors.grey.shade100),
+        ),
+        child: Icon(icon, size: 24, color: const Color(0xFF1A1A1A)),
+      ),
+    );
+  }
+
+  Widget _sectionLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.plusJakartaSans(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: Colors.grey.shade500,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -542,33 +572,49 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
     required String label,
     required String value,
     required IconData icon,
+    required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12),
+          BoxShadow(
+            color: const Color(0xFF9E7E6B).withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
         ],
+        border: Border.all(color: Colors.grey.shade50),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.primary),
-          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          const SizedBox(height: 20),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textDark,
+            style: GoogleFonts.ebGaramond(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFF1A1A1A),
             ),
           ),
-          const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade500,
+            ),
           ),
         ],
       ),
@@ -581,37 +627,50 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
     required IconData icon,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 12),
+          BoxShadow(
+            color: const Color(0xFF9E7E6B).withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
         ],
+        border: Border.all(color: Colors.grey.shade50),
       ),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.textLight),
-          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF7ED),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: const Color(0xFFE67E22), size: 24),
+          ),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Colors.grey.shade500,
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
-                    color: AppColors.textDark,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                  style: GoogleFonts.ebGaramond(
+                    color: const Color(0xFF1A1A1A),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    height: 1.3,
                   ),
                 ),
               ],

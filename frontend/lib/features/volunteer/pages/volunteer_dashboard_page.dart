@@ -7,7 +7,6 @@ import 'volunteer_orders_page.dart';
 import 'volunteer_notifications_page.dart';
 import 'volunteer_ratings_page.dart';
 import 'volunteer_profile_page.dart';
-import 'volunteer_verification_page.dart';
 
 class VolunteerDashboardPage extends StatefulWidget {
   final int initialIndex;
@@ -31,7 +30,6 @@ class _VolunteerDashboardPageState extends State<VolunteerDashboardPage> {
     final List<Widget> _pages = [
       VolunteerHomePage(), // Home
       VolunteerOrdersPage(), // My Deliveries
-      VolunteerVerificationPage(), // Verification page
       VolunteerRatingsPage(), // Ratings & Badges
       VolunteerProfilePage(), // Profile (Logout here)
     ];
@@ -101,17 +99,6 @@ class _VolunteerDashboardPageState extends State<VolunteerDashboardPage> {
                         child: Icon(Icons.local_shipping),
                       ),
                       label: AppLocalizations.of(context)!.translate("deliveries"),
-                    ),
-                    BottomNavigationBarItem(
-                      icon: const Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.domain_verification),
-                      ),
-                      activeIcon: const Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Icon(Icons.domain_verification),
-                      ),
-                      label: AppLocalizations.of(context)!.translate("verification"),
                     ),
                     BottomNavigationBarItem(
                       icon: const Padding(

@@ -147,24 +147,24 @@ class _VolunteerNotificationsPageState extends State<VolunteerNotificationsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFFFFBF7),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: Color(0xFF1A1A1A),
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           "Notifications",
-          style: GoogleFonts.inter(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+          style: GoogleFonts.ebGaramond(
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            color: const Color(0xFF1A1A1A),
           ),
         ),
         centerTitle: true,
@@ -181,24 +181,32 @@ class _VolunteerNotificationsPageState extends State<VolunteerNotificationsPage>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.notifications_none,
-                            size: 64,
-                            color: Colors.grey[400],
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF7ED),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.notifications_none_rounded,
+                              size: 48,
+                              color: const Color(0xFFE67E22).withOpacity(0.5),
+                            ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           Text(
                             "No notifications yet",
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.plusJakartaSans(
                               fontSize: 16,
-                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w700,
+                              color: Colors.grey.shade400,
                             ),
                           ),
                         ],
                       ),
                     )
                   : ListView.separated(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                       itemCount: _notifications.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 16),
                       itemBuilder: (context, index) {
@@ -232,20 +240,22 @@ class _NotificationTile extends StatelessWidget {
         if (!isRead && onMarkAsRead != null) {
           onMarkAsRead!();
         }
-        // TODO: Handle navigation based on notification data
       },
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: const Color(0xFF9E7E6B).withOpacity(0.06),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
           ],
+          border: Border.all(
+            color: isRead ? Colors.transparent : AppColors.primary.withOpacity(0.1),
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,12 +264,12 @@ class _NotificationTile extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: (notification['color'] as Color).withOpacity(0.1),
-                shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 notification['icon'] as IconData,
                 color: notification['color'] as Color,
-                size: 20,
+                size: 22,
               ),
             ),
             const SizedBox(width: 16),
@@ -271,53 +281,42 @@ class _NotificationTile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        notification['type'] as String,
-                        style: GoogleFonts.inter(
+                        (notification['type'] as String).toUpperCase(),
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 10,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w800,
                           color: notification['color'] as Color,
-                          letterSpacing: 1.0,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                      Row(
-                        children: [
-                          if (!isRead)
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          const SizedBox(width: 8),
-                          Text(
-                            notification['time'] as String,
-                            style: GoogleFonts.inter(
-                              fontSize: 10,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        notification['time'] as String,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10,
+                          color: Colors.grey.shade500,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
                     notification['title'] as String,
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
+                    style: GoogleFonts.ebGaramond(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1A1A1A),
+                      height: 1.2,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     notification['message'] as String,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.plusJakartaSans(
                       fontSize: 13,
-                      color: AppColors.textLight.withOpacity(0.8),
+                      color: Colors.grey.shade600,
                       height: 1.4,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
