@@ -146,7 +146,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeaderInfo(context, type, rating, name, address),
+                  _buildHeaderInfo(context, type, rating, name, address, orgName),
                   const SizedBox(height: 32),
                   _buildDirectionsButton(),
                   const SizedBox(height: 48),
@@ -186,10 +186,10 @@ class BuyerFoodDetailPage extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Consumer<AppAuthProvider>(
             builder: (context, auth, _) {
-              final listingId = listing?['_id'] ?? listing?['id'] ?? store?.id;
+              final sellerId = listing?['sellerProfileId']?['userId'] ?? "";
               final profile = auth.mongoProfile;
-              final List? favorites = profile?['favouriteListings'];
-              final bool isFavorited = favorites?.contains(listingId) ?? false;
+              final List? favorites = profile?['favouriteSellers'];
+              final bool isFavorited = favorites?.contains(sellerId) ?? false;
 
               return CircleAvatar(
                 backgroundColor: Colors.black.withOpacity(0.3),
@@ -200,15 +200,15 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     size: 20,
                   ),
                   onPressed: () async {
-                    if (auth.currentUser == null || listingId == null) return;
+                    if (auth.currentUser == null || sellerId.isEmpty) return;
                     try {
-                      await BackendService.toggleFavoriteListing(
+                      await BackendService.toggleFavoriteSeller(
                         firebaseUid: auth.currentUser!.uid,
-                        listingId: listingId,
+                        sellerId: sellerId,
                       );
                       await auth.refreshMongoUser();
                     } catch (e) {
-                      debugPrint("Error toggling favorite: $e");
+                      debugPrint("Error toggling favorite restaurant: $e");
                     }
                   },
                 ),
@@ -251,7 +251,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderInfo(BuildContext context, String type, String rating, String name, String address) {
+  Widget _buildHeaderInfo(BuildContext context, String type, String rating, String name, String address, String orgName) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -319,6 +319,44 @@ class BuyerFoodDetailPage extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        // Restaurant Name with Favorite Toggle
+        const Divider(),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: AppColors.primary.withOpacity(0.1),
+              radius: 20,
+              child: const Icon(Icons.store, color: AppColors.primary, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Sold by",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textLight.withOpacity(0.6),
+                    ),
+                  ),
+                  Text(
+                    orgName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        const Divider(),
       ],
     );
   }

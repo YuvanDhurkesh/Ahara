@@ -558,8 +558,84 @@ exports.toggleFavoriteListing = async (req, res) => {
   }
 };
 // ======================================================
-// UPDATE VOLUNTEER AVAILABILITY
+// TOGGLE FAVOURITE SELLER
 // ======================================================
+
+exports.toggleFavoriteSeller = async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { sellerId } = req.body;
+    if (!sellerId) {
+      return res.status(400).json({ error: "sellerId is required" });
+    }
+
+    const user = await User.findOne({ firebaseUid: uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    let profile = await BuyerProfile.findOne({ userId: user._id });
+    if (!profile) {
+      profile = await BuyerProfile.create({ userId: user._id });
+    }
+
+    const sellerIndex = profile.favouriteSellers.indexOf(sellerId.toString());
+    let isFavorited = false;
+
+    if (sellerIndex > -1) {
+      profile.favouriteSellers.splice(sellerIndex, 1);
+    } else {
+      profile.favouriteSellers.push(sellerId.toString());
+      isFavorited = true;
+    }
+
+    await profile.save();
+
+    return res.status(200).json({
+      message: isFavorited ? "Seller favorited" : "Seller unfavorited",
+      isFavorited,
+      favouriteSellers: profile.favouriteSellers
+    });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Server error toggle favorite seller",
+      details: error.message
+    });
+  }
+};
+
+// ======================================================
+// GET FAVOURITE SELLERS (WITH DETAILS)
+// ======================================================
+
+exports.getFavoriteSellers = async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    const user = await User.findOne({ firebaseUid: uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const profile = await BuyerProfile.findOne({ userId: user._id });
+    if (!profile) {
+      return res.status(200).json({ sellers: [] });
+    }
+
+    // Get all seller profiles that are favorited
+    // Note: favouriteSellers contains sellerId (the SellerProfile's userId)
+    const favoriteSellers = await SellerProfile.find({
+      userId: { $in: profile.favouriteSellers }
+    }).populate("userId", "name phone email geo addressText");
+
+    return res.status(200).json({ sellers: favoriteSellers });
+  } catch (error) {
+    return res.status(500).json({
+      error: "Server error fetching favorite sellers",
+      details: error.message
+    });
+  }
+};
 
 exports.updateAvailability = async (req, res) => {
   try {
