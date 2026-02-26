@@ -13,9 +13,6 @@ import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
 
-
-
-
 class BuyerHomePage extends StatefulWidget {
   const BuyerHomePage({super.key});
 
@@ -65,44 +62,40 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     _fetchRealListings();
 
     // Update countdown every 30 seconds
-    _countdownTimer =
-        Timer.periodic(const Duration(seconds: 30), (_) {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted) {
         setState(() => _now = DateTime.now());
       }
     });
   }
+
   Future<void> _loadUserLocation() async {
-  try {
-    final response =
-        await BackendService.getUserProfile(_firebaseUid);
+    try {
+      final response = await BackendService.getUserProfile(_firebaseUid);
 
-    print("FULL RESPONSE: $response");
+      print("FULL RESPONSE: $response");
 
-    if (mounted) {
-      setState(() {
-        _userLocation =
-            response['user']?['addressText'] ??
-            "Unknown location";
-      });
-    }
-  } catch (e) {
-    print("Location fetch error: $e");
-    if (mounted) {
-      setState(() {
-        _userLocation = "Location unavailable";
-      });
+      if (mounted) {
+        setState(() {
+          _userLocation =
+              response['user']?['addressText'] ?? "Unknown location";
+        });
+      }
+    } catch (e) {
+      print("Location fetch error: $e");
+      if (mounted) {
+        setState(() {
+          _userLocation = "Location unavailable";
+        });
+      }
     }
   }
-}
-
 
   @override
   void dispose() {
     _countdownTimer?.cancel();
     super.dispose();
   }
-
 
   Future<void> _fetchRealListings() async {
     setState(() => _isLoading = true);
@@ -150,27 +143,31 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   @override
   Widget build(BuildContext context) {
     // Combine mock stores and real listings
-    final allItems = <dynamic>[
-      ..._validListings,
-      ...allMockStores,
-    ];
-    
+    final allItems = <dynamic>[..._validListings, ...allMockStores];
+
     final filteredItems = allItems.where((item) {
       // Check if it's a mock store or real listing
       final isMock = item is MockStore;
-      
+
       // Filter by Main Category (Free/Discounted)
       bool matchesMain = true;
       if (_mainCategory == "Free") {
-        matchesMain = isMock ? item.isFree : (item['pricing']?['isFree'] ?? false);
+        matchesMain = isMock
+            ? item.isFree
+            : (item['pricing']?['isFree'] ?? false);
       } else if (_mainCategory == "Discounted") {
-        matchesMain = isMock ? (item.discount != null) : ((item['pricing']?['originalPrice'] ?? 0) > (item['pricing']?['discountedPrice'] ?? 0));
+        matchesMain = isMock
+            ? (item.discount != null)
+            : ((item['pricing']?['originalPrice'] ?? 0) >
+                  (item['pricing']?['discountedPrice'] ?? 0));
       }
 
       // Filter by Sub Category (Food Type)
       bool matchesSub = true;
       if (_subCategory != "All") {
-        matchesSub = isMock ? (item.category == _subCategory) : (item['foodType'] == _subCategory);
+        matchesSub = isMock
+            ? (item.category == _subCategory)
+            : (item['foodType'] == _subCategory);
       }
 
       return matchesMain && matchesSub;
@@ -187,47 +184,47 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : filteredItems.isEmpty
-                    ? _buildEmptyState()
-                    : ResponsiveLayout(
-                        mobile: ListView.builder(
-                          padding: const EdgeInsets.all(20),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 24),
-                              child: _buildItemCard(filteredItems[index]),
-                            );
-                          },
-                        ),
-                        tablet: GridView.builder(
-                          padding: const EdgeInsets.all(20),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 1.1,
-                                crossAxisSpacing: 20,
-                                mainAxisSpacing: 20,
-                              ),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            return _buildItemCard(filteredItems[index]);
-                          },
-                        ),
-                        desktop: GridView.builder(
-                          padding: const EdgeInsets.all(20),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                childAspectRatio: 1.0,
-                                crossAxisSpacing: 20,
-                                mainAxisSpacing: 20,
-                              ),
-                          itemCount: filteredItems.length,
-                          itemBuilder: (context, index) {
-                            return _buildItemCard(filteredItems[index]);
-                          },
-                        ),
-                      ),
+                ? _buildEmptyState()
+                : ResponsiveLayout(
+                    mobile: ListView.builder(
+                      padding: const EdgeInsets.all(20),
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          child: _buildItemCard(filteredItems[index]),
+                        );
+                      },
+                    ),
+                    tablet: GridView.builder(
+                      padding: const EdgeInsets.all(20),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.1,
+                            crossAxisSpacing: 20,
+                            mainAxisSpacing: 20,
+                          ),
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        return _buildItemCard(filteredItems[index]);
+                      },
+                    ),
+                    desktop: GridView.builder(
+                      padding: const EdgeInsets.all(20),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            childAspectRatio: 1.0,
+                            crossAxisSpacing: 20,
+                            mainAxisSpacing: 20,
+                          ),
+                      itemCount: filteredItems.length,
+                      itemBuilder: (context, index) {
+                        return _buildItemCard(filteredItems[index]);
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -259,97 +256,93 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   }
 
   Widget _buildHeader() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.location_on,
-                    color: AppColors.primary,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 4),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on,
+                      color: AppColors.primary,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 4),
 
-                  // 🔥 Dynamic Location
-                  Expanded(
-                    child: Text(
-                      _userLocation,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: AppColors.textLight.withOpacity(0.6),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                    // 🔥 Dynamic Location
+                    Expanded(
+                      child: Text(
+                        _userLocation,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: AppColors.textLight.withOpacity(0.6),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
 
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    color: AppColors.primary,
-                    size: 14,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-
-              // 🔥 Dynamic Discover Title
-              Text(
-                _userLocation == "Loading..."
-                    ? "Discover"
-                    : "Discover ${_userLocation.split(',').last.trim()}",
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.textDark,
-                  letterSpacing: -0.5,
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: AppColors.primary,
+                      size: 14,
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+
+                // 🔥 Dynamic Discover Title
+                Text(
+                  _userLocation == "Loading..."
+                      ? "Discover"
+                      : "Discover ${_userLocation.split(',').last.trim()}",
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textDark,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const BuyerNotificationsPage(),
-              ),
-            );
-          },
-          icon: const Icon(
-            Icons.notifications_outlined,
-            color: AppColors.textDark,
-            size: 22,
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BuyerNotificationsPage(),
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.notifications_outlined,
+              color: AppColors.textDark,
+              size: 22,
+            ),
+            tooltip: "Notifications",
           ),
-          tooltip: "Notifications",
-        ),
-        IconButton(
-          onPressed: () async {
-            await FirebaseAuth.instance.signOut();
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const LandingPage()),
-              (route) => false,
-            );
-          },
-          icon: const Icon(
-            Icons.logout,
-            color: AppColors.textDark,
-            size: 22,
+          IconButton(
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LandingPage()),
+                (route) => false,
+              );
+            },
+            icon: const Icon(Icons.logout, color: AppColors.textDark, size: 22),
+            tooltip: "Logout",
           ),
-          tooltip: "Logout",
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _buildMainCategoryTabs() {
     return Padding(
@@ -375,7 +368,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                 ),
                 child: Center(
                   child: Text(
-                    AppLocalizations.of(context)!.translate(category.toLowerCase()),
+                    AppLocalizations.of(
+                      context,
+                    )!.translate(category.toLowerCase()),
                     style: TextStyle(
                       color: isSelected
                           ? Colors.white
@@ -419,7 +414,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                 ),
                 child: Center(
                   child: Text(
-                    AppLocalizations.of(context)!.translate(category.toLowerCase().replaceAll(" & ", "_")),
+                    AppLocalizations.of(
+                      context,
+                    )!.translate(category.toLowerCase().replaceAll(" & ", "_")),
                     style: TextStyle(
                       color: isSelected
                           ? Colors.white
@@ -455,17 +452,52 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     final bool isFree = pricing['isFree'] ?? false;
     final int price = pricing['discountedPrice'] ?? 0;
     final int? originalPrice = pricing['originalPrice'];
-    
+
     final sellerProfile = listing['sellerProfileId'] ?? {};
     final String orgName = sellerProfile['orgName'] ?? "Local Seller";
-    final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0).toDouble();
+    final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0)
+        .toDouble();
     final int ratingCount = sellerProfile['stats']?['ratingCount'] ?? 0;
-    
+
     final String? expiryStr = listing['pickupWindow']?['to'];
-    final DateTime? expiryTime = expiryStr != null ? DateTime.tryParse(expiryStr) : null;
-    
+    final DateTime? expiryTime = expiryStr != null
+        ? DateTime.tryParse(expiryStr)
+        : null;
+
+    // --- Rescue Window detection ---
+    final String? pickupFromStr = listing['pickupWindow']?['from'];
+    final DateTime? pickupFrom = pickupFromStr != null
+        ? DateTime.tryParse(pickupFromStr)
+        : null;
+    bool _checkUpcoming(DateTime? start) {
+      if (start == null) return false;
+      if (!start.isAfter(_now)) return false;
+
+      // Healing logic: If it's shifted to tomorrow but the time has already passed today
+      if (start.difference(_now).inHours < 24) {
+        final todayStart = DateTime(
+          _now.year,
+          _now.month,
+          _now.day,
+          start.hour,
+          start.minute,
+        );
+        if (!todayStart.isAfter(_now)) return false;
+      }
+      return true;
+    }
+
+    final bool isRescueUpcoming = _checkUpcoming(pickupFrom);
+
+    String _fmt12(DateTime dt) {
+      final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+      final m = dt.minute.toString().padLeft(2, '0');
+      final p = dt.hour >= 12 ? 'PM' : 'AM';
+      return '$h:$m $p';
+    }
+
     final List images = listing['images'] ?? [];
-    final String uploadedImageUrl = images.isNotEmpty 
+    final String uploadedImageUrl = images.isNotEmpty
         ? BackendService.formatImageUrl(images[0])
         : "";
     final String foodName = listing['foodName'] ?? "Food Item";
@@ -500,7 +532,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(24),
+                  ),
                   child: Image.network(
                     imageUrl,
                     height: 180,
@@ -535,7 +569,10 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                     top: 12,
                     left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green,
                         borderRadius: BorderRadius.circular(10),
@@ -559,25 +596,34 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                       final profile = auth.mongoProfile;
                       final sellerId = sellerProfile['userId'] ?? "";
                       final List? favorites = profile?['favouriteSellers'];
-                      final bool isFavorited = favorites?.contains(sellerId) ?? false;
+                      final bool isFavorited =
+                          favorites?.contains(sellerId) ?? false;
 
                       return GestureDetector(
                         onTap: () async {
-                          if (auth.currentUser == null || sellerId.isEmpty) return;
+                          if (auth.currentUser == null || sellerId.isEmpty)
+                            return;
                           try {
                             await BackendService.toggleFavoriteSeller(
-                                firebaseUid: auth.currentUser!.uid,
-                                sellerId: sellerId);
+                              firebaseUid: auth.currentUser!.uid,
+                              sellerId: sellerId,
+                            );
                             await auth.refreshMongoUser();
                             if (mounted) {
                               AnimatedToast.show(
                                 context,
-                                isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
-                                type: isFavorited ? ToastType.info : ToastType.success,
+                                isFavorited
+                                    ? "Removed restaurant from favorites"
+                                    : "Added restaurant to favorites",
+                                type: isFavorited
+                                    ? ToastType.info
+                                    : ToastType.success,
                               );
                             }
                           } catch (e) {
-                            debugPrint("Error toggling favorite restaurant: $e");
+                            debugPrint(
+                              "Error toggling favorite restaurant: $e",
+                            );
                           }
                         },
                         child: Container(
@@ -594,8 +640,12 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                             ],
                           ),
                           child: Icon(
-                            isFavorited ? Icons.favorite : Icons.favorite_border,
-                            color: isFavorited ? Colors.red : AppColors.textLight,
+                            isFavorited
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavorited
+                                ? Colors.red
+                                : AppColors.textLight,
                             size: 20,
                           ),
                         ),
@@ -608,7 +658,10 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                     bottom: 12,
                     right: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
@@ -619,7 +672,10 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                           const SizedBox(width: 4),
                           Text(
                             rating.toStringAsFixed(1),
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
@@ -672,27 +728,99 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      if (expiryTime != null) ...[
-                        _buildIconLabel(Icons.timer_outlined, "Ends in ${_formatTimeRemaining(expiryTime)}"),
-                        const SizedBox(width: 16),
-                      ],
-                      _buildIconLabel(Icons.store, orgName),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isFree ? Colors.green : AppColors.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          isFree ? "Claim Now" : "Reserve",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                      if (isRescueUpcoming) ...[
+                        // Amber "Opens at" badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF3C7),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: const Color(0xFFF59E0B).withOpacity(0.4),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.schedule_rounded,
+                                size: 11,
+                                color: Color(0xFFB45309),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Opens ${_fmt12(pickupFrom!)}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF92400E),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
+                      ] else if (expiryTime != null) ...[
+                        _buildIconLabel(
+                          Icons.timer_outlined,
+                          'Ends ${_formatTimeRemaining(expiryTime)}',
+                        ),
+                      ],
+                      const SizedBox(width: 8),
+                      Expanded(child: _buildIconLabel(Icons.store, orgName)),
+                      const SizedBox(width: 8),
+                      if (isRescueUpcoming)
+                        // Locked button
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.lock_clock_outlined,
+                                size: 13,
+                                color: Colors.grey.shade500,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Locked',
+                                style: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isFree ? Colors.green : AppColors.primary,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            isFree ? 'Claim Now' : 'Reserve',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ],
@@ -788,31 +916,39 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   child: Consumer<AppAuthProvider>(
                     builder: (context, auth, _) {
                       final profile = auth.mongoProfile;
-                    final List? favorites = profile?['favouriteSellers'];
-                    // Mock stores don't have MongoDB listings, so we use their ID
-                    // Note: This might fail on backend if store.id is not a valid ObjectId
-                    // but we'll use it to trigger the UI and toast for consistency.
-                    final bool isFavorited = favorites?.contains(store.id) ?? false;
+                      final List? favorites = profile?['favouriteSellers'];
+                      // Mock stores don't have MongoDB listings, so we use their ID
+                      // Note: This might fail on backend if store.id is not a valid ObjectId
+                      // but we'll use it to trigger the UI and toast for consistency.
+                      final bool isFavorited =
+                          favorites?.contains(store.id) ?? false;
 
-                    return GestureDetector(
-                      onTap: () async {
-                        if (auth.currentUser == null) return;
-                        try {
-                          await BackendService.toggleFavoriteSeller(
+                      return GestureDetector(
+                        onTap: () async {
+                          if (auth.currentUser == null) return;
+                          try {
+                            await BackendService.toggleFavoriteSeller(
                               firebaseUid: auth.currentUser!.uid,
-                              sellerId: store.id);
-                          await auth.refreshMongoUser();
-                          if (mounted) {
-                            AnimatedToast.show(
-                              context,
-                              isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
-                              type: isFavorited ? ToastType.info : ToastType.success,
+                              sellerId: store.id,
+                            );
+                            await auth.refreshMongoUser();
+                            if (mounted) {
+                              AnimatedToast.show(
+                                context,
+                                isFavorited
+                                    ? "Removed restaurant from favorites"
+                                    : "Added restaurant to favorites",
+                                type: isFavorited
+                                    ? ToastType.info
+                                    : ToastType.success,
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint(
+                              "Error toggling favorite for mock store: $e",
                             );
                           }
-                        } catch (e) {
-                          debugPrint("Error toggling favorite for mock store: $e");
-                        }
-                      },
+                        },
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
@@ -827,7 +963,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                             ],
                           ),
                           child: Icon(
-                            isFavorited ? Icons.favorite : Icons.favorite_outline,
+                            isFavorited
+                                ? Icons.favorite
+                                : Icons.favorite_outline,
                             color: isFavorited
                                 ? Colors.red
                                 : AppColors.textLight.withOpacity(0.6),
@@ -915,7 +1053,10 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      _buildIconLabel(Icons.timer_outlined, "${AppLocalizations.of(context)!.translate("ends_in")}2h"),
+                      _buildIconLabel(
+                        Icons.timer_outlined,
+                        "${AppLocalizations.of(context)!.translate("ends_in")}2h",
+                      ),
                       const SizedBox(width: 16),
                       _buildIconLabel(Icons.directions_walk, "1.2 km"),
                       const Spacer(),
@@ -931,9 +1072,13 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          store.isFree 
-                              ? AppLocalizations.of(context)!.translate("claim_now")
-                              : AppLocalizations.of(context)!.translate("reserve"),
+                          store.isFree
+                              ? AppLocalizations.of(
+                                  context,
+                                )!.translate("claim_now")
+                              : AppLocalizations.of(
+                                  context,
+                                )!.translate("reserve"),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
