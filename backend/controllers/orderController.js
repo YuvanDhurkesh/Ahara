@@ -190,7 +190,7 @@ exports.getBuyerOrders = async (req, res) => {
         const orders = await Order.find(query)
             .populate({
                 path: "listingId",
-                select: "foodName images pricing pickupAddressText pickupWindow safetyStatus isSafetyValidated"
+                select: "foodName images pricing pickupAddressText pickupWindow safetyStatus isSafetyValidated pickupGeo"
             })
             .populate({
                 path: "sellerId",
@@ -214,7 +214,7 @@ exports.getSellerOrders = async (req, res) => {
     try {
         const { sellerId } = req.params;
         const orders = await Order.find({ sellerId })
-            .populate("listingId", "foodName foodType images pricing pickupAddressText pickupWindow")
+            .populate("listingId", "foodName foodType images pricing pickupAddressText pickupWindow pickupGeo")
             .populate("buyerId", "name phone addressText")
             .populate("volunteerId", "name phone trustScore")
             .sort({ createdAt: -1 });
@@ -272,7 +272,7 @@ exports.getVolunteerOrders = async (req, res) => {
         const orders = await Order.find(query)
             .populate({
                 path: "listingId",
-                select: "foodName images pickupAddressText pickupWindow"
+                select: "foodName images pickupAddressText pickupWindow pickupGeo"
             })
             .populate({
                 path: "buyerId",
@@ -364,8 +364,8 @@ exports.acceptRescueRequest = async (req, res) => {
                 type: "order_update",
                 title: "📦 Pickup Assignment",
                 message: `You have been assigned to pick up ${order.quantityOrdered}x ${order.listingId?.foodName || 'food items'} from the seller.`,
-                data: { 
-                    orderId: order._id, 
+                data: {
+                    orderId: order._id,
                     status: "volunteer_assigned",
                     action: "pickup_from_seller"
                 }
@@ -538,7 +538,7 @@ exports.cancelOrder = async (req, res) => {
             userId: order.buyerId,
             type: "order_update",
             title: cancelledBy === "buyer" ? "✅ Order Cancelled" : "❌ Order Cancelled",
-            message: cancelledBy === "buyer" 
+            message: cancelledBy === "buyer"
                 ? `You have successfully cancelled order #${shortId}.`
                 : `Your order #${shortId} has been cancelled by the ${cancelledBy}.`,
             data: { orderId: order._id, status: "cancelled" }
@@ -882,8 +882,8 @@ exports.verifyOtp = async (req, res) => {
                     type: "order_update",
                     title: "🚚 Delivery Assignment",
                     message: `Food collected! Now deliver ${order.quantityOrdered}x ${order.listingId?.foodName || 'food items'} to the buyer.`,
-                    data: { 
-                        orderId: order._id, 
+                    data: {
+                        orderId: order._id,
                         status: "picked_up",
                         action: "deliver_to_buyer"
                     }
