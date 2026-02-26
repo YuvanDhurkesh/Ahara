@@ -22,7 +22,7 @@ class AppLocalizations {
       'continue': 'Continue',
       'seller_dashboard': 'Seller Dashboard',
       'recent_activity': 'Recent Activity',
-      'welcome_back_user': 'Welcome back, ',
+      'welcome_back_user': 'Welcome back',
       'discover': 'Discover',
       'browse': 'Browse',
       'orders': 'Orders',
