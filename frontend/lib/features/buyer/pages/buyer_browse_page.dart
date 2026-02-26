@@ -11,6 +11,7 @@ import 'package:latlong2/latlong.dart';
 
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../shared/widgets/animated_toast.dart';
 
 class BuyerBrowsePage extends StatefulWidget {
   const BuyerBrowsePage({super.key});
@@ -688,20 +689,27 @@ List<Marker> _buildOSMMarkers() {
                 child: Consumer<AppAuthProvider>(
                   builder: (context, auth, _) {
                     final profile = auth.mongoProfile;
-                    final listingId = listing['_id'] ?? listing['id'];
-                    final List? favorites = profile?['favouriteListings'];
-                    final bool isFavorited = favorites?.contains(listingId) ?? false;
+                    final sellerId = listing['sellerProfileId']?['userId'] ?? "";
+                    final List? favorites = profile?['favouriteSellers'];
+                    final bool isFavorited = favorites?.contains(sellerId) ?? false;
 
                     return GestureDetector(
                       onTap: () async {
-                        if (auth.currentUser == null) return;
+                        if (auth.currentUser == null || sellerId.isEmpty) return;
                         try {
-                          await BackendService.toggleFavoriteListing(
+                          await BackendService.toggleFavoriteSeller(
                               firebaseUid: auth.currentUser!.uid,
-                              listingId: listingId);
+                              sellerId: sellerId);
                           await auth.refreshMongoUser();
+                          if (mounted) {
+                            AnimatedToast.show(
+                              context,
+                              isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
+                              type: isFavorited ? ToastType.info : ToastType.success,
+                            );
+                          }
                         } catch (e) {
-                          debugPrint("Error toggling favorite: $e");
+                          debugPrint("Error toggling favorite restaurant: $e");
                         }
                       },
                       child: Container(
@@ -881,17 +889,24 @@ List<Marker> _buildOSMMarkers() {
                 child: Consumer<AppAuthProvider>(
                   builder: (context, auth, _) {
                     final profile = auth.mongoProfile;
-                    final List? favorites = profile?['favouriteListings'];
+                    final List? favorites = profile?['favouriteSellers'];
                     final bool isFavorited = favorites?.contains(store.id) ?? false;
 
                     return GestureDetector(
                       onTap: () async {
                         if (auth.currentUser == null) return;
                         try {
-                          await BackendService.toggleFavoriteListing(
+                          await BackendService.toggleFavoriteSeller(
                               firebaseUid: auth.currentUser!.uid,
-                              listingId: store.id);
+                              sellerId: store.id);
                           await auth.refreshMongoUser();
+                          if (mounted) {
+                            AnimatedToast.show(
+                              context,
+                              isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
+                              type: isFavorited ? ToastType.info : ToastType.success,
+                            );
+                          }
                         } catch (e) {
                           debugPrint("Error toggling favorite for mock store: $e");
                         }

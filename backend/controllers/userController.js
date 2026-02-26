@@ -2,6 +2,7 @@ const User = require("../models/User");
 const SellerProfile = require("../models/SellerProfile");
 const BuyerProfile = require("../models/BuyerProfile");
 const VolunteerProfile = require("../models/VolunteerProfile");
+const Notification = require("../models/Notification");
 
 // ======================================================
 // CREATE USER
@@ -590,6 +591,22 @@ exports.toggleFavoriteSeller = async (req, res) => {
     }
 
     await profile.save();
+
+    if (isFavorited) {
+      try {
+        const sellerProfile = await SellerProfile.findOne({ userId: sellerId });
+        const orgName = sellerProfile ? sellerProfile.orgName : "a restaurant";
+        await Notification.create({
+          userId: user._id,
+          type: "favorite_added",
+          title: "New Favorite",
+          message: `You added ${orgName} to your favorite restaurants.`,
+          data: { sellerId }
+        });
+      } catch (notiError) {
+        console.error("Failed to create favorite notification:", notiError);
+      }
+    }
 
     return res.status(200).json({
       message: isFavorited ? "Seller favorited" : "Seller unfavorited",

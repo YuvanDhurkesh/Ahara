@@ -93,6 +93,8 @@ class _BuyerNotificationsPageState extends State<BuyerNotificationsPage> {
         return "Deal";
       case "alert":
         return "Alert";
+      case "favorite_added":
+        return "Favorite";
       default:
         return "Info";
     }
@@ -106,8 +108,10 @@ class _BuyerNotificationsPageState extends State<BuyerNotificationsPage> {
         return Icons.local_offer_rounded;
       case "alert":
         return Icons.notifications_active_rounded;
+      case "favorite_added":
+        return Icons.favorite_rounded;
       default:
-        return Icons.info_rounded;
+        return Icons.info_outline_rounded;
     }
   }
 
@@ -118,9 +122,11 @@ class _BuyerNotificationsPageState extends State<BuyerNotificationsPage> {
       case "deal":
         return Colors.orange;
       case "alert":
-        return Colors.blue;
+        return const Color(0xFF3D3028); // Deep Charcoal (App's TextDark)
+      case "favorite_added":
+        return const Color(0xFFD81B60); // Vibrant Pinkish-Red (matches favorites)
       default:
-        return Colors.green;
+        return const Color(0xFF8C8E64); // Olive (App's Secondary)
     }
   }
 
@@ -253,12 +259,19 @@ class _NotificationTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: (notification['color'] as Color).withOpacity(0.1),
+                color: notification['color'] as Color,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: (notification['color'] as Color).withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Icon(
                 notification['icon'] as IconData,
-                color: notification['color'] as Color,
+                color: Colors.white,
                 size: 20,
               ),
             ),

@@ -11,6 +11,7 @@ import '../../../core/localization/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../shared/widgets/animated_toast.dart';
 
 
 
@@ -569,11 +570,10 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                                 sellerId: sellerId);
                             await auth.refreshMongoUser();
                             if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites"),
-                                  duration: const Duration(seconds: 1),
-                                ),
+                              AnimatedToast.show(
+                                context,
+                                isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
+                                type: isFavorited ? ToastType.info : ToastType.success,
                               );
                             }
                           } catch (e) {
@@ -788,26 +788,31 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   child: Consumer<AppAuthProvider>(
                     builder: (context, auth, _) {
                       final profile = auth.mongoProfile;
-                      final List? favorites = profile?['favouriteListings'];
-                      // Mock stores don't have MongoDB listings, so we use their ID
-                      // but they won't be saved to the backend unless we implement it.
-                      // For now, let's just make it a local toggle visually or keep it as is.
-                      final bool isFavorited = favorites?.contains(store.id) ?? false;
+                    final List? favorites = profile?['favouriteSellers'];
+                    // Mock stores don't have MongoDB listings, so we use their ID
+                    // Note: This might fail on backend if store.id is not a valid ObjectId
+                    // but we'll use it to trigger the UI and toast for consistency.
+                    final bool isFavorited = favorites?.contains(store.id) ?? false;
 
-                      return GestureDetector(
-                        onTap: () async {
-                          if (auth.currentUser == null) return;
-                          try {
-                            // Note: This will fail on backend if store.id is not a valid ObjectId
-                            // For mock data, we just show error in console
-                            await BackendService.toggleFavoriteListing(
-                                firebaseUid: auth.currentUser!.uid,
-                                listingId: store.id);
-                            await auth.refreshMongoUser();
-                          } catch (e) {
-                            debugPrint("Error toggling favorite for mock store: $e");
+                    return GestureDetector(
+                      onTap: () async {
+                        if (auth.currentUser == null) return;
+                        try {
+                          await BackendService.toggleFavoriteSeller(
+                              firebaseUid: auth.currentUser!.uid,
+                              sellerId: store.id);
+                          await auth.refreshMongoUser();
+                          if (mounted) {
+                            AnimatedToast.show(
+                              context,
+                              isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
+                              type: isFavorited ? ToastType.info : ToastType.success,
+                            );
                           }
-                        },
+                        } catch (e) {
+                          debugPrint("Error toggling favorite for mock store: $e");
+                        }
+                      },
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(

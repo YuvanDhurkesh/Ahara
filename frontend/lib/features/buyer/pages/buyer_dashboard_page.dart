@@ -98,7 +98,7 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
       const BuyerHomePage(), // Discover
       const BuyerBrowsePage(), // Browse
       const BuyerOrdersPage(), // Orders
-      const BuyerFavouritesPage(), // Favourites
+      BuyerFavouritesPage(onDiscoverMore: () => setState(() => _selectedIndex = 0)), // Favourites
       const BuyerProfilePage(), // Profile
     ];
 

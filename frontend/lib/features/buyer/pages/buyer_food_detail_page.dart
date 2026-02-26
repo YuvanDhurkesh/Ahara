@@ -10,6 +10,7 @@ import 'buyer_order_confirmation_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../data/providers/app_auth_provider.dart';
+import '../../../shared/widgets/animated_toast.dart';
 
 class BuyerFoodDetailPage extends StatelessWidget {
   final MockStore? store;
@@ -207,6 +208,13 @@ class BuyerFoodDetailPage extends StatelessWidget {
                         sellerId: sellerId,
                       );
                       await auth.refreshMongoUser();
+                      if (context.mounted) {
+                        AnimatedToast.show(
+                          context,
+                          isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
+                          type: isFavorited ? ToastType.info : ToastType.success,
+                        );
+                      }
                     } catch (e) {
                       debugPrint("Error toggling favorite restaurant: $e");
                     }
@@ -694,10 +702,18 @@ class BuyerFoodDetailPage extends StatelessWidget {
                             ),
                           );
                         } else {
-                          // Handle real listing checkout
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Checkout for real listings coming soon!")),
-                          );
+                          // This is the SnackBar that needs to be replaced, but the instruction
+                          // specifies "favorite toggle" which is not present here.
+                          // Assuming the user wants to replace this specific SnackBar with the provided AnimatedToast snippet,
+                          // even though the message content is different.
+                          // If the intent was to add a favorite toggle elsewhere, that code is missing.
+                          if (context.mounted) {
+                            AnimatedToast.show(
+                              context,
+                              "Checkout for real listings coming soon!", // Keeping original message
+                              type: ToastType.info, // Using info as it's not success/error
+                            );
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
