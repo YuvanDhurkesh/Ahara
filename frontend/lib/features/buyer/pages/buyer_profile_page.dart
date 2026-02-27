@@ -8,6 +8,7 @@ import 'buyer_notifications_page.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import 'package:provider/provider.dart';
+import '../../../shared/widgets/animated_toast.dart';
 
 class BuyerProfilePage extends StatefulWidget {
   const BuyerProfilePage({super.key});
@@ -206,7 +207,50 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
 
                 const SizedBox(height: 40),
 
-                // Recent Activity or other profile content could go here
+                // Dietary Preferences Section
+                Row(
+                  children: [
+                    Text(
+                      "Dietary Preferences",
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () => _setAllPreferences(true),
+                      child: Text("Select All", style: GoogleFonts.inter(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                    ),
+                    TextButton(
+                      onPressed: () => _setAllPreferences(false),
+                      child: Text("Clear All", style: GoogleFonts.inter(fontSize: 12, color: AppColors.textLight, fontWeight: FontWeight.w600)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "We'll filter your feed based on these choices.",
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: AppColors.textLight.withOpacity(0.6),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _buildPreferenceChip("vegetarian", "Vegetarian", Icons.eco_outlined),
+                    _buildPreferenceChip("vegan", "Vegan", Icons.eco),
+                    _buildPreferenceChip("non_veg", "Non-Veg", Icons.kebab_dining_outlined),
+                    _buildPreferenceChip("jain", "Jain", Icons.temple_hindu_outlined),
+                  ],
+                ),
+
+                const SizedBox(height: 40),
+
                 Text(
                   "Your Impact",
                   style: GoogleFonts.inter(
@@ -372,6 +416,97 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
         ],
       ),
     );
+  }
+
+  Widget _buildPreferenceChip(String key, String label, IconData icon) {
+    final auth = context.watch<AppAuthProvider>();
+    final List<String> currentPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
+    final bool isSelected = currentPrefs.contains(key);
+
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (bool selected) => _togglePreference(key, selected),
+      avatar: Icon(
+        icon, 
+        color: isSelected ? Colors.white : AppColors.primary, 
+        size: 18
+      ),
+      selectedColor: AppColors.primary,
+      checkmarkColor: Colors.white,
+      showCheckmark: false, // Standard checkmark hidden for cleaner look
+      labelStyle: GoogleFonts.inter(
+        color: isSelected ? Colors.white : AppColors.textDark,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+        fontSize: 13,
+      ),
+      backgroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isSelected ? AppColors.primary : Colors.grey.shade200,
+          width: isSelected ? 2 : 1,
+        ),
+      ),
+      elevation: isSelected ? 8 : 0,
+      shadowColor: AppColors.primary.withOpacity(0.4),
+      pressElevation: 12,
+    );
+  }
+
+  Future<void> _setAllPreferences(bool selectAll) async {
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+    final List<String> newPrefs = selectAll 
+        ? ["vegetarian", "vegan", "non_veg", "jain"] 
+        : [];
+    
+    await _updatePreferences(newPrefs);
+  }
+
+  Future<void> _togglePreference(String key, bool selected) async {
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+    final List<String> currentPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
+
+    if (selected) {
+      if (!currentPrefs.contains(key)) currentPrefs.add(key);
+    } else {
+      currentPrefs.remove(key);
+    }
+    
+    await _updatePreferences(currentPrefs);
+  }
+
+  Future<void> _updatePreferences(List<String> prefs) async {
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+    final String? firebaseUid = auth.currentUser?.uid;
+    
+    if (firebaseUid == null) return;
+
+    try {
+      await BackendService.updateBuyerProfile(
+        firebaseUid: firebaseUid,
+        dietaryPreferences: prefs,
+      );
+      await auth.refreshMongoUser();
+      
+      if (mounted) {
+        AnimatedToast.show(
+          context,
+          "Preferences updated!",
+          type: ToastType.success,
+        );
+      }
+    } catch (e) {
+      debugPrint("Error updating dietary preferences: $e");
+      if (mounted) {
+        AnimatedToast.show(
+          context,
+          "Failed to update preferences",
+          type: ToastType.error,
+        );
+      }
+    }
   }
 
   void _showManageAccountSheet(BuildContext context) {
