@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'dart:html' as html;
+import 'package:url_launcher/url_launcher.dart';
 
 class VolunteerStoryPage extends StatefulWidget {
   final String restaurantName;
@@ -369,13 +369,14 @@ class _VolunteerStoryPageState extends State<VolunteerStoryPage>
                       height: 48,
                       child: ElevatedButton.icon(
                         icon: const Icon(Icons.share_rounded, size: 18),
-                        onPressed: () {
-                          // In a full mobile app, you would use a social share plugin here.
-                          // Since we're in Flutter Web right now, we can open a new tab to IG.
-                          html.window.open('https://www.instagram.com/create/story/', '_blank');
+                        onPressed: () async {
+                          final Uri url = Uri.parse('https://www.instagram.com/create/story/');
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                          }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF953553), // Deep Maroon/Pink
+                          backgroundColor: const Color(0xFFE56A15), // Deep Sunset Orange
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
