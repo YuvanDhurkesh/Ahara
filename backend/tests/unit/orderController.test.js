@@ -257,3 +257,57 @@ describe('Order Controller - getOrderById', () => {
         expect(res._getJSONData()._id).toBe('order-1');
     });
 });
+
+// ─────────────────────────────────────────────
+// trust score helper functions
+// ─────────────────────────────────────────────
+
+describe('Order Controller - trust score helpers', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('recomputeBuyerTrustScore sets default when no orders', async () => {
+        Order.find.mockResolvedValue([]);
+        const updateSpy = jest.spyOn(User, 'findByIdAndUpdate').mockResolvedValue({});
+        await orderController.recomputeBuyerTrustScore('buyer1');
+        expect(updateSpy).toHaveBeenCalledWith('buyer1', { $set: { trustScore: 50 } });
+    });
+
+    it('recomputeSellerTrustScore filters terminal orders and applies bonus', async () => {
+        const orders = [
+            { status: 'delivered' },
+            { status: 'cancelled' },
+            { status: 'delivered' }
+        ];
+        Order.find.mockImplementation((query) => {
+            expect(query).toEqual({
+                sellerId: 'seller1',
+                status: { $in: ['delivered', 'cancelled'] }
+            });
+            return Promise.resolve(orders);
+        });
+        const updateSpy = jest.spyOn(User, 'findByIdAndUpdate').mockResolvedValue({});
+        await orderController.recomputeSellerTrustScore('seller1');
+        // 2 completed, 1 cancelled, onTimeRate=1 => base=80, plus bonus 2*2=4 => 84
+        expect(updateSpy).toHaveBeenCalledWith('seller1', { $set: { trustScore: 84 } });
+    });
+
+    it('recomputeVolunteerTrustScore filters terminal orders and applies bonus', async () => {
+        const orders = [
+            { status: 'delivered' },
+            { status: 'cancelled', cancellation: { cancelledBy: 'volunteer' } },
+        ];
+        Order.find.mockImplementation((query) => {
+            expect(query).toEqual({
+                volunteerId: 'vol1',
+                status: { $in: ['delivered', 'cancelled'] }
+            });
+            return Promise.resolve(orders);
+        });
+        const updateSpy = jest.spyOn(User, 'findByIdAndUpdate').mockResolvedValue({});
+        await orderController.recomputeVolunteerTrustScore('vol1');
+        // base formula => 70, plus 2*completed (1) = 72
+        expect(updateSpy).toHaveBeenCalledWith('vol1', { $set: { trustScore: 72 } });
+    });
+});

@@ -469,6 +469,19 @@ exports.updateOrder = async (req, res) => {
             }
         }
 
+        // If status changed to delivered or cancelled, recompute trust scores for all parties
+        if (updates.status === 'delivered' || updates.status === 'cancelled') {
+            try {
+                await recomputeBuyerTrustScore(order.buyerId);
+                await recomputeSellerTrustScore(order.sellerId);
+                if (order.volunteerId) {
+                    await recomputeVolunteerTrustScore(order.volunteerId);
+                }
+            } catch (e) {
+                console.error('Error recomputing trust scores after updateOrder', e);
+            }
+        }
+
         res.status(200).json({ message: "Order updated successfully", order });
     } catch (error) {
         console.error("Update Order Error:", error);
@@ -572,6 +585,17 @@ exports.cancelOrder = async (req, res) => {
 
         await session.commitTransaction();
         session.endSession();
+
+        // Recompute trust scores after cancellation
+        try {
+            await recomputeBuyerTrustScore(order.buyerId);
+            await recomputeSellerTrustScore(order.sellerId);
+            if (order.volunteerId) {
+                await recomputeVolunteerTrustScore(order.volunteerId);
+            }
+        } catch (e) {
+            console.error('Error recomputing trust scores after cancellation', e);
+        }
 
         res.status(200).json({ message: "Order cancelled successfully", order });
     } catch (error) {
@@ -792,6 +816,161 @@ async function initiateVolunteerMatching(order, listing) {
         console.error("[Matching] Error in initiateVolunteerMatching:", error);
     }
 }
+
+// Recompute buyer trust score based on order history
+async function recomputeBuyerTrustScore(buyerId) {
+    try {
+        if (!buyerId) return;
+        // Fetch orders for buyer
+        const orders = await Order.find({ buyerId });
+        const total = orders.length;
+        if (total === 0) {
+            // Set default score for new buyers
+            await User.findByIdAndUpdate(buyerId, { $set: { trustScore: 50 } });
+            return;
+        }
+
+        let completed = 0;
+        let cancelledByBuyer = 0;
+        let onTimeCount = 0;
+        for (const o of orders) {
+            if (o.status === 'delivered') {
+                completed += 1;
+                // on-time: if pickup.scheduledAt exists compare to deliveredAt
+                const scheduled = o.pickup && o.pickup.scheduledAt ? new Date(o.pickup.scheduledAt) : null;
+                const delivered = o.timeline && o.timeline.deliveredAt ? new Date(o.timeline.deliveredAt) : null;
+                if (scheduled && delivered) {
+                    // consider on-time if delivered within 1 hour after scheduled (tunable)
+                    const diffMs = delivered - scheduled;
+                    if (diffMs <= 1000 * 60 * 60) onTimeCount += 1;
+                } else if (delivered && !scheduled) {
+                    // If no scheduled time assume on-time
+                    onTimeCount += 1;
+                }
+            }
+            if (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'buyer') {
+                cancelledByBuyer += 1;
+            }
+        }
+
+        const completionRate = completed / total; // 0..1
+        const cancelRate = cancelledByBuyer / total; // 0..1
+        const onTimeRate = completed > 0 ? (onTimeCount / completed) : 0;
+
+        // Scoring weights (tunable)
+        const base = 50;
+        const completionWeight = 30; // up to +30
+        const cancelWeight = 30; // up to -30
+        const onTimeWeight = 20; // up to +20
+
+        let score = base + Math.round(completionRate * completionWeight) - Math.round(cancelRate * cancelWeight) + Math.round(onTimeRate * onTimeWeight);
+
+        // Clamp
+        if (score > 100) score = 100;
+        if (score < 0) score = 0;
+
+        await User.findByIdAndUpdate(buyerId, { $set: { trustScore: score } });
+    } catch (err) {
+        console.error('recomputeBuyerTrustScore error', err);
+    }
+}
+
+// Recompute seller trust score based on orders received
+async function recomputeSellerTrustScore(sellerId) {
+    try {
+        if (!sellerId) return;
+        // only consider orders that have reached a terminal state
+        const orders = await Order.find({
+            sellerId,
+            status: { $in: ['delivered', 'cancelled'] }
+        });
+        const total = orders.length;
+        if (total === 0) {
+            await User.findByIdAndUpdate(sellerId, { $set: { trustScore: 50 } });
+            return;
+        }
+        let completed = 0;
+        let cancelled = 0;
+        let onTime = 0;
+        for (const o of orders) {
+            if (o.status === 'delivered') {
+                completed += 1;
+                const scheduled = o.pickup && o.pickup.scheduledAt ? new Date(o.pickup.scheduledAt) : null;
+                const delivered = o.timeline && o.timeline.deliveredAt ? new Date(o.timeline.deliveredAt) : null;
+                if (scheduled && delivered) {
+                    const diffMs = delivered - scheduled;
+                    if (diffMs <= 1000 * 60 * 60) onTime += 1;
+                } else if (delivered && !scheduled) {
+                    onTime += 1;
+                }
+            }
+            if (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'seller') {
+                cancelled += 1;
+            }
+        }
+        const completionRate = completed / total;
+        const cancelRate = cancelled / total;
+        const onTimeRate = completed > 0 ? onTime / completed : 0;
+        let score = 50
+            + Math.round(completionRate * 30)
+            - Math.round(cancelRate * 30)
+            + Math.round(onTimeRate * 20);
+
+        if (score > 100) score = 100;
+        if (score < 0) score = 0;
+        await User.findByIdAndUpdate(sellerId, { $set: { trustScore: score } });
+    } catch (err) {
+        console.error('recomputeSellerTrustScore error', err);
+    }
+}
+
+// Recompute volunteer trust score based on orders handled
+async function recomputeVolunteerTrustScore(volunteerId) {
+    try {
+        if (!volunteerId) return;
+        // only look at finished orders so in-flight rescues don't drag the
+        // denominator down.
+        const orders = await Order.find({
+            volunteerId,
+            status: { $in: ['delivered', 'cancelled'] }
+        });
+        const total = orders.length;
+        if (total === 0) {
+            await User.findByIdAndUpdate(volunteerId, { $set: { trustScore: 50 } });
+            return;
+        }
+        let completed = 0;
+        let cancelledByVolunteer = 0;
+        let onTime = 0;
+        for (const o of orders) {
+            if (o.status === 'delivered') {
+                completed += 1;
+                const scheduled = o.pickup && o.pickup.scheduledAt ? new Date(o.pickup.scheduledAt) : null;
+                const delivered = o.timeline && o.timeline.deliveredAt ? new Date(o.timeline.deliveredAt) : null;
+                if (scheduled && delivered) {
+                    const diffMs = delivered - scheduled;
+                    if (diffMs <= 1000 * 60 * 60) onTime += 1;
+                } else if (delivered && !scheduled) {
+                    onTime += 1;
+                }
+            }
+            if (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'volunteer') {
+                cancelledByVolunteer += 1;
+            }
+        }
+        const completionRate = completed / total;
+        const cancelRate = cancelledByVolunteer / total;
+        const onTimeRate = completed > 0 ? onTime / completed : 0;
+        let score =
+            50 + Math.round(completionRate * 30) - Math.round(cancelRate * 30) + Math.round(onTimeRate * 20);
+
+        if (score > 100) score = 100;
+        if (score < 0) score = 0;
+        await User.findByIdAndUpdate(volunteerId, { $set: { trustScore: score } });
+    } catch (err) {
+        console.error('recomputeVolunteerTrustScore error', err);
+    }
+}
 // 11. Verify OTP and transition status
 exports.verifyOtp = async (req, res) => {
     try {
@@ -907,6 +1086,17 @@ exports.verifyOtp = async (req, res) => {
                     data: { orderId: order._id }
                 }
             ], { ordered: true });
+
+            // Recompute trust scores after successful delivery
+            try {
+                await recomputeBuyerTrustScore(order.buyerId);
+                await recomputeSellerTrustScore(order.sellerId);
+                if (order.volunteerId) {
+                    await recomputeVolunteerTrustScore(order.volunteerId);
+                }
+            } catch (e) {
+                console.error('Error recomputing trust scores after delivery', e);
+            }
         }
 
         res.status(200).json({
@@ -919,3 +1109,10 @@ exports.verifyOtp = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+// expose helper methods for testing/other modules
+exports.recomputeBuyerTrustScore = recomputeBuyerTrustScore;
+exports.recomputeSellerTrustScore = recomputeSellerTrustScore;
+exports.recomputeVolunteerTrustScore = recomputeVolunteerTrustScore;
+
