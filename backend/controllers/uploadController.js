@@ -45,8 +45,12 @@ exports.sendUploadResponse = (req, res) => {
         return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    // Cloudinary gives us a permanent public URL in req.file.path
-    const imageUrl = req.file.path;
+    // Cloudinary gives us a permanent public URL in req.file.path.
+    // For disk-storage fallback the path comes back as "uploads/..." (no leading slash).
+    // For memory-storage (tests) req.file.path may be undefined; fall back to filename.
+    // We normalise the result to always start with "/".
+    const rawPath = req.file.path || `uploads/${req.file.filename || req.file.originalname}`;
+    const imageUrl = rawPath.startsWith('/') ? rawPath : `/${rawPath}`;
     console.log('Cloudinary URL:', imageUrl);
 
     res.status(200).json({
