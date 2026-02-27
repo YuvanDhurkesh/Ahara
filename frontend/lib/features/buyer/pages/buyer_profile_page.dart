@@ -197,7 +197,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                         value: displayTrustScore == null
                           ? "N/A"
                           : ((_localTrustScore ?? trustScore) ?? displayTrustScore).toString(),
-                        subtext: "Reflects your contribution to reducing food waste and supporting the community.",
+                        subtext: "Reflects contribution to waste reduction.",
                         icon: Icons.shield_outlined,
                         color: AppColors.secondary,
                       ),
