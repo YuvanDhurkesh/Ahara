@@ -274,10 +274,10 @@ describe('Order Controller - trust score helpers', () => {
         expect(updateSpy).toHaveBeenCalledWith('buyer1', { $set: { trustScore: 50 } });
     });
 
-    it('recomputeSellerTrustScore filters terminal orders and applies bonus', async () => {
+    it('recomputeSellerTrustScore calculates accurate bounds without inflating bonuses', async () => {
         const orders = [
             { status: 'delivered' },
-            { status: 'cancelled' },
+            { status: 'cancelled', cancellation: { cancelledBy: 'seller' } },
             { status: 'delivered' }
         ];
         Order.find.mockImplementation((query) => {
@@ -289,11 +289,11 @@ describe('Order Controller - trust score helpers', () => {
         });
         const updateSpy = jest.spyOn(User, 'findByIdAndUpdate').mockResolvedValue({});
         await orderController.recomputeSellerTrustScore('seller1');
-        // 2 completed, 1 cancelled, onTimeRate=1 => base=80, plus bonus 2*2=4 => 84
-        expect(updateSpy).toHaveBeenCalledWith('seller1', { $set: { trustScore: 84 } });
+        // 2 completed, 1 cancelled, onTimeRate=0 (mock missing delivery timestamps) => completion(2/3)*30 - cancel(1/3)*30 + onTime(0)*20 + base 50 = 20 - 10 + 0 + 50 = 60
+        expect(updateSpy).toHaveBeenCalledWith('seller1', { $set: { trustScore: 60 } });
     });
 
-    it('recomputeVolunteerTrustScore filters terminal orders and applies bonus', async () => {
+    it('recomputeVolunteerTrustScore calculates accurate bounds without inflating bonuses', async () => {
         const orders = [
             { status: 'delivered' },
             { status: 'cancelled', cancellation: { cancelledBy: 'volunteer' } },
@@ -307,7 +307,7 @@ describe('Order Controller - trust score helpers', () => {
         });
         const updateSpy = jest.spyOn(User, 'findByIdAndUpdate').mockResolvedValue({});
         await orderController.recomputeVolunteerTrustScore('vol1');
-        // base formula => 70, plus 2*completed (1) = 72
-        expect(updateSpy).toHaveBeenCalledWith('vol1', { $set: { trustScore: 72 } });
+        // completion(1/2)*30 - cancel(1/2)*30 + onTime(0)*20 + base 50= 15 - 15 + 0 + 50 = 50
+        expect(updateSpy).toHaveBeenCalledWith('vol1', { $set: { trustScore: 50 } });
     });
 });
