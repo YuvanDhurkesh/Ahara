@@ -10,6 +10,7 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../../data/services/backend_service.dart';
 import '../../../../data/services/socket_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'volunteer_story_page.dart';
 
 class VolunteerOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic>? order;
@@ -202,6 +203,23 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
             content: Text("Delivery verified. Order completed!"),
           ),
         );
+
+        if (_currentStatus == 'delivered') {
+          final restaurantName = widget.order?['sellerId']?['name'] ?? 'The Provider';
+          final int mealsCount = (widget.order?['quantityOrdered'] is int) 
+              ? widget.order!['quantityOrdered'] 
+              : int.tryParse(widget.order?['quantityOrdered']?.toString() ?? '1') ?? 1;
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VolunteerStoryPage(
+                restaurantName: restaurantName,
+                mealsCount: mealsCount,
+              ),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
