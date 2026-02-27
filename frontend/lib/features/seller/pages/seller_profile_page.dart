@@ -19,11 +19,25 @@ class SellerProfilePage extends StatefulWidget {
 
 class _SellerProfilePageState extends State<SellerProfilePage> {
   bool _isLoading = true;
+  int? _localTrustScore;
+  int? _lastSeenTrust;
 
   @override
   void initState() {
     super.initState();
     _fetchSellerData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+    final newTrust = auth.mongoUser?['trustScore'];
+    if (newTrust != _lastSeenTrust) {
+      _lastSeenTrust = newTrust;
+      // whenever trust changes we want to recompute local fallback
+      _fetchSellerData();
+    }
   }
 
   Future<void> _fetchSellerData() async {
@@ -39,6 +53,22 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
       if (authProvider.mongoProfile == null &&
           authProvider.currentUser != null) {
         await authProvider.refreshMongoUser();
+      }
+
+      // compute local trust score continuously for dynamic latest value
+      final sellerId = authProvider.mongoUser?['_id'];
+      if (sellerId != null) {
+        try {
+          final orders = await BackendService.getSellerOrders(sellerId.toString());
+          final computed = _computeLocalTrustFromOrders(orders);
+          if (mounted) {
+            setState(() {
+              _localTrustScore = computed;
+            });
+          }
+        } catch (e) {
+          debugPrint("failed to compute local trust: $e");
+        }
       }
 
       if (mounted) {
@@ -67,6 +97,7 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
     return Consumer<AppAuthProvider>(
       builder: (context, authProvider, _) {
         final mongoProfile = authProvider.mongoProfile;
+        final backendTrust = authProvider.mongoUser?['trustScore'];
 
         // Fallback values if data isn't loaded
         final businessName = mongoProfile?['orgName'] ?? "Your Business";
@@ -76,6 +107,10 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
 
         // Calculate CO2 offset (rough estimate: ~2kg CO2 per meal)
         final co2Offset = mealsShared * 2;
+
+        // decide which value to show
+        final displayTrust = (_localTrustScore ?? backendTrust) ?? 0;
+        final showBackend = _localTrustScore == null && backendTrust != null;
 
         return SafeArea(
           child: Center(
@@ -114,9 +149,12 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                           child: _buildInfoCard(
                             context,
                             title: "Trust Score",
-                            value: (mongoProfile?['stats']?['ratingCount'] ?? 0)
-                                .toString(),
-                            subtext: "Ratings received",
+                            value: displayTrust.toString(),
+                            subtext: showBackend
+                                ? "From backend"
+                                : (_localTrustScore != null
+                                    ? "Earn Trust"
+                                    : "Not available"),
                             icon: Icons.shield_outlined,
                             color: AppColors.secondary,
                           ),
@@ -272,6 +310,58 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
         ],
       ),
     );
+  }
+
+  // local trust computation utility
+  int _computeLocalTrustFromOrders(List<Map<String, dynamic>> orders) {
+    int total = orders.length;
+    if (total == 0) return 50;
+
+    int completed = 0;
+    int cancelled = 0;
+    int onTime = 0;
+
+    for (var o in orders) {
+      final status = o['status']?.toString() ?? '';
+      if (status == 'delivered' || status == 'completed') {
+        completed += 1;
+        
+        DateTime? scheduled;
+        DateTime? delivered;
+        final pickup = o['pickup'];
+        final timeline = o['timeline'];
+        
+        try {
+          if (pickup != null && pickup['scheduledAt'] != null) {
+            scheduled = DateTime.tryParse(pickup['scheduledAt'].toString());
+          }
+          if (timeline != null && timeline['deliveredAt'] != null) {
+            delivered = DateTime.tryParse(timeline['deliveredAt'].toString());
+          }
+        } catch (_) {}
+        
+        if (delivered != null) {
+          if (scheduled != null) {
+            final diff = delivered.difference(scheduled).inMinutes;
+            if (diff <= 60) onTime += 1;
+          } else {
+            onTime += 1;
+          }
+        }
+      }
+      if (status == 'cancelled' && o['cancellation'] != null && o['cancellation']['cancelledBy'] == 'seller') {
+        cancelled += 1;
+      }
+    }
+
+    final completionRate = completed / total;
+    final cancelRate = cancelled / total;
+    final onTimeRate = completed > 0 ? onTime / completed : 0;
+
+    int score = 50 + (completionRate * 30).round() - (cancelRate * 30).round() + (onTimeRate * 20).round();
+    if (score > 100) score = 100;
+    if (score < 0) score = 0;
+    return score;
   }
 
   void _showManageAccountSheet(BuildContext context) {

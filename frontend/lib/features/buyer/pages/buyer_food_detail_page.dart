@@ -1282,6 +1282,12 @@ class BuyerFoodDetailPage extends StatelessWidget {
                   onPressed: () async {
                     if (matchingOrder != null) {
                       await BackendService.cancelOrder(matchingOrder!['_id'], 'buyer', 'No volunteer found');
+                      // refresh user trust score
+                      try {
+                        // lazy import via Provider
+                        // we don't have context type here, but context is available
+                        Provider.of<AppAuthProvider>(context, listen: false).refreshMongoUser();
+                      } catch (_) {}
                     }
                     Navigator.pop(context);
                   },

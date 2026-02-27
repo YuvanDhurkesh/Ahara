@@ -27,6 +27,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
   bool _isChangingPassword = false;
   String? _hydratedUserId;
 
+  int? _localTrustScore;
+  int? _backendTrustScore;
+
   @override
   void initState() {
     super.initState();
@@ -36,7 +39,44 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
       if (auth.mongoUser == null && auth.currentUser != null) {
         auth.refreshMongoUser();
       }
+      // capture backend trust score, compute continuously for updated local display
+      _backendTrustScore = auth.mongoUser?['trustScore'];
+      final userId = auth.mongoUser?['_id'];
+      if (userId != null) {
+        BackendService.getVolunteerOrders(userId.toString()).then((orders) {
+          if (mounted) {
+            setState(() {
+              _localTrustScore = _computeLocalTrustFromOrders(orders);
+            });
+          }
+        }).catchError((e) {
+          debugPrint('volunteer trust compute err: $e');
+        });
+      }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+    final newTrust = auth.mongoUser?['trustScore'];
+    if (newTrust != _backendTrustScore) {
+      _backendTrustScore = newTrust;
+      // continuously update local tracking
+      final userId = auth.mongoUser?['_id'];
+      if (userId != null) {
+        BackendService.getVolunteerOrders(userId.toString()).then((orders) {
+          if (mounted) {
+            setState(() {
+              _localTrustScore = _computeLocalTrustFromOrders(orders);
+            });
+          }
+        }).catchError((e) {
+          debugPrint('volunteer trust compute err: $e');
+        });
+      }
+    }
   }
 
   @override
@@ -57,6 +97,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
 
     final mongoUser = auth.mongoUser;
     final mongoProfile = auth.mongoProfile;
+    final backendTrustFromMongo = (mongoUser != null && mongoUser['trustScore'] != null)
+      ? mongoUser['trustScore']
+      : null;
     final name = (mongoUser?['name'] ?? 'Volunteer').toString();
     final rating = (mongoProfile?['stats']?['avgRating'] ?? 0).toDouble();
     final totalDeliveries =
@@ -92,6 +135,15 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
               const SizedBox(height: 32),
               Row(
                 children: [
+                  Expanded(
+                    child: _statCard(
+                      label: 'Trust Score',
+                      value: ((_localTrustScore ?? backendTrustFromMongo) ?? 0).toString(),
+                      icon: Icons.shield_rounded,
+                      color: const Color(0xFF388E3C),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: _statCard(
                       label: 'Rating',
@@ -189,6 +241,57 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
         : 'walk';
 
     _hydratedUserId = userId;
+  }
+
+  int _computeLocalTrustFromOrders(List<Map<String, dynamic>> orders) {
+    int total = orders.length;
+    if (total == 0) return 50;
+
+    int completed = 0;
+    int cancelled = 0;
+    int onTime = 0;
+
+    for (var o in orders) {
+      final status = o['status']?.toString() ?? '';
+      if (status == 'delivered' || status == 'completed') {
+        completed += 1;
+        
+        DateTime? scheduled;
+        DateTime? delivered;
+        final pickup = o['pickup'];
+        final timeline = o['timeline'];
+        
+        try {
+          if (pickup != null && pickup['scheduledAt'] != null) {
+            scheduled = DateTime.tryParse(pickup['scheduledAt'].toString());
+          }
+          if (timeline != null && timeline['deliveredAt'] != null) {
+            delivered = DateTime.tryParse(timeline['deliveredAt'].toString());
+          }
+        } catch (_) {}
+        
+        if (delivered != null) {
+          if (scheduled != null) {
+            final diff = delivered.difference(scheduled).inMinutes;
+            if (diff <= 60) onTime += 1;
+          } else {
+            onTime += 1;
+          }
+        }
+      }
+      if (status == 'cancelled' && o['cancellation'] != null && o['cancellation']['cancelledBy'] == 'volunteer') {
+        cancelled += 1;
+      }
+    }
+
+    final completionRate = completed / total;
+    final cancelRate = cancelled / total;
+    final onTimeRate = completed > 0 ? onTime / completed : 0;
+
+    int score = 50 + (completionRate * 30).round() - (cancelRate * 30).round() + (onTimeRate * 20).round();
+    if (score > 100) score = 100;
+    if (score < 0) score = 0;
+    return score;
   }
 
   Future<void> _saveChanges() async {

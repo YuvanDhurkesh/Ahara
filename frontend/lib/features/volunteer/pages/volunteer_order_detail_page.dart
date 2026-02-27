@@ -4,7 +4,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../data/providers/app_auth_provider.dart';
 import '../../../../data/services/backend_service.dart';
 import '../../../../data/services/socket_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -190,6 +192,10 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           }
         });
 
+        // refresh volunteer profile trust score
+        final auth = Provider.of<AppAuthProvider>(context, listen: false);
+        await auth.refreshMongoUser();
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.green,
@@ -255,6 +261,9 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           "Cancelled by volunteer",
         );
         if (mounted) {
+          // update user trust score from backend
+          final auth = Provider.of<AppAuthProvider>(context, listen: false);
+          await auth.refreshMongoUser();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content: Text("Rescue cancelled"), backgroundColor: Colors.red),

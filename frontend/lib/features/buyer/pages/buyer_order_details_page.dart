@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../data/services/backend_service.dart';
+import 'package:provider/provider.dart';
+import '../../../data/providers/app_auth_provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_order_rate_page.dart';
 import 'buyer_order_track_page.dart';
@@ -85,6 +87,12 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
           "buyer",
           "Cancelled by buyer",
         );
+        // Refresh mongo user to pick up updated trust score
+        try {
+          await Provider.of<AppAuthProvider>(context, listen: false).refreshMongoUser();
+        } catch (e) {
+          // ignore refresh errors
+        }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

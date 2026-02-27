@@ -22,6 +22,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
   int _ordersPlaced = 0;
   int _ordersCancelled = 0;
   double _totalSpent = 0;
+  int? _localTrustScore;
 
   @override
   void initState() {
@@ -54,13 +55,39 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
       int totalOrders = 0;
       int cancelledOrders = 0;
       double totalSpent = 0;
+      int completedOrders = 0;
+      int onTimeCount = 0;
 
       for (final order in orders) {
         totalOrders += 1;
 
         final status = (order['status'] ?? '').toString();
-        if (status == 'cancelled' || status == 'failed') {
+        if (status == 'cancelled' && order['cancellation'] != null && order['cancellation']['cancelledBy'] == 'buyer') {
           cancelledOrders += 1;
+        }
+        if (status == 'delivered' || status == 'completed') {
+          completedOrders += 1;
+          // check on-time: compare scheduled pickup to delivered timestamp if available
+          final pickup = order['pickup'];
+          final timeline = order['timeline'];
+          DateTime? scheduled;
+          DateTime? delivered;
+          try {
+            if (pickup != null && pickup['scheduledAt'] != null) {
+              scheduled = DateTime.tryParse(pickup['scheduledAt'].toString());
+            }
+            if (timeline != null && timeline['deliveredAt'] != null) {
+              delivered = DateTime.tryParse(timeline['deliveredAt'].toString());
+            }
+          } catch (_) {}
+          if (delivered != null) {
+            if (scheduled != null) {
+              final diff = delivered.difference(scheduled).inMinutes;
+              if (diff <= 60) onTimeCount += 1;
+            } else {
+              onTimeCount += 1;
+            }
+          }
         }
 
         final pricing = order['pricing'];
@@ -73,11 +100,26 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
         }
       }
 
+      // compute a local trust score continuously based on recent orders
+      int localScore = 50;
+      if (totalOrders > 0) {
+        final completionRate = completedOrders / totalOrders;
+        final cancelRate = cancelledOrders / totalOrders;
+        final onTimeRate = completedOrders > 0 ? (onTimeCount / completedOrders) : 0;
+        final completionWeight = 30;
+        final cancelWeight = 30;
+        final onTimeWeight = 20;
+        localScore = 50 + (completionRate * completionWeight).round() - (cancelRate * cancelWeight).round() + (onTimeRate * onTimeWeight).round();
+        if (localScore > 100) localScore = 100;
+        if (localScore < 0) localScore = 0;
+      }
+
       if (!mounted) return;
       setState(() {
         _ordersPlaced = totalOrders;
         _ordersCancelled = cancelledOrders;
         _totalSpent = totalSpent;
+        _localTrustScore = localScore;
         _isLoadingStats = false;
       });
     } catch (e) {
@@ -97,6 +139,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
         (mongoUser?['name'] ?? auth.currentUser?.displayName ?? 'Buyer')
             .toString();
     final trustScore = mongoUser?['trustScore'];
+    final displayTrustScore = trustScore ?? (_isLoadingStats ? null : _localTrustScore);
 
     return SafeArea(
       child: Center(
@@ -149,13 +192,11 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                     Expanded(
                       child: _buildInfoCard(
                         context,
-                        title: "Trust Score",
-                        value: trustScore == null
-                            ? "N/A"
-                            : trustScore.toString(),
-                        subtext: trustScore == null
-                            ? "Not available for buyer"
-                            : "From backend profile",
+                        title: "Impact Score",
+                        value: displayTrustScore == null
+                          ? "N/A"
+                          : ((_localTrustScore ?? trustScore) ?? displayTrustScore).toString(),
+                        subtext: "Reflects your contribution to reducing food waste and supporting the community.",
                         icon: Icons.shield_outlined,
                         color: AppColors.secondary,
                       ),

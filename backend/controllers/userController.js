@@ -85,10 +85,8 @@ exports.createUser = async (req, res) => {
       userData.geo = geoData;
     }
 
-    // Trust score only for seller & volunteer
-    if (role === "seller" || role === "volunteer") {
-      userData.trustScore = 50;
-    }
+    // Trust score default for all roles (initialize to neutral 50)
+    userData.trustScore = 50;
 
     const newUser = await User.create(userData);
 

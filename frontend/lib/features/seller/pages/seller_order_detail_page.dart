@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
-import '../../../../data/services/backend_service.dart';
+import '../../../data/providers/app_auth_provider.dart';
+import '../../../data/services/backend_service.dart';
 
 class SellerOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -52,6 +54,10 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
           _otpController.clear();
         });
 
+        // refresh backend user data so trust score reflects the update
+        final auth = Provider.of<AppAuthProvider>(context, listen: false);
+        await auth.refreshMongoUser();
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.green,
@@ -77,6 +83,9 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
       await BackendService.updateOrderStatus(widget.order['_id'], newStatus);
       if (mounted) {
         setState(() => _currentStatus = newStatus);
+        // refresh profile to pick up trust changes
+        final auth = Provider.of<AppAuthProvider>(context, listen: false);
+        await auth.refreshMongoUser();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -120,6 +129,8 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
         );
         if (mounted) {
           setState(() => _currentStatus = "cancelled");
+          final auth = Provider.of<AppAuthProvider>(context, listen: false);
+          await auth.refreshMongoUser();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Order cancelled"), backgroundColor: Colors.red),
           );

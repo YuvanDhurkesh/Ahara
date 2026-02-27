@@ -32,18 +32,11 @@ const userSchema = new mongoose.Schema(
     pincode: String,
 
     
-    // Trust system (seller + volunteer only)
+    // Trust system (0-100) for buyers, sellers and volunteers
     trustScore: {
       type: Number,
-      min: 10,
-      max: 100,
-      validate: {
-        validator: function (v) {
-          if (this.role === "buyer") return v === undefined;
-          return true;
-        },
-        message: "Buyers should not have trustScore"
-      }
+      min: 0,
+      max: 100
     },
 
     accountStatus: {
