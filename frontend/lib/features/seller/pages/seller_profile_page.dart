@@ -314,14 +314,19 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
 
   // local trust computation utility
   int _computeLocalTrustFromOrders(List<Map<String, dynamic>> orders) {
-    int total = orders.length;
+    final terminalOrders = orders.where((o) {
+      final status = o['status']?.toString() ?? '';
+      return status == 'delivered' || status == 'completed' || status == 'cancelled';
+    }).toList();
+    
+    int total = terminalOrders.length;
     if (total == 0) return 50;
 
     int completed = 0;
     int cancelled = 0;
     int onTime = 0;
 
-    for (var o in orders) {
+    for (var o in terminalOrders) {
       final status = o['status']?.toString() ?? '';
       if (status == 'delivered' || status == 'completed') {
         completed += 1;

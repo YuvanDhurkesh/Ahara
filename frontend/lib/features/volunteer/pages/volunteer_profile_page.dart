@@ -34,25 +34,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final auth = context.read<AppAuthProvider>();
-      if (auth.mongoUser == null && auth.currentUser != null) {
-        auth.refreshMongoUser();
-      }
-      // capture backend trust score, compute continuously for updated local display
-      _backendTrustScore = auth.mongoUser?['trustScore'];
-      final userId = auth.mongoUser?['_id'];
-      if (userId != null) {
-        BackendService.getVolunteerOrders(userId.toString()).then((orders) {
-          if (mounted) {
-            setState(() {
-              _localTrustScore = _computeLocalTrustFromOrders(orders);
-            });
-          }
-        }).catchError((e) {
-          debugPrint('volunteer trust compute err: $e');
-        });
-      }
+      _fetchVolunteerData();
     });
   }
 
@@ -63,19 +45,35 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
     final newTrust = auth.mongoUser?['trustScore'];
     if (newTrust != _backendTrustScore) {
       _backendTrustScore = newTrust;
-      // continuously update local tracking
-      final userId = auth.mongoUser?['_id'];
+      _fetchVolunteerData();
+    }
+  }
+
+  Future<void> _fetchVolunteerData() async {
+    try {
+      if (!mounted) return;
+      final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
+
+      if (authProvider.mongoUser == null && authProvider.currentUser != null) {
+        await authProvider.refreshMongoUser();
+      }
+
+      final userId = authProvider.mongoUser?['_id'];
       if (userId != null) {
-        BackendService.getVolunteerOrders(userId.toString()).then((orders) {
+        try {
+          final orders = await BackendService.getVolunteerOrders(userId.toString());
+          final computed = _computeLocalTrustFromOrders(orders);
           if (mounted) {
             setState(() {
-              _localTrustScore = _computeLocalTrustFromOrders(orders);
+              _localTrustScore = computed;
             });
           }
-        }).catchError((e) {
-          debugPrint('volunteer trust compute err: $e');
-        });
+        } catch (e) {
+          debugPrint("failed to compute local trust: $e");
+        }
       }
+    } catch (e) {
+      debugPrint("Error fetching volunteer data: $e");
     }
   }
 
@@ -244,14 +242,19 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
   }
 
   int _computeLocalTrustFromOrders(List<Map<String, dynamic>> orders) {
-    int total = orders.length;
+    final terminalOrders = orders.where((o) {
+      final status = o['status']?.toString() ?? '';
+      return status == 'delivered' || status == 'completed' || status == 'cancelled';
+    }).toList();
+    
+    int total = terminalOrders.length;
     if (total == 0) return 50;
 
     int completed = 0;
     int cancelled = 0;
     int onTime = 0;
 
-    for (var o in orders) {
+    for (var o in terminalOrders) {
       final status = o['status']?.toString() ?? '';
       if (status == 'delivered' || status == 'completed') {
         completed += 1;
