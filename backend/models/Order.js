@@ -12,6 +12,7 @@ const orderSchema = new mongoose.Schema(
 
         volunteerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null, index: true },
         volunteerAssignedAt: Date,
+        volunteerMatchAttempts: { type: Number, default: 0 }, // Fix #5: retry cap
 
         status: {
             type: String,

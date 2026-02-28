@@ -646,6 +646,47 @@ exports.cancelOrder = async (req, res) => {
             const droppedVolunteerId = order.volunteerId;
             const shortId = order._id.toString().slice(-6);
 
+            // Fix #5: Enforce a retry cap — hard-cancel if we've tried too many times
+            const MAX_MATCH_ATTEMPTS = 3;
+            order.volunteerMatchAttempts = (order.volunteerMatchAttempts || 0) + 1;
+
+            if (order.volunteerMatchAttempts >= MAX_MATCH_ATTEMPTS) {
+                // Too many drops — hard-cancel and notify
+                order.status = "cancelled";
+                order.cancellation = { cancelledBy: "system", reason: "No volunteer available after multiple attempts" };
+                order.timeline.cancelledAt = new Date();
+                if (order.payment && order.payment.status === "paid") {
+                    order.payment.status = "refunded";
+                    order.payment.refundedAt = new Date();
+                }
+                await order.save({ session });
+
+                await Notification.insertMany([
+                    {
+                        userId: order.buyerId,
+                        type: "order_update",
+                        title: "❌ Order Cancelled — No Volunteer Available",
+                        message: `We couldn't find a volunteer for order #${shortId} after ${MAX_MATCH_ATTEMPTS} attempts. Your order has been cancelled and any payment refunded.`,
+                        data: { orderId: order._id, status: "cancelled" }
+                    },
+                    {
+                        userId: order.sellerId,
+                        type: "order_update",
+                        title: "❌ Order Cancelled — No Volunteer",
+                        message: `Order #${shortId} was cancelled after ${MAX_MATCH_ATTEMPTS} failed volunteer matches.`,
+                        data: { orderId: order._id, status: "cancelled" }
+                    }
+                ], { session });
+
+                await session.commitTransaction();
+                session.endSession();
+
+                if (droppedVolunteerId) {
+                    try { await recomputeVolunteerTrustScore(droppedVolunteerId); } catch (e) { /* ignore */ }
+                }
+                return res.status(200).json({ message: "Order cancelled — volunteer match limit reached", order });
+            }
+
             // Revert to awaiting_volunteer so another volunteer can pick it up
             order.status = "awaiting_volunteer";
             order.volunteerId = null;
@@ -666,7 +707,7 @@ exports.cancelOrder = async (req, res) => {
                     userId: order.sellerId,
                     type: "order_update",
                     title: "🔄 Volunteer Dropped",
-                    message: `The assigned volunteer for order #${shortId} dropped out. Searching for a new one.`,
+                    message: `The assigned volunteer for order #${shortId} dropped out. Searching for a new one (attempt ${order.volunteerMatchAttempts}/${MAX_MATCH_ATTEMPTS}).`,
                     data: { orderId: order._id, status: "awaiting_volunteer" }
                 }
             ], { session });
@@ -732,7 +773,10 @@ exports.cancelOrder = async (req, res) => {
             title: cancelledBy === "buyer" ? "✅ Order Cancelled" : title,
             message: cancelledBy === "buyer"
                 ? `You have successfully cancelled order #${shortId}.`
-                : `Your order #${shortId} has been cancelled by the ${cancelledBy}.`,
+                : cancelledBy === "system"
+                    // Fix #6: specific, helpful message for system-triggered cancellations
+                    ? `Order #${shortId} was automatically cancelled — no volunteer was available. Any payment has been refunded.`
+                    : `Your order #${shortId} has been cancelled by the ${cancelledBy}.`,
             data: { orderId: order._id, status: "cancelled" }
         });
 
