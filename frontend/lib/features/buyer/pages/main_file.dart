@@ -495,10 +495,15 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     title: "Payment Method",
                     value: currentPayment,
                     onTap: () async {
+                      final priceNum = double.tryParse(
+                        store.price.replaceAll(RegExp(r'[^0-9.]'), ''),
+                      ) ?? 0.0;
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const BuyerPaymentPage(),
+                          builder: (context) => BuyerPaymentPage(
+                            amount: priceNum,
+                          ),
                         ),
                       );
                       if (result != null) {

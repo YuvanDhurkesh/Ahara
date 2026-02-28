@@ -723,7 +723,9 @@ class BuyerFoodDetailPage extends StatelessWidget {
                       final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const BuyerPaymentPage(),
+                          builder: (context) => BuyerPaymentPage(
+                            amount: (listing?['pricing']?['discountedPrice'] ?? 0).toDouble(),
+                          ),
                         ),
                       );
                       if (result != null) {
@@ -1639,7 +1641,9 @@ class BuyerFoodDetailPage extends StatelessWidget {
                                 final method = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => const BuyerPaymentPage(),
+                                    builder: (_) => BuyerPaymentPage(
+                                      amount: total,
+                                    ),
                                   ),
                                 );
                                 if (method == null) return;
@@ -1659,7 +1663,9 @@ class BuyerFoodDetailPage extends StatelessWidget {
                               final method = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const BuyerPaymentPage(),
+                                  builder: (_) => BuyerPaymentPage(
+                                    amount: total,
+                                  ),
                                 ),
                               );
                               if (method == null) return;
@@ -1702,7 +1708,9 @@ class BuyerFoodDetailPage extends StatelessWidget {
                               final method = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const BuyerPaymentPage(),
+                                  builder: (_) => BuyerPaymentPage(
+                                    amount: total,
+                                  ),
                                 ),
                               );
                               if (method != null) {
