@@ -1,19 +1,19 @@
 /**
  * Generate a high-quality default image URL for listings that have no photo.
- * Uses curated Unsplash photo IDs per food category — permanent, no API key needed.
+ * Uses curated Unsplash photo IDs for common categories and LoremFlickr for specialized names.
  */
 
-// Each key maps to a pool of hand-picked Unsplash photo IDs (all food-accurate).
+// pool of hand-picked Unsplash photo IDs (high-quality, food-accurate)
 const CATEGORY_PHOTOS = {
   biryani: ['bMfxMCmCHbU', 'QzljZB_Vfe4', 'gI4VrRpSBo0'],
   rice: ['bMfxMCmCHbU', 'VkUBDMb8Bxs', 'E3qRz4sNqBE'],
-  curry: ['1BaBOGSiF1k', 'YnQbEzYhJo', 'k0rX4hQqOxo'],
+  curry: ['1BaBOGSiF1k', 'YnQbEzYhJo', 'k0rX4hQqOxo', 'In9-3R6Wp00'],
   dal: ['1BaBOGSiF1k', 'SqCmFRV61h4'],
   bread: ['8PZJpMPjVbQ', 'ot0nBwh9Rcg', 'Fd9pV5GWjlc'],
   roti: ['8PZJpMPjVbQ', 'Fd9pV5GWjlc'],
   naan: ['8PZJpMPjVbQ', 'ot0nBwh9Rcg'],
-  pasta: ['pMW4jzELQCw', 'SqYmTDQYMjo', 'R4-LCEj0-E'],
-  noodles: ['pMW4jzELQCw', 'R4-LCEj0-E'],
+  pasta: ['SqYmTDQYMjo', 'R4-LCEj0-E', '48p194Y08NM'],
+  noodles: ['R4-LCEj0-E', '48p194Y08NM', 'ot0nBwh9Rcg'],
   pizza: ['oU6KZTXhuvk', 'bELvIg_KZGU', 'yszTabh9ux0'],
   burger: ['So5iBhQnBmk', 'MMGP4kHH-5g', 'uQs1802D0CQ'],
   sandwich: ['So5iBhQnBmk', 'uQs1802D0CQ'],
@@ -32,40 +32,60 @@ const CATEGORY_PHOTOS = {
   milk: ['ouE9JUkB_Ow'],
   eggs: ['ouE9JUkB_Ow', 'SqCmFRV61h4'],
   snack: ['MMGP4kHH-5g', 'uQs1802D0CQ'],
-  // Generic fallback pool — always accurate food images
-  meal: ['1BaBOGSiF1k', 'bMfxMCmCHbU', 'So5iBhQnBmk', 'pMW4jzELQCw', 'oU6KZTXhuvk'],
+  steak: ['A7X_9Xn7rYg', 'mO_mYn5XG_A'],
+  sushi: ['G6X5fEqp0mU', 'm9u0yWQN5X8'],
+  taco: ['33_vY_U5D2A', 'u_M7uT7Z7Yk'],
+  coffee: ['t_8uE7uY7r8', 'mO_mYn5XG_A'],
+  juice: ['t_8uE7uY7r8', 'mO_mYn5XG_A'],
+  tea: ['t_8uE7uY7r8', 'mO_mYn5XG_A'],
+  meal: ['1BaBOGSiF1k', 'bMfxMCmCHbU', 'So5iBhQnBmk', 'ot0nBwh9Rcg', 'oU6KZTXhuvk'],
 };
 
-// Simple deterministic hash → consistent image for the same food name
+// Simple deterministic hash
 function hashCode(str) {
   let h = 0;
+  if (!str) return 0;
   for (let i = 0; i < str.length; i++) {
     h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
   }
   return Math.abs(h);
 }
 
-// Match food name to a category key
-function resolveCategory(foodName = '') {
-  const name = foodName.toLowerCase();
+// Match food name or category to a pool key
+function resolveCategory(name = '') {
+  const n = (name || '').toLowerCase();
   const order = [
     'biryani', 'rice', 'pizza', 'burger', 'sandwich', 'pasta', 'noodles',
     'bread', 'roti', 'naan', 'curry', 'dal', 'idli', 'dosa', 'sambar', 'sabzi',
     'salad', 'soup', 'fruit', 'cake', 'sweet', 'dessert', 'milk', 'eggs', 'dairy',
-    'vegetables', 'snack',
+    'steak', 'sushi', 'taco', 'vegetables', 'snack', 'coffee', 'juice', 'tea', 'meal'
   ];
   for (const key of order) {
-    if (name.includes(key)) return key;
+    if (n.includes(key)) return key;
   }
-  return 'meal'; // fallback
+  return null;
 }
 
 function generateDefaultImageUrl(foodName = 'food', category = 'food') {
-  const catKey = resolveCategory(foodName);
-  const pool = CATEGORY_PHOTOS[catKey] || CATEGORY_PHOTOS.meal;
-  const photoId = pool[hashCode(foodName) % pool.length];
-  // Unsplash direct photo URL — permanent, no API key required
-  return `https://images.unsplash.com/photo-${photoId}?w=800&q=80&fit=crop&auto=format`;
+  // Try matching food name first, then category
+  let catKey = resolveCategory(foodName);
+  if (!catKey) catKey = resolveCategory(category);
+
+  // 1. If we have a hand-picked curated pool, use it for best quality
+  if (catKey && CATEGORY_PHOTOS[catKey]) {
+    const pool = CATEGORY_PHOTOS[catKey];
+    const photoId = pool[hashCode(foodName) % pool.length];
+    return `https://images.unsplash.com/photo-${photoId}?w=800&q=80&fit=crop&auto=format`;
+  }
+
+  // 2. Fallback to LoremFlickr for specialized names
+  const name = foodName.toLowerCase().replace(/[^a-z ]/g, '').trim();
+  const formattedName = name.split(' ').join(',');
+  const seed = hashCode(foodName) % 1000;
+
+  return `https://loremflickr.com/800/600/food,${formattedName}?lock=${seed}`;
 }
+
+module.exports = { generateDefaultImageUrl };
 
 module.exports = { generateDefaultImageUrl };

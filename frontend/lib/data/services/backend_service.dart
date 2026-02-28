@@ -125,7 +125,9 @@ class BackendService {
     required String firebaseUid,
     required String listingId,
   }) async {
-    final url = Uri.parse("$baseUrl/users/$firebaseUid/toggle-favorite-listing");
+    final url = Uri.parse(
+      "$baseUrl/users/$firebaseUid/toggle-favorite-listing",
+    );
 
     final response = await http.post(
       url,
@@ -206,9 +208,7 @@ class BackendService {
 
     if (response.statusCode != 200) {
       final errorBody = jsonDecode(response.body);
-      throw Exception(
-        errorBody['error'] ?? "Failed to update availability",
-      );
+      throw Exception(errorBody['error'] ?? "Failed to update availability");
     }
   }
 
@@ -723,7 +723,9 @@ class BackendService {
   }
 
   static Future<Map<String, dynamic>> verifyOtp(
-      String orderId, String otp) async {
+    String orderId,
+    String otp,
+  ) async {
     final url = Uri.parse("$baseUrl/orders/$orderId/verify-otp");
 
     final response = await http.post(
@@ -864,14 +866,21 @@ class BackendService {
 
   // ========================= NOTIFICATIONS =========================
 
-  static Future<Map<String, dynamic>> getUserNotifications(String userId, {int page = 1, int limit = 20, bool? isRead}) async {
+  static Future<Map<String, dynamic>> getUserNotifications(
+    String userId, {
+    int page = 1,
+    int limit = 20,
+    bool? isRead,
+  }) async {
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
       if (isRead != null) 'isRead': isRead.toString(),
     };
 
-    final url = Uri.parse("$baseUrl/notifications/user/$userId").replace(queryParameters: queryParams);
+    final url = Uri.parse(
+      "$baseUrl/notifications/user/$userId",
+    ).replace(queryParameters: queryParams);
 
     final response = await http.get(
       url,
@@ -888,7 +897,9 @@ class BackendService {
     }
   }
 
-  static Future<Map<String, dynamic>> getUnreadNotificationCount(String userId) async {
+  static Future<Map<String, dynamic>> getUnreadNotificationCount(
+    String userId,
+  ) async {
     final url = Uri.parse("$baseUrl/notifications/user/$userId/unread-count");
 
     final response = await http.get(
@@ -906,7 +917,10 @@ class BackendService {
     }
   }
 
-  static Future<void> markNotificationAsRead(String notificationId, String userId) async {
+  static Future<void> markNotificationAsRead(
+    String notificationId,
+    String userId,
+  ) async {
     final url = Uri.parse("$baseUrl/notifications/$notificationId/read");
 
     final response = await http.patch(
@@ -915,9 +929,7 @@ class BackendService {
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: jsonEncode({
-        "userId": userId,
-      }),
+      body: jsonEncode({"userId": userId}),
     );
 
     if (response.statusCode != 200) {
@@ -941,7 +953,10 @@ class BackendService {
     }
   }
 
-  static Future<void> deleteNotification(String notificationId, String userId) async {
+  static Future<void> deleteNotification(
+    String notificationId,
+    String userId,
+  ) async {
     final url = Uri.parse("$baseUrl/notifications/$notificationId");
 
     final response = await http.delete(
@@ -950,9 +965,7 @@ class BackendService {
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: jsonEncode({
-        "userId": userId,
-      }),
+      body: jsonEncode({"userId": userId}),
     );
 
     if (response.statusCode != 200) {
@@ -987,7 +1000,8 @@ class BackendService {
     }
 
     // Filter out old SVG generator URLs (DiceBear/Placeholder)
-    if (imageUrl.contains('dicebear.com') || imageUrl.contains('placeholder.com')) {
+    if (imageUrl.contains('dicebear.com') ||
+        imageUrl.contains('placeholder.com')) {
       return false;
     }
 
@@ -1001,29 +1015,103 @@ class BackendService {
     }
   }
 
-  static String generateFoodImageUrl(String foodName) {
-    // Generate a default real food image URL using LoremFlickr
-    final String name = (foodName).toLowerCase();
-    
-    // Primary mandatory tag is always 'food' to avoid random non-food pics
-    final List<String> tags = ["food"];
-    
-    // Add ONE high-reliability secondary tag
-    if (name.contains('chaap') || name.contains('soya')) tags.add('curry');
-    else if (name.contains('biryani') || name.contains('rice')) tags.add('rice');
-    else if (name.contains('bread') || name.contains('roti') || name.contains('naan')) tags.add('bread');
-    else if (name.contains('pasta') || name.contains('noodle')) tags.add('pasta');
-    else if (name.contains('pizza')) tags.add('pizza');
-    else if (name.contains('burger')) tags.add('burger');
-    else if (name.contains('fruit')) tags.add('fruit');
-    else if (name.contains('cake') || name.contains('pastry') || name.contains('sweet')) tags.add('dessert');
-    else tags.add('meal');
+  static String generateFoodImageUrl(String foodName, [String? category]) {
+    final String name = foodName.toLowerCase();
+    final String cat = (category ?? "").toLowerCase();
 
-    // Create a consistent lock/seed for the same food item
-    final seed = foodName.codeUnits.fold<int>(0, (prev, element) => prev + element) % 1000;
-    
-    // Using a single tag search for 'food,tag' which acts as (food AND tag)
-    // This provides high-quality images and avoids fallback to the cat statue
-    return "https://loremflickr.com/800/600/${tags.join(',')}?lock=$seed";
+    // Pool keys matching backend imageGenerator.js
+    const List<String> order = [
+      'biryani',
+      'rice',
+      'pizza',
+      'burger',
+      'sandwich',
+      'pasta',
+      'noodles',
+      'bread',
+      'roti',
+      'naan',
+      'curry',
+      'dal',
+      'idli',
+      'dosa',
+      'sambar',
+      'sabzi',
+      'salad',
+      'soup',
+      'fruit',
+      'cake',
+      'sweet',
+      'dessert',
+      'milk',
+      'eggs',
+      'dairy',
+      'steak',
+      'sushi',
+      'taco',
+      'vegetables',
+      'snack',
+      'coffee',
+      'juice',
+      'tea',
+      'meal',
+    ];
+
+    String? catKey;
+    for (final key in order) {
+      if (name.contains(key)) {
+        catKey = key;
+        break;
+      }
+    }
+
+    if (catKey == null && cat.isNotEmpty) {
+      for (final key in order) {
+        if (cat.contains(key)) {
+          catKey = key;
+          break;
+        }
+      }
+    }
+
+    // High-quality Unsplash pool for matched categories (mirroring backend)
+    final Map<String, List<String>> pool = {
+      'biryani': ['bMfxMCmCHbU', 'QzljZB_Vfe4', 'gI4VrRpSBo0'],
+      'rice': ['bMfxMCmCHbU', 'VkUBDMb8Bxs', 'E3qRz4sNqBE'],
+      'curry': ['1BaBOGSiF1k', 'YnQbEzYhJo', 'k0rX4hQqOxo', 'In9-3R6Wp00'],
+      'bread': ['8PZJpMPjVbQ', 'ot0nBwh9Rcg', 'Fd9pV5GWjlc'],
+      'pizza': ['oU6KZTXhuvk', 'bELvIg_KZGU', 'yszTabh9ux0'],
+      'pasta': ['SqYmTDQYMjo', 'R4-LCEj0-E', '48p194Y08NM'],
+      'noodles': ['R4-LCEj0-E', '48p194Y08NM', 'ot0nBwh9Rcg'],
+      'burger': ['So5iBhQnBmk', 'MMGP4kHH-5g', 'uQs1802D0CQ'],
+      'salad': ['IGfIGP5ONV0', '9H9oEGNa9ps', 'YJdCZba0TYE'],
+      'fruit': ['IGfIGP5ONV0', 'YnQbEzYhJo', 'a2XpxdFb2l8'],
+      'dessert': ['SxIYUGd6cFo', '85zVPGWtWxI', '3iqxDmGOi4g'],
+      'meal': [
+        '1BaBOGSiF1k',
+        'bMfxMCmCHbU',
+        'So5iBhQnBmk',
+        'ot0nBwh9Rcg',
+        'oU6KZTXhuvk',
+      ],
+    };
+
+    final seed = foodName.codeUnits.fold<int>(
+      0,
+      (prev, element) => prev + element,
+    );
+
+    if (catKey != null && pool.containsKey(catKey)) {
+      final ids = pool[catKey]!;
+      final id = ids[seed % ids.length];
+      return "https://images.unsplash.com/photo-$id?w=800&q=80&fit=crop&auto=format";
+    }
+
+    // Fallback to LoremFlickr for specific names
+    final formattedName = name
+        .replaceAll(RegExp(r'[^a-z ]'), '')
+        .trim()
+        .replaceAll(' ', ',');
+    return "https://loremflickr.com/800/600/food,$formattedName?lock=${seed % 1000}";
   }
 }

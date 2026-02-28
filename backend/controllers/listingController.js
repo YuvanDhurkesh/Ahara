@@ -13,7 +13,11 @@ async function ensureListingHasImage(listing) {
         (listingObj.images[0].includes('dicebear.com') ||
             listingObj.images[0].includes('placeholder.com'));
 
-    if (!listingObj.images || listingObj.images.length === 0 || isOldGenerator) {
+    const isDeadUnsplash = listingObj.images &&
+        listingObj.images.length > 0 &&
+        listingObj.images[0].includes('pMW4jzELQCw');
+
+    if (!listingObj.images || listingObj.images.length === 0 || isOldGenerator || isDeadUnsplash) {
         const defaultImageUrl = generateDefaultImageUrl(listingObj.foodName, listingObj.category);
 
         // Update in database to permanently fix old entries or set new one
