@@ -163,6 +163,8 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               children: [
                 const SizedBox(height: 12),
+                if (status == 'cancelled' || status == 'failed')
+                  _buildCancellationBanner(_localOrder),
                 _buildOrderIdentity(_localOrder),
                 const SizedBox(height: 24),
                 _buildModeIndicator(isDelivery),
@@ -190,6 +192,64 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCancellationBanner(Map<String, dynamic> order) {
+    final cancellation = order['cancellation'] as Map<String, dynamic>?;
+    final cancelledBy = cancellation?['cancelledBy']?.toString() ?? 'unknown';
+    final reason = cancellation?['reason']?.toString();
+    final isFailed = order['status'] == 'failed';
+
+    final actorLabel = {
+      'buyer': 'You (Buyer)',
+      'seller': 'Seller',
+      'volunteer': 'Volunteer',
+      'system': 'System (no volunteer available)',
+    }[cancelledBy] ?? cancelledBy;
+
+    final color = isFailed ? Colors.deepOrange : Colors.red;
+    final icon = isFailed ? Icons.error_outline : Icons.cancel_outlined;
+    final title = isFailed ? 'Order Failed' : 'Order Cancelled';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 13, color: color),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          RichText(
+            text: TextSpan(
+              style: GoogleFonts.inter(fontSize: 12, color: Colors.black87),
+              children: [
+                const TextSpan(text: 'Cancelled by: '),
+                TextSpan(text: actorLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+          if (reason != null && reason.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text('Reason: $reason',
+                style: GoogleFonts.inter(fontSize: 12, color: Colors.black54, fontStyle: FontStyle.italic)),
+          ],
         ],
       ),
     );
