@@ -7,153 +7,168 @@ const mongoose = require("mongoose");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-    let session;
-    try {
-        console.log("ENTERING createOrder");
-        session = await mongoose.startSession();
-        session.startTransaction();
-        const {
-            listingId,
-            buyerId,
-            quantityOrdered,
-            fulfillment,
-            pickup,
-            drop,
-            pricing,
-            specialInstructions
-        } = req.body;
+    const MAX_RETRIES = 3;
+    let attempt = 0;
 
-        // 1. Find the listing
-        const listing = await Listing.findById(listingId).session(session);
-
-        if (!listing) {
-            throw new Error("Listing not found");
-        }
-
-        if (listing.status !== "active") {
-            throw new Error(`Listing is no longer active (Status: ${listing.status})`);
-        }
-
-        // 2. Check quantity
-        if (listing.remainingQuantity < quantityOrdered) {
-            throw new Error(`Insufficient quantity. Only ${listing.remainingQuantity} left.`);
-        }
-
-        // 3. Check expiry
-        if (new Date(listing.pickupWindow.to) < new Date()) {
-            throw new Error("Listing has expired");
-        }
-
-        // 4. Create the order
-        const initialStatus = fulfillment === "volunteer_delivery" ? "awaiting_volunteer" : "placed";
-        const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate 4-digit OTP
-        const pOtp = fulfillment === "volunteer_delivery" ? Math.floor(1000 + Math.random() * 9000).toString() : null;
-
-        const newOrder = new Order({
-            listingId,
-            sellerId: listing.sellerId,
-            buyerId,
-            quantityOrdered,
-            fulfillment,
-            status: initialStatus,
-            pickup,
-            drop,
-            pricing,
-            specialInstructions,
-            pickupOtp: pOtp,
-            handoverOtp: otp,
-            timeline: { placedAt: new Date() }
-        });
-
-        await newOrder.save({ session });
-
-        // 5. Update listing quantity
-        listing.remainingQuantity -= quantityOrdered;
-
-        // 6. Auto-complete if quantity hits 0
-        if (listing.remainingQuantity === 0) {
-            listing.status = "completed";
-        }
-
-        await listing.save({ session });
-
-        // 6. Notify Seller and Buyer
-        // Fetch buyer details within the same session so we can include them in the seller notification
-        let buyer = null;
+    while (attempt < MAX_RETRIES) {
+        let session;
         try {
-            if (typeof User.findById === 'function') {
-                const maybeQuery = User.findById(buyerId);
-                if (maybeQuery && typeof maybeQuery.session === 'function') {
-                    buyer = await maybeQuery.session(session);
-                } else if (maybeQuery && typeof maybeQuery.then === 'function') {
-                    buyer = await maybeQuery;
-                }
-            }
-        } catch (e) {
-            // If tests mock User without a proper implementation, gracefully ignore and continue
-            buyer = null;
-        }
-
-        const sellerNotification = {
-            userId: listing.sellerId,
-            type: "order_update",
-            title: "📦 New Order Received",
-            message: `${buyer && buyer.name ? buyer.name : 'A buyer'} just ordered ${quantityOrdered}x ${listing.foodName}.`,
-            data: {
-                orderId: newOrder._id,
-                listingId: listing._id,
-                buyer: {
-                    id: buyer?._id,
-                    name: buyer?.name,
-                    email: buyer?.email,
-                    phone: buyer?.phone,
-                    addressText: buyer?.addressText
-                },
+            console.log("ENTERING createOrder");
+            session = await mongoose.startSession();
+            session.startTransaction();
+            const {
+                listingId,
+                buyerId,
                 quantityOrdered,
                 fulfillment,
                 pickup,
                 drop,
-                placedAt: newOrder.timeline?.placedAt || newOrder.createdAt,
-                action: "view_order"
+                pricing,
+                specialInstructions
+            } = req.body;
+
+            // 1. Find the listing
+            const listing = await Listing.findById(listingId).session(session);
+
+            if (!listing) {
+                throw new Error("Listing not found");
             }
-        };
 
-        const buyerNotification = {
-            userId: buyerId,
-            type: "order_update",
-            title: "✅ Order Placed Successfully",
-            message: `Your order for ${quantityOrdered}x ${listing.foodName} has been placed! ${fulfillment === "volunteer_delivery" ? "A volunteer will be assigned soon." : "You can pick it up at the scheduled time."}`,
-            data: {
-                orderId: newOrder._id,
-                listingId: listing._id,
-                action: "view_order"
+            if (listing.status !== "active") {
+                throw new Error(`Listing is no longer active (Status: ${listing.status})`);
             }
-        };
 
-        await Notification.create([sellerNotification, buyerNotification], { session, ordered: true });
+            // 2. Check quantity
+            if (listing.remainingQuantity < quantityOrdered) {
+                throw new Error(`Insufficient quantity. Only ${listing.remainingQuantity} left.`);
+            }
 
-        await session.commitTransaction();
-        session.endSession();
+            // 3. Check expiry
+            if (new Date(listing.pickupWindow.to) < new Date()) {
+                throw new Error("Listing has expired");
+            }
 
-        // If volunteer delivery, trigger matching
-        if (fulfillment === "volunteer_delivery") {
-            initiateVolunteerMatching(newOrder, listing);
-        }
+            // 4. Create the order
+            const initialStatus = fulfillment === "volunteer_delivery" ? "awaiting_volunteer" : "placed";
+            const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate 4-digit OTP
+            const pOtp = fulfillment === "volunteer_delivery" ? Math.floor(1000 + Math.random() * 9000).toString() : null;
 
-        res.status(201).json({
-            message: "Order placed successfully",
-            order: newOrder,
-            remainingQuantity: listing.remainingQuantity
-        });
+            const newOrder = new Order({
+                listingId,
+                sellerId: listing.sellerId,
+                buyerId,
+                quantityOrdered,
+                fulfillment,
+                status: initialStatus,
+                pickup,
+                drop,
+                pricing,
+                specialInstructions,
+                pickupOtp: pOtp,
+                handoverOtp: otp,
+                timeline: { placedAt: new Date() }
+            });
 
-    } catch (error) {
-        if (session) {
-            await session.abortTransaction();
+            await newOrder.save({ session });
+
+            // 5. Update listing quantity
+            listing.remainingQuantity -= quantityOrdered;
+
+            // 6. Auto-complete if quantity hits 0
+            if (listing.remainingQuantity === 0) {
+                listing.status = "completed";
+            }
+
+            await listing.save({ session });
+
+            // 6. Notify Seller and Buyer
+            // Fetch buyer details within the same session so we can include them in the seller notification
+            let buyer = null;
+            try {
+                if (typeof User.findById === 'function') {
+                    const maybeQuery = User.findById(buyerId);
+                    if (maybeQuery && typeof maybeQuery.session === 'function') {
+                        buyer = await maybeQuery.session(session);
+                    } else if (maybeQuery && typeof maybeQuery.then === 'function') {
+                        buyer = await maybeQuery;
+                    }
+                }
+            } catch (e) {
+                // If tests mock User without a proper implementation, gracefully ignore and continue
+                buyer = null;
+            }
+
+            const sellerNotification = {
+                userId: listing.sellerId,
+                type: "order_update",
+                title: "📦 New Order Received",
+                message: `${buyer && buyer.name ? buyer.name : 'A buyer'} just ordered ${quantityOrdered}x ${listing.foodName}.`,
+                data: {
+                    orderId: newOrder._id,
+                    listingId: listing._id,
+                    buyer: {
+                        id: buyer?._id,
+                        name: buyer?.name,
+                        email: buyer?.email,
+                        phone: buyer?.phone,
+                        addressText: buyer?.addressText
+                    },
+                    quantityOrdered,
+                    fulfillment,
+                    pickup,
+                    drop,
+                    placedAt: newOrder.timeline?.placedAt || newOrder.createdAt,
+                    action: "view_order"
+                }
+            };
+
+            const buyerNotification = {
+                userId: buyerId,
+                type: "order_update",
+                title: "✅ Order Placed Successfully",
+                message: `Your order for ${quantityOrdered}x ${listing.foodName} has been placed! ${fulfillment === "volunteer_delivery" ? "A volunteer will be assigned soon." : "You can pick it up at the scheduled time."}`,
+                data: {
+                    orderId: newOrder._id,
+                    listingId: listing._id,
+                    action: "view_order"
+                }
+            };
+
+            await Notification.create([sellerNotification, buyerNotification], { session, ordered: true });
+
+            await session.commitTransaction();
             session.endSession();
+
+            // If volunteer delivery, trigger matching
+            if (fulfillment === "volunteer_delivery") {
+                initiateVolunteerMatching(newOrder, listing);
+            }
+
+            return res.status(201).json({
+                message: "Order placed successfully",
+                order: newOrder,
+                remainingQuantity: listing.remainingQuantity
+            });
+
+        } catch (error) {
+            if (session) {
+                try { await session.abortTransaction(); } catch (_) { }
+                session.endSession();
+            }
+
+            // Retry on transient transaction errors (WriteConflict, etc.)
+            const isTransient = error.errorLabels && error.errorLabels.includes('TransientTransactionError');
+            if (isTransient && attempt < MAX_RETRIES - 1) {
+                attempt++;
+                console.warn(`[createOrder] TransientTransactionError — retrying (attempt ${attempt}/${MAX_RETRIES})`);
+                await new Promise(r => setTimeout(r, 50 * attempt)); // brief back-off
+                continue;
+            }
+
+            console.error("Create Order Error:", error.message);
+            console.error("Full error:", error);
+            return res.status(400).json({ error: error.message });
         }
-        console.error("Create Order Error:", error.message);
-        console.error("Full error:", error);
-        res.status(400).json({ error: error.message });
     }
 };
 
