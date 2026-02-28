@@ -18,25 +18,37 @@ class VolunteerDashboardPage extends StatefulWidget {
 
 class _VolunteerDashboardPageState extends State<VolunteerDashboardPage> {
   late int _selectedIndex;
+  late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> _pages = [
+    _pages = [
       VolunteerHomePage(), // Home
       VolunteerOrdersPage(), // My Deliveries
       VolunteerRatingsPage(), // Ratings & Badges
       VolunteerProfilePage(), // Profile (Logout here)
     ];
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: _pages[_selectedIndex],
+      body: Stack(
+        children: List.generate(_pages.length, (index) {
+          return AnimatedOpacity(
+            opacity: _selectedIndex == index ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOut,
+            child: IgnorePointer(
+              ignoring: _selectedIndex != index,
+              child: _pages[index],
+            ),
+          );
+        }),
+      ),
 
       // 👇 SAME buyer-style bottom navigation wrapper
       bottomNavigationBar: Container(

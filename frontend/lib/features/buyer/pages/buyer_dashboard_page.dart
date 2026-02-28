@@ -23,11 +23,20 @@ class BuyerDashboardPage extends StatefulWidget {
 class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
   late int _selectedIndex;
   bool _isVoiceModeActive = false;
+  late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    _pages = [
+      const BuyerHomePage(), // Discover
+      const BuyerBrowsePage(), // Browse
+      const BuyerOrdersPage(), // Orders
+      BuyerFavouritesPage(
+          onDiscoverMore: () => setState(() => _selectedIndex = 0)), // Favourites
+      const BuyerProfilePage(), // Profile
+    ];
   }
 
   void _toggleVoiceMode() async {
@@ -94,17 +103,21 @@ class _BuyerDashboardPageState extends State<BuyerDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _pages = [
-      const BuyerHomePage(), // Discover
-      const BuyerBrowsePage(), // Browse
-      const BuyerOrdersPage(), // Orders
-      BuyerFavouritesPage(onDiscoverMore: () => setState(() => _selectedIndex = 0)), // Favourites
-      const BuyerProfilePage(), // Profile
-    ];
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: _pages[_selectedIndex],
+      body: Stack(
+        children: List.generate(_pages.length, (index) {
+          return AnimatedOpacity(
+            opacity: _selectedIndex == index ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOut,
+            child: IgnorePointer(
+              ignoring: _selectedIndex != index,
+              child: _pages[index],
+            ),
+          );
+        }),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _toggleVoiceMode,
         backgroundColor: _isVoiceModeActive ? AppColors.primary : AppColors.secondary,
