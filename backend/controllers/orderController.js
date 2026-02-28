@@ -518,6 +518,30 @@ exports.cancelOrder = async (req, res) => {
             throw new Error(`Cannot cancel order with status: ${order.status}`);
         }
 
+        // ── Fix #3: Rate-limit repeat cancellers (max 3 per 24 h) ────────────
+        const CANCEL_LIMIT = 3;
+        const WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const since = new Date(Date.now() - WINDOW_MS);
+
+        // Determine which field to query based on who is cancelling
+        const cancellerId = cancelledBy === "buyer" ? order.buyerId
+            : cancelledBy === "seller" ? order.sellerId
+                : cancelledBy === "volunteer" ? order.volunteerId
+                    : null;
+
+        if (cancellerId) {
+            const recentCancels = await Order.countDocuments({
+                "cancellation.cancelledBy": cancelledBy,
+                [`${cancelledBy}Id`]: cancellerId,
+                "timeline.cancelledAt": { $gte: since }
+            });
+            if (recentCancels >= CANCEL_LIMIT) {
+                throw new Error(
+                    `Cancellation limit reached. You may not cancel more than ${CANCEL_LIMIT} orders within 24 hours.`
+                );
+            }
+        }
+
         // ── Fix #2: Buyer cancellation cut-off (30 min before pickup) ─────────
         // Sellers and system may always cancel pre-pickup; buyers may not cancel
         // if the scheduled pickup window starts within 30 minutes.
