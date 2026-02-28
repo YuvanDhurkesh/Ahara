@@ -8,7 +8,7 @@ if (process.env.NODE_ENV === 'test') {
 module.exports = {
     testEnvironment: 'node',
     verbose: true,
-    setupFilesAfterEnv: ['./tests/setup.js'],
+    setupFilesAfterEnv: ['./tests/setup.js', './tests/jest.setup.js'],
     testTimeout: 60000, // 60 seconds for integration tests
     maxWorkers: 1, // Run tests sequentially to avoid database conflicts
     collectCoverageFrom: [
