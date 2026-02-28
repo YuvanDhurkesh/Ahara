@@ -518,6 +518,26 @@ exports.cancelOrder = async (req, res) => {
             throw new Error(`Cannot cancel order with status: ${order.status}`);
         }
 
+        // ── Fix #2: Buyer cancellation cut-off (30 min before pickup) ─────────
+        // Sellers and system may always cancel pre-pickup; buyers may not cancel
+        // if the scheduled pickup window starts within 30 minutes.
+        if (cancelledBy === "buyer") {
+            const pickupAt = order.pickup && order.pickup.scheduledAt
+                ? new Date(order.pickup.scheduledAt)
+                : order.listingId && order.listingId.pickupWindow
+                    ? new Date(order.listingId.pickupWindow.from)
+                    : null;
+
+            if (pickupAt) {
+                const minutesUntilPickup = (pickupAt - Date.now()) / 60000;
+                if (minutesUntilPickup < 30) {
+                    throw new Error(
+                        `Cannot cancel within 30 minutes of scheduled pickup. Contact the seller directly.`
+                    );
+                }
+            }
+        }
+
         // ── Food already with volunteer – mark failed, don't restore quantity ─
         const foodInTransit = ["picked_up", "in_transit"].includes(order.status);
         if (foodInTransit) {
