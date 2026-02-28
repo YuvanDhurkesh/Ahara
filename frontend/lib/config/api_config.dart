@@ -12,7 +12,6 @@ class ApiConfig {
 
       // Default fallback for local development
       return "http://aharabackend-env.eba-nn8ggm5m.ap-south-1.elasticbeanstalk.com/api";
-      //return "http://localhost:5000/api";
     }
 
     return envUrl;

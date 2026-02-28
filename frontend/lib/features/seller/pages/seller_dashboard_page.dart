@@ -22,11 +22,18 @@ class SellerDashboardPage extends StatefulWidget {
 class _SellerDashboardPageState extends State<SellerDashboardPage> {
   late int _selectedIndex;
   bool _isVoiceModeActive = false;
+  late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    _pages = [
+      const SellerOverviewPage(),
+      const SellerListingsPage(),
+      const SellerOrdersPage(),
+      const SellerProfilePage(),
+    ];
   }
 
   void _toggleVoiceMode() async {
@@ -90,16 +97,21 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _pages = [
-      const SellerOverviewPage(),
-      const SellerListingsPage(),
-      const SellerOrdersPage(),
-      const SellerProfilePage(),
-    ];
-
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: _pages[_selectedIndex],
+      body: Stack(
+        children: List.generate(_pages.length, (index) {
+          return AnimatedOpacity(
+            opacity: _selectedIndex == index ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOut,
+            child: IgnorePointer(
+              ignoring: _selectedIndex != index,
+              child: _pages[index],
+            ),
+          );
+        }),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _toggleVoiceMode,
         backgroundColor: _isVoiceModeActive ? AppColors.primary : AppColors.secondary,
