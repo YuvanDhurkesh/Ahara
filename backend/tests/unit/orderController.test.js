@@ -283,7 +283,7 @@ describe('Order Controller - trust score helpers', () => {
         Order.find.mockImplementation((query) => {
             expect(query).toEqual({
                 sellerId: 'seller1',
-                status: { $in: ['delivered', 'cancelled'] }
+                status: { $in: ['delivered', 'cancelled', 'failed'] }
             });
             return Promise.resolve(orders);
         });
@@ -302,7 +302,7 @@ describe('Order Controller - trust score helpers', () => {
         Order.find.mockImplementation((query) => {
             expect(query).toEqual({
                 volunteerId: 'vol1',
-                status: { $in: ['delivered', 'cancelled'] }
+                status: { $in: ['delivered', 'cancelled', 'failed'] }
             });
             return Promise.resolve(orders);
         });

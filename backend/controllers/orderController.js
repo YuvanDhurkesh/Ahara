@@ -1008,10 +1008,10 @@ async function recomputeBuyerTrustScore(buyerId) {
 async function recomputeSellerTrustScore(sellerId) {
     try {
         if (!sellerId) return;
-        // only consider orders that have reached a terminal state
+        // consider all terminal orders: delivered, cancelled, failed
         const orders = await Order.find({
             sellerId,
-            status: { $in: ['delivered', 'cancelled'] }
+            status: { $in: ['delivered', 'cancelled', 'failed'] }
         });
         const total = orders.length;
         if (total === 0) {
@@ -1033,7 +1033,11 @@ async function recomputeSellerTrustScore(sellerId) {
                     onTime += 1;
                 }
             }
-            if (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'seller') {
+            // treat seller-cancelled OR failed orders as seller-responsible cancellations
+            if (
+                (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'seller') ||
+                o.status === 'failed'
+            ) {
                 cancelled += 1;
             }
         }
@@ -1057,11 +1061,10 @@ async function recomputeSellerTrustScore(sellerId) {
 async function recomputeVolunteerTrustScore(volunteerId) {
     try {
         if (!volunteerId) return;
-        // only look at finished orders so in-flight rescues don't drag the
-        // denominator down.
+        // only look at finished orders (delivered, cancelled, failed)
         const orders = await Order.find({
             volunteerId,
-            status: { $in: ['delivered', 'cancelled'] }
+            status: { $in: ['delivered', 'cancelled', 'failed'] }
         });
         const total = orders.length;
         if (total === 0) {
@@ -1083,7 +1086,11 @@ async function recomputeVolunteerTrustScore(volunteerId) {
                     onTime += 1;
                 }
             }
-            if (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'volunteer') {
+            // treat volunteer-cancelled OR failed orders as volunteer-responsible
+            if (
+                (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'volunteer') ||
+                o.status === 'failed'
+            ) {
                 cancelledByVolunteer += 1;
             }
         }
