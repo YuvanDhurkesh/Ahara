@@ -1,26 +1,198 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../shared/styles/app_colors.dart';
+import '../../../data/repositories/payment_repository.dart';
 
 class BuyerPaymentPage extends StatefulWidget {
-  const BuyerPaymentPage({super.key});
+  final double? amount;
+  final String? orderId;
+
+  const BuyerPaymentPage({super.key, this.amount, this.orderId});
 
   @override
   State<BuyerPaymentPage> createState() => _BuyerPaymentPageState();
 }
 
 class _BuyerPaymentPageState extends State<BuyerPaymentPage> {
+  late Razorpay _razorpay;
+  final PaymentRepository _paymentRepo = PaymentRepository();
+  bool _isProcessing = false;
+
   final List<Map<String, dynamic>> _methods = [
-    {"type": "Card", "label": "Visa *1234", "icon": Icons.credit_card_rounded},
+    {
+      "type": "Card",
+      "label": "Credit/Debit Card",
+      "subtitle": "Visa, Mastercard, Rupay",
+      "icon": Icons.credit_card_rounded,
+      "isRazorpay": true
+    },
     {
       "type": "UPI",
-      "label": "Google Pay / PhonePe",
+      "label": "UPI",
+      "subtitle": "Google Pay / PhonePe / Paytm",
       "icon": Icons.qr_code_rounded,
+      "isRazorpay": true
     },
-    {"type": "Cash", "label": "Cash on Delivery", "icon": Icons.money_rounded},
+    {
+      "type": "Wallet",
+      "label": "Digital Wallet",
+      "subtitle": "PayTM Wallet",
+      "icon": Icons.account_balance_wallet_rounded,
+      "isRazorpay": true
+    },
+    {
+      "type": "Cash",
+      "label": "Cash on Delivery",
+      "subtitle": "Pay when order arrives",
+      "icon": Icons.money_rounded,
+      "isRazorpay": false
+    },
   ];
 
-  String _selectedMethod = "Visa *1234";
+  String _selectedMethod = "Card";
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeRazorpay();
+  }
+
+  void _initializeRazorpay() {
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+  }
+
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    try {
+      final isVerified = await _paymentRepo.verifyPayment(
+        razorpayOrderId: response.orderId ?? '',
+        razorpayPaymentId: response.paymentId ?? '',
+        razorpaySignature: response.signature ?? '',
+      );
+
+      if (isVerified) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Payment successful!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, _selectedMethod);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Payment verification failed!'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Payment failed: ${response.message}'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    if (mounted) setState(() => _isProcessing = false);
+  }
+
+  Future<void> _processPayment() async {
+    if (_isProcessing) return;
+
+    // Handle Cash on Delivery
+    if (_selectedMethod == "Cash") {
+      Navigator.pop(context, _selectedMethod);
+      return;
+    }
+
+    // Handle Razorpay payment
+    setState(() => _isProcessing = true);
+
+    try {
+      final amount = widget.amount ?? 0.0;
+      if (amount <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid amount'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final orderResponse = await _paymentRepo.createOrder(
+        amount: amount,
+        receipt: 'order_${DateTime.now().millisecondsSinceEpoch}',
+      );
+
+      if (orderResponse['success'] == true) {
+        final order = orderResponse['order'];
+        final keyId = orderResponse['key_id'];
+
+        var options = {
+          'key': keyId,
+          'amount': (amount * 100).toInt(),
+          'name': 'Ahara',
+          'description': 'Food Order',
+          'order_id': order['id'],
+          'prefill': {
+            'email': 'user@ahara.com',
+            'contact': '9999999999',
+          },
+          'theme': {'color': '#000000'}
+        };
+
+        _razorpay.open(options);
+      } else {
+        if (mounted) {
+          final errorMsg = orderResponse['error'] ?? 'Unknown error';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Order creation failed: $errorMsg'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,11 +228,11 @@ class _BuyerPaymentPageState extends State<BuyerPaymentPage> {
               separatorBuilder: (_, __) => const SizedBox(height: 16),
               itemBuilder: (context, index) {
                 final method = _methods[index];
-                final isSelected = _selectedMethod == method['label'];
+                final isSelected = _selectedMethod == method['type'];
 
                 return GestureDetector(
                   onTap: () =>
-                      setState(() => _selectedMethod = method['label']),
+                      setState(() => _selectedMethod = method['type']),
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -102,24 +274,36 @@ class _BuyerPaymentPageState extends State<BuyerPaymentPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                method['type'],
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textLight.withOpacity(0.6),
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              Text(
                                 method['label'],
                                 style: GoogleFonts.inter(
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   fontWeight: isSelected
                                       ? FontWeight.w600
                                       : FontWeight.w500,
                                   color: AppColors.textDark,
                                 ),
                               ),
+                              Text(
+                                method['subtitle'],
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  color:
+                                      AppColors.textLight.withOpacity(0.6),
+                                ),
+                              ),
+                              if (method['isRazorpay'])
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4),
+                                  child: Text(
+                                    '(via Razorpay)',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -138,16 +322,17 @@ class _BuyerPaymentPageState extends State<BuyerPaymentPage> {
           Padding(
             padding: const EdgeInsets.all(24),
             child: ElevatedButton(
-              onPressed: () => Navigator.pop(context, _selectedMethod),
+              onPressed: _isProcessing ? null : _processPayment,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
+                disabledBackgroundColor: Colors.grey,
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
               child: Text(
-                "Confirm Payment",
+                _isProcessing ? "Processing..." : "Confirm Payment",
                 style: GoogleFonts.inter(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -160,5 +345,4 @@ class _BuyerPaymentPageState extends State<BuyerPaymentPage> {
         ],
       ),
     );
-  }
-}
+  }}

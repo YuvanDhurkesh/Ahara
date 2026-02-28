@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'buyer_dashboard_page.dart';
 import '../data/mock_stores.dart';
+import '../../../data/repositories/payment_repository.dart';
 
 class BuyerCheckoutPage extends StatefulWidget {
   final MockStore store;
@@ -15,9 +17,14 @@ class BuyerCheckoutPage extends StatefulWidget {
 class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
   // State Variables
   String _selectedAddress = "Add shipping address";
-  String _selectedPayment = "Visa *1234";
+  String _selectedPayment = "UPI";
   String _promoCode = "";
   final TextEditingController _promoController = TextEditingController();
+  
+  // Payment Variables
+  late Razorpay _razorpay;
+  final PaymentRepository _paymentRepo = PaymentRepository();
+  bool _isProcessingPayment = false;
 
   // Mock Addresses
   final List<String> _savedAddresses = [
@@ -25,6 +32,168 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
     "Tech Park, Indiranagar, Bangalore",
     "45, 8th Main, HSR Layout, Bangalore",
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeRazorpay();
+  }
+
+  void _initializeRazorpay() {
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+  }
+
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    try {
+      // Verify payment on backend
+      final isVerified = await _paymentRepo.verifyPayment(
+        razorpayOrderId: response.orderId ?? '',
+        razorpayPaymentId: response.paymentId ?? '',
+        razorpaySignature: response.signature ?? '',
+      );
+
+      if (isVerified) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Payment successful! Order placed.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Navigate to Dashboard and clear stack
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const BuyerDashboardPage(),
+            ),
+            (route) => false,
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Payment verification failed!'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessingPayment = false);
+      }
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Payment failed: ${response.message}'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    if (mounted) {
+      setState(() => _isProcessingPayment = false);
+    }
+  }
+
+  Future<void> _processPayment() async {
+    if (_isProcessingPayment) return;
+
+    // Handle Cash on Delivery
+    if (_selectedPayment == "Cash") {
+      setState(() => _isProcessingPayment = true);
+      try {
+        // TODO: Create order in database with status "pending"
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Order placed! Pay when delivery arrives.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const BuyerDashboardPage()),
+          (route) => false,
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      } finally {
+        if (mounted) setState(() => _isProcessingPayment = false);
+      }
+      return;
+    }
+
+    // Handle Online Payment (Card, UPI, Wallet)
+    setState(() => _isProcessingPayment = true);
+
+    try {
+      // Create order on backend
+      final orderResponse = await _paymentRepo.createOrder(
+        amount: _total,
+        receipt: 'order_${DateTime.now().millisecondsSinceEpoch}',
+      );
+
+      if (orderResponse['success'] == true) {
+        final order = orderResponse['order'];
+        final keyId = orderResponse['key_id'];
+
+        // Open Razorpay checkout
+        var options = {
+          'key': keyId,
+          'amount': (_total * 100).toInt(), // Convert to paise
+          'name': 'Ahara',
+          'description': 'Food Order from ${widget.store.name}',
+          'order_id': order['id'],
+          'prefill': {
+            'email': 'user@ahara.com',
+            'contact': '9999999999',
+          },
+          'theme': {
+            'color': '#000000'
+          }
+        };
+
+        _razorpay.open(options);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error creating order: ${orderResponse.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessingPayment = false);
+      }
+    }
+  }
 
   // Logic to parse price
   double get _price {
@@ -40,6 +209,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
   @override
   void dispose() {
     _promoController.dispose();
+    _razorpay.clear();
     super.dispose();
   }
 
@@ -236,25 +406,17 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Navigate to Dashboard and clear stack
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const BuyerDashboardPage(),
-                      ),
-                      (route) => false,
-                    );
-                  },
+                  onPressed: _isProcessingPayment ? null : _processPayment,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
+                    disabledBackgroundColor: Colors.grey,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 0,
                   ),
                   child: Text(
-                    "Place order",
+                    _isProcessingPayment ? "Processing..." : "Place order",
                     style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -470,33 +632,44 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // UPI Option
+                // UPI Option - Razorpay
                 _buildPaymentOptionTile(
                   icon: Icons.qr_code,
                   title: "UPI",
-                  subtitle: "Google Pay, PhonePe, Paytm",
+                  subtitle: "Google Pay, PhonePe, Paytm (via Razorpay)",
                   onTap: () {
+                    setState(() => _selectedPayment = "UPI");
                     Navigator.pop(context);
-                    _showDetailedPaymentSheet("UPI");
                   },
                 ),
 
-                // Card Option
+                // Card Option - Razorpay
                 _buildPaymentOptionTile(
                   icon: Icons.credit_card,
                   title: "Credit / Debit Card",
-                  subtitle: "Visa, Mastercard, Rupay",
+                  subtitle: "Visa, Mastercard, Rupay (via Razorpay)",
                   onTap: () {
+                    setState(() => _selectedPayment = "Card");
                     Navigator.pop(context);
-                    _showDetailedPaymentSheet("Card");
+                  },
+                ),
+
+                // Wallet Option - Razorpay
+                _buildPaymentOptionTile(
+                  icon: Icons.account_balance_wallet,
+                  title: "Digital Wallet",
+                  subtitle: "PayTM Wallet (via Razorpay)",
+                  onTap: () {
+                    setState(() => _selectedPayment = "Wallet");
+                    Navigator.pop(context);
                   },
                 ),
 
                 // Cash Option
                 _buildPaymentOptionTile(
                   icon: Icons.money,
-                  title: "Cash",
-                  subtitle: "Pay on delivery / pickup",
+                  title: "Cash on Delivery",
+                  subtitle: "Pay when order arrives",
                   onTap: () {
                     setState(() => _selectedPayment = "Cash");
                     Navigator.pop(context);
