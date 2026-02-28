@@ -1571,22 +1571,30 @@ class BuyerFoodDetailPage extends StatelessWidget {
               if (matchingStatus == "timeout")
                 TextButton(
                   onPressed: () async {
-                    if (matchingOrder != null) {
-                      await BackendService.cancelOrder(matchingOrder!['_id'], 'buyer', 'No volunteer found');
-                      // refresh user trust score
-                      try {
-                        // lazy import via Provider
-                        // we don't have context type here, but context is available
-                        Provider.of<AppAuthProvider>(context, listen: false).refreshMongoUser();
-                      } catch (_) {}
-
+                    if (matchingOrder == null) {
+                      Navigator.pop(context);
+                      return;
+                    }
+                    try {
                       await BackendService.cancelOrder(
                         matchingOrder!['_id'],
                         'buyer',
-                        'No volunteer found',
+                        'No volunteer found — cancelled by buyer',
                       );
+                      try {
+                        Provider.of<AppAuthProvider>(context, listen: false).refreshMongoUser();
+                      } catch (_) {}
+                      if (context.mounted) Navigator.pop(context);
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to cancel: ${e.toString().replaceAll("Exception: ", "")}'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     }
-                    Navigator.pop(context);
                   },
                   child: const Text(
                     'Cancel Order',

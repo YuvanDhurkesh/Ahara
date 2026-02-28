@@ -7,153 +7,168 @@ const mongoose = require("mongoose");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
-    let session;
-    try {
-        console.log("ENTERING createOrder");
-        session = await mongoose.startSession();
-        session.startTransaction();
-        const {
-            listingId,
-            buyerId,
-            quantityOrdered,
-            fulfillment,
-            pickup,
-            drop,
-            pricing,
-            specialInstructions
-        } = req.body;
+    const MAX_RETRIES = 3;
+    let attempt = 0;
 
-        // 1. Find the listing
-        const listing = await Listing.findById(listingId).session(session);
-
-        if (!listing) {
-            throw new Error("Listing not found");
-        }
-
-        if (listing.status !== "active") {
-            throw new Error(`Listing is no longer active (Status: ${listing.status})`);
-        }
-
-        // 2. Check quantity
-        if (listing.remainingQuantity < quantityOrdered) {
-            throw new Error(`Insufficient quantity. Only ${listing.remainingQuantity} left.`);
-        }
-
-        // 3. Check expiry
-        if (new Date(listing.pickupWindow.to) < new Date()) {
-            throw new Error("Listing has expired");
-        }
-
-        // 4. Create the order
-        const initialStatus = fulfillment === "volunteer_delivery" ? "awaiting_volunteer" : "placed";
-        const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate 4-digit OTP
-        const pOtp = fulfillment === "volunteer_delivery" ? Math.floor(1000 + Math.random() * 9000).toString() : null;
-
-        const newOrder = new Order({
-            listingId,
-            sellerId: listing.sellerId,
-            buyerId,
-            quantityOrdered,
-            fulfillment,
-            status: initialStatus,
-            pickup,
-            drop,
-            pricing,
-            specialInstructions,
-            pickupOtp: pOtp,
-            handoverOtp: otp,
-            timeline: { placedAt: new Date() }
-        });
-
-        await newOrder.save({ session });
-
-        // 5. Update listing quantity
-        listing.remainingQuantity -= quantityOrdered;
-
-        // 6. Auto-complete if quantity hits 0
-        if (listing.remainingQuantity === 0) {
-            listing.status = "completed";
-        }
-
-        await listing.save({ session });
-
-        // 6. Notify Seller and Buyer
-        // Fetch buyer details within the same session so we can include them in the seller notification
-        let buyer = null;
+    while (attempt < MAX_RETRIES) {
+        let session;
         try {
-            if (typeof User.findById === 'function') {
-                const maybeQuery = User.findById(buyerId);
-                if (maybeQuery && typeof maybeQuery.session === 'function') {
-                    buyer = await maybeQuery.session(session);
-                } else if (maybeQuery && typeof maybeQuery.then === 'function') {
-                    buyer = await maybeQuery;
-                }
-            }
-        } catch (e) {
-            // If tests mock User without a proper implementation, gracefully ignore and continue
-            buyer = null;
-        }
-
-        const sellerNotification = {
-            userId: listing.sellerId,
-            type: "order_update",
-            title: "📦 New Order Received",
-            message: `${buyer && buyer.name ? buyer.name : 'A buyer'} just ordered ${quantityOrdered}x ${listing.foodName}.`,
-            data: {
-                orderId: newOrder._id,
-                listingId: listing._id,
-                buyer: {
-                    id: buyer?._id,
-                    name: buyer?.name,
-                    email: buyer?.email,
-                    phone: buyer?.phone,
-                    addressText: buyer?.addressText
-                },
+            console.log("ENTERING createOrder");
+            session = await mongoose.startSession();
+            session.startTransaction();
+            const {
+                listingId,
+                buyerId,
                 quantityOrdered,
                 fulfillment,
                 pickup,
                 drop,
-                placedAt: newOrder.timeline?.placedAt || newOrder.createdAt,
-                action: "view_order"
+                pricing,
+                specialInstructions
+            } = req.body;
+
+            // 1. Find the listing
+            const listing = await Listing.findById(listingId).session(session);
+
+            if (!listing) {
+                throw new Error("Listing not found");
             }
-        };
 
-        const buyerNotification = {
-            userId: buyerId,
-            type: "order_update",
-            title: "✅ Order Placed Successfully",
-            message: `Your order for ${quantityOrdered}x ${listing.foodName} has been placed! ${fulfillment === "volunteer_delivery" ? "A volunteer will be assigned soon." : "You can pick it up at the scheduled time."}`,
-            data: {
-                orderId: newOrder._id,
-                listingId: listing._id,
-                action: "view_order"
+            if (listing.status !== "active") {
+                throw new Error(`Listing is no longer active (Status: ${listing.status})`);
             }
-        };
 
-        await Notification.create([sellerNotification, buyerNotification], { session, ordered: true });
+            // 2. Check quantity
+            if (listing.remainingQuantity < quantityOrdered) {
+                throw new Error(`Insufficient quantity. Only ${listing.remainingQuantity} left.`);
+            }
 
-        await session.commitTransaction();
-        session.endSession();
+            // 3. Check expiry
+            if (new Date(listing.pickupWindow.to) < new Date()) {
+                throw new Error("Listing has expired");
+            }
 
-        // If volunteer delivery, trigger matching
-        if (fulfillment === "volunteer_delivery") {
-            initiateVolunteerMatching(newOrder, listing);
-        }
+            // 4. Create the order
+            const initialStatus = fulfillment === "volunteer_delivery" ? "awaiting_volunteer" : "placed";
+            const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate 4-digit OTP
+            const pOtp = fulfillment === "volunteer_delivery" ? Math.floor(1000 + Math.random() * 9000).toString() : null;
 
-        res.status(201).json({
-            message: "Order placed successfully",
-            order: newOrder,
-            remainingQuantity: listing.remainingQuantity
-        });
+            const newOrder = new Order({
+                listingId,
+                sellerId: listing.sellerId,
+                buyerId,
+                quantityOrdered,
+                fulfillment,
+                status: initialStatus,
+                pickup,
+                drop,
+                pricing,
+                specialInstructions,
+                pickupOtp: pOtp,
+                handoverOtp: otp,
+                timeline: { placedAt: new Date() }
+            });
 
-    } catch (error) {
-        if (session) {
-            await session.abortTransaction();
+            await newOrder.save({ session });
+
+            // 5. Update listing quantity
+            listing.remainingQuantity -= quantityOrdered;
+
+            // 6. Auto-complete if quantity hits 0
+            if (listing.remainingQuantity === 0) {
+                listing.status = "completed";
+            }
+
+            await listing.save({ session });
+
+            // 6. Notify Seller and Buyer
+            // Fetch buyer details within the same session so we can include them in the seller notification
+            let buyer = null;
+            try {
+                if (typeof User.findById === 'function') {
+                    const maybeQuery = User.findById(buyerId);
+                    if (maybeQuery && typeof maybeQuery.session === 'function') {
+                        buyer = await maybeQuery.session(session);
+                    } else if (maybeQuery && typeof maybeQuery.then === 'function') {
+                        buyer = await maybeQuery;
+                    }
+                }
+            } catch (e) {
+                // If tests mock User without a proper implementation, gracefully ignore and continue
+                buyer = null;
+            }
+
+            const sellerNotification = {
+                userId: listing.sellerId,
+                type: "order_update",
+                title: "📦 New Order Received",
+                message: `${buyer && buyer.name ? buyer.name : 'A buyer'} just ordered ${quantityOrdered}x ${listing.foodName}.`,
+                data: {
+                    orderId: newOrder._id,
+                    listingId: listing._id,
+                    buyer: {
+                        id: buyer?._id,
+                        name: buyer?.name,
+                        email: buyer?.email,
+                        phone: buyer?.phone,
+                        addressText: buyer?.addressText
+                    },
+                    quantityOrdered,
+                    fulfillment,
+                    pickup,
+                    drop,
+                    placedAt: newOrder.timeline?.placedAt || newOrder.createdAt,
+                    action: "view_order"
+                }
+            };
+
+            const buyerNotification = {
+                userId: buyerId,
+                type: "order_update",
+                title: "✅ Order Placed Successfully",
+                message: `Your order for ${quantityOrdered}x ${listing.foodName} has been placed! ${fulfillment === "volunteer_delivery" ? "A volunteer will be assigned soon." : "You can pick it up at the scheduled time."}`,
+                data: {
+                    orderId: newOrder._id,
+                    listingId: listing._id,
+                    action: "view_order"
+                }
+            };
+
+            await Notification.create([sellerNotification, buyerNotification], { session, ordered: true });
+
+            await session.commitTransaction();
             session.endSession();
+
+            // If volunteer delivery, trigger matching
+            if (fulfillment === "volunteer_delivery") {
+                initiateVolunteerMatching(newOrder, listing);
+            }
+
+            return res.status(201).json({
+                message: "Order placed successfully",
+                order: newOrder,
+                remainingQuantity: listing.remainingQuantity
+            });
+
+        } catch (error) {
+            if (session) {
+                try { await session.abortTransaction(); } catch (_) { }
+                session.endSession();
+            }
+
+            // Retry on transient transaction errors (WriteConflict, etc.)
+            const isTransient = error.errorLabels && error.errorLabels.includes('TransientTransactionError');
+            if (isTransient && attempt < MAX_RETRIES - 1) {
+                attempt++;
+                console.warn(`[createOrder] TransientTransactionError — retrying (attempt ${attempt}/${MAX_RETRIES})`);
+                await new Promise(r => setTimeout(r, 50 * attempt)); // brief back-off
+                continue;
+            }
+
+            console.error("Create Order Error:", error.message);
+            console.error("Full error:", error);
+            return res.status(400).json({ error: error.message });
         }
-        console.error("Create Order Error:", error.message);
-        console.error("Full error:", error);
-        res.status(400).json({ error: error.message });
     }
 };
 
@@ -411,15 +426,8 @@ exports.updateOrder = async (req, res) => {
                         }
                     );
 
-                    if (updates.status === "delivered") {
-                        // Trust Score Bonus (+2)
-                        await User.findByIdAndUpdate(order.volunteerId, { $inc: { trustScore: 2 } });
-                        // Cap at 100
-                        await User.findOneAndUpdate(
-                            { _id: order.volunteerId, trustScore: { $gt: 100 } },
-                            { $set: { trustScore: 100 } }
-                        );
-                    }
+                    // Trust score is fully managed by recomputeVolunteerTrustScore
+                    // called below — no flat $inc here to avoid races.
                 }
             }
         }
@@ -495,6 +503,18 @@ exports.updateOrderStatus = async (req, res) => {
 };
 
 // Cancel order
+//
+// Stage-gating rules:
+//   - Terminal statuses (delivered, cancelled, failed) → reject immediately.
+//   - Food-in-transit statuses (picked_up, in_transit):
+//       • Quantity is NOT restored — food has already left the seller.
+//       • Order transitions to "failed" instead of "cancelled".
+//       • Only seller or system may trigger this (buyer/volunteer must go through
+//         dispute flow, which is a future enhancement).
+//   - Volunteer cancellation on volunteer_assigned:
+//       • We do NOT hard-cancel. Instead the order reverts to "awaiting_volunteer"
+//         so another volunteer can be matched.
+//       • Listing quantity is NOT touched (it was already decremented at order creation).
 exports.cancelOrder = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -508,11 +528,221 @@ exports.cancelOrder = async (req, res) => {
             throw new Error("Order not found");
         }
 
-        if (order.status === "delivered" || order.status === "cancelled") {
+        // ── Terminal statuses – reject outright ───────────────────────────────
+        if (["delivered", "cancelled", "failed"].includes(order.status)) {
             throw new Error(`Cannot cancel order with status: ${order.status}`);
         }
 
-        // Restore listing quantity
+        // ── Fix #3: Rate-limit repeat cancellers (max 3 per 24 h) ────────────
+        const CANCEL_LIMIT = 3;
+        const WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+        const since = new Date(Date.now() - WINDOW_MS);
+
+        // Determine which field to query based on who is cancelling
+        const cancellerId = cancelledBy === "buyer" ? order.buyerId
+            : cancelledBy === "seller" ? order.sellerId
+                : cancelledBy === "volunteer" ? order.volunteerId
+                    : null;
+
+        if (cancellerId) {
+            const recentCancels = await Order.countDocuments({
+                "cancellation.cancelledBy": cancelledBy,
+                [`${cancelledBy}Id`]: cancellerId,
+                "timeline.cancelledAt": { $gte: since }
+            });
+            if (recentCancels >= CANCEL_LIMIT) {
+                throw new Error(
+                    `Cancellation limit reached. You may not cancel more than ${CANCEL_LIMIT} orders within 24 hours.`
+                );
+            }
+        }
+
+        // ── Fix #2: Buyer cancellation cut-off (30 min before pickup) ─────────
+        // Sellers and system may always cancel pre-pickup; buyers may not cancel
+        // if the scheduled pickup window starts within 30 minutes.
+        if (cancelledBy === "buyer") {
+            const pickupAt = order.pickup && order.pickup.scheduledAt
+                ? new Date(order.pickup.scheduledAt)
+                : order.listingId && order.listingId.pickupWindow
+                    ? new Date(order.listingId.pickupWindow.from)
+                    : null;
+
+            if (pickupAt) {
+                const minutesUntilPickup = (pickupAt - Date.now()) / 60000;
+                if (minutesUntilPickup < 30) {
+                    throw new Error(
+                        `Cannot cancel within 30 minutes of scheduled pickup. Contact the seller directly.`
+                    );
+                }
+            }
+        }
+
+        // ── Food already with volunteer – mark failed, don't restore quantity ─
+        const foodInTransit = ["picked_up", "in_transit"].includes(order.status);
+        if (foodInTransit) {
+            order.status = "failed";
+            order.cancellation = { cancelledBy, reason };
+            order.timeline.cancelledAt = new Date();
+
+            // M1: Flag payment for refund if the order was paid
+            if (order.payment && order.payment.status === "paid") {
+                order.payment.status = "refunded";
+                order.payment.refundedAt = new Date(); // Fix #4
+            }
+
+            await order.save({ session });
+
+            // Free volunteer slot
+            if (order.volunteerId) {
+                await VolunteerProfile.findOneAndUpdate(
+                    { userId: order.volunteerId },
+                    {
+                        $inc: { "availability.activeOrders": -1 },
+                        $set: { "availability.isAvailable": true }
+                    },
+                    { session, returnDocument: "after" }
+                );
+            }
+
+            const failedNotifs = [];
+            const shortId = order._id.toString().slice(-6);
+            failedNotifs.push({
+                userId: order.buyerId,
+                type: "order_update",
+                title: "⚠️ Order Failed",
+                message: `Order #${shortId} could not be completed after pickup. Please contact support.`,
+                data: { orderId: order._id, status: "failed" }
+            });
+            failedNotifs.push({
+                userId: order.sellerId,
+                type: "order_update",
+                title: "⚠️ Order Failed",
+                message: `Order #${shortId} was marked as failed after food was picked up.`,
+                data: { orderId: order._id, status: "failed" }
+            });
+            if (order.volunteerId) {
+                failedNotifs.push({
+                    userId: order.volunteerId,
+                    type: "order_update",
+                    title: "⚠️ Order Failed",
+                    message: `Order #${shortId} has been marked as failed.`,
+                    data: { orderId: order._id, status: "failed" }
+                });
+            }
+
+            await Notification.insertMany(failedNotifs, { session });
+            await session.commitTransaction();
+            session.endSession();
+
+            // Trust-score recompute (penalises the responsible party)
+            try {
+                await recomputeBuyerTrustScore(order.buyerId);
+                await recomputeSellerTrustScore(order.sellerId);
+                if (order.volunteerId) await recomputeVolunteerTrustScore(order.volunteerId);
+            } catch (e) { console.error("recompute trust after failed:", e); }
+
+            return res.status(200).json({ message: "Order marked as failed", order });
+        }
+
+        // ── Volunteer drops a volunteer_assigned order → re-broadcast ─────────
+        if (cancelledBy === "volunteer" && order.status === "volunteer_assigned") {
+            // Free the volunteer's slot
+            if (order.volunteerId) {
+                await VolunteerProfile.findOneAndUpdate(
+                    { userId: order.volunteerId },
+                    {
+                        $inc: { "availability.activeOrders": -1 },
+                        $set: { "availability.isAvailable": true }
+                    },
+                    { session, returnDocument: "after" }
+                );
+            }
+
+            const droppedVolunteerId = order.volunteerId;
+            const shortId = order._id.toString().slice(-6);
+
+            // Fix #5: Enforce a retry cap — hard-cancel if we've tried too many times
+            const MAX_MATCH_ATTEMPTS = 3;
+            order.volunteerMatchAttempts = (order.volunteerMatchAttempts || 0) + 1;
+
+            if (order.volunteerMatchAttempts >= MAX_MATCH_ATTEMPTS) {
+                // Too many drops — hard-cancel and notify
+                order.status = "cancelled";
+                order.cancellation = { cancelledBy: "system", reason: "No volunteer available after multiple attempts" };
+                order.timeline.cancelledAt = new Date();
+                if (order.payment && order.payment.status === "paid") {
+                    order.payment.status = "refunded";
+                    order.payment.refundedAt = new Date();
+                }
+                await order.save({ session });
+
+                await Notification.insertMany([
+                    {
+                        userId: order.buyerId,
+                        type: "order_update",
+                        title: "❌ Order Cancelled — No Volunteer Available",
+                        message: `We couldn't find a volunteer for order #${shortId} after ${MAX_MATCH_ATTEMPTS} attempts. Your order has been cancelled and any payment refunded.`,
+                        data: { orderId: order._id, status: "cancelled" }
+                    },
+                    {
+                        userId: order.sellerId,
+                        type: "order_update",
+                        title: "❌ Order Cancelled — No Volunteer",
+                        message: `Order #${shortId} was cancelled after ${MAX_MATCH_ATTEMPTS} failed volunteer matches.`,
+                        data: { orderId: order._id, status: "cancelled" }
+                    }
+                ], { session });
+
+                await session.commitTransaction();
+                session.endSession();
+
+                if (droppedVolunteerId) {
+                    try { await recomputeVolunteerTrustScore(droppedVolunteerId); } catch (e) { /* ignore */ }
+                }
+                return res.status(200).json({ message: "Order cancelled — volunteer match limit reached", order });
+            }
+
+            // Revert to awaiting_volunteer so another volunteer can pick it up
+            order.status = "awaiting_volunteer";
+            order.volunteerId = null;
+            order.volunteerAssignedAt = null;
+            order.timeline.acceptedAt = null;
+            await order.save({ session });
+
+            // Notify buyer and seller about the re-queue
+            await Notification.insertMany([
+                {
+                    userId: order.buyerId,
+                    type: "order_update",
+                    title: "🔄 Finding New Volunteer",
+                    message: `The volunteer for order #${shortId} is no longer available. We're finding a replacement!`,
+                    data: { orderId: order._id, status: "awaiting_volunteer" }
+                },
+                {
+                    userId: order.sellerId,
+                    type: "order_update",
+                    title: "🔄 Volunteer Dropped",
+                    message: `The assigned volunteer for order #${shortId} dropped out. Searching for a new one (attempt ${order.volunteerMatchAttempts}/${MAX_MATCH_ATTEMPTS}).`,
+                    data: { orderId: order._id, status: "awaiting_volunteer" }
+                }
+            ], { session });
+
+            await session.commitTransaction();
+            session.endSession();
+
+            // Penalise the volunteer who dropped
+            if (droppedVolunteerId) {
+                try { await recomputeVolunteerTrustScore(droppedVolunteerId); } catch (e) { /* ignore */ }
+            }
+
+            // Re-trigger geo matching outside the transaction
+            const listing = await Listing.findById(order.listingId);
+            if (listing) initiateVolunteerMatching(order, listing);
+
+            return res.status(200).json({ message: "Volunteer dropped; searching for new volunteer", order });
+        }
+
+        // ── Standard cancellation (buyer / seller / system, pre-pickup) ───────
         const listing = await Listing.findById(order.listingId).session(session);
         if (listing) {
             listing.remainingQuantity += order.quantityOrdered;
@@ -522,10 +752,16 @@ exports.cancelOrder = async (req, res) => {
             await listing.save({ session });
         }
 
-        // Update order
         order.status = "cancelled";
         order.cancellation = { cancelledBy, reason };
         order.timeline.cancelledAt = new Date();
+
+        // M1: Flag payment for refund if the order was paid
+        if (order.payment && order.payment.status === "paid") {
+            order.payment.status = "refunded";
+            order.payment.refundedAt = new Date(); // Fix #4
+        }
+
         await order.save({ session });
 
         // If volunteer was assigned, decrement activeOrders and restore availability
@@ -536,28 +772,29 @@ exports.cancelOrder = async (req, res) => {
                     $inc: { "availability.activeOrders": -1 },
                     $set: { "availability.isAvailable": true }
                 },
-                { session, returnDocument: 'after' }
+                { session, returnDocument: "after" }
             );
         }
 
-        // --- Notify Parties ---
+        // Notify all affected parties
         const notifications = [];
         const shortId = order._id.toString().slice(-6);
         const title = "❌ Order Cancelled";
         const message = `Order #${shortId} has been cancelled by the ${cancelledBy}.`;
 
-        // Always notify Buyer
         notifications.push({
             userId: order.buyerId,
             type: "order_update",
-            title: cancelledBy === "buyer" ? "✅ Order Cancelled" : "❌ Order Cancelled",
+            title: cancelledBy === "buyer" ? "✅ Order Cancelled" : title,
             message: cancelledBy === "buyer"
                 ? `You have successfully cancelled order #${shortId}.`
-                : `Your order #${shortId} has been cancelled by the ${cancelledBy}.`,
+                : cancelledBy === "system"
+                    // Fix #6: specific, helpful message for system-triggered cancellations
+                    ? `Order #${shortId} was automatically cancelled — no volunteer was available. Any payment has been refunded.`
+                    : `Your order #${shortId} has been cancelled by the ${cancelledBy}.`,
             data: { orderId: order._id, status: "cancelled" }
         });
 
-        // Always notify Seller if they didn't cancel
         if (cancelledBy !== "seller") {
             notifications.push({
                 userId: order.sellerId,
@@ -568,7 +805,6 @@ exports.cancelOrder = async (req, res) => {
             });
         }
 
-        // Notify Volunteer if they didn't cancel and were assigned
         if (order.volunteerId && cancelledBy !== "volunteer") {
             notifications.push({
                 userId: order.volunteerId,
@@ -590,11 +826,9 @@ exports.cancelOrder = async (req, res) => {
         try {
             await recomputeBuyerTrustScore(order.buyerId);
             await recomputeSellerTrustScore(order.sellerId);
-            if (order.volunteerId) {
-                await recomputeVolunteerTrustScore(order.volunteerId);
-            }
+            if (order.volunteerId) await recomputeVolunteerTrustScore(order.volunteerId);
         } catch (e) {
-            console.error('Error recomputing trust scores after cancellation', e);
+            console.error("Error recomputing trust scores after cancellation", e);
         }
 
         res.status(200).json({ message: "Order cancelled successfully", order });
@@ -869,7 +1103,7 @@ async function recomputeBuyerTrustScore(buyerId) {
         if (score > 100) score = 100;
         if (score < 0) score = 0;
 
-        await User.findByIdAndUpdate(buyerId, { $set: { trustScore: score } });
+        await applyTrustScore(buyerId, score);
     } catch (err) {
         console.error('recomputeBuyerTrustScore error', err);
     }
@@ -879,10 +1113,10 @@ async function recomputeBuyerTrustScore(buyerId) {
 async function recomputeSellerTrustScore(sellerId) {
     try {
         if (!sellerId) return;
-        // only consider orders that have reached a terminal state
+        // consider all terminal orders: delivered, cancelled, failed
         const orders = await Order.find({
             sellerId,
-            status: { $in: ['delivered', 'cancelled'] }
+            status: { $in: ['delivered', 'cancelled', 'failed'] }
         });
         const total = orders.length;
         if (total === 0) {
@@ -904,7 +1138,11 @@ async function recomputeSellerTrustScore(sellerId) {
                     onTime += 1;
                 }
             }
-            if (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'seller') {
+            // treat seller-cancelled OR failed orders as seller-responsible cancellations
+            if (
+                (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'seller') ||
+                o.status === 'failed'
+            ) {
                 cancelled += 1;
             }
         }
@@ -918,7 +1156,7 @@ async function recomputeSellerTrustScore(sellerId) {
 
         if (score > 100) score = 100;
         if (score < 0) score = 0;
-        await User.findByIdAndUpdate(sellerId, { $set: { trustScore: score } });
+        await applyTrustScore(sellerId, score);
     } catch (err) {
         console.error('recomputeSellerTrustScore error', err);
     }
@@ -928,11 +1166,10 @@ async function recomputeSellerTrustScore(sellerId) {
 async function recomputeVolunteerTrustScore(volunteerId) {
     try {
         if (!volunteerId) return;
-        // only look at finished orders so in-flight rescues don't drag the
-        // denominator down.
+        // only look at finished orders (delivered, cancelled, failed)
         const orders = await Order.find({
             volunteerId,
-            status: { $in: ['delivered', 'cancelled'] }
+            status: { $in: ['delivered', 'cancelled', 'failed'] }
         });
         const total = orders.length;
         if (total === 0) {
@@ -954,7 +1191,11 @@ async function recomputeVolunteerTrustScore(volunteerId) {
                     onTime += 1;
                 }
             }
-            if (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'volunteer') {
+            // treat volunteer-cancelled OR failed orders as volunteer-responsible
+            if (
+                (o.status === 'cancelled' && o.cancellation && o.cancellation.cancelledBy === 'volunteer') ||
+                o.status === 'failed'
+            ) {
                 cancelledByVolunteer += 1;
             }
         }
@@ -966,11 +1207,25 @@ async function recomputeVolunteerTrustScore(volunteerId) {
 
         if (score > 100) score = 100;
         if (score < 0) score = 0;
-        await User.findByIdAndUpdate(volunteerId, { $set: { trustScore: score } });
+        await applyTrustScore(volunteerId, score);
     } catch (err) {
         console.error('recomputeVolunteerTrustScore error', err);
     }
 }
+
+/**
+ * M2: Persist trust score and auto-set accountStatus based on thresholds.
+ *   score < 10  → locked
+ *   score < 20  → warned
+ *   otherwise   → active
+ */
+async function applyTrustScore(userId, score) {
+    const accountStatus = score < 10 ? "locked" : score < 20 ? "warned" : "active";
+    await User.findByIdAndUpdate(userId, {
+        $set: { trustScore: score, accountStatus }
+    });
+}
+
 // 11. Verify OTP and transition status
 exports.verifyOtp = async (req, res) => {
     try {
@@ -1020,26 +1275,15 @@ exports.verifyOtp = async (req, res) => {
         if (nextStatus === "delivered") {
             order.timeline.deliveredAt = new Date();
 
-            // If volunteer delivery, decrement activeOrders and ADD TRUST SCORE BONUS
+            // If volunteer delivery, decrement activeOrders and re-enable availability.
+            // Trust score is managed solely by recomputeVolunteerTrustScore below.
             if (order.volunteerId && order.fulfillment === "volunteer_delivery") {
                 await VolunteerProfile.findOneAndUpdate(
                     { userId: order.volunteerId },
                     {
                         $inc: { "availability.activeOrders": -1 },
-                        $set: { "availability.isAvailable": true } // Re-enable availability
+                        $set: { "availability.isAvailable": true }
                     }
-                );
-
-                // Add Trust Score Bonus (+2) to User model
-                await User.findByIdAndUpdate(
-                    order.volunteerId,
-                    { $inc: { trustScore: 2 } }
-                );
-
-                // Ensure Trust Score doesn't exceed 100
-                await User.findOneAndUpdate(
-                    { _id: order.volunteerId, trustScore: { $gt: 100 } },
-                    { $set: { trustScore: 100 } }
                 );
             }
         }

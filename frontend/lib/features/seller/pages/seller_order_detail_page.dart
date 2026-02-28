@@ -164,6 +164,9 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildOrderHeader(),
+            const SizedBox(height: 16),
+            if (_currentStatus == 'cancelled' || _currentStatus == 'failed')
+              _buildCancellationBanner(),
             const SizedBox(height: 24),
             _buildStatusStepper(),
             const SizedBox(height: 24),
@@ -718,6 +721,57 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildCancellationBanner() {
+    final cancellation = widget.order['cancellation'] as Map<String, dynamic>?;
+    final cancelledBy = cancellation?['cancelledBy']?.toString() ?? 'unknown';
+    final reason = cancellation?['reason']?.toString();
+    final isFailed = _currentStatus == 'failed';
+
+    final actorLabel = {
+      'buyer': 'Buyer',
+      'seller': 'You (Seller)',
+      'volunteer': 'Volunteer',
+      'system': 'System (no volunteer available)',
+    }[cancelledBy] ?? cancelledBy;
+
+    final color = isFailed ? Colors.deepOrange : Colors.redAccent;
+    final title = isFailed ? 'Order Failed' : 'Order Cancelled';
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(isFailed ? Icons.error_outline : Icons.cancel_outlined, color: color, size: 18),
+            const SizedBox(width: 8),
+            Text(title, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: color)),
+          ]),
+          const SizedBox(height: 8),
+          Text.rich(
+            TextSpan(children: [
+              const TextSpan(text: 'Cancelled by: '),
+              TextSpan(text: actorLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+            ]),
+            style: const TextStyle(fontSize: 12, color: Colors.black87),
+          ),
+          if (reason != null && reason.isNotEmpty) ...[  
+            const SizedBox(height: 4),
+            Text('Reason: $reason',
+                style: const TextStyle(fontSize: 12, color: Colors.black54, fontStyle: FontStyle.italic)),
+          ],
+        ],
+      ),
     );
   }
 
