@@ -572,6 +572,7 @@ exports.cancelOrder = async (req, res) => {
             // M1: Flag payment for refund if the order was paid
             if (order.payment && order.payment.status === "paid") {
                 order.payment.status = "refunded";
+                order.payment.refundedAt = new Date(); // Fix #4
             }
 
             await order.save({ session });
@@ -702,6 +703,7 @@ exports.cancelOrder = async (req, res) => {
         // M1: Flag payment for refund if the order was paid
         if (order.payment && order.payment.status === "paid") {
             order.payment.status = "refunded";
+            order.payment.refundedAt = new Date(); // Fix #4
         }
 
         await order.save({ session });
