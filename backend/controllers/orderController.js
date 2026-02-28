@@ -524,6 +524,12 @@ exports.cancelOrder = async (req, res) => {
             order.status = "failed";
             order.cancellation = { cancelledBy, reason };
             order.timeline.cancelledAt = new Date();
+
+            // M1: Flag payment for refund if the order was paid
+            if (order.payment && order.payment.status === "paid") {
+                order.payment.status = "refunded";
+            }
+
             await order.save({ session });
 
             // Free volunteer slot
@@ -648,6 +654,12 @@ exports.cancelOrder = async (req, res) => {
         order.status = "cancelled";
         order.cancellation = { cancelledBy, reason };
         order.timeline.cancelledAt = new Date();
+
+        // M1: Flag payment for refund if the order was paid
+        if (order.payment && order.payment.status === "paid") {
+            order.payment.status = "refunded";
+        }
+
         await order.save({ session });
 
         // If volunteer was assigned, decrement activeOrders and restore availability
@@ -986,7 +998,7 @@ async function recomputeBuyerTrustScore(buyerId) {
         if (score > 100) score = 100;
         if (score < 0) score = 0;
 
-        await User.findByIdAndUpdate(buyerId, { $set: { trustScore: score } });
+        await applyTrustScore(buyerId, score);
     } catch (err) {
         console.error('recomputeBuyerTrustScore error', err);
     }
@@ -1035,7 +1047,7 @@ async function recomputeSellerTrustScore(sellerId) {
 
         if (score > 100) score = 100;
         if (score < 0) score = 0;
-        await User.findByIdAndUpdate(sellerId, { $set: { trustScore: score } });
+        await applyTrustScore(sellerId, score);
     } catch (err) {
         console.error('recomputeSellerTrustScore error', err);
     }
@@ -1083,11 +1095,25 @@ async function recomputeVolunteerTrustScore(volunteerId) {
 
         if (score > 100) score = 100;
         if (score < 0) score = 0;
-        await User.findByIdAndUpdate(volunteerId, { $set: { trustScore: score } });
+        await applyTrustScore(volunteerId, score);
     } catch (err) {
         console.error('recomputeVolunteerTrustScore error', err);
     }
 }
+
+/**
+ * M2: Persist trust score and auto-set accountStatus based on thresholds.
+ *   score < 10  → locked
+ *   score < 20  → warned
+ *   otherwise   → active
+ */
+async function applyTrustScore(userId, score) {
+    const accountStatus = score < 10 ? "locked" : score < 20 ? "warned" : "active";
+    await User.findByIdAndUpdate(userId, {
+        $set: { trustScore: score, accountStatus }
+    });
+}
+
 // 11. Verify OTP and transition status
 exports.verifyOtp = async (req, res) => {
     try {

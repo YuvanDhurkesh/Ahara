@@ -289,8 +289,9 @@ describe('Order Controller - trust score helpers', () => {
         });
         const updateSpy = jest.spyOn(User, 'findByIdAndUpdate').mockResolvedValue({});
         await orderController.recomputeSellerTrustScore('seller1');
-        // 2 completed, 1 cancelled, onTimeRate=0 (mock missing delivery timestamps) => completion(2/3)*30 - cancel(1/3)*30 + onTime(0)*20 + base 50 = 20 - 10 + 0 + 50 = 60
-        expect(updateSpy).toHaveBeenCalledWith('seller1', { $set: { trustScore: 60 } });
+        // 2 completed, 1 cancelled, onTimeRate=0 => completion(2/3)*30 - cancel(1/3)*30 + onTime(0)*20 + base 50 = 20 - 10 + 0 + 50 = 60
+        // score=60 >= 20 so accountStatus='active'
+        expect(updateSpy).toHaveBeenCalledWith('seller1', { $set: { trustScore: 60, accountStatus: 'active' } });
     });
 
     it('recomputeVolunteerTrustScore calculates accurate bounds without inflating bonuses', async () => {
@@ -308,6 +309,7 @@ describe('Order Controller - trust score helpers', () => {
         const updateSpy = jest.spyOn(User, 'findByIdAndUpdate').mockResolvedValue({});
         await orderController.recomputeVolunteerTrustScore('vol1');
         // completion(1/2)*30 - cancel(1/2)*30 + onTime(0)*20 + base 50= 15 - 15 + 0 + 50 = 50
-        expect(updateSpy).toHaveBeenCalledWith('vol1', { $set: { trustScore: 50 } });
+        // score=50 >= 20 so accountStatus='active'
+        expect(updateSpy).toHaveBeenCalledWith('vol1', { $set: { trustScore: 50, accountStatus: 'active' } });
     });
 });
