@@ -3,6 +3,7 @@ const Listing = require("../models/Listing");
 const Notification = require("../models/Notification");
 const VolunteerProfile = require("../models/VolunteerProfile");
 const User = require("../models/User");
+const Message = require("../models/Message");
 const mongoose = require("mongoose");
 
 // Create a new order
@@ -189,6 +190,18 @@ exports.getOrderById = async (req, res) => {
         res.status(200).json(order);
     } catch (error) {
         console.error("Get Order Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get order messages
+exports.getOrderMessages = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const messages = await Message.find({ orderId: id }).sort({ createdAt: 1 });
+        res.status(200).json(messages);
+    } catch (error) {
+        console.error("Get Order Messages Error:", error);
         res.status(500).json({ error: error.message });
     }
 };

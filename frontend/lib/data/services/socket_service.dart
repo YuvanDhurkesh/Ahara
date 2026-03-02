@@ -61,6 +61,35 @@ class SocketService {
     });
   }
 
+  static void sendMessage({
+    required String orderId,
+    required String senderId,
+    required String senderRole,
+    required String text,
+  }) {
+    debugPrint("Sending Message -> Order: $orderId | Role: $senderRole | Text: $text");
+    socket.emit('send_message', {
+      'orderId': orderId,
+      'senderId': senderId,
+      'senderRole': senderRole,
+      'text': text,
+    });
+  }
+
+  static void onReceiveMessage(Function(Map<String, dynamic> message) callback) {
+    debugPrint("Setting up onReceiveMessage listener");
+    socket.on('receive_message', (data) {
+      debugPrint("Received Message Payload: $data");
+      if (data != null) {
+        callback(Map<String, dynamic>.from(data));
+      }
+    });
+  }
+
+  static void offReceiveMessage() {
+    socket.off('receive_message');
+  }
+
   static void dispose() {
     _socket?.disconnect();
     _socket?.dispose();

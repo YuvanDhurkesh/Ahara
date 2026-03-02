@@ -11,6 +11,7 @@ import '../../../../data/services/backend_service.dart';
 import '../../../../data/services/socket_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'volunteer_story_page.dart';
+import '../../common/widgets/chat_screen.dart';
 
 class VolunteerOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic>? order;
@@ -661,6 +662,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
       phone: phone,
       icon: Icons.store_rounded,
       iconColor: const Color(0xFFE67E22),
+      roleToChat: 'seller',
     );
   }
 
@@ -678,6 +680,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
       phone: phone,
       icon: Icons.home_rounded,
       iconColor: Colors.green,
+      roleToChat: 'buyer',
     );
   }
 
@@ -688,6 +691,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     required String phone,
     required IconData icon,
     required Color iconColor,
+    required String roleToChat,
   }) {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -747,11 +751,55 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                             size: 16, color: Colors.blue.shade700),
                         const SizedBox(width: 8),
                         Text(
-                          "Call Contact",
+                          "Call",
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    if (widget.order == null) return;
+                    final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                    final currentUserId = auth.mongoUser?['_id'] ?? '';
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChatScreen(
+                          orderId: widget.order!['_id'],
+                          currentUserId: currentUserId,
+                          currentUserRole: 'volunteer',
+                          recipientName: name,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF7ED),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.chat_bubble_outline_rounded,
+                            size: 16, color: Colors.orange.shade700),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Message",
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.orange.shade700,
                           ),
                         ),
                       ],

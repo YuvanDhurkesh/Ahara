@@ -556,6 +556,24 @@ class BackendService {
     }
   }
 
+  static Future<List<dynamic>> getOrderMessages(String orderId) async {
+    final url = Uri.parse("$baseUrl/orders/$orderId/messages");
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to fetch order messages");
+    }
+  }
+
   static Future<List<Map<String, dynamic>>> getBuyerOrders(
     String buyerId,
   ) async {

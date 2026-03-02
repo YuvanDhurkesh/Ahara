@@ -6,6 +6,9 @@ import 'package:latlong2/latlong.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../data/mock_orders.dart';
 import '../../../../data/services/socket_service.dart';
+import 'package:provider/provider.dart';
+import '../../../../data/providers/app_auth_provider.dart';
+import '../../common/widgets/chat_screen.dart';
 
 class BuyerOrderTrackPage extends StatefulWidget {
   final MockOrder? mockOrder;
@@ -257,6 +260,25 @@ class _BuyerOrderTrackPageState extends State<BuyerOrderTrackPage> {
                               ),
                             ],
                           ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            if (widget.order == null) return;
+                            final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                            final currentUserId = auth.mongoUser?['_id'] ?? '';
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChatScreen(
+                                  orderId: widget.order!['_id'],
+                                  currentUserId: currentUserId,
+                                  currentUserRole: 'buyer',
+                                  recipientName: widget.order!['volunteerId']?['name'] ?? 'Volunteer',
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.chat_bubble_outline, color: AppColors.primary),
                         ),
                         IconButton(
                           onPressed: () {},

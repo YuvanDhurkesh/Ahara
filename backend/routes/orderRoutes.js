@@ -8,6 +8,7 @@ router.get("/volunteer/:volunteerId", orderController.getVolunteerOrders);
 router.get("/buyer/:buyerId", orderController.getBuyerOrders);
 router.get("/seller/:sellerId", orderController.getSellerOrders);
 router.get("/:id", orderController.getOrderById);
+router.get("/:id/messages", orderController.getOrderMessages);
 router.patch("/:id/status", orderController.updateOrderStatus);
 router.patch("/:id", orderController.updateOrder);
 router.post("/:id/cancel", orderController.cancelOrder);
