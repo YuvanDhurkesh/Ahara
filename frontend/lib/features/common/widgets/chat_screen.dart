@@ -98,20 +98,7 @@ class _ChatScreenState extends State<ChatScreen> {
       text: text,
     );
 
-    // Optimistically add to UI
-    setState(() {
-      _messages.add(MessageModel(
-        id: '', // Temporary
-        orderId: widget.orderId,
-        senderId: widget.currentUserId,
-        senderRole: widget.currentUserRole,
-        text: text,
-        createdAt: DateTime.now(),
-      ));
-    });
-
     _controller.clear();
-    _scrollToBottom();
   }
 
   void _scrollToBottom() {

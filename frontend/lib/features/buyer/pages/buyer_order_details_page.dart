@@ -15,6 +15,7 @@ import 'buyer_order_rate_page.dart';
 import 'buyer_order_track_page.dart';
 import '../data/mock_orders.dart';
 import '../data/mock_stores.dart';
+import '../../common/widgets/chat_screen.dart';
 
 class BuyerOrderDetailsPage extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -555,6 +556,29 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                       ],
                     ),
                   ],
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                  final currentUserId = auth.mongoUser?['_id'] ?? '';
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatScreen(
+                        orderId: _localOrder['_id'],
+                        currentUserId: currentUserId,
+                        currentUserRole: 'buyer',
+                        recipientName: seller['name'] ?? 'Provider',
+                        recipientRole: 'seller',
+                      ),
+                    ),
+                  );
+                },
+                icon: const CircleAvatar(
+                  backgroundColor: AppColors.primary,
+                  radius: 18,
+                  child: Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 18),
                 ),
               ),
               IconButton(
