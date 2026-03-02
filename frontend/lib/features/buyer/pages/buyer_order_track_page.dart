@@ -274,6 +274,7 @@ class _BuyerOrderTrackPageState extends State<BuyerOrderTrackPage> {
                                   currentUserId: currentUserId,
                                   currentUserRole: 'buyer',
                                   recipientName: widget.order!['volunteerId']?['name'] ?? 'Volunteer',
+                                  recipientRole: 'volunteer',
                                 ),
                               ),
                             );
@@ -287,11 +288,76 @@ class _BuyerOrderTrackPageState extends State<BuyerOrderTrackPage> {
                       ],
                     ),
                   ),
+                  if (widget.order != null && widget.order!['sellerId'] != null) ...[
+                    const SizedBox(height: 16),
+                    _buildSellerInfo(),
+                  ],
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSellerInfo() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 24,
+            backgroundColor: Colors.orange,
+            child: Icon(Icons.store, color: Colors.white),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Food Provider",
+                  style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 0.5),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  widget.order!['sellerId']?['name'] ?? "Provider",
+                  style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              if (widget.order == null) return;
+              final auth = Provider.of<AppAuthProvider>(context, listen: false);
+              final currentUserId = auth.mongoUser?['_id'] ?? '';
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChatScreen(
+                    orderId: widget.order!['_id'],
+                    currentUserId: currentUserId,
+                    currentUserRole: 'buyer',
+                    recipientName: widget.order!['sellerId']?['name'] ?? 'Provider',
+                    recipientRole: 'seller',
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.chat_bubble_outline, color: AppColors.primary),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.phone, color: AppColors.primary),
+          ),
+        ],
       ),
     );
   }

@@ -173,6 +173,10 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
             const SizedBox(height: 24),
             _buildBuyerInfo(),
             const SizedBox(height: 16),
+            if (widget.order['volunteerId'] != null) ...[
+              _buildVolunteerInfo(),
+              const SizedBox(height: 16),
+            ],
             _buildPickupInstructions(),
             const SizedBox(height: 24),
             _buildOtpVerificationSection(),
@@ -460,6 +464,84 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
                         currentUserId: currentUserId,
                         currentUserRole: 'seller',
                         recipientName: widget.order['buyerId']?['name'] ?? 'Buyer',
+                        recipientRole: 'buyer',
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVolunteerInfo() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.delivery_dining,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Delivery Partner",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textLight.withOpacity(0.6),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    widget.order['volunteerId']?['name'] ?? "Unknown",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                  final currentUserId = auth.mongoUser?['_id'] ?? '';
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatScreen(
+                        orderId: widget.order['_id'],
+                        currentUserId: currentUserId,
+                        currentUserRole: 'seller',
+                        recipientName: widget.order['volunteerId']?['name'] ?? 'Volunteer',
+                        recipientRole: 'volunteer',
                       ),
                     ),
                   );

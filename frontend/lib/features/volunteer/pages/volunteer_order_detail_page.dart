@@ -778,6 +778,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                           currentUserId: currentUserId,
                           currentUserRole: 'volunteer',
                           recipientName: name,
+                          recipientRole: roleToChat,
                         ),
                       ),
                     );

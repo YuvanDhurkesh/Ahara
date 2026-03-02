@@ -39,7 +39,13 @@ class SocketService {
   }
 
   static void joinOrderRoom(String orderId) {
-    socket.emit('join_order', orderId);
+    if (socket.connected) {
+      socket.emit('join_order', orderId);
+    } else {
+      socket.once('connect', (_) {
+        socket.emit('join_order', orderId);
+      });
+    }
   }
 
   static void updateLocation(String orderId, double lat, double lng) {

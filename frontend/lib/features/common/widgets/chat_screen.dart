@@ -8,6 +8,7 @@ class ChatScreen extends StatefulWidget {
   final String currentUserId;
   final String currentUserRole;
   final String recipientName;
+  final String recipientRole;
 
   const ChatScreen({
     super.key,
@@ -15,6 +16,7 @@ class ChatScreen extends StatefulWidget {
     required this.currentUserId,
     required this.currentUserRole,
     required this.recipientName,
+    required this.recipientRole,
   });
 
   @override
@@ -38,15 +40,29 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _loadMessages() async {
     try {
       final rawMessages = await BackendService.getOrderMessages(widget.orderId);
-      final messages = rawMessages.map((m) => MessageModel.fromJson(m)).toList();
-      setState(() {
-        _messages = messages;
-        _isLoading = false;
-      });
-      _scrollToBottom();
+      final messages = rawMessages.map((json) => MessageModel.fromJson(json)).toList();
+      
+      // Filter out messages not meant for this chat window
+      // We only want:
+      // 1. Messages WE sent TO them (where we are the sender role, and we know the other side) 
+      //    Wait, the database doesn't store recipient. It just stores who sent it to the broadcast room.
+      // So in the history, we only want messages sent by us or by the target recipient.
+      final filteredMessages = messages.where((m) {
+        return m.senderRole == widget.currentUserRole || m.senderRole == widget.recipientRole;
+      }).toList();
+
+      if (mounted) {
+        setState(() {
+          _messages = filteredMessages;
+          _isLoading = false;
+        });
+        _scrollToBottom();
+      }
     } catch (e) {
       debugPrint("Error loading messages: \$e");
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -54,16 +70,20 @@ class _ChatScreenState extends State<ChatScreen> {
     SocketService.joinOrderRoom(widget.orderId);
     
     SocketService.onReceiveMessage((data) {
-      if (data['orderId'] == widget.orderId) {
-        final newMessage = MessageModel.fromJson(data);
-        if (!_messages.any((m) => m.id == newMessage.id && m.id.isNotEmpty)) {
+    if (data['orderId'] == widget.orderId) {
+      final newMessage = MessageModel.fromJson(data);
+      if (!_messages.any((m) => m.id == newMessage.id && m.id.isNotEmpty)) {
+        // ONLY append the message to the view if it matches the role we are talking to
+        if (newMessage.senderRole == widget.recipientRole || 
+            newMessage.senderRole == widget.currentUserRole) {
            setState(() {
              _messages.add(newMessage);
            });
            _scrollToBottom();
         }
       }
-    });
+    }
+  });
   }
 
   void _sendMessage() {
