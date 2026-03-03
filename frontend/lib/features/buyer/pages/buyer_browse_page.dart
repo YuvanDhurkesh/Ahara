@@ -14,6 +14,7 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
 import '../../../shared/utils/location_util.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class BuyerBrowsePage extends StatefulWidget {
   const BuyerBrowsePage({super.key});
@@ -132,11 +133,11 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   // Format time remaining until expiry
   String _formatTimeRemaining(DateTime expiryTime) {
     final diff = expiryTime.difference(_now);
-    if (diff.isNegative) return "Expired";
-    if (diff.inDays > 0) return "Expires in ${diff.inDays}d ${diff.inHours % 24}h";
-    if (diff.inHours > 0) return "Expires in ${diff.inHours}h ${diff.inMinutes % 60}m";
-    if (diff.inMinutes > 0) return "Expires in ${diff.inMinutes}m";
-    return "Expiring soon";
+    if (diff.isNegative) return AppLocalizations.of(context)!.translate("expired");
+    if (diff.inDays > 0) return "${AppLocalizations.of(context)!.translate("ends_in")} ${diff.inDays}d ${diff.inHours % 24}h";
+    if (diff.inHours > 0) return "${AppLocalizations.of(context)!.translate("ends_in")} ${diff.inHours}h ${diff.inMinutes % 60}m";
+    if (diff.inMinutes > 0) return "${AppLocalizations.of(context)!.translate("ends_in")} ${diff.inMinutes}m";
+    return AppLocalizations.of(context)!.translate("soon");
   }
 
   // Filter out expired listings (client-side defense)
@@ -291,7 +292,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                       const Icon(Icons.location_off_outlined, color: AppColors.primary, size: 36),
                       const SizedBox(height: 12),
                       Text(
-                        "No listings here yet",
+                        AppLocalizations.of(context)!.translate("no_listings_here"),
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -301,8 +302,8 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                       const SizedBox(height: 4),
                       Text(
                         _allResults.isEmpty 
-                            ? "Try changing your filters or searching another area."
-                            : "Invite sellers in this area to encourage community growth!",
+                            ? AppLocalizations.of(context)!.translate("try_changing_filters")
+                            : AppLocalizations.of(context)!.translate("invite_sellers_desc"),
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 13,
@@ -444,7 +445,7 @@ List<Marker> _buildOSMMarkers() {
               const SizedBox(width: 4),
               Flexible(
                 child: Text(
-                  isFree ? "Free" : price,
+                  isFree ? AppLocalizations.of(context)!.translate("FREE") : price,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
@@ -584,7 +585,7 @@ Widget _buildFloatingButton({
                     controller: _searchController,
                     onChanged: (val) => setState(() => _searchQuery = val),
                     decoration: InputDecoration(
-                      hintText: "Search city, food or category...",
+                      hintText: AppLocalizations.of(context)!.translate("search_browse_hint"),
                       hintStyle: GoogleFonts.inter(
                         color: AppColors.textLight.withOpacity(0.5),
                         fontWeight: FontWeight.w500,
@@ -614,19 +615,27 @@ Widget _buildFloatingButton({
             const Divider(height: 20),
             Row(
               children: [
-                _buildHeaderFilter("Filter", onTap: _showFilterDialog),
+                _buildHeaderFilter(AppLocalizations.of(context)!.translate("filter"), onTap: _showFilterDialog),
                 const SizedBox(width: 8),
-                if (_minRating > 0) ...[
-                  _buildActiveFilterChip("${_minRating}+ ★"),
-                  const SizedBox(width: 8),
-                ],
-                if (_onlyFree) ...[
-                  _buildActiveFilterChip("Free"),
-                  const SizedBox(width: 8),
-                ],
-                const Spacer(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        if (_minRating > 0) ...[
+                          _buildActiveFilterChip("${_minRating}+ ★"),
+                          const SizedBox(width: 8),
+                        ],
+                        if (_onlyFree) ...[
+                          _buildActiveFilterChip(AppLocalizations.of(context)!.translate("FREE")),
+                          const SizedBox(width: 8),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
                 Text(
-                  "${_allResults.length} results",
+                  "${_allResults.length} ${AppLocalizations.of(context)!.translate("results")}",
                   style: GoogleFonts.inter(
                     color: Colors.grey.shade600,
                     fontWeight: FontWeight.w500,
@@ -701,7 +710,7 @@ Widget _buildFloatingButton({
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Filter",
+                    AppLocalizations.of(context)!.translate("filter"),
                     style: GoogleFonts.inter(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -709,7 +718,7 @@ Widget _buildFloatingButton({
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    "Rating",
+                    AppLocalizations.of(context)!.translate("rating"),
                     style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
@@ -734,12 +743,12 @@ Widget _buildFloatingButton({
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    "Offers",
+                    AppLocalizations.of(context)!.translate("offers"),
                     style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
                   FilterChip(
-                    label: const Text("Free Food Only"),
+                    label: Text(AppLocalizations.of(context)!.translate("free_food_only")),
                     selected: _onlyFree,
                     onSelected: (val) {
                       setModalState(() {});
@@ -764,7 +773,7 @@ Widget _buildFloatingButton({
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text("Apply Filters"),
+                      child: Text(AppLocalizations.of(context)!.translate("apply_filters")),
                     ),
                   ),
                 ],

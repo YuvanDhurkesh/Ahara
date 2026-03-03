@@ -5,6 +5,8 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'seller_order_detail_page.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/localization/language_provider.dart';
 
 class SellerOrdersPage extends StatefulWidget {
   const SellerOrdersPage({super.key});
@@ -62,31 +64,35 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(
-          "My Orders",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textDark,
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Error: $_error", style: TextStyle(color: Colors.red)),
-                      const SizedBox(height: 16),
-                      ElevatedButton(onPressed: _fetchOrders, child: const Text("Retry")),
-                    ],
-                  ),
-                )
-              : _buildTabbedView(),
+    return Consumer<LanguageProvider>(
+      builder: (context, langProvider, _) {
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            title: Text(
+              AppLocalizations.of(context)!.translate("my_orders"),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            backgroundColor: Colors.white,
+            elevation: 0,
+            foregroundColor: AppColors.textDark,
+          ),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("${AppLocalizations.of(context)!.translate('error')}: $_error", style: const TextStyle(color: Colors.red)),
+                          const SizedBox(height: 16),
+                          ElevatedButton(onPressed: _fetchOrders, child: Text(AppLocalizations.of(context)!.translate('retry'))),
+                        ],
+                      ),
+                    )
+                  : _buildTabbedView(),
+        );
+      },
     );
   }
 
@@ -111,13 +117,13 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
         children: [
           Container(
             color: Colors.white,
-            child: const TabBar(
+            child: TabBar(
               labelColor: AppColors.primary,
               unselectedLabelColor: Colors.grey,
               indicatorColor: AppColors.primary,
               tabs: [
-                Tab(text: "Active"),
-                Tab(text: "History"),
+                Tab(text: AppLocalizations.of(context)!.translate("active")),
+                Tab(text: AppLocalizations.of(context)!.translate("history")),
               ],
             ),
           ),
@@ -144,7 +150,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
             height: MediaQuery.of(context).size.height * 0.6,
             child: Center(
               child: Text(
-                "No orders found",
+                AppLocalizations.of(context)!.translate("no_orders_found"),
                 style: TextStyle(color: Colors.grey.shade400),
               ),
             ),
@@ -172,8 +178,8 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
   }
 
   Widget _buildOrderCard(BuildContext context, Map<String, dynamic> order) {
-    final foodName = order['listingId']?['foodName'] ?? "Unknown Item";
-    final buyerName = order['buyerId']?['name'] ?? "Unknown Buyer";
+    final foodName = order['listingId']?['foodName'] ?? AppLocalizations.of(context)!.translate("unknown_item");
+    final buyerName = order['buyerId']?['name'] ?? AppLocalizations.of(context)!.translate("unknown_item");
     final createdAt = DateTime.parse(order['createdAt']);
     final status = order['status'] ?? "pending";
     final orderId = order['_id'].toString();
@@ -208,25 +214,30 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Order #${orderId.substring(orderId.length - 6).toUpperCase()}",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textLight.withOpacity(0.6),
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${AppLocalizations.of(context)!.translate('order')} #${orderId.substring(orderId.length - 6).toUpperCase()}",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textLight.withOpacity(0.6),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        AppLocalizations.of(context)!.translate(order['listingId']?['foodName'] ?? "unknown_item"),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                    ],
                   ),
                   _buildStatusChip(status),
                 ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                foodName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
               ),
               const SizedBox(height: 8),
               Row(
@@ -260,9 +271,9 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                       color: AppColors.textLight.withOpacity(0.5),
                     ),
                   ),
-                  const Text(
-                    "View Details",
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context)!.translate("view_details"),
+                    style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -311,7 +322,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        status.toUpperCase().replaceAll('_', ' '),
+        AppLocalizations.of(context)!.translate(status),
         style: TextStyle(
           color: color,
           fontSize: 9,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../auth/pages/login_page.dart';
+import '../../common/pages/landing_page.dart';
 import 'buyer_account_details_page.dart';
 import '../../../../core/utils/responsive_layout.dart';
 import 'buyer_notifications_page.dart';
@@ -9,6 +10,8 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/localization/language_selection_page.dart';
 
 class BuyerProfilePage extends StatefulWidget {
   const BuyerProfilePage({super.key});
@@ -156,7 +159,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Hello, $displayName",
+                      "${AppLocalizations.of(context)!.translate("hello")}, $displayName",
                       style: GoogleFonts.lora(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -178,13 +181,13 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                     Expanded(
                       child: _buildInfoCard(
                         context,
-                        title: "Orders Placed",
+                        title: AppLocalizations.of(context)!.translate("orders_placed"),
                         value: _isLoadingStats
                             ? "..."
                             : _ordersPlaced.toString(),
                         subtext: _statsError != null
-                            ? "Unable to load"
-                            : "Your Order Journey",
+                            ? AppLocalizations.of(context)!.translate("unable_to_load")
+                            : AppLocalizations.of(context)!.translate("your_order_journey"),
                         icon: Icons.star_outline,
                         color: AppColors.primary,
                       ),
@@ -193,11 +196,11 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                     Expanded(
                       child: _buildInfoCard(
                         context,
-                        title: "Impact Score",
+                        title: AppLocalizations.of(context)!.translate("impact_score"),
                         value: displayTrustScore == null
                           ? "N/A"
                           : ((_localTrustScore ?? trustScore) ?? displayTrustScore).toString(),
-                        subtext: "Reflects contribution to waste reduction.",
+                        subtext: AppLocalizations.of(context)!.translate("impact_score_desc"),
                         icon: Icons.shield_outlined,
                         color: AppColors.secondary,
                       ),
@@ -208,30 +211,38 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                 const SizedBox(height: 40),
 
                 // Dietary Preferences Section
-                Row(
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 0,
                   children: [
                     Text(
-                      "Dietary Preferences",
+                      AppLocalizations.of(context)!.translate("dietary_preferences"),
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textDark,
                       ),
                     ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: () => _setAllPreferences(true),
-                      child: Text("Select All", style: GoogleFonts.inter(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600)),
-                    ),
-                    TextButton(
-                      onPressed: () => _setAllPreferences(false),
-                      child: Text("Clear All", style: GoogleFonts.inter(fontSize: 12, color: AppColors.textLight, fontWeight: FontWeight.w600)),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                          onPressed: () => _setAllPreferences(true),
+                          child: Text(AppLocalizations.of(context)!.translate("select_all"), style: GoogleFonts.inter(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                        ),
+                        TextButton(
+                          onPressed: () => _setAllPreferences(false),
+                          child: Text(AppLocalizations.of(context)!.translate("clear_all"), style: GoogleFonts.inter(fontSize: 12, color: AppColors.textLight, fontWeight: FontWeight.w600)),
+                        ),
+                      ],
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "We'll filter your feed based on these choices.",
+                  AppLocalizations.of(context)!.translate("dietary_prefs_desc"),
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     color: AppColors.textLight.withOpacity(0.6),
@@ -242,17 +253,17 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   spacing: 12,
                   runSpacing: 12,
                   children: [
-                    _buildPreferenceChip("vegetarian", "Vegetarian", Icons.eco_outlined),
-                    _buildPreferenceChip("vegan", "Vegan", Icons.eco),
-                    _buildPreferenceChip("non_veg", "Non-Veg", Icons.kebab_dining_outlined),
-                    _buildPreferenceChip("jain", "Jain", Icons.temple_hindu_outlined),
+                    _buildPreferenceChip("vegetarian", AppLocalizations.of(context)!.translate("vegetarian"), Icons.eco_outlined),
+                    _buildPreferenceChip("vegan", AppLocalizations.of(context)!.translate("vegan"), Icons.eco),
+                    _buildPreferenceChip("non_veg", AppLocalizations.of(context)!.translate("non_veg"), Icons.kebab_dining_outlined),
+                    _buildPreferenceChip("jain", AppLocalizations.of(context)!.translate("jain"), Icons.temple_hindu_outlined),
                   ],
                 ),
 
                 const SizedBox(height: 40),
 
                 Text(
-                  "Your Impact",
+                  AppLocalizations.of(context)!.translate("your_impact"),
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -264,17 +275,17 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   mobile: Column(
                     children: [
                       _buildImpactStat(
-                        "Orders Placed",
+                        AppLocalizations.of(context)!.translate("orders_placed"),
                         _isLoadingStats ? "..." : _ordersPlaced.toString(),
                         Icons.shopping_bag_outlined,
                       ),
                       _buildImpactStat(
-                        "Orders Cancelled",
+                        AppLocalizations.of(context)!.translate("orders_cancelled"),
                         _isLoadingStats ? "..." : _ordersCancelled.toString(),
                         Icons.cancel_outlined,
                       ),
                       _buildImpactStat(
-                        "Total Spent",
+                        AppLocalizations.of(context)!.translate("total_spent"),
                         _isLoadingStats
                             ? "..."
                             : "₹${_totalSpent.toStringAsFixed(0)}",
@@ -629,8 +640,44 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                       Icons.visibility_off_outlined,
                       "Hidden Stores",
                     ),
-                    _buildMenuItem(context, Icons.article_outlined, "Blog"),
-                    _buildMenuItem(context, Icons.gavel_outlined, "Legal"),
+                    _buildMenuItem(context, Icons.article_outlined, AppLocalizations.of(context)!.translate("blog")),
+                    _buildMenuItem(context, Icons.gavel_outlined, AppLocalizations.of(context)!.translate("legal")),
+                    _buildMenuItem(
+                      context,
+                      Icons.language_outlined,
+                      AppLocalizations.of(context)!.translate("change_language"),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // User Request: Login button even after login
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => LandingPage()),
+                            (route) => false,
+                          );
+                        },
+                        icon: const Icon(Icons.login_outlined, color: AppColors.primary),
+                        label: Text(
+                          AppLocalizations.of(context)!.translate("login_with_another_account"),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
 
                     const SizedBox(height: 40),
                     Padding(
@@ -645,7 +692,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const LoginPage(),
+                                builder: (context) => const LandingPage(),
                               ),
                               (route) => false,
                             );
@@ -659,9 +706,9 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: const Text(
-                          "Log out",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        child: Text(
+                          AppLocalizations.of(context)!.translate("logout_btn"),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -705,18 +752,25 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
       ),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
       onTap: () {
-        if (title == "Account details") {
+        if (title == "Account details" || title == AppLocalizations.of(context)!.translate("account_details")) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const BuyerAccountDetailsPage(),
             ),
           );
-        } else if (title == "Notifications") {
+        } else if (title == "Notifications" || title == AppLocalizations.of(context)!.translate("notifications")) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const BuyerNotificationsPage(),
+            ),
+          );
+        } else if (title == AppLocalizations.of(context)!.translate("change_language")) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LanguageSelectionPage(),
             ),
           );
         }

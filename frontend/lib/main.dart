@@ -60,8 +60,8 @@ class MyApp extends StatelessWidget {
         Locale('ta'),
         Locale('te'),
       ],
-      localizationsDelegates: const [
-        AppLocalizationsDelegate(),
+      localizationsDelegates: [
+        _CustomLocalizationsDelegate(context),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -70,6 +70,23 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+class _CustomLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+  final BuildContext context;
+  const _CustomLocalizationsDelegate(this.context);
+
+  @override
+  bool isSupported(Locale locale) => ['en', 'hi', 'ta', 'te'].contains(locale.languageCode);
+
+  @override
+  Future<AppLocalizations> load(Locale locale) async {
+    return AppLocalizations(locale, context);
+  }
+
+  @override
+  bool shouldReload(_CustomLocalizationsDelegate old) => false;
+}
+
 
 /// 🔥 AUTH WRAPPER
 /// Controls app entry based on login state
@@ -139,14 +156,14 @@ class AuthWrapper extends StatelessWidget {
         }
 
         // 3. Fallback: Firebase user exists but Mongo not loaded yet
-        return const Scaffold(
+        return Scaffold(
           body: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text("Loading profile..."),
+                Text(AppLocalizations.of(context)!.translate("loading_profile")),
               ],
             ),
           ),

@@ -6,6 +6,8 @@ import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_order_track_page.dart';
 import 'buyer_order_details_page.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/localization/language_provider.dart';
 
 class BuyerOrdersPage extends StatefulWidget {
   const BuyerOrdersPage({super.key});
@@ -63,31 +65,35 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          "My Orders",
-          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: AppColors.textDark,
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Error: $_error", style: GoogleFonts.inter(color: Colors.red)),
-                      const SizedBox(height: 16),
-                      ElevatedButton(onPressed: _fetchOrders, child: const Text("Retry")),
-                    ],
-                  ),
-                )
-              : _buildTabbedView(),
+    return Consumer<LanguageProvider>(
+      builder: (context, langProvider, _) {
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            title: Text(
+              AppLocalizations.of(context)!.translate("my_orders"),
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            backgroundColor: Colors.white,
+            elevation: 0,
+            foregroundColor: AppColors.textDark,
+          ),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("${AppLocalizations.of(context)!.translate('error')}: $_error", style: GoogleFonts.inter(color: Colors.red)),
+                          const SizedBox(height: 16),
+                          ElevatedButton(onPressed: _fetchOrders, child: Text(AppLocalizations.of(context)!.translate('retry'))),
+                        ],
+                      ),
+                    )
+                  : _buildTabbedView(),
+        );
+      },
     );
   }
 
@@ -112,9 +118,9 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
               unselectedLabelColor: Colors.grey,
               indicatorColor: AppColors.primary,
               labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
-              tabs: const [
-                Tab(text: "Active"),
-                Tab(text: "History"),
+              tabs: [
+                Tab(text: AppLocalizations.of(context)!.translate("active")),
+                Tab(text: AppLocalizations.of(context)!.translate("history")),
               ],
             ),
           ),
@@ -141,7 +147,7 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
     if (orders.isEmpty) {
       return Center(
         child: Text(
-          "No orders found",
+          AppLocalizations.of(context)!.translate("no_orders_found"),
           style: GoogleFonts.inter(color: Colors.grey),
         ),
       );
@@ -203,7 +209,7 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                order['listingId']?['foodName'] ?? "Unknown Item",
+                                AppLocalizations.of(context)!.translate(order['listingId']?['foodName'] ?? "unknown_item"),
                                 style: GoogleFonts.inter(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -216,7 +222,7 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "Quantity: ${order['quantityOrdered']} • ₹${order['pricing']?['total'] ?? 0}",
+                          "${AppLocalizations.of(context)!.translate("quantity")}: ${order['quantityOrdered']} • ₹${order['pricing']?['total'] ?? 0}",
                           style: GoogleFonts.inter(
                             color: AppColors.textLight.withOpacity(0.7),
                             fontSize: 13,
@@ -257,7 +263,7 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
                         );
                       },
                       icon: const Icon(Icons.location_on_outlined, size: 18),
-                      label: const Text("Track Order"),
+                      label: Text(AppLocalizations.of(context)!.translate("track_order")),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
@@ -325,7 +331,7 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        label,
+        AppLocalizations.of(context)!.translate(status),
         style: GoogleFonts.inter(
           color: color,
           fontSize: 10,
@@ -352,7 +358,7 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
           ),
           const SizedBox(width: 4),
           Text(
-            isDelivery ? "Delivery" : "Pickup",
+            isDelivery ? AppLocalizations.of(context)!.translate("delivery_label") : AppLocalizations.of(context)!.translate("pickup"),
             style: GoogleFonts.inter(
               fontSize: 10,
               fontWeight: FontWeight.bold,
@@ -376,7 +382,7 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
           const Icon(Icons.vpn_key_outlined, size: 12, color: Colors.white),
           const SizedBox(width: 4),
           Text(
-            "OTP: $otp",
+            "${AppLocalizations.of(context)!.translate('otp_label')}: $otp",
             style: GoogleFonts.inter(
               color: Colors.white,
               fontSize: 11,
@@ -429,10 +435,10 @@ class _BuyerOrdersPageState extends State<BuyerOrdersPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Placed", style: GoogleFonts.inter(fontSize: 9, color: Colors.grey)),
-            Text("Assigned", style: GoogleFonts.inter(fontSize: 9, color: Colors.grey)),
-            Text("Picked Up", style: GoogleFonts.inter(fontSize: 9, color: Colors.grey)),
-            Text("Delivered", style: GoogleFonts.inter(fontSize: 9, color: Colors.grey)),
+            Text(AppLocalizations.of(context)!.translate("placed"), style: GoogleFonts.inter(fontSize: 9, color: Colors.grey)),
+            Text(AppLocalizations.of(context)!.translate("assigned"), style: GoogleFonts.inter(fontSize: 9, color: Colors.grey)),
+            Text(AppLocalizations.of(context)!.translate("picked_up"), style: GoogleFonts.inter(fontSize: 9, color: Colors.grey)),
+            Text(AppLocalizations.of(context)!.translate("delivered"), style: GoogleFonts.inter(fontSize: 9, color: Colors.grey)),
           ],
         ),
       ],

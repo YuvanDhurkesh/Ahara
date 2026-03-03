@@ -12,6 +12,7 @@ import '../../../../data/services/socket_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'volunteer_story_page.dart';
 import '../../common/widgets/chat_screen.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class VolunteerOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic>? order;
@@ -91,7 +92,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         backgroundColor: const Color(0xFFFFFBF7),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         title: Text(
-          "⚠️ Report Emergency",
+          "⚠️ ${AppLocalizations.of(context)!.translate('report_emergency')}",
           style: GoogleFonts.ebGaramond(
               fontWeight: FontWeight.w800, color: Colors.red),
         ),
@@ -99,14 +100,14 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "Are you facing an issue? This will notify the buyer and seller of a potential delay.",
+              AppLocalizations.of(context)!.translate("emergency_desc"),
               style: GoogleFonts.plusJakartaSans(fontSize: 14),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: reasonController,
               decoration: InputDecoration(
-                hintText: "Reason (Accident, Bike issue, etc.)",
+                hintText: AppLocalizations.of(context)!.translate("emergency_hint") ?? "Reason (Accident, Bike issue, etc.)",
                 hintStyle: GoogleFonts.plusJakartaSans(fontSize: 14),
                 filled: true,
                 fillColor: Colors.white,
@@ -122,7 +123,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text("Cancel",
+            child: Text(AppLocalizations.of(context)!.translate("cancel"),
                 style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.w700, color: Colors.grey)),
           ),
@@ -133,7 +134,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                   borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: Text("Report",
+            child: Text(AppLocalizations.of(context)!.translate("report"),
                 style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.w700, color: Colors.white)),
           ),
@@ -152,15 +153,15 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
                 backgroundColor: Colors.red,
-                content: Text("Emergency reported. Assistance is notified.")),
+                content: Text(AppLocalizations.of(context)!.translate("emergency_reported_msg") ?? "Emergency reported. Assistance is notified.")),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to report: $e")),
+            SnackBar(content: Text("${AppLocalizations.of(context)!.translate('failed_to_report')}: $e")),
           );
         }
       }
@@ -171,7 +172,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     final otp = _otpController.text.trim();
     if (otp.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a 4-digit OTP")),
+        const SnackBar(content: Text("Please enter a valid 4-digit OTP")),
       );
       return;
     }
@@ -199,9 +200,9 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         await auth.refreshMongoUser();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             backgroundColor: Colors.green,
-            content: Text("Delivery verified. Order completed!"),
+            content: Text(AppLocalizations.of(context)!.translate("delivery_verified") ?? "Delivery verified. Order completed!"),
           ),
         );
 
@@ -242,18 +243,18 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         backgroundColor: const Color(0xFFFFFBF7),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         title: Text(
-          "Cancel Rescue",
+          AppLocalizations.of(context)!.translate("cancel_rescue"),
           style: GoogleFonts.ebGaramond(
               fontWeight: FontWeight.w800, color: Colors.red),
         ),
         content: Text(
-          "Are you sure you want to cancel this rescue? This will return the order to the pool and notify everyone.",
+          AppLocalizations.of(context)!.translate("cancel_rescue_msg"),
           style: GoogleFonts.plusJakartaSans(fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text("Keep It",
+            child: Text(AppLocalizations.of(context)!.translate("keep_it"),
                 style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.w700, color: Colors.grey)),
           ),
@@ -264,7 +265,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text("Cancel",
+            child: Text(AppLocalizations.of(context)!.translate("cancel"),
                 style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.w700, color: Colors.white)),
           ),
@@ -284,15 +285,15 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           final auth = Provider.of<AppAuthProvider>(context, listen: false);
           await auth.refreshMongoUser();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text("Rescue cancelled"), backgroundColor: Colors.red),
+            SnackBar(
+                content: Text(AppLocalizations.of(context)!.translate("rescue_cancelled") ?? "Rescue cancelled"), backgroundColor: Colors.red),
           );
           Navigator.pop(context, true);
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to cancel: $e")),
+            SnackBar(content: Text("${AppLocalizations.of(context)!.translate('failed_to_cancel')}: $e")),
           );
         }
       }
@@ -333,7 +334,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Could not launch navigation")),
+          SnackBar(content: Text(AppLocalizations.of(context)!.translate("could_not_launch_nav") ?? "Could not launch navigation")),
         );
       }
     }
@@ -353,7 +354,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Rescue Details',
+          AppLocalizations.of(context)!.translate('rescue_details'),
           style: GoogleFonts.ebGaramond(
             color: const Color(0xFF1A1A1A),
             fontWeight: FontWeight.w800,
@@ -368,7 +369,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
               elevation: 4,
               icon:
                   const Icon(Icons.warning_amber_rounded, color: Colors.white),
-              label: Text("GET HELP",
+              label: Text(AppLocalizations.of(context)!.translate("get_help"),
                   style: GoogleFonts.plusJakartaSans(
                       color: Colors.white, fontWeight: FontWeight.w800)),
             )
@@ -458,7 +459,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                       child: TextButton(
                         onPressed: _cancelOrder,
                         child: Text(
-                          "Cancel This Rescue",
+                          AppLocalizations.of(context)!.translate("cancel_rescue"),
                           style: GoogleFonts.plusJakartaSans(
                             color: Colors.red.shade300,
                             fontWeight: FontWeight.bold,
@@ -482,7 +483,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
   Widget _orderSummary() {
     final order = widget.order;
     final listing = order?['listingId'] as Map<String, dynamic>?;
-    final foodName = listing?['foodName'] ?? 'Order';
+    final foodName = AppLocalizations.of(context)!.translate(listing?['foodName'] ?? 'order');
     final quantity = order?['quantityOrdered']?.toString() ?? '-';
     final idText = order?['_id']?.toString();
     final shortId = idText == null
@@ -504,7 +505,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    shortId != null ? 'RESCUE #$shortId' : 'RESCUE DETAILS',
+                    shortId != null ? "${AppLocalizations.of(context)!.translate('rescue_id')}$shortId" : AppLocalizations.of(context)!.translate('rescue_details'),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
@@ -537,7 +538,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                   child: Column(
                     children: [
                       Text(
-                        'PICKUP CODE',
+                        AppLocalizations.of(context)!.translate('pickup_code') ?? 'PICKUP CODE',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
@@ -561,11 +562,11 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           Row(
             children: [
               _buildSmallBadge(
-                  _currentStatus.replaceAll('_', ' ').toUpperCase(),
+                  AppLocalizations.of(context)!.translate(_currentStatus),
                   const Color(0xFFE8F5E9),
                   Colors.green.shade700),
               const SizedBox(width: 12),
-              _buildSmallBadge('$quantity ITEMS', const Color(0xFFF3E5F5),
+              _buildSmallBadge("${quantity} ${AppLocalizations.of(context)!.translate('items_count')}", const Color(0xFFF3E5F5),
                   Colors.purple.shade700),
             ],
           ),
@@ -580,15 +581,10 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     final reason = cancellation?['reason']?.toString();
     final isFailed = _currentStatus == 'failed';
 
-    final actorLabel = {
-      'buyer': 'Buyer',
-      'seller': 'Seller',
-      'volunteer': 'You (Volunteer)',
-      'system': 'System (no volunteer available)',
-    }[cancelledBy] ?? cancelledBy;
+    final actorLabel = AppLocalizations.of(context)!.translate(cancelledBy);
 
     final color = isFailed ? Colors.deepOrange : Colors.red;
-    final title = isFailed ? 'Rescue Failed' : 'Rescue Cancelled';
+    final title = isFailed ? AppLocalizations.of(context)!.translate('rescue_failed') ?? 'Rescue Failed' : AppLocalizations.of(context)!.translate('rescue_cancelled') ?? 'Rescue Cancelled';
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -611,7 +607,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           Text.rich(
             TextSpan(children: [
               TextSpan(
-                  text: 'Cancelled by: ',
+                  text: AppLocalizations.of(context)!.translate('cancelled_by'),
                   style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.black54)),
               TextSpan(
                   text: actorLabel,
@@ -621,7 +617,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           ),
           if (reason != null && reason.isNotEmpty) ...[  
             const SizedBox(height: 4),
-            Text('Reason: $reason',
+            Text('${AppLocalizations.of(context)!.translate("reason_label")}: $reason',
                 style: GoogleFonts.plusJakartaSans(
                     fontSize: 12, color: Colors.black45, fontStyle: FontStyle.italic)),
           ],
@@ -656,7 +652,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     final phone = seller?['phoneNumber'] ?? '-';
 
     return _addressDetailCard(
-      title: "PICKUP FROM",
+      title: AppLocalizations.of(context)!.translate("pickup_from"),
       name: name,
       address: address,
       phone: phone,
@@ -674,7 +670,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
     final phone = buyer?['phoneNumber'] ?? '-';
 
     return _addressDetailCard(
-      title: "DELIVER TO",
+      title: AppLocalizations.of(context)!.translate("deliver_to"),
       name: name,
       address: address,
       phone: phone,
@@ -751,7 +747,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                             size: 16, color: Colors.blue.shade700),
                         const SizedBox(width: 8),
                         Text(
-                          "Call",
+                          AppLocalizations.of(context)!.translate("call"),
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -796,7 +792,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
                             size: 16, color: Colors.orange.shade700),
                         const SizedBox(width: 8),
                         Text(
-                          "Message",
+                          AppLocalizations.of(context)!.translate("message"),
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
@@ -837,7 +833,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "ORDER VERIFICATION",
+            AppLocalizations.of(context)!.translate('order_verification_title') ?? "ORDER VERIFICATION",
             style: GoogleFonts.plusJakartaSans(
               fontSize: 10,
               fontWeight: FontWeight.w800,
@@ -847,7 +843,7 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            "Enter Delivery OTP",
+            AppLocalizations.of(context)!.translate('enter_delivery_otp') ?? "Enter Delivery OTP",
             style: GoogleFonts.ebGaramond(
               fontSize: 22,
               fontWeight: FontWeight.w800,
@@ -915,8 +911,8 @@ class _VolunteerOrderDetailPageState extends State<VolunteerOrderDetailPage> {
         ? deliveryLocation
         : pickupLocation;
     final label = _currentStatus == 'picked_up' || _currentStatus == 'in_transit'
-        ? "Navigate to Dropoff"
-        : "Navigate to Pickup";
+        ? AppLocalizations.of(context)!.translate('nav_to_dropoff') ?? "Navigate to Dropoff"
+        : AppLocalizations.of(context)!.translate('nav_to_pickup') ?? "Navigate to Pickup";
 
     return SizedBox(
       width: double.infinity,

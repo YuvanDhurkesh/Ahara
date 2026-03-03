@@ -5,6 +5,7 @@ import '../../../shared/styles/app_colors.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import '../../common/widgets/chat_screen.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class SellerOrderDetailPage extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -35,7 +36,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     final otp = _otpController.text.trim();
     if (otp.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a valid 4-digit OTP")),
+        SnackBar(content: Text(AppLocalizations.of(context)!.translate("invalid_otp_msg"))),
       );
       return;
     }
@@ -62,7 +63,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.green,
-            content: Text(response['message'] ?? "Verified successfully!"),
+            content: Text(AppLocalizations.of(context)!.translate(response['message']) ?? AppLocalizations.of(context)!.translate("verified_success") ?? "Verified successfully!"),
           ),
         );
       }
@@ -90,7 +91,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              "Order status updated to ${newStatus.replaceAll('_', ' ')}",
+              "${AppLocalizations.of(context)!.translate('order_status_updated')}: ${AppLocalizations.of(context)!.translate(newStatus)}",
             ),
           ),
         );
@@ -98,7 +99,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
+          SnackBar(content: Text("${AppLocalizations.of(context)!.translate('error')}: $e")),
         );
       }
     }
@@ -108,14 +109,14 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Cancel Order", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-        content: const Text("Are you sure you want to cancel this order? This will restore listing quantity and notify the buyer."),
+        title: Text(AppLocalizations.of(context)!.translate("cancel_order"), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+        content: Text(AppLocalizations.of(context)!.translate("cancel_confirmation_msg")),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("No, Keep it")),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(AppLocalizations.of(context)!.translate("keep_it"))),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text("Yes, Cancel", style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context)!.translate("yes_cancel"), style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -133,13 +134,13 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
           final auth = Provider.of<AppAuthProvider>(context, listen: false);
           await auth.refreshMongoUser();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Order cancelled"), backgroundColor: Colors.red),
+            SnackBar(content: Text(AppLocalizations.of(context)!.translate("order_cancelled")), backgroundColor: Colors.red),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to cancel: $e")),
+            SnackBar(content: Text("${AppLocalizations.of(context)!.translate('failed_to_cancel')}: $e")),
           );
         }
       }
@@ -148,12 +149,13 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final listing = widget.order['listingId'] ?? {};
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          "Order Details",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        title: Text(
+          AppLocalizations.of(context)!.translate("order_details"),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -190,7 +192,8 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
   }
 
   Widget _buildOrderHeader() {
-    final foodName = widget.order['listingId']?['foodName'] ?? "Unknown Item";
+    final listing = widget.order['listingId'] ?? {};
+    final foodName = AppLocalizations.of(context)!.translate(listing['foodName'] ?? "unknown_item");
     final orderId = widget.order['_id'].toString();
     final createdAt = DateTime.parse(widget.order['createdAt']);
     final totalAmount = widget.order['pricing']?['total'] ?? 0;
@@ -217,7 +220,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Order #${orderId.substring(orderId.length - 6).toUpperCase()}",
+                    "${AppLocalizations.of(context)!.translate('order')} #${orderId.substring(orderId.length - 6).toUpperCase()}",
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textLight.withOpacity(0.6),
@@ -226,7 +229,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    foodName,
+                    listing['foodName'] ?? AppLocalizations.of(context)!.translate("unknown_item"),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -245,7 +248,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  _currentStatus.toUpperCase().replaceAll('_', ' '),
+                  AppLocalizations.of(context)!.translate(_currentStatus),
                   style: TextStyle(
                     color: _getStatusColor(_currentStatus),
                     fontSize: 10,
@@ -263,15 +266,15 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildHeaderStat(
-                "Amount",
+                AppLocalizations.of(context)!.translate("amount"),
                 "₹${totalAmount.toString()}",
               ),
               _buildHeaderStat(
-                "Date",
+                AppLocalizations.of(context)!.translate("date"),
                 DateFormat('MMM dd, yyyy').format(createdAt),
               ),
               _buildHeaderStat(
-                "Time",
+                AppLocalizations.of(context)!.translate("time"),
                 DateFormat('hh:mm a').format(createdAt),
               ),
             ],
@@ -320,8 +323,8 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Order Progress",
+        Text(
+          AppLocalizations.of(context)!.translate("order_progress"),
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -433,7 +436,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Buyer Information",
+                    AppLocalizations.of(context)!.translate("buyer_info"),
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.textLight.withOpacity(0.6),
@@ -442,7 +445,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    widget.order['buyerId']?['name'] ?? "Unknown Buyer",
+                    widget.order['buyerId']?['name'] ?? AppLocalizations.of(context)!.translate("unknown_buyer"),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -510,7 +513,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Delivery Partner",
+                    AppLocalizations.of(context)!.translate("delivery_partner"),
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.textLight.withOpacity(0.6),
@@ -519,7 +522,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    widget.order['volunteerId']?['name'] ?? "Unknown",
+                    widget.order['volunteerId']?['name'] ?? AppLocalizations.of(context)!.translate("unknown_volunteer"),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -584,8 +587,8 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
                 ),
               ),
               const SizedBox(width: 16),
-              const Text(
-                "Pickup Instructions",
+              Text(
+                AppLocalizations.of(context)!.translate("pickup_instructions"),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -597,7 +600,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
           const SizedBox(height: 16),
           Text(
             (widget.order['specialInstructions'] ?? "").isEmpty
-                ? "No specific instructions provided. Please wait at the specified location."
+                ? AppLocalizations.of(context)!.translate("no_instructions_provided") ?? "No specific instructions provided."
                 : widget.order['specialInstructions'],
             style: TextStyle(
               fontSize: 14,
@@ -615,18 +618,18 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     bool canVerify = false;
     String helperText = "";
 
-    if (isSelfPickup) {
-      if (_currentStatus == 'placed') {
-        canVerify = true;
-        helperText = "Enter Buyer's Handover OTP once they arrive for pickup.";
+      if (isSelfPickup) {
+        if (_currentStatus == 'placed') {
+          canVerify = true;
+          helperText = AppLocalizations.of(context)!.translate("handover_instruction_buyer") ?? "Enter Buyer's Handover OTP once they arrive for pickup.";
+        }
+      } else {
+        // Volunteer Delivery
+        if (['placed', 'volunteer_assigned', 'volunteer_accepted'].contains(_currentStatus)) {
+          canVerify = true;
+          helperText = AppLocalizations.of(context)!.translate("handover_instruction_volunteer") ?? "Enter Volunteer's Pickup OTP to record the collection.";
+        }
       }
-    } else {
-      // Volunteer Delivery
-      if (['placed', 'volunteer_assigned', 'volunteer_accepted'].contains(_currentStatus)) {
-        canVerify = true;
-        helperText = "Enter Volunteer's Pickup OTP to record the collection.";
-      }
-    }
 
     if (!canVerify) return const SizedBox.shrink();
 
@@ -645,7 +648,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
               const Icon(Icons.verified_user, color: AppColors.primary, size: 20),
               const SizedBox(width: 12),
               Text(
-                "Secure Handover",
+                AppLocalizations.of(context)!.translate("secure_handover"),
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -721,8 +724,8 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          "Verify",
+                      : Text(
+                          AppLocalizations.of(context)!.translate("verify"),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
@@ -753,7 +756,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
         // For seller, if it's self-pickup, they verify OTP. 
         // If it's delivery, they should wait for a volunteer matching.
         if (widget.order['fulfillment'] == 'volunteer_delivery') {
-          nextButtonText = "Awaiting Volunteer...";
+          nextButtonText = AppLocalizations.of(context)!.translate("finding_volunteer");
           nextStatus = null;
         } else {
           // Self pickup? They can use the OTP section. 
@@ -761,7 +764,7 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
         }
         break;
       case "awaiting_volunteer":
-        nextButtonText = "Broadcast Sent...";
+        nextButtonText = AppLocalizations.of(context)!.translate("broadcast_sent");
         nextStatus = null; 
         break;
       case "volunteer_assigned":
@@ -828,14 +831,14 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     final isFailed = _currentStatus == 'failed';
 
     final actorLabel = {
-      'buyer': 'Buyer',
-      'seller': 'You (Seller)',
-      'volunteer': 'Volunteer',
-      'system': 'System (no volunteer available)',
+      'buyer': AppLocalizations.of(context)!.translate('buyer_label'),
+      'seller': AppLocalizations.of(context)!.translate('you_seller'),
+      'volunteer': AppLocalizations.of(context)!.translate('volunteer_label'),
+      'system': AppLocalizations.of(context)!.translate('system_no_volunteer'),
     }[cancelledBy] ?? cancelledBy;
 
     final color = isFailed ? Colors.deepOrange : Colors.redAccent;
-    final title = isFailed ? 'Order Failed' : 'Order Cancelled';
+    final title = isFailed ? AppLocalizations.of(context)!.translate('order_failed') : AppLocalizations.of(context)!.translate('order_cancelled_label');
 
     return Container(
       width: double.infinity,
@@ -857,14 +860,14 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
           const SizedBox(height: 8),
           Text.rich(
             TextSpan(children: [
-              const TextSpan(text: 'Cancelled by: '),
+              TextSpan(text: AppLocalizations.of(context)!.translate('cancelled_by')),
               TextSpan(text: actorLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
             ]),
             style: const TextStyle(fontSize: 12, color: Colors.black87),
           ),
           if (reason != null && reason.isNotEmpty) ...[  
             const SizedBox(height: 4),
-            Text('Reason: $reason',
+            Text("${AppLocalizations.of(context)!.translate('reason_label')}: $reason",
                 style: const TextStyle(fontSize: 12, color: Colors.black54, fontStyle: FontStyle.italic)),
           ],
         ],
@@ -897,15 +900,15 @@ class _SellerOrderDetailPageState extends State<SellerOrderDetailPage> {
     switch (status) {
       case "placed":
       case "pending":
-        return "Placed";
+        return AppLocalizations.of(context)!.translate("placed");
       case "awaiting_volunteer":
-        return "Requested";
+        return AppLocalizations.of(context)!.translate("requested");
       case "volunteer_assigned":
-        return "Assigned";
+        return AppLocalizations.of(context)!.translate("assigned");
       case "picked_up":
-        return "Picked Up";
+        return AppLocalizations.of(context)!.translate("picked_up");
       case "delivered":
-        return "Delivered";
+        return AppLocalizations.of(context)!.translate("delivered");
       default:
         return "";
     }
