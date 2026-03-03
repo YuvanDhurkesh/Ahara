@@ -78,36 +78,26 @@ class _LandingPageState extends State<LandingPage> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: AppColors.textDark),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const LanguageSelectionPage()),
-              );
-            },
-            tooltip: "Change Language",
-          ),
           if (!isMobile) ...[
             _NavBarItem(
-              AppLocalizations.of(context)!.translate("how_it_works"),
+              "How It Works",
               isActive: _activeSection == "howitworks",
               onTap: () => _scrollToSection(_howItWorksKey, "howitworks"),
             ),
             _NavBarItem(
-              AppLocalizations.of(context)!.translate("trust"),
+              "Trust",
               isActive: _activeSection == "trust",
               onTap: () => _scrollToSection(_trustKey, "trust"),
             ),
             _NavBarItem(
-              AppLocalizations.of(context)!.translate("impact"),
+              "Impact",
               isActive: _activeSection == "impact",
               onTap: () => _scrollToSection(_impactKey, "impact"),
             ),
           ],
           IconButton(
             onPressed: () => _showAuthOptions(context),
-            tooltip: AppLocalizations.of(context)!.translate("join_us"),
+            tooltip: "Join Us",
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -171,7 +161,7 @@ class _LandingPageState extends State<LandingPage> {
                 ),
               ),
             ),
-            _buildDrawerItem("How it works", () {
+            _buildDrawerItem("How It Works", () {
               Navigator.pop(context);
               _scrollToSection(_howItWorksKey, "howitworks");
             }),
@@ -247,9 +237,9 @@ class _LandingPageState extends State<LandingPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                "Welcome back to Ahara",
-                style: TextStyle(
+              Text(
+                "Welcome Back to Ahara",
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textDark,
@@ -315,10 +305,10 @@ class _LandingPageState extends State<LandingPage> {
                       color: AppColors.textLight,
                     ),
                     children: [
-                      const TextSpan(text: "New to Ahara? "),
+                      TextSpan(text: "New to Ahara? "),
                       TextSpan(
                         text: "Create an Account",
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                         ),
@@ -460,9 +450,9 @@ class HeroSection extends StatelessWidget {
             color: AppColors.primary.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Text(
+          child: Text(
             "COMMUNITY-DRIVEN FOOD SHARING",
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.primary,
               fontWeight: FontWeight.w800,
               fontSize: 10,
@@ -543,27 +533,27 @@ class HowItWorks extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 48),
       child: Column(
         children: [
-          const SectionTitle("How It Works"),
+          SectionTitle("How It Works"),
           const SizedBox(height: 40),
           ResponsiveLayout(
             mobile: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
-                children: const [
+                children: [
                   FeatureCard(
                     title: "Give Food",
                     icon: Icons.shopping_basket_outlined,
                     description: "Share surplus food",
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   FeatureCard(
                     title: "Volunteer",
                     icon: Icons.people_outline,
                     description: "Transport & verify",
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   FeatureCard(
-                    title: "Find a meal",
+                    title: "Find a Meal",
                     icon: Icons.restaurant_outlined,
                     description: "Discover local meals",
                   ),
@@ -572,7 +562,7 @@ class HowItWorks extends StatelessWidget {
             ),
             desktop: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Flexible(
                   child: FeatureCard(
                     title: "Give Food",
@@ -580,7 +570,7 @@ class HowItWorks extends StatelessWidget {
                     description: "Share surplus food",
                   ),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Flexible(
                   child: FeatureCard(
                     title: "Volunteer",
@@ -588,10 +578,10 @@ class HowItWorks extends StatelessWidget {
                     description: "Transport & verify",
                   ),
                 ),
-                SizedBox(width: 20),
+                const SizedBox(width: 20),
                 Flexible(
                   child: FeatureCard(
-                    title: "Find a meal",
+                    title: "Find a Meal",
                     icon: Icons.restaurant_outlined,
                     description: "Discover local meals",
                   ),
@@ -620,7 +610,7 @@ class TrustSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 48),
       child: Column(
         children: [
-          const SectionTitle("Why Trust Us"),
+          SectionTitle("Why Trust Us"),
           const SizedBox(height: 40),
           ResponsiveLayout(
             mobile: Padding(

@@ -9,6 +9,7 @@ import '../../../data/services/backend_service.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'create_listing_page.dart';
 import 'seller_listing_details_page.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class SellerListingsPage extends StatefulWidget {
   const SellerListingsPage({super.key});
@@ -116,21 +117,21 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
         backgroundColor: AppColors.background,
         appBar: AppBar(
           title: Text(
-            "My Listings",
+            AppLocalizations.of(context)!.translate("my_listings"),
             style: GoogleFonts.lora(fontWeight: FontWeight.bold, fontSize: 20),
           ),
           backgroundColor: Colors.white,
           elevation: 0,
           foregroundColor: AppColors.textDark,
-          bottom: const TabBar(
+          bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textLight,
             indicatorColor: AppColors.primary,
             indicatorWeight: 3,
             tabs: [
-              Tab(text: "Active"),
-              Tab(text: "Completed"),
-              Tab(text: "Expired"),
+              Tab(text: AppLocalizations.of(context)!.translate("active")),
+              Tab(text: AppLocalizations.of(context)!.translate("completed")),
+              Tab(text: AppLocalizations.of(context)!.translate("expired_tab")),
             ],
           ),
           actions: [
@@ -147,7 +148,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                   _fetchListings(); // Refresh after return
                 },
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text("New Listing"),
+                label: Text(AppLocalizations.of(context)!.translate("new_listing")),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary.withOpacity(0.1),
                   foregroundColor: AppColors.primary,
@@ -169,7 +170,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
         body: _isLoading 
             ? const Center(child: CircularProgressIndicator())
             : _errorMessage != null
-                ? Center(child: Text("Error: $_errorMessage"))
+                ? Center(child: Text("${AppLocalizations.of(context)!.translate("error")}: $_errorMessage"))
                 : Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 900),
@@ -214,7 +215,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Relist Listing"),
+        title: Text(AppLocalizations.of(context)!.translate("relist_listing")),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -278,7 +279,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
+            child: Text(AppLocalizations.of(context)!.translate("cancel")),
           ),
           ElevatedButton(
             onPressed: () {
@@ -290,7 +291,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                 );
               }
             },
-            child: const Text("Relist"),
+            child: Text(AppLocalizations.of(context)!.translate("relist_listing")),
           ),
         ],
       ),
@@ -319,9 +320,9 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
   }
 
   Widget _buildEmptyState(BuildContext context, ListingStatus status) {
-    String message = "No listings yet";
-    if (status == ListingStatus.claimed) message = "No completed listings";
-    if (status == ListingStatus.expired) message = "No expired listings";
+    String message = AppLocalizations.of(context)!.translate("no_listings_yet");
+    if (status == ListingStatus.claimed) message = AppLocalizations.of(context)!.translate("no_completed_listings");
+    if (status == ListingStatus.expired) message = AppLocalizations.of(context)!.translate("no_expired_listings");
 
     return Center(
       child: Column(
@@ -344,7 +345,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
           const SizedBox(height: 8),
           if (status == ListingStatus.active)
             Text(
-              "Start by creating your first food listing",
+              AppLocalizations.of(context)!.translate("start_creating_listing_desc"),
               style: TextStyle(color: AppColors.textLight.withOpacity(0.6)),
             ),
         ],
@@ -443,7 +444,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                       const SizedBox(width: 4),
                       Text(
                         listing.redistributionMode == RedistributionMode.free
-                            ? "FREE"
+                            ? AppLocalizations.of(context)!.translate("FREE")
                             : listing.price?.toStringAsFixed(0) ?? "0",
                         style: const TextStyle(
                           color: Colors.white,
@@ -527,8 +528,8 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                     const SizedBox(width: 6),
                     Text(
                       _now.isBefore(listing.expiryTime)
-                          ? "Expires in ${_formatDuration(listing.expiryTime.difference(_now))}"
-                          : "Expired ${_formatDuration(_now.difference(listing.expiryTime))} ago",
+                          ? "${AppLocalizations.of(context)!.translate("expires_in")} ${_formatDuration(listing.expiryTime.difference(_now))}"
+                          : "${AppLocalizations.of(context)!.translate("expired_ago")} ${_formatDuration(_now.difference(listing.expiryTime))}",
                       style: TextStyle(
                         color: _now.isBefore(listing.expiryTime) 
                             ? Colors.orange.shade700 
@@ -542,14 +543,17 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                 const SizedBox(height: 16),
                 const Divider(height: 1),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 12,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Hygiene Status",
+                          AppLocalizations.of(context)!.translate("hygiene_status"),
                           style: TextStyle(
                             fontSize: 11,
                             color: AppColors.textLight.withOpacity(0.5),
@@ -570,6 +574,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                       ],
                     ),
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         TextButton(
                           onPressed: () async {
@@ -582,14 +587,14 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                             );
                             _fetchListings();
                           },
-                          child: const Text("Edit"),
+                          child: Text(AppLocalizations.of(context)!.translate("edit")),
                         ),
                         const SizedBox(width: 4),
                         if (isExpired)
                           ElevatedButton.icon(
                             onPressed: () => _showRelistDialog(listing),
                             icon: const Icon(Icons.refresh, size: 16),
-                            label: const Text("Relist"),
+                            label: Text(AppLocalizations.of(context)!.translate("relist_listing")),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                               foregroundColor: Colors.white,
@@ -620,9 +625,9 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
-                              "View Details",
-                              style: TextStyle(color: AppColors.primary),
+                            child: Text(
+                              AppLocalizations.of(context)!.translate("view_details"),
+                              style: const TextStyle(color: AppColors.primary),
                             ),
                           ),
                       ],

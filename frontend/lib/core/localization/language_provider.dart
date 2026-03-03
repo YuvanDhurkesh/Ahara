@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'translation_cache.dart';
 
 class LanguageProvider extends ChangeNotifier {
   Locale _locale = const Locale('en');
@@ -15,7 +16,12 @@ class LanguageProvider extends ChangeNotifier {
   bool get isManualSelection => _isManualSelection;
 
   LanguageProvider() {
-    _loadFromPrefs();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await TranslationCache.init();
+    await _loadFromPrefs();
   }
 
   Future<void> setLanguage(String languageCode, {bool isManual = true}) async {
@@ -25,6 +31,12 @@ class LanguageProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_langKey, languageCode);
   }
+
+  // New method to allow AppLocalizations to trigger a rebuild when a dynamic translation arrives
+  void refreshUI() {
+    notifyListeners();
+  }
+
 
   Future<void> setUiMode(String mode, {bool isManual = true}) async {
     _uiMode = mode;

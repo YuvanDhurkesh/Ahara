@@ -7,6 +7,7 @@ import 'volunteer_register_page.dart';
 import 'login_page.dart';
 
 import '../../../core/localization/language_provider.dart';
+import '../../../core/localization/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 class RegisterSelectionPage extends StatelessWidget {
@@ -27,7 +28,7 @@ class RegisterSelectionPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "How would you like\nto join us?",
+              "How would you like to join?",
               style: Theme.of(
                 context,
               ).textTheme.headlineLarge?.copyWith(height: 1.2),
@@ -36,7 +37,7 @@ class RegisterSelectionPage extends StatelessWidget {
             const SizedBox(height: 12),
 
             Text(
-              "Select your role to get started with the community and help reduce food waste.",
+              "Select your role to create your account and get started.",
               style: TextStyle(
                 color: AppColors.textLight.withOpacity(0.8),
                 fontSize: 16,
@@ -93,7 +94,7 @@ class RegisterSelectionPage extends StatelessWidget {
   Widget _buildBuyerCard(BuildContext context) {
     return _SelectionCard(
       title: "Register as Buyer",
-      description: "Find and purchase surplus meals near you at great prices.",
+      description: "Find affordable meals and surplus food nearby while supporting local businesses.",
       icon: Icons.shopping_bag_outlined,
       onTap: () {
         navigateWithRole(context, const BuyerRegisterPage(role: "buyer"));
@@ -104,7 +105,7 @@ class RegisterSelectionPage extends StatelessWidget {
   Widget _buildSellerCard(BuildContext context) {
     return _SelectionCard(
       title: "Register as Seller",
-      description: "List your surplus food and help reduce local waste.",
+      description: "List your surplus food and reach more customers in your neighborhood.",
       icon: Icons.storefront_outlined,
       onTap: () {
         navigateWithRole(context, const SellerRegisterPage());
@@ -115,7 +116,7 @@ class RegisterSelectionPage extends StatelessWidget {
   Widget _buildVolunteerCard(BuildContext context) {
     return _SelectionCard(
       title: "Register as Volunteer",
-      description: "Lend a hand in distributing food to those who need it.",
+      description: "Help verify and transport meals to those who need them most in your city.",
       icon: Icons.volunteer_activism_outlined,
       onTap: () {
         navigateWithRole(context, const VolunteerRegisterPage());

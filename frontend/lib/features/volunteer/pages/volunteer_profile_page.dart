@@ -6,6 +6,8 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import '../../common/pages/landing_page.dart';
 import 'package:provider/provider.dart';
+import '../../../core/localization/app_localizations.dart';
+import '../../../core/localization/language_selection_page.dart';
 
 class VolunteerProfilePage extends StatefulWidget {
   const VolunteerProfilePage({super.key});
@@ -119,7 +121,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Hello, $name',
+                    '${AppLocalizations.of(context)!.translate("hello")}, $name',
                     style: GoogleFonts.ebGaramond(
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
@@ -135,7 +137,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                 children: [
                   Expanded(
                     child: _statCard(
-                      label: 'Trust Score',
+                      label: AppLocalizations.of(context)!.translate('trust_score'),
                       value: ((_localTrustScore ?? backendTrustFromMongo) ?? 0).toString(),
                       icon: Icons.shield_rounded,
                       color: const Color(0xFF388E3C),
@@ -144,7 +146,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _statCard(
-                      label: 'Rating',
+                      label: AppLocalizations.of(context)!.translate('rating'),
                       value: rating.toStringAsFixed(1),
                       icon: Icons.star_rounded,
                       color: const Color(0xFFD35400),
@@ -153,7 +155,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _statCard(
-                      label: 'Total Deliveries',
+                      label: AppLocalizations.of(context)!.translate('total_deliveries'),
                       value: totalDeliveries,
                       icon: Icons.local_shipping_rounded,
                       color: AppColors.primary,
@@ -162,16 +164,16 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                 ],
               ),
               const SizedBox(height: 24),
-              _sectionLabel("Details"),
+              _sectionLabel(AppLocalizations.of(context)!.translate('details')),
               const SizedBox(height: 12),
               _infoTile(
-                label: 'Vehicle Type',
+                label: AppLocalizations.of(context)!.translate('vehicle_type'),
                 value: transportLabel,
                 icon: Icons.directions_bike_rounded,
               ),
               const SizedBox(height: 16),
               _infoTile(
-                label: 'Address',
+                label: AppLocalizations.of(context)!.translate('address'),
                 value: addressText,
                 icon: Icons.location_on_rounded,
               ),
@@ -367,7 +369,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Manage account',
+                      AppLocalizations.of(context)!.translate('manage_account'),
                       style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -387,11 +389,11 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   controller: controller,
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   children: [
-                    _buildSectionHeader('SETTINGS'),
+                    _buildSectionHeader(AppLocalizations.of(context)!.translate('settings').toUpperCase()),
                     _buildMenuItem(
                       ctx,
                       Icons.person_outline,
-                      'Account details',
+                      AppLocalizations.of(context)!.translate('account_details'),
                       onTap: () {
                         Navigator.pop(ctx);
                         _openManageAccountPage();
@@ -400,10 +402,24 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                     _buildMenuItem(
                       ctx,
                       Icons.lock_outline,
-                      'Change password',
+                      AppLocalizations.of(context)!.translate('change_password'),
                       onTap: () {
                         Navigator.pop(ctx);
                         _showChangePasswordDialog();
+                      },
+                    ),
+                    _buildMenuItem(
+                      ctx,
+                      Icons.language_outlined,
+                      AppLocalizations.of(context)!.translate('change_language'),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LanguageSelectionPage(),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(height: 40),
@@ -422,9 +438,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: const Text(
-                          'Log out',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        child: Text(
+                          AppLocalizations.of(context)!.translate('logout'),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),

@@ -133,7 +133,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
           'type': 'new_feedback',
           'title': AppLocalizations.of(context)!.translate("new_feedback"),
           'subtitle':
-              '${'⭐' * rating.toInt()} ${comment ?? "Seller review received"}',
+              '${'⭐' * rating.toInt()} ${comment ?? AppLocalizations.of(context)!.translate("review_received")}',
           'timestamp': createdAt is String
               ? DateTime.parse(createdAt)
               : DateTime.now(),
@@ -294,7 +294,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                   size: 20,
                 ),
               ),
-              tooltip: "Notifications",
+              tooltip: AppLocalizations.of(context)!.translate("notifications"),
             ),
             IconButton(
               onPressed: () {
@@ -324,7 +324,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                   size: 20,
                 ),
               ),
-              tooltip: "Logout",
+              tooltip: AppLocalizations.of(context)!.translate("logout"),
             ),
           ],
         ),
@@ -346,7 +346,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
           const Icon(Icons.error_outline, color: Colors.red, size: 32),
           const SizedBox(height: 12),
           Text(
-            "Failed to load statistics",
+            AppLocalizations.of(context)!.translate("failed_to_load_stats"),
             style: GoogleFonts.inter(
               fontWeight: FontWeight.bold,
               color: Colors.red.shade900,
@@ -366,7 +366,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text("Retry"),
+            child: Text(AppLocalizations.of(context)!.translate("retry")),
           ),
         ],
       ),

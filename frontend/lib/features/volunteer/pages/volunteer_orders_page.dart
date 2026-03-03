@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/styles/app_colors.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/localization/language_provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../data/services/backend_service.dart';
 import 'volunteer_order_detail_page.dart';
@@ -52,9 +53,11 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
       return status == 'delivered';
     }).toList();
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFFBF7),
-      appBar: AppBar(
+    return Consumer<LanguageProvider>(
+      builder: (context, langProvider, _) {
+        return Scaffold(
+          backgroundColor: const Color(0xFFFFFBF7),
+          appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -115,7 +118,7 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
           : _error != null
               ? Center(
                   child: Text(
-                    'Error: $_error',
+                    '${localizations.translate('error')}: $_error',
                     style: const TextStyle(color: Colors.red),
                   ),
                 )
@@ -127,6 +130,8 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
                     _completedTab(localizations, completedOrders),
                   ],
                 ),
+        );
+      },
     );
   }
 
@@ -141,7 +146,7 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
             Icon(Icons.inbox_outlined, size: 48, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Text(
-              'No new requests',
+              localizations.translate("no_new_requests"),
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.grey.shade400,
                 fontWeight: FontWeight.w700,
@@ -179,7 +184,7 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
                 size: 48, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Text(
-              'No active deliveries',
+              localizations.translate("no_active_deliveries"),
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.grey.shade400,
                 fontWeight: FontWeight.w700,
@@ -217,7 +222,7 @@ class _VolunteerOrdersPageState extends State<VolunteerOrdersPage>
                 size: 48, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Text(
-              'No completed deliveries',
+              localizations.translate("no_completed_deliveries"),
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.grey.shade400,
                 fontWeight: FontWeight.w700,
@@ -349,11 +354,11 @@ class _DeliveryCard extends StatelessWidget {
     final listing = order['listingId'] as Map<String, dynamic>?;
     final buyer = order['buyerId'] as Map<String, dynamic>?;
 
-    final title = listing?['foodName'] ?? 'Delivery';
+    final title = localizations.translate(listing?['foodName'] ?? 'delivery_label');
     final pickup =
         order['pickup']?['addressText'] ?? listing?['pickupAddressText'];
     final drop =
-        order['drop']?['addressText'] ?? buyer?['name'] ?? 'Delivery address';
+        order['drop']?['addressText'] ?? buyer?['name'] ?? localizations.translate('delivery_label');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),

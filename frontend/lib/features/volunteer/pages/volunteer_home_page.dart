@@ -182,12 +182,15 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                     const SizedBox(height: 32),
 
                     if (isAvailable) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 16,
+                        runSpacing: 4,
                         children: [
-                          _sectionTitle("Your Statistics"),
+                          _sectionTitle(AppLocalizations.of(context)!.translate("your_statistics")),
                           Text(
-                            "Last updated: Just now",
+                            AppLocalizations.of(context)!.translate("last_updated_just_now"),
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               color: Colors.grey.shade500,
@@ -200,7 +203,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                       _dashboardCards(screenWidth),
                       
                       const SizedBox(height: 36),
-                      _sectionTitle("Achievements"),
+                      _sectionTitle(AppLocalizations.of(context)!.translate("achievements")),
                       const SizedBox(height: 16),
                       _badgeSection(),
                       
@@ -208,12 +211,12 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                       _alertBanner(),
                       
                       const SizedBox(height: 32),
-                      _sectionTitle("Quick Access"),
+                      _sectionTitle(AppLocalizations.of(context)!.translate("quick_access")),
                       const SizedBox(height: 16),
                       _quickActions(screenWidth),
 
                       const SizedBox(height: 36),
-                      _sectionTitle("Incoming Requests"),
+                      _sectionTitle(AppLocalizations.of(context)!.translate("incoming_requests")),
                       const SizedBox(height: 16),
                       _rescueRequestsSection(),
                     ] else ...[
@@ -280,7 +283,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    isAvailable ? "Online" : "Away",
+                    isAvailable ? AppLocalizations.of(context)!.translate("online") : AppLocalizations.of(context)!.translate("away"),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 11,
                       color: isAvailable ? Colors.green : Colors.grey.shade400,
@@ -421,11 +424,11 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _statItem("Deliveries", _totalDeliveries.toString(), Icons.local_shipping_outlined, AppColors.primary),
+          Expanded(child: _statItem(AppLocalizations.of(context)!.translate("deliveries"), _totalDeliveries.toString(), Icons.local_shipping_outlined, AppColors.primary)),
           Container(height: 40, width: 1, color: Colors.grey.shade100),
-          _statItem("Today", _todayCount.toString(), Icons.calendar_today_outlined, const Color(0xFFE67E22)),
+          Expanded(child: _statItem(AppLocalizations.of(context)!.translate("today"), _todayCount.toString(), Icons.calendar_today_outlined, const Color(0xFFE67E22))),
           Container(height: 40, width: 1, color: Colors.grey.shade100),
-          _statItem("Rating", _avgRating.toStringAsFixed(1), Icons.star_border_rounded, const Color(0xFFD35400)),
+          Expanded(child: _statItem(AppLocalizations.of(context)!.translate("rating"), _avgRating.toStringAsFixed(1), Icons.star_border_rounded, const Color(0xFFD35400))),
         ],
       ),
     );
@@ -474,10 +477,10 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
         scrollDirection: Axis.horizontal,
         clipBehavior: Clip.none,
         children: [
-          _badgeItem(Icons.verified_user_rounded, "Verified", true),
-          _badgeItem(Icons.auto_awesome_rounded, "Top Star", _avgRating >= 4.5),
+          _badgeItem(Icons.verified_user_rounded, AppLocalizations.of(context)!.translate("verified"), true),
+          _badgeItem(Icons.auto_awesome_rounded, AppLocalizations.of(context)!.translate("top_star"), _avgRating >= 4.5),
           _badgeItem(Icons.local_fire_department_rounded, "20+ Club", totalCompleted >= 20),
-          _badgeItem(Icons.handshake_rounded, "Social Hero", totalCompleted >= 5),
+          _badgeItem(Icons.handshake_rounded, AppLocalizations.of(context)!.translate("social_hero"), totalCompleted >= 5),
         ],
       ),
     );
@@ -559,7 +562,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "New Requests Nearby",
+                  AppLocalizations.of(context)!.translate("new_requests_nearby"),
                   style: GoogleFonts.plusJakartaSans(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -567,7 +570,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                   ),
                 ),
                 Text(
-                  "$_newRequests tasks are waiting for you",
+                  AppLocalizations.of(context)!.translate("tasks_waiting").replaceAll("{count}", _newRequests.toString()),
                   style: GoogleFonts.plusJakartaSans(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 13,
@@ -704,7 +707,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
               elevation: 0,
             ),
             child: Text(
-              "Accept",
+              AppLocalizations.of(context)!.translate("accept"),
               style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800),
             ),
           ),
@@ -716,11 +719,11 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
   Widget _quickActions(double width) {
     return Row(
       children: [
-        _quickActionItem(Icons.receipt_long_rounded, "Orders", const VolunteerOrdersPage()),
+        _quickActionItem(Icons.receipt_long_rounded, AppLocalizations.of(context)!.translate("orders"), const VolunteerOrdersPage()),
         const SizedBox(width: 16),
-        _quickActionItem(Icons.auto_awesome_rounded, "Badges", const VolunteerRatingsPage()),
+        _quickActionItem(Icons.auto_awesome_rounded, AppLocalizations.of(context)!.translate("ratings"), const VolunteerRatingsPage()),
         const SizedBox(width: 16),
-        _quickActionItem(Icons.settings_suggest_rounded, "Settings", const VolunteerProfilePage()),
+        _quickActionItem(Icons.settings_suggest_rounded, AppLocalizations.of(context)!.translate("settings"), const VolunteerProfilePage()),
       ],
     );
   }
@@ -789,7 +792,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
           ),
           const SizedBox(height: 32),
           Text(
-            "Shift is Off",
+            AppLocalizations.of(context)!.translate("shift_off"),
             style: GoogleFonts.plusJakartaSans(
               fontSize: 22,
               fontWeight: FontWeight.w900,

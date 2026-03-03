@@ -7,6 +7,7 @@ import 'register_selection_page.dart';
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../core/localization/language_provider.dart';
+import '../../../core/localization/app_localizations.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'phone_login_page.dart';
 
@@ -173,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 12),
               Text(
-                "Login to continue your journey with Ahara and help the community.",
+                "Login to your account to continue.",
                 style: TextStyle(
                   color: AppColors.textLight.withOpacity(0.8),
                   fontSize: 15,
@@ -183,13 +184,12 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 48),
 
               _buildLabel("EMAIL ADDRESS"),
-
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: "name@example.com",
-                  prefixIcon: Icon(Icons.email_outlined),
+                decoration: InputDecoration(
+                  hintText: "Enter your email address",
+                  prefixIcon: const Icon(Icons.email_outlined),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -201,11 +201,8 @@ class _LoginPageState extends State<LoginPage> {
                   return null;
                 },
               ),
-
-              const SizedBox(height: 28),
-
+              const SizedBox(height: 24),
               _buildLabel("PASSWORD"),
-
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
@@ -215,14 +212,12 @@ class _LoginPageState extends State<LoginPage> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: Colors.grey,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
                   ),
                 ),
                 validator: (value) {
@@ -247,8 +242,8 @@ class _LoginPageState extends State<LoginPage> {
 
               const SizedBox(height: 32),
 
-              Row(
-                children: const [
+              const Row(
+                children: [
                   Expanded(child: Divider()),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10),
@@ -261,28 +256,28 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 20),
 
               SizedBox(
-  width: double.infinity,
-  height: 55,
-  child: OutlinedButton(
-    onPressed: _isLoading ? null : _handleGoogleSignIn,
-    child: _isLoading
-        ? const CircularProgressIndicator()
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.network(
-                "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
-                height: 24,
+                width: double.infinity,
+                height: 55,
+                child: OutlinedButton(
+                  onPressed: _isLoading ? null : _handleGoogleSignIn,
+                  child: _isLoading
+                      ? const CircularProgressIndicator()
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.network(
+                              "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
+                              height: 24,
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              "Sign in with Google",
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                ),
               ),
-              const SizedBox(width: 10),
-              const Text(
-                "Sign in with Google",
-                style: TextStyle(fontSize: 16),
-              ),
-            ],
-          ),
-  ),
-),
 
               const SizedBox(height: 16),
 
@@ -292,7 +287,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.phone_android_outlined, color: AppColors.primary),
                   label: const Text(
-                    "Sign in with Phone (OTP)",
+                    "Sign in with Phone",
                     style: TextStyle(fontSize: 16),
                   ),
                   onPressed: () {

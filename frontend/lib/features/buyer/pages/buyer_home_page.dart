@@ -35,7 +35,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   Timer? _countdownTimer;
 
   // 🔥 User location state
-  String _userLocation = "Detecting location...";
+  String _userLocation = "detecting_location";
   Position? _livePosition;
   String _firebaseUid = "";
 
@@ -102,7 +102,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
       debugPrint("Location fetch error: $e");
       if (mounted) {
         setState(() {
-          _userLocation = "Location unavailable";
+          _userLocation = "location_unavailable";
         });
       }
     }
@@ -149,11 +149,11 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
   String _formatTimeRemaining(DateTime expiryTime) {
     final diff = expiryTime.difference(_now);
-    if (diff.isNegative) return "Expired";
+    if (diff.isNegative) return AppLocalizations.of(context)!.translate("expired");
     if (diff.inDays > 0) return "${diff.inDays}d ${diff.inHours % 24}h";
     if (diff.inHours > 0) return "${diff.inHours}h ${diff.inMinutes % 60}m";
     if (diff.inMinutes > 0) return "${diff.inMinutes}m";
-    return "Soon";
+    return AppLocalizations.of(context)!.translate("soon");
   }
 
   @override
@@ -357,7 +357,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
           Icon(Icons.search_off_outlined, size: 64, color: AppColors.textLight.withOpacity(0.2)),
           const SizedBox(height: 16),
           Text(
-            "No places found in this category",
+            AppLocalizations.of(context)!.translate("no_places_found"),
             style: TextStyle(color: AppColors.textLight.withOpacity(0.5), fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ],
@@ -381,7 +381,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        _userLocation,
+                        AppLocalizations.of(context)!.translate(_userLocation),
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(color: AppColors.textLight.withOpacity(0.6), fontSize: 12, fontWeight: FontWeight.w600),
                       ),
@@ -391,9 +391,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _userLocation == "Detecting location..."
-                      ? "Discover"
-                      : (_livePosition != null ? "Discover Near You" : "Discover ${_userLocation.split(',').last.trim()}"),
+                  _userLocation == "detecting_location"
+                      ? AppLocalizations.of(context)!.translate("discover")
+                      : (_livePosition != null ? AppLocalizations.of(context)!.translate("discover_near_you") : "${AppLocalizations.of(context)!.translate("discover")} ${_userLocation.split(',').last.trim()}"),
                   style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textDark, letterSpacing: -0.5),
                 ),
               ],
@@ -490,14 +490,14 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   }
 
   Widget _buildRealListingCard(Map<String, dynamic> listing) {
-    final String name = listing['foodName'] ?? "Unknown Food";
+    final String name = listing['foodName'] ?? AppLocalizations.of(context)!.translate("unknown_food");
     final pricing = listing['pricing'] ?? {};
     final bool isFree = pricing['isFree'] ?? false;
     final int price = pricing['discountedPrice'] ?? 0;
     final int? originalPrice = pricing['originalPrice'];
 
     final sellerProfile = listing['sellerProfileId'] ?? {};
-    final String orgName = sellerProfile['orgName'] ?? "Local Seller";
+    final String orgName = sellerProfile['orgName'] ?? AppLocalizations.of(context)!.translate("local_seller");
     final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0).toDouble();
 
     final String? expiryStr = listing['pickupWindow']?['to'];
@@ -558,7 +558,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                 if (isFree)
                   Positioned(
                     top: 12, left: 12,
-                    child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10)), child: const Text("FREE", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900))),
+                    child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10)), child: Text(AppLocalizations.of(context)!.translate("FREE"), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900))),
                   ),
                 if (rating > 0)
                   Positioned(bottom: 12, right: 12, child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)), child: Row(children: [const Icon(Icons.star, color: Colors.amber, size: 14), const SizedBox(width: 4), Text(rating.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]))),
@@ -577,7 +577,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           if (originalPrice != null && originalPrice > price) Text("₹$originalPrice", style: TextStyle(fontSize: 12, color: AppColors.textLight.withOpacity(0.5), decoration: TextDecoration.lineThrough)),
-                          Text(isFree ? "FREE" : "₹$price", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: isFree ? Colors.green : AppColors.primary)),
+                          Text(isFree ? AppLocalizations.of(context)!.translate("FREE") : "₹$price", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: isFree ? Colors.green : AppColors.primary)),
                         ],
                       ),
                     ],
@@ -589,18 +589,18 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4))),
-                          child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.schedule_rounded, size: 11, color: Color(0xFFB45309)), const SizedBox(width: 4), Text('Opens ${_fmt12(pickupFrom!)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E)))]),
+                          child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.schedule_rounded, size: 11, color: Color(0xFFB45309)), const SizedBox(width: 4), Text('${AppLocalizations.of(context)!.translate("opens")} ${_fmt12(pickupFrom!)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E)))]),
                         ),
                       ] else if (expiryTime != null) ...[
-                        _buildIconLabel(Icons.timer_outlined, 'Ends ${_formatTimeRemaining(expiryTime)}'),
+                        _buildIconLabel(Icons.timer_outlined, '${AppLocalizations.of(context)!.translate("ends")} ${_formatTimeRemaining(expiryTime)}'),
                       ],
                       const SizedBox(width: 8),
                       Expanded(child: _buildIconLabel(Icons.store, orgName)),
                       const SizedBox(width: 8),
                       if (isRescueUpcoming)
-                        Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12)), child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.lock_clock_outlined, size: 13, color: Colors.grey.shade500), const SizedBox(width: 4), Text('Locked', style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold))]))
+                        Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12)), child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.lock_clock_outlined, size: 13, color: Colors.grey.shade500), const SizedBox(width: 4), Text(AppLocalizations.of(context)!.translate('locked'), style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold))]))
                       else
-                        Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), decoration: BoxDecoration(color: isFree ? Colors.green : AppColors.primary, borderRadius: BorderRadius.circular(12)), child: Text(isFree ? 'Claim Now' : 'Reserve', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
+                        Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), decoration: BoxDecoration(color: isFree ? Colors.green : AppColors.primary, borderRadius: BorderRadius.circular(12)), child: Text(isFree ? AppLocalizations.of(context)!.translate('claim_now') : AppLocalizations.of(context)!.translate('reserve'), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
                     ],
                   ),
                 ],
