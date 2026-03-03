@@ -4,9 +4,8 @@ const User = require('../../models/User');
 const Order = require('../../models/Order');
 const Listing = require('../../models/Listing');
 const SellerProfile = require('../../models/SellerProfile');
-const Review = require('../../models/Review');
+const { Review, ReviewResponse } = require('../../models/Review');
 const { connect, disconnect } = require('../setup');
-const mongoose = require('mongoose');
 
 describe('Review Routes Integration Tests', () => {
     let reviewer;
@@ -114,7 +113,10 @@ describe('Review Routes Integration Tests', () => {
         const res = await request(app).get(`/api/reviews/target/${seller._id}`);
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.length).toBe(1);
-        expect(res.body[0].rating).toBe(4);
+        expect(res.body.success).toBe(true);
+        expect(res.body.reviews.length).toBe(1);
+        expect(res.body.reviews[0].rating).toBe(4);
+        expect(res.body.analytics.avgRating).toBe(4);
+        expect(res.body.analytics.totalReviews).toBe(1);
     });
 });
