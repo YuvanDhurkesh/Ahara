@@ -724,7 +724,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
       return const SizedBox.shrink();
     }
 
-    final isFavorite = (auth.mongoUser?['favouriteSellers'] as List?)?.contains(sellerId) ?? false;
+    final isFavorite = (auth.mongoProfile?['favouriteSellers'] as List?)?.contains(sellerId) ?? false;
 
     return GestureDetector(
       onTap: () async {

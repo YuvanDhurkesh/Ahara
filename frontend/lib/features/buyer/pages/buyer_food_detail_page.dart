@@ -213,10 +213,18 @@ class BuyerFoodDetailPage extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Consumer<AppAuthProvider>(
             builder: (context, auth, _) {
-              final sellerId = listing?['sellerProfileId']?['userId'] ?? "";
+              final sellerProfileRaw = listing?['sellerProfileId'];
+              String? sellerId;
+              if (sellerProfileRaw is String) {
+                sellerId = sellerProfileRaw;
+              } else if (sellerProfileRaw is Map) {
+                sellerId = sellerProfileRaw['_id'] ?? 
+                           (sellerProfileRaw['userId'] is Map ? sellerProfileRaw['userId']['_id'] : sellerProfileRaw['userId']);
+              }
+              
               final profile = auth.mongoProfile;
               final List? favorites = profile?['favouriteSellers'];
-              final bool isFavorited = favorites?.contains(sellerId) ?? false;
+              final bool isFavorited = (sellerId != null && sellerId.isNotEmpty) && (favorites?.contains(sellerId) ?? false);
 
               return CircleAvatar(
                 backgroundColor: Colors.black.withOpacity(0.3),
@@ -231,7 +239,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     try {
                       await BackendService.toggleFavoriteSeller(
                         firebaseUid: auth.currentUser!.uid,
-                        sellerId: sellerId,
+                        sellerId: sellerId!,
                       );
                       await auth.refreshMongoUser();
                       if (context.mounted) {
