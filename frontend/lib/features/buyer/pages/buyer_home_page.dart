@@ -493,7 +493,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   Widget _buildRealListingCard(Map<String, dynamic> listing) {
     final String name = listing['foodName'] ?? AppLocalizations.of(context)!.translate("unknown_food");
     final pricingRaw = listing['pricing'];
-    final Map<String, dynamic> pricing = (pricingRaw is Map) ? pricingRaw : {};
+    final Map<String, dynamic> pricing = (pricingRaw is Map) ? Map<String, dynamic>.from(pricingRaw) : {};
     final bool isFree = pricing['isFree'] ?? false;
     final int price = pricing['discountedPrice'] ?? 0;
     final int? originalPrice = pricing['originalPrice'];
@@ -504,7 +504,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     final double rating = (sellerProfile['stats'] is Map ? (sellerProfile['stats']['avgRating'] ?? 0.0) : 0.0).toDouble();
 
     final pickupWindowRaw = listing['pickupWindow'];
-    final Map<String, dynamic> pickupWindow = (pickupWindowRaw is Map) ? pickupWindowRaw : {};
+    final Map<String, dynamic> pickupWindow = (pickupWindowRaw is Map) ? Map<String, dynamic>.from(pickupWindowRaw) : {};
     final String? expiryStr = pickupWindow['to'];
     final DateTime? expiryTime = expiryStr != null ? DateTime.tryParse(expiryStr) : null;
 
@@ -707,9 +707,11 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
   Widget _buildFavoriteButton({Map<String, dynamic>? listing, MockStore? store}) {
     final auth = Provider.of<AppAuthProvider>(context);
-    final sellerProfileRaw = listing['sellerProfileId'];
+    final sellerProfileRaw = listing?['sellerProfileId'];
     String? sellerId;
-    if (sellerProfileRaw is String) {
+    if (listing == null) {
+      sellerId = store?.name; // Fallback for mock stores if needed, though handled below
+    } else if (sellerProfileRaw is String) {
       sellerId = sellerProfileRaw;
     } else if (sellerProfileRaw is Map) {
       // In some cases it's the profile object, in others it might be nested
@@ -734,7 +736,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
         try {
           await BackendService.toggleFavoriteSeller(
             firebaseUid: auth.currentUser!.uid,
-            sellerId: sellerId,
+            sellerId: sellerId!,
           );
           await auth.refreshMongoUser();
           
