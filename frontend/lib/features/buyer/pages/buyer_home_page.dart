@@ -492,19 +492,23 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
   Widget _buildRealListingCard(Map<String, dynamic> listing) {
     final String name = listing['foodName'] ?? AppLocalizations.of(context)!.translate("unknown_food");
-    final pricing = listing['pricing'] ?? {};
+    final pricingRaw = listing['pricing'];
+    final Map<String, dynamic> pricing = (pricingRaw is Map) ? pricingRaw : {};
     final bool isFree = pricing['isFree'] ?? false;
     final int price = pricing['discountedPrice'] ?? 0;
     final int? originalPrice = pricing['originalPrice'];
 
-    final sellerProfile = listing['sellerProfileId'] ?? {};
+    final sellerProfileRaw = listing['sellerProfileId'];
+    final sellerProfile = (sellerProfileRaw is Map) ? sellerProfileRaw : {};
     final String orgName = sellerProfile['orgName'] ?? AppLocalizations.of(context)!.translate("local_seller");
-    final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0).toDouble();
+    final double rating = (sellerProfile['stats'] is Map ? (sellerProfile['stats']['avgRating'] ?? 0.0) : 0.0).toDouble();
 
-    final String? expiryStr = listing['pickupWindow']?['to'];
+    final pickupWindowRaw = listing['pickupWindow'];
+    final Map<String, dynamic> pickupWindow = (pickupWindowRaw is Map) ? pickupWindowRaw : {};
+    final String? expiryStr = pickupWindow['to'];
     final DateTime? expiryTime = expiryStr != null ? DateTime.tryParse(expiryStr) : null;
 
-    final String? pickupFromStr = listing['pickupWindow']?['from'];
+    final String? pickupFromStr = pickupWindow['from'];
     final DateTime? pickupFrom = pickupFromStr != null ? DateTime.tryParse(pickupFromStr) : null;
 
     bool _checkUpcoming(DateTime? start) {
@@ -703,9 +707,15 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
 
   Widget _buildFavoriteButton({Map<String, dynamic>? listing, MockStore? store}) {
     final auth = Provider.of<AppAuthProvider>(context);
-    final sellerId = listing != null 
-        ? (listing['sellerProfileId']?['userId']?['_id'] ?? listing['sellerProfileId']?['userId'] ?? listing['sellerProfileId'])
-        : (store?.name ?? ""); // Mock stores don't really have seller IDs in this context, using name as placeholder or handle separately
+    final sellerProfileRaw = listing['sellerProfileId'];
+    String? sellerId;
+    if (sellerProfileRaw is String) {
+      sellerId = sellerProfileRaw;
+    } else if (sellerProfileRaw is Map) {
+      // In some cases it's the profile object, in others it might be nested
+      sellerId = sellerProfileRaw['_id'] ?? 
+                 (sellerProfileRaw['userId'] is Map ? sellerProfileRaw['userId']['_id'] : sellerProfileRaw['userId']);
+    }
 
     if (sellerId == null || sellerId.isEmpty || store != null) {
       // For now, only real listings support favorites if we don't have a stable ID for mock stores
