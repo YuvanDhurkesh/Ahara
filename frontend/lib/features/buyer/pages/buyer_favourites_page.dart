@@ -21,6 +21,7 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
   List<Map<String, dynamic>> _allActiveListings = [];
   bool _isLoading = true;
   String? _expandedSellerId;
+  int _lastFavoriteCount = -1;
 
   @override
   void initState() {
@@ -66,28 +67,43 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    return Consumer<AppAuthProvider>(
+      builder: (context, auth, child) {
+        // Auto-refresh if the number of favorites in the provider doesn't match our local count
+        final currentFavs = auth.mongoProfile?['favouriteSellers'] as List?;
+        final currentCount = currentFavs?.length ?? 0;
+        
+        if (_lastFavoriteCount != -1 && _lastFavoriteCount != currentCount) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _fetchInitialData();
+          });
+        }
+        _lastFavoriteCount = currentCount;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          _buildSliverAppBar(),
-          SliverPadding(
-            padding: const EdgeInsets.all(20),
-            sliver: _favoriteSellers.isEmpty
-                ? SliverFillRemaining(child: _buildEmptyState())
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => _buildSellerCard(_favoriteSellers[index]),
-                      childCount: _favoriteSellers.length,
-                    ),
-                  ),
+        if (_isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          body: CustomScrollView(
+            slivers: [
+              _buildSliverAppBar(),
+              SliverPadding(
+                padding: const EdgeInsets.all(20),
+                sliver: _favoriteSellers.isEmpty
+                    ? SliverFillRemaining(child: _buildEmptyState())
+                    : SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => _buildSellerCard(_favoriteSellers[index]),
+                          childCount: _favoriteSellers.length,
+                        ),
+                      ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -143,7 +159,7 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
   }
 
   Widget _buildSellerCard(Map<String, dynamic> seller) {
-    final sellerId = seller['userId']?['_id'] ?? seller['userId'];
+    final sellerId = seller['_id'] ?? (seller['userId'] is Map ? seller['userId']['_id'] : seller['userId']);
     final orgName = seller['orgName'] ?? "Unknown Seller";
     final rating = (seller['stats']?['avgRating'] ?? 0.0).toDouble();
     final address = seller['businessAddressText'] ?? "No address provided";
@@ -186,8 +202,15 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                     Text(rating.toStringAsFixed(1), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                     const SizedBox(width: 12),
                     (() {
-                      final hasListings = _allActiveListings.any((l) => 
-                        (l['sellerProfileId']?['userId'] ?? l['sellerProfileId']) == sellerId);
+                      final hasListings = _allActiveListings.any((l) {
+                        final lSeller = l['sellerProfileId'];
+                        if (lSeller is String) return lSeller == sellerId;
+                        if (lSeller is Map) {
+                          return lSeller['_id'] == sellerId || 
+                                 (lSeller['userId'] is Map ? lSeller['userId']['_id'] : lSeller['userId']) == sellerId;
+                        }
+                        return false;
+                      });
                       
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -296,9 +319,15 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
   }
 
   Widget _buildSellerListings(String sellerId) {
-    final sellerListings = _allActiveListings
-            .where((l) => (l['sellerProfileId']?['userId'] ?? l['sellerProfileId']) == sellerId)
-            .toList();
+    final sellerListings = _allActiveListings.where((l) {
+      final lSeller = l['sellerProfileId'];
+      if (lSeller is String) return lSeller == sellerId;
+      if (lSeller is Map) {
+        return lSeller['_id'] == sellerId || 
+               (lSeller['userId'] is Map ? lSeller['userId']['_id'] : lSeller['userId']) == sellerId;
+      }
+      return false;
+    }).toList();
 
     if (sellerListings.isEmpty) {
       return Padding(
