@@ -322,12 +322,16 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
             color: Colors.grey.shade600,
           ),
         ),
-        Text(
-          value,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: valueColor ?? Colors.black,
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: valueColor ?? Colors.black,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],

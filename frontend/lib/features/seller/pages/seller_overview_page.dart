@@ -377,7 +377,7 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final int crossAxisCount = constraints.maxWidth > 700 ? 4 : 2;
-        final double childAspectRatio = constraints.maxWidth > 700 ? 1.6 : 1.4;
+        final double childAspectRatio = constraints.maxWidth > 700 ? 1.6 : 1.1;
 
         final activeListings = _stats?['activeListings']?.toString() ?? "0";
         final pendingOrders = _stats?['pendingOrders']?.toString() ?? "0";
@@ -637,15 +637,17 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        value,
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textDark,
-                          letterSpacing: -0.2,
+                        Text(
+                          value,
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textDark,
+                            letterSpacing: -0.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
                       const SizedBox(height: 6),
                       Row(
                         children: [

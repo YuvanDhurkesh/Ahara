@@ -96,6 +96,29 @@ class _LandingPageState extends State<LandingPage> {
             ),
           ],
           IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LanguageSelectionPage(),
+                ),
+              );
+            },
+            tooltip: "Change Language",
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.translate,
+                color: AppColors.textDark,
+                size: 20,
+              ),
+            ),
+          ),
+          IconButton(
             onPressed: () => _showAuthOptions(context),
             tooltip: "Join Us",
             icon: Container(

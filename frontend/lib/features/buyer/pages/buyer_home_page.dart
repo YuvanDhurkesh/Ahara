@@ -14,6 +14,7 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
 import '../../../shared/utils/location_util.dart';
 import 'package:geolocator/geolocator.dart';
+import 'buyer_dashboard_page.dart';
 
 class BuyerHomePage extends StatefulWidget {
   const BuyerHomePage({super.key});
@@ -562,6 +563,11 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   ),
                 if (rating > 0)
                   Positioned(bottom: 12, right: 12, child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)), child: Row(children: [const Icon(Icons.star, color: Colors.amber, size: 14), const SizedBox(width: 4), Text(rating.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]))),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: _buildFavoriteButton(listing: listing),
+                ),
               ],
             ),
             Padding(
@@ -586,13 +592,15 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   Row(
                     children: [
                       if (isRescueUpcoming) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4))),
-                          child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.schedule_rounded, size: 11, color: Color(0xFFB45309)), const SizedBox(width: 4), Text('${AppLocalizations.of(context)!.translate("opens")} ${_fmt12(pickupFrom!)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E)))]),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4))),
+                            child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.schedule_rounded, size: 11, color: Color(0xFFB45309)), const SizedBox(width: 4), Text('${AppLocalizations.of(context)!.translate("opens")} ${_fmt12(pickupFrom!)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E)), overflow: TextOverflow.ellipsis)]),
+                          ),
                         ),
                       ] else if (expiryTime != null) ...[
-                        _buildIconLabel(Icons.timer_outlined, '${AppLocalizations.of(context)!.translate("ends")} ${_formatTimeRemaining(expiryTime)}'),
+                        Flexible(child: _buildIconLabel(Icons.timer_outlined, '${AppLocalizations.of(context)!.translate("ends")} ${_formatTimeRemaining(expiryTime)}')),
                       ],
                       const SizedBox(width: 8),
                       Expanded(child: _buildIconLabel(Icons.store, orgName)),
@@ -637,6 +645,11 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   child: Wrap(spacing: 6, runSpacing: 6, children: [if (store.discount != null) _buildSpecialBadge(store.discount!, Colors.orange), if (store.isFree) _buildSpecialBadge("FREE", Colors.green), ...store.badges.map((badge) => _buildBadge(badge)).toList()]),
                 ),
                 Positioned(bottom: 12, right: 12, child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)), child: Row(children: [const Icon(Icons.star, color: Colors.amber, size: 14), const SizedBox(width: 4), Text(store.rating, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]))),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: _buildFavoriteButton(store: store),
+                ),
               ],
             ),
             Padding(
@@ -685,6 +698,66 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
   }
 
   Widget _buildIconLabel(IconData icon, String text) {
-    return Row(children: [Icon(icon, size: 16, color: AppColors.textLight.withOpacity(0.5)), const SizedBox(width: 4), Text(text, style: TextStyle(fontSize: 12, color: AppColors.textLight.withOpacity(0.6), fontWeight: FontWeight.w500))]);
+    return Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, size: 16, color: AppColors.textLight.withOpacity(0.5)), const SizedBox(width: 4), Flexible(child: Text(text, style: TextStyle(fontSize: 12, color: AppColors.textLight.withOpacity(0.6), fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis))]);
+  }
+
+  Widget _buildFavoriteButton({Map<String, dynamic>? listing, MockStore? store}) {
+    final auth = Provider.of<AppAuthProvider>(context);
+    final sellerId = listing != null 
+        ? (listing['sellerProfileId']?['userId']?['_id'] ?? listing['sellerProfileId']?['userId'] ?? listing['sellerProfileId'])
+        : (store?.name ?? ""); // Mock stores don't really have seller IDs in this context, using name as placeholder or handle separately
+
+    if (sellerId == null || sellerId.isEmpty || store != null) {
+      // For now, only real listings support favorites if we don't have a stable ID for mock stores
+      return const SizedBox.shrink();
+    }
+
+    final isFavorite = (auth.mongoUser?['favouriteSellers'] as List?)?.contains(sellerId) ?? false;
+
+    return GestureDetector(
+      onTap: () async {
+        if (auth.currentUser == null) {
+          AnimatedToast.show(context, "Please login to add favorites", type: ToastType.info);
+          return;
+        }
+
+        try {
+          await BackendService.toggleFavoriteSeller(
+            firebaseUid: auth.currentUser!.uid,
+            sellerId: sellerId,
+          );
+          await auth.refreshMongoUser();
+          
+          if (mounted) {
+            AnimatedToast.show(
+              context, 
+              isFavorite ? "Removed from favorites" : "Added to favorites",
+              type: isFavorite ? ToastType.info : ToastType.success
+            );
+          }
+        } catch (e) {
+          debugPrint("Error toggling favorite: $e");
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(
+          isFavorite ? Icons.favorite : Icons.favorite_border,
+          color: isFavorite ? Colors.red : AppColors.textLight.withOpacity(0.5),
+          size: 20,
+        ),
+      ),
+    );
   }
 }
