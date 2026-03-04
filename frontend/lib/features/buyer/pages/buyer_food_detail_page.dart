@@ -235,7 +235,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     size: 20,
                   ),
                   onPressed: () async {
-                    if (auth.currentUser == null || sellerId.isEmpty) return;
+                    if (auth.currentUser == null || sellerId == null || sellerId.isEmpty) return;
                     try {
                       await BackendService.toggleFavoriteSeller(
                         firebaseUid: auth.currentUser!.uid,
