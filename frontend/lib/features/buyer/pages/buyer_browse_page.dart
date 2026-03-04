@@ -163,7 +163,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     // 2. Add only valid (non-expired) real listings
     results.insertAll(0, _validListings);
 
-    final auth = context.watch<AppAuthProvider>();
+    final auth = Provider.of<AppAuthProvider>(context, listen: false);
     final List<String> dietaryPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
 
     return results.where((item) {
@@ -887,6 +887,58 @@ Widget _buildFloatingButton({
                       onPressed: () => setState(() => _selectedStoreId = null),
                     ),
                   ),
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: Consumer<AppAuthProvider>(
+                      builder: (context, auth, _) {
+                        final profile = auth.mongoProfile;
+                        final List? favorites = profile?['favouriteSellers'];
+                        
+                        String? sellerId;
+                        if (item is MockStore) {
+                          sellerId = null; // Don't allow favoriting mock stores here for now to avoid errors
+                        } else {
+                          final sellerProfileRaw = item['sellerProfileId'];
+                          if (sellerProfileRaw is String) {
+                            sellerId = sellerProfileRaw;
+                          } else if (sellerProfileRaw is Map) {
+                            sellerId = sellerProfileRaw['_id'] ?? 
+                                       (sellerProfileRaw['userId'] is Map ? sellerProfileRaw['userId']['_id'] : sellerProfileRaw['userId']);
+                          }
+                        }
+
+                        if (sellerId == null || sellerId.isEmpty) return const SizedBox.shrink();
+                        final bool isFavorited = favorites?.contains(sellerId) ?? false;
+
+                        return GestureDetector(
+                          onTap: () async {
+                            if (auth.currentUser == null) return;
+                            try {
+                              await BackendService.toggleFavoriteSeller(
+                                firebaseUid: auth.currentUser!.uid,
+                                sellerId: sellerId!);
+                              await auth.refreshMongoUser();
+                            } catch (e) {
+                              debugPrint("Error toggling favorite from popout: $e");
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              isFavorited ? Icons.favorite : Icons.favorite_border,
+                              size: 20,
+                              color: isFavorited ? Colors.red : Colors.black,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
               Padding(
@@ -1008,13 +1060,21 @@ Widget _buildFloatingButton({
                 child: Consumer<AppAuthProvider>(
                   builder: (context, auth, _) {
                     final profile = auth.mongoProfile;
-                    final sellerId = listing['sellerProfileId']?['userId'] ?? "";
+                    final sellerProfileRaw = listing['sellerProfileId'];
+                    String? sellerId;
+                    if (sellerProfileRaw is String) {
+                      sellerId = sellerProfileRaw;
+                    } else if (sellerProfileRaw is Map) {
+                      sellerId = sellerProfileRaw['_id'] ?? 
+                                 (sellerProfileRaw['userId'] is Map ? sellerProfileRaw['userId']['_id'] : sellerProfileRaw['userId']);
+                    }
+                    
                     final List? favorites = profile?['favouriteSellers'];
-                    final bool isFavorited = favorites?.contains(sellerId) ?? false;
+                    final bool isFavorited = sellerId != null && (favorites?.contains(sellerId) ?? false);
 
                     return GestureDetector(
                       onTap: () async {
-                        if (auth.currentUser == null || sellerId.isEmpty) return;
+                        if (auth.currentUser == null || sellerId == null || sellerId.isEmpty) return;
                         try {
                           await BackendService.toggleFavoriteSeller(
                               firebaseUid: auth.currentUser!.uid,
