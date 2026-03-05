@@ -1011,21 +1011,23 @@ Widget _buildFloatingButton({
                     final dynamic rawSellerId = listing['sellerId'];
                     final String sellerId = (rawSellerId is Map) ? (rawSellerId['_id'] ?? "").toString() : (rawSellerId ?? "").toString();
                     final List? favorites = profile?['favouriteSellers'];
-                    final bool isFavorited = favorites?.contains(sellerId) ?? false;
+                    final bool isFavorited = favorites?.any((f) => f.toString() == sellerId) ?? false;
 
                     return GestureDetector(
                       onTap: () async {
                         if (auth.currentUser == null || sellerId.isEmpty) return;
+                        final wasAlreadyFavorited = isFavorited;
                         try {
-                          await BackendService.toggleFavoriteSeller(
+                          final result = await BackendService.toggleFavoriteSeller(
                               firebaseUid: auth.currentUser!.uid,
                               sellerId: sellerId);
                           await auth.refreshMongoUser();
                           if (mounted) {
+                            final nowFavorited = result['isFavorited'] ?? !wasAlreadyFavorited;
                             AnimatedToast.show(
                               context,
-                              isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
-                              type: isFavorited ? ToastType.info : ToastType.success,
+                              nowFavorited ? "Added restaurant to favorites" : "Removed restaurant from favorites",
+                              type: nowFavorited ? ToastType.success : ToastType.info,
                             );
                           }
                         } catch (e) {
