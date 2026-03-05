@@ -633,25 +633,28 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      if (isRescueUpcoming) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4))),
-                          child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.schedule_rounded, size: 11, color: Color(0xFFB45309)), const SizedBox(width: 4), Text('${AppLocalizations.of(context)!.translate("opens")} ${_fmt12(pickupFrom!)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E)))]),
-                        ),
-                      ] else if (expiryTime != null) ...[
-                        _buildIconLabel(Icons.timer_outlined, '${AppLocalizations.of(context)!.translate("ends")} ${_formatTimeRemaining(expiryTime)}'),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        if (isRescueUpcoming) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4))),
+                            child: Row(mainAxisSize: MainAxisSize.min, children: [const Icon(Icons.schedule_rounded, size: 11, color: Color(0xFFB45309)), const SizedBox(width: 4), Text('${AppLocalizations.of(context)!.translate("opens")} ${_fmt12(pickupFrom!)}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF92400E)))]),
+                          ),
+                        ] else if (expiryTime != null) ...[
+                          _buildIconLabel(Icons.timer_outlined, '${AppLocalizations.of(context)!.translate("ends")} ${_formatTimeRemaining(expiryTime)}'),
+                        ],
+                        const SizedBox(width: 8),
+                        Flexible(child: _buildIconLabel(Icons.store, orgName)),
+                        const SizedBox(width: 8),
+                        if (isRescueUpcoming)
+                          Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12)), child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.lock_clock_outlined, size: 13, color: Colors.grey.shade500), const SizedBox(width: 4), Text(AppLocalizations.of(context)!.translate('locked'), style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold))]))
+                        else
+                          Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), decoration: BoxDecoration(color: isFree ? Colors.green : AppColors.primary, borderRadius: BorderRadius.circular(12)), child: Text(isFree ? AppLocalizations.of(context)!.translate('claim_now') : AppLocalizations.of(context)!.translate('reserve'), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
                       ],
-                      const SizedBox(width: 8),
-                      Expanded(child: _buildIconLabel(Icons.store, orgName)),
-                      const SizedBox(width: 8),
-                      if (isRescueUpcoming)
-                        Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12)), child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.lock_clock_outlined, size: 13, color: Colors.grey.shade500), const SizedBox(width: 4), Text(AppLocalizations.of(context)!.translate('locked'), style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold))]))
-                      else
-                        Container(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), decoration: BoxDecoration(color: isFree ? Colors.green : AppColors.primary, borderRadius: BorderRadius.circular(12)), child: Text(isFree ? AppLocalizations.of(context)!.translate('claim_now') : AppLocalizations.of(context)!.translate('reserve'), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))),
-                    ],
+                    ),
                   ),
                 ],
               ),

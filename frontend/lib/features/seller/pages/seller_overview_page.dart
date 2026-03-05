@@ -661,23 +661,23 @@ class _SellerOverviewPageState extends State<SellerOverviewPage> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.textLight.withOpacity(0.06),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              _getCurrentMonthLabel(),
-                              style: TextStyle(
-                                color: AppColors.textLight.withOpacity(0.6),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
                         ],
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.textLight.withOpacity(0.06),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          _getCurrentMonthLabel(),
+                          style: TextStyle(
+                            color: AppColors.textLight.withOpacity(0.6),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   ),
