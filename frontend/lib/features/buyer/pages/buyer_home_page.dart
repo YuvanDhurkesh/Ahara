@@ -562,6 +562,52 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   ),
                 if (rating > 0)
                   Positioned(bottom: 12, right: 12, child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)), child: Row(children: [const Icon(Icons.star, color: Colors.amber, size: 14), const SizedBox(width: 4), Text(rating.toStringAsFixed(1), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]))),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Consumer<AppAuthProvider>(
+                    builder: (context, auth, _) {
+                      final profile = auth.mongoProfile;
+                      final dynamic rawSellerId = listing['sellerId'];
+                      final String sellerId = (rawSellerId is Map) ? (rawSellerId['_id'] ?? "").toString() : (rawSellerId ?? "").toString();
+                      final List? favorites = profile?['favouriteSellers'];
+                      final bool isFavorited = favorites?.contains(sellerId) ?? false;
+
+                      return GestureDetector(
+                        onTap: () async {
+                          if (auth.currentUser == null || sellerId.isEmpty) return;
+                          try {
+                            await BackendService.toggleFavoriteSeller(
+                                firebaseUid: auth.currentUser!.uid,
+                                sellerId: sellerId);
+                            await auth.refreshMongoUser();
+                            if (mounted) {
+                              AnimatedToast.show(
+                                context,
+                                isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
+                                type: isFavorited ? ToastType.info : ToastType.success,
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint("Error toggling favorite restaurant: $e");
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isFavorited ? Icons.favorite : Icons.favorite_border,
+                            size: 20,
+                            color: isFavorited ? Colors.red : Colors.black,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
             Padding(
@@ -637,6 +683,51 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                   child: Wrap(spacing: 6, runSpacing: 6, children: [if (store.discount != null) _buildSpecialBadge(store.discount!, Colors.orange), if (store.isFree) _buildSpecialBadge("FREE", Colors.green), ...store.badges.map((badge) => _buildBadge(badge)).toList()]),
                 ),
                 Positioned(bottom: 12, right: 12, child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)), child: Row(children: [const Icon(Icons.star, color: Colors.amber, size: 14), const SizedBox(width: 4), Text(store.rating, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))]))),
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Consumer<AppAuthProvider>(
+                    builder: (context, auth, _) {
+                      final profile = auth.mongoProfile;
+                      final String storeId = store.id;
+                      final List? favorites = profile?['favouriteSellers'];
+                      final bool isFavorited = favorites?.contains(storeId) ?? false;
+
+                      return GestureDetector(
+                        onTap: () async {
+                          if (auth.currentUser == null) return;
+                          try {
+                            await BackendService.toggleFavoriteSeller(
+                                firebaseUid: auth.currentUser!.uid,
+                                sellerId: storeId);
+                            await auth.refreshMongoUser();
+                            if (mounted) {
+                              AnimatedToast.show(
+                                context,
+                                isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
+                                type: isFavorited ? ToastType.info : ToastType.success,
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint("Error toggling favorite for mock store: $e");
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isFavorited ? Icons.favorite : Icons.favorite_border,
+                            size: 20,
+                            color: isFavorited ? Colors.red : Colors.black,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
             Padding(

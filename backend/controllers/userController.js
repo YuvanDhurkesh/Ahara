@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const User = require("../models/User");
 const SellerProfile = require("../models/SellerProfile");
 const BuyerProfile = require("../models/BuyerProfile");
@@ -638,10 +639,22 @@ exports.getFavoriteSellers = async (req, res) => {
     }
 
     // Get all seller profiles that are favorited
-    // Note: favouriteSellers contains sellerId (the SellerProfile's userId)
+    // Filter and Convert to ObjectIds for the query to be safe
+    const validSellerIds = (profile.favouriteSellers || []).filter(id =>
+      mongoose.Types.ObjectId.isValid(id)
+    );
+
+    console.log(`[FAV] User ${uid} has ${profile.favouriteSellers?.length} raw favorites`);
+    const objectIds = validSellerIds.map(id => new mongoose.Types.ObjectId(id));
+
     const favoriteSellers = await SellerProfile.find({
-      userId: { $in: profile.favouriteSellers }
+      $or: [
+        { _id: { $in: objectIds } },
+        { userId: { $in: objectIds } }
+      ]
     }).populate("userId", "name phone email geo addressText");
+
+    console.log(`[FAV] Found ${favoriteSellers.length} matching seller profiles in DB`);
 
     return res.status(200).json({ sellers: favoriteSellers });
   } catch (error) {

@@ -6,6 +6,7 @@ import '../../../data/services/backend_service.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import 'buyer_food_detail_page.dart';
 import '../../../shared/widgets/animated_toast.dart';
+import '../data/mock_stores.dart';
 import '../../../core/localization/app_localizations.dart';
 
 class BuyerFavouritesPage extends StatefulWidget {
@@ -29,38 +30,94 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
   }
 
   Future<void> _fetchInitialData() async {
+    debugPrint("🟡 [Favourites] _fetchInitialData() called");
     setState(() => _isLoading = true);
     await Future.wait([
       _fetchFavorites(),
       _fetchAllListings(),
     ]);
     if (mounted) setState(() => _isLoading = false);
+    debugPrint("🟢 [Favourites] _fetchInitialData() done. Total sellers: ${_favoriteSellers.length}");
   }
 
   Future<void> _fetchAllListings() async {
+    debugPrint("🔵 [Favourites] Fetching all active listings...");
     try {
       final listings = await BackendService.getAllActiveListings();
+      debugPrint("🔵 [Favourites] Got ${listings.length} active listings from backend.");
       if (mounted) {
         setState(() => _allActiveListings = listings);
       }
     } catch (e) {
-      debugPrint("Error fetching all listings: $e");
+      debugPrint("🔴 [Favourites] Error fetching all listings: $e");
     }
   }
 
   Future<void> _fetchFavorites() async {
+    debugPrint("⭐ [Favourites] _fetchFavorites() called");
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final sellers = await BackendService.getFavoriteSellers(user.uid);
-        if (mounted) {
-          setState(() {
-            _favoriteSellers = sellers;
-          });
+      if (user == null) {
+        debugPrint("🔴 [Favourites] No Firebase user found. Aborting.");
+        return;
+      }
+      debugPrint("⭐ [Favourites] Firebase UID: ${user.uid}");
+
+      // 1. Fetch real sellers from backend
+      debugPrint("⭐ [Favourites] Calling BackendService.getFavoriteSellers...");
+      final sellers = await BackendService.getFavoriteSellers(user.uid);
+      debugPrint("⭐ [Favourites] Backend returned ${sellers.length} favorite sellers.");
+      for (var s in sellers) {
+        debugPrint("   ↳ Seller: orgName=${s['orgName']}, _id=${s['_id']}, userId=${s['userId']}");
+      }
+
+      // 2. Check mongo profile for favorite IDs (including mock stores)
+      final auth = Provider.of<AppAuthProvider>(context, listen: false);
+      final List<dynamic> favoriteIds = auth.mongoProfile?['favouriteSellers'] ?? [];
+      debugPrint("⭐ [Favourites] mongoProfile favouriteSellers IDs: $favoriteIds");
+
+      List<Map<String, dynamic>> combinedSellers = List.from(sellers);
+
+      for (var id in favoriteIds) {
+        final idStr = id.toString();
+        debugPrint("   ↳ Checking ID: $idStr (type: ${id.runtimeType})");
+
+        // Match store_ prefixed IDs (new format) OR plain numeric IDs (legacy format)
+        final isStorePrefix = idStr.startsWith("store_");
+        final isLegacyNumeric = int.tryParse(idStr) != null;
+
+        if (isStorePrefix || isLegacyNumeric) {
+          debugPrint("   ↳ Looks like a mock store ID. Searching allMockStores...");
+          // Try exact match first (store_1), then try numeric match (1 -> store_1)
+          final matches = allMockStores.where((s) =>
+            s.id == idStr || s.id == "store_$idStr"
+          ).toList();
+          if (matches.isNotEmpty) {
+            final mockStore = matches.first;
+            debugPrint("   ✅ Found mock store: ${mockStore.name}");
+            combinedSellers.add({
+              '_id': mockStore.id,
+              'orgName': mockStore.name,
+              'isMock': true,
+              'mockData': mockStore,
+            });
+          } else {
+            debugPrint("   ❌ No mock store found with ID: $idStr");
+          }
+        } else {
+          debugPrint("   → Skipping '$idStr' (real seller ID, handled by backend)");
         }
       }
+
+      debugPrint("⭐ [Favourites] Combined total sellers to display: ${combinedSellers.length}");
+
+      if (mounted) {
+        setState(() {
+          _favoriteSellers = combinedSellers;
+        });
+      }
     } catch (e) {
-      debugPrint("Error fetching favorite sellers: $e");
+      debugPrint("🔴 [Favourites] Error fetching favorite sellers: $e");
     }
   }
 
@@ -143,10 +200,18 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
   }
 
   Widget _buildSellerCard(Map<String, dynamic> seller) {
-    final sellerId = seller['userId']?['_id'] ?? seller['userId'];
+    final bool isMock = seller['isMock'] ?? false;
+    final sellerId = isMock ? seller['_id'] : ((seller['userId'] is Map ? seller['userId']['_id'] : seller['userId']) ?? seller['_id']);
     final orgName = seller['orgName'] ?? "Unknown Seller";
-    final rating = (seller['stats']?['avgRating'] ?? 0.0).toDouble();
-    final address = seller['businessAddressText'] ?? "No address provided";
+    
+    final double rating = isMock 
+        ? (double.tryParse((seller['mockData'] as MockStore).rating) ?? 0.0)
+        : (seller['stats']?['avgRating'] ?? 0.0).toDouble();
+        
+    final address = isMock 
+        ? "Mock Location, Ahara" 
+        : (seller['businessAddressText'] ?? "No address provided");
+        
     final isExpanded = _expandedSellerId == sellerId;
 
     return Container(
@@ -169,7 +234,7 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
             leading: CircleAvatar(
               radius: 24,
               backgroundColor: AppColors.primary.withOpacity(0.1),
-              child: const Icon(Icons.store, color: AppColors.primary, size: 24),
+              child: Icon(isMock ? Icons.store_outlined : Icons.store, color: AppColors.primary, size: 24),
             ),
             title: Text(
               orgName,
@@ -186,8 +251,15 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                     Text(rating.toStringAsFixed(1), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                     const SizedBox(width: 12),
                     (() {
-                      final hasListings = _allActiveListings.any((l) => 
-                        (l['sellerProfileId']?['userId'] ?? l['sellerProfileId']) == sellerId);
+                      final hasListings = isMock || _allActiveListings.any((l) {
+                        final lSeller = l['sellerProfileId'];
+                        if (lSeller is String) return lSeller == sellerId;
+                        if (lSeller is Map) {
+                          return lSeller['_id'] == sellerId || 
+                                 (lSeller['userId'] is Map ? lSeller['userId']['_id'] : lSeller['userId']) == sellerId;
+                        }
+                        return false;
+                      });
                       
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -250,7 +322,7 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                     try {
                       await BackendService.toggleFavoriteSeller(
                         firebaseUid: auth.currentUser!.uid,
-                        sellerId: sellerId,
+                        sellerId: sellerId!,
                       );
                       await auth.refreshMongoUser();
                       
@@ -267,29 +339,31 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                     }
                   },
                 ),
-                const SizedBox(width: 8),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                      color: AppColors.primary,
-                    ),
-                    Text(
-                      isExpanded ? AppLocalizations.of(context)!.translate("close") : AppLocalizations.of(context)!.translate("items"),
-                      style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
+                if (!isMock) ...[
+                  const SizedBox(width: 8),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                        color: AppColors.primary,
+                      ),
+                      Text(
+                        isExpanded ? AppLocalizations.of(context)!.translate("close") : AppLocalizations.of(context)!.translate("items"),
+                        style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
-            onTap: () {
+            onTap: isMock ? null : () {
               setState(() {
                 _expandedSellerId = isExpanded ? null : sellerId;
               });
             },
           ),
-          if (isExpanded) _buildSellerListings(sellerId),
+          if (isExpanded && !isMock) _buildSellerListings(sellerId!),
         ],
       ),
     );
@@ -297,7 +371,15 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
 
   Widget _buildSellerListings(String sellerId) {
     final sellerListings = _allActiveListings
-            .where((l) => (l['sellerProfileId']?['userId'] ?? l['sellerProfileId']) == sellerId)
+            .where((l) {
+              final lSeller = l['sellerProfileId'];
+              if (lSeller is String) return lSeller == sellerId;
+              if (lSeller is Map) {
+                return lSeller['_id'] == sellerId || 
+                       (lSeller['userId'] is Map ? lSeller['userId']['_id'] : lSeller['userId']) == sellerId;
+              }
+              return false;
+            })
             .toList();
 
     if (sellerListings.isEmpty) {

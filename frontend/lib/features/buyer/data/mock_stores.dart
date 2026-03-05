@@ -40,7 +40,7 @@ class MockStore {
 
 final List<MockStore> allMockStores = [
   MockStore(
-    id: "1",
+    id: "store_1",
     name: "Sunshine Delights",
     type: "Bakery & Cafe",
     category: "Bread & pastries",
@@ -65,7 +65,7 @@ final List<MockStore> allMockStores = [
     },
   ),
   MockStore(
-    id: "2",
+    id: "store_2",
     name: "Cozette Cloud Kitchen",
     type: "Cloud Kitchen",
     category: "Meals",
@@ -96,7 +96,7 @@ final List<MockStore> allMockStores = [
     },
   ),
   MockStore(
-    id: "3",
+    id: "store_3",
     name: "The Daily Meal",
     type: "Restaurant",
     category: "Meals",
@@ -121,7 +121,7 @@ final List<MockStore> allMockStores = [
     },
   ),
   MockStore(
-    id: "4",
+    id: "store_4",
     name: "Pet Paradise",
     type: "Pet Food Store",
     category: "Pet food",
@@ -146,7 +146,7 @@ final List<MockStore> allMockStores = [
     },
   ),
   MockStore(
-    id: "5",
+    id: "store_5",
     name: "Grand Gala Catering",
     type: "Catering Service",
     category: "Meals",
@@ -169,7 +169,7 @@ final List<MockStore> allMockStores = [
     },
   ),
   MockStore(
-    id: "6",
+    id: "store_6",
     name: "The Free Pantry",
     type: "Essential Groceries",
     category: "Groceries",
@@ -192,7 +192,7 @@ final List<MockStore> allMockStores = [
     },
   ),
   MockStore(
-    id: "7",
+    id: "store_7",
     name: "Royal Event Management",
     type: "Event Food Redistribution",
     category: "Meals",
@@ -215,7 +215,7 @@ final List<MockStore> allMockStores = [
     },
   ),
   MockStore(
-    id: "8",
+    id: "store_8",
     name: "Harvest Cafe",
     type: "Cafe",
     category: "Vegan",
@@ -240,7 +240,7 @@ final List<MockStore> allMockStores = [
     },
   ),
   MockStore(
-    id: "9",
+    id: "store_9",
     name: "The Grill Cloud",
     type: "Cloud Kitchen",
     category: "Non-vegetarian",
@@ -265,7 +265,7 @@ final List<MockStore> allMockStores = [
     },
   ),
   MockStore(
-    id: "10",
+    id: "store_10",
     name: "Elite Caterers",
     type: "Professional Catering",
     category: "Meals",

@@ -213,7 +213,9 @@ class BuyerFoodDetailPage extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Consumer<AppAuthProvider>(
             builder: (context, auth, _) {
-              final sellerId = listing?['sellerProfileId']?['userId'] ?? "";
+              final dynamic rawSellerId = listing?['sellerId'];
+              final String sellerId = store?.id ?? 
+                                     ((rawSellerId is Map) ? (rawSellerId['_id'] ?? "").toString() : (rawSellerId ?? "").toString());
               final profile = auth.mongoProfile;
               final List? favorites = profile?['favouriteSellers'];
               final bool isFavorited = favorites?.contains(sellerId) ?? false;

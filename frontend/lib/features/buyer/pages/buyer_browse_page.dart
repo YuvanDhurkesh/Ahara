@@ -1008,7 +1008,8 @@ Widget _buildFloatingButton({
                 child: Consumer<AppAuthProvider>(
                   builder: (context, auth, _) {
                     final profile = auth.mongoProfile;
-                    final sellerId = listing['sellerProfileId']?['userId'] ?? "";
+                    final dynamic rawSellerId = listing['sellerId'];
+                    final String sellerId = (rawSellerId is Map) ? (rawSellerId['_id'] ?? "").toString() : (rawSellerId ?? "").toString();
                     final List? favorites = profile?['favouriteSellers'];
                     final bool isFavorited = favorites?.contains(sellerId) ?? false;
 
