@@ -579,12 +579,36 @@ exports.toggleFavoriteSeller = async (req, res) => {
       profile = await BuyerProfile.create({ userId: user._id });
     }
 
-    const sellerIndex = profile.favouriteSellers.indexOf(sellerId.toString());
+    // Look up the SellerProfile by EITHER _id OR userId so we handle any ID format
+    let sellerProfile = null;
+    if (mongoose.Types.ObjectId.isValid(sellerId)) {
+      sellerProfile = await SellerProfile.findOne({
+        $or: [
+          { _id: new mongoose.Types.ObjectId(sellerId) },
+          { userId: new mongoose.Types.ObjectId(sellerId) }
+        ]
+      });
+    }
+
+    // Collect ALL IDs that could refer to this seller in the array
+    const relatedIds = new Set([sellerId.toString()]);
+    if (sellerProfile) {
+      relatedIds.add(sellerProfile._id.toString());
+      if (sellerProfile.userId) relatedIds.add(sellerProfile.userId.toString());
+    }
+
+    // Check if ANY related ID is already in favouriteSellers
+    const alreadyFavorited = profile.favouriteSellers.some(id => relatedIds.has(id.toString()));
+
     let isFavorited = false;
 
-    if (sellerIndex > -1) {
-      profile.favouriteSellers.splice(sellerIndex, 1);
+    if (alreadyFavorited) {
+      // Remove ALL related IDs (cleanup duplicates too)
+      profile.favouriteSellers = profile.favouriteSellers.filter(
+        id => !relatedIds.has(id.toString())
+      );
     } else {
+      // Store the exact sellerId as provided by the frontend (for consistent isFavorited check)
       profile.favouriteSellers.push(sellerId.toString());
       isFavorited = true;
     }
@@ -593,7 +617,6 @@ exports.toggleFavoriteSeller = async (req, res) => {
 
     if (isFavorited) {
       try {
-        const sellerProfile = await SellerProfile.findOne({ userId: sellerId });
         const orgName = sellerProfile ? sellerProfile.orgName : "a restaurant";
         await Notification.create({
           userId: user._id,

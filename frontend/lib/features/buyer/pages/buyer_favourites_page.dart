@@ -23,10 +23,38 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
   bool _isLoading = true;
   String? _expandedSellerId;
 
+  // Tracks the previous favouriteSellers snapshot to detect changes
+  List<String> _lastFavIds = [];
+
   @override
   void initState() {
     super.initState();
     _fetchInitialData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final auth = Provider.of<AppAuthProvider>(context, listen: true);
+    final List<dynamic> currentIds = auth.mongoProfile?['favouriteSellers'] ?? [];
+    final List<String> currentIdStrs = currentIds.map((e) => e.toString()).toList();
+
+    // Re-fetch only when the list actually changed
+    if (!_listsEqual(_lastFavIds, currentIdStrs)) {
+      _lastFavIds = currentIdStrs;
+      // Don't call on very first load (initState handles that)
+      if (!_isLoading) {
+        _fetchFavorites();
+      }
+    }
+  }
+
+  bool _listsEqual(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   Future<void> _fetchInitialData() async {
