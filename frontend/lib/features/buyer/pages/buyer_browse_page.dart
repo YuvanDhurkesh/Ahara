@@ -8,7 +8,6 @@ import '../../../data/services/backend_service.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-
 import 'package:provider/provider.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
@@ -45,7 +44,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   // Real Data State
   List<Map<String, dynamic>> _realListings = [];
   bool _isListingsLoading = false;
-  
+
   // Live countdown state
   DateTime _now = DateTime.now();
   Timer? _countdownTimer;
@@ -54,7 +53,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   void initState() {
     super.initState();
     _fetchRealListings();
-    
+
     // Update countdown every 30 seconds
     _countdownTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted) {
@@ -70,13 +69,15 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
 
   Future<void> _centerOnUserLocation() async {
     if (!mounted) return;
-    
+
     // 1. Try to get live location first
     final Position? position = await LocationUtil.getCurrentLocation();
     if (position != null) {
       if (mounted) {
         setState(() => _livePosition = position);
-        debugPrint("📍 Centering map on LIVE user location: [${position.latitude}, ${position.longitude}]");
+        debugPrint(
+          "📍 Centering map on LIVE user location: [${position.latitude}, ${position.longitude}]",
+        );
         _mapController.move(LatLng(position.latitude, position.longitude), 14);
         return;
       }
@@ -85,15 +86,17 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     // 2. Fallback to profile location
     final auth = Provider.of<AppAuthProvider>(context, listen: false);
     final coords = auth.mongoUser?['geo']?['coordinates'];
-    
+
     if (coords != null && coords is List && coords.length >= 2) {
       final double lng = (coords[0] as num).toDouble();
       final double lat = (coords[1] as num).toDouble();
-      
+
       debugPrint("📍 Centering map on profile location: [$lat, $lng]");
       _mapController.move(LatLng(lat, lng), 13);
     } else {
-       debugPrint("📍 User location not found in profile, defaulting to Bangalore");
+      debugPrint(
+        "📍 User location not found in profile, defaulting to Bangalore",
+      );
     }
   }
 
@@ -102,9 +105,17 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     if (position != null) {
       setState(() => _livePosition = position);
       _mapController.move(LatLng(position.latitude, position.longitude), 14);
-      AnimatedToast.show(context, "Centered on current location", type: ToastType.info);
+      AnimatedToast.show(
+        context,
+        "Centered on current location",
+        type: ToastType.info,
+      );
     } else {
-      AnimatedToast.show(context, "Could not fetch location", type: ToastType.error);
+      AnimatedToast.show(
+        context,
+        "Could not fetch location",
+        type: ToastType.error,
+      );
     }
   }
 
@@ -133,10 +144,14 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   // Format time remaining until expiry
   String _formatTimeRemaining(DateTime expiryTime) {
     final diff = expiryTime.difference(_now);
-    if (diff.isNegative) return AppLocalizations.of(context)!.translate("expired");
-    if (diff.inDays > 0) return "${AppLocalizations.of(context)!.translate("ends_in")} ${diff.inDays}d ${diff.inHours % 24}h";
-    if (diff.inHours > 0) return "${AppLocalizations.of(context)!.translate("ends_in")} ${diff.inHours}h ${diff.inMinutes % 60}m";
-    if (diff.inMinutes > 0) return "${AppLocalizations.of(context)!.translate("ends_in")} ${diff.inMinutes}m";
+    if (diff.isNegative)
+      return AppLocalizations.of(context)!.translate("expired");
+    if (diff.inDays > 0)
+      return "${AppLocalizations.of(context)!.translate("ends_in")} ${diff.inDays}d ${diff.inHours % 24}h";
+    if (diff.inHours > 0)
+      return "${AppLocalizations.of(context)!.translate("ends_in")} ${diff.inHours}h ${diff.inMinutes % 60}m";
+    if (diff.inMinutes > 0)
+      return "${AppLocalizations.of(context)!.translate("ends_in")} ${diff.inMinutes}m";
     return AppLocalizations.of(context)!.translate("soon");
   }
 
@@ -159,19 +174,25 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   List<dynamic> get _allResults {
     // 1. Start with mock stores
     List<dynamic> results = List.from(allMockStores);
-    
+
     // 2. Add only valid (non-expired) real listings
     results.insertAll(0, _validListings);
 
     final auth = context.watch<AppAuthProvider>();
-    final List<String> dietaryPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
+    final List<String> dietaryPrefs = List<String>.from(
+      auth.mongoProfile?['dietaryPreferences'] ?? [],
+    );
 
     return results.where((item) {
       final isMock = item is MockStore;
       final name = isMock ? item.name : (item['foodName'] ?? "");
       final type = isMock ? item.type : (item['foodType'] ?? "");
-      final rating = isMock ? double.tryParse(item.rating) ?? 0.0 : 0.0; // Real listings don't have ratings yet
-      final isFree = isMock ? item.isFree : (item['pricing']?['isFree'] ?? false);
+      final rating = isMock
+          ? double.tryParse(item.rating) ?? 0.0
+          : 0.0; // Real listings don't have ratings yet
+      final isFree = isMock
+          ? item.isFree
+          : (item['pricing']?['isFree'] ?? false);
 
       // 1. Search Query
       if (_searchQuery.isNotEmpty) {
@@ -190,32 +211,42 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
 
       // 🔥 NEW: Filter by User Dietary Preferences (Strict Filtering)
       if (dietaryPrefs.isNotEmpty) {
-        String itemDietary = "vegetarian"; 
+        String itemDietary = "vegetarian";
         if (isMock) {
           final cat = item.category.toLowerCase();
-          if (cat.contains("vegan")) itemDietary = "vegan";
-          else if (cat.contains("non-veg")) itemDietary = "non_veg";
-          else if (cat.contains("vegetarian")) itemDietary = "vegetarian";
-          else if (cat.contains("jain")) itemDietary = "jain";
+          if (cat.contains("vegan"))
+            itemDietary = "vegan";
+          else if (cat.contains("non-veg"))
+            itemDietary = "non_veg";
+          else if (cat.contains("vegetarian"))
+            itemDietary = "vegetarian";
+          else if (cat.contains("jain"))
+            itemDietary = "jain";
         } else {
-          itemDietary = (item['dietaryType'] ?? "vegetarian").toString().toLowerCase();
+          itemDietary = (item['dietaryType'] ?? "vegetarian")
+              .toString()
+              .toLowerCase();
         }
-        
+
         // 1. If user has only one preference, act as a specific filter
         if (dietaryPrefs.length == 1) {
           final pref = dietaryPrefs.first;
           if (pref == "vegan" && itemDietary != "vegan") return false;
           if (pref == "jain" && itemDietary != "jain") return false;
-          if (pref == "vegetarian" && (itemDietary == "non_veg" || itemDietary == "not_specified")) return false;
+          if (pref == "vegetarian" &&
+              (itemDietary == "non_veg" || itemDietary == "not_specified"))
+            return false;
           if (pref == "non_veg" && itemDietary != "non_veg") return false;
         } else {
           // 2. If multiple, ensure item matches ANY of the allowed types (e.g. user eats Veg + Non-Veg)
           // But strict exclusions apply:
-          if (dietaryPrefs.contains("vegan") && !dietaryPrefs.contains("non_veg")) {
-             if (itemDietary == "non_veg") return false;
+          if (dietaryPrefs.contains("vegan") &&
+              !dietaryPrefs.contains("non_veg")) {
+            if (itemDietary == "non_veg") return false;
           }
-           if (dietaryPrefs.contains("vegetarian") && !dietaryPrefs.contains("non_veg")) {
-             if (itemDietary == "non_veg") return false;
+          if (dietaryPrefs.contains("vegetarian") &&
+              !dietaryPrefs.contains("non_veg")) {
+            if (itemDietary == "non_veg") return false;
           }
         }
       }
@@ -227,7 +258,9 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AppAuthProvider>();
-    final List<String> dietaryPrefs = List<String>.from(auth.mongoUser?['profile']?['dietaryPreferences'] ?? []);
+    final List<String> dietaryPrefs = List<String>.from(
+      auth.mongoUser?['profile']?['dietaryPreferences'] ?? [],
+    );
 
     return Scaffold(
       body: Stack(
@@ -235,7 +268,16 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
           // 1. Map Background
           _buildMapBackground(),
 
-         
+          // Status bar background for clean look
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: MediaQuery.of(context).padding.top,
+              color: AppColors.background.withOpacity(0.92),
+            ),
+          ),
 
           // 3. Floating Search Header
           Positioned(
@@ -258,14 +300,19 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                   onTap: () {
                     setState(() => _showSearchInArea = false);
                     _fetchRealListings();
-                    AnimatedToast.show(context, "Searching in this area...", type: ToastType.info);
+                    AnimatedToast.show(
+                      context,
+                      "Searching in this area...",
+                      type: ToastType.info,
+                    );
                   },
                 ),
               ),
             ),
 
           // 🔥 NEW: Empty State Prompt
-          if ((_allResults.isEmpty || !_hasVisibleResults) && !_isListingsLoading)
+          if ((_allResults.isEmpty || !_hasVisibleResults) &&
+              !_isListingsLoading)
             Positioned(
               top: 130,
               left: 0,
@@ -277,7 +324,9 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.95),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                    border: Border.all(
+                      color: AppColors.primary.withOpacity(0.2),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -289,10 +338,16 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.location_off_outlined, color: AppColors.primary, size: 36),
+                      const Icon(
+                        Icons.location_off_outlined,
+                        color: AppColors.primary,
+                        size: 36,
+                      ),
                       const SizedBox(height: 12),
                       Text(
-                        AppLocalizations.of(context)!.translate("no_listings_here"),
+                        AppLocalizations.of(
+                          context,
+                        )!.translate("no_listings_here"),
                         style: GoogleFonts.inter(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -301,9 +356,13 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _allResults.isEmpty 
-                            ? AppLocalizations.of(context)!.translate("try_changing_filters")
-                            : AppLocalizations.of(context)!.translate("invite_sellers_desc"),
+                        _allResults.isEmpty
+                            ? AppLocalizations.of(
+                                context,
+                              )!.translate("try_changing_filters")
+                            : AppLocalizations.of(
+                                context,
+                              )!.translate("invite_sellers_desc"),
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 13,
@@ -340,223 +399,234 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
   }
 
   Widget _buildMapBackground() {
-  return FlutterMap(
-    mapController: _mapController,
-    options: MapOptions(
-      initialCenter: const LatLng(12.9716, 77.5946), // Bangalore default
-      initialZoom: 13,
-      onPositionChanged: (position, hasGesture) {
-        if (position.center != null) {
-          // 1. Check for visible results
-          final bool visible = _checkVisibleResults(position.bounds);
-          if (visible != _hasVisibleResults) {
-            setState(() => _hasVisibleResults = visible);
-          }
+    return FlutterMap(
+      mapController: _mapController,
+      options: MapOptions(
+        initialCenter: const LatLng(12.9716, 77.5946), // Bangalore default
+        initialZoom: 13,
+        onPositionChanged: (position, hasGesture) {
+          if (position.center != null) {
+            // 1. Check for visible results
+            final bool visible = _checkVisibleResults(position.bounds);
+            if (visible != _hasVisibleResults) {
+              setState(() => _hasVisibleResults = visible);
+            }
 
-          // 2. Show "Search in area" button if gestured
-          if (hasGesture) {
-            if (_lastCenter == null || 
-                (position.center!.latitude - _lastCenter!.latitude).abs() > 0.01 ||
-                (position.center!.longitude - _lastCenter!.longitude).abs() > 0.01) {
-              setState(() {
-                _showSearchInArea = true;
-                _lastCenter = position.center;
-              });
+            // 2. Show "Search in area" button if gestured
+            if (hasGesture) {
+              if (_lastCenter == null ||
+                  (position.center!.latitude - _lastCenter!.latitude).abs() >
+                      0.01 ||
+                  (position.center!.longitude - _lastCenter!.longitude).abs() >
+                      0.01) {
+                setState(() {
+                  _showSearchInArea = true;
+                  _lastCenter = position.center;
+                });
+              }
             }
           }
-        }
-      },
-      onTap: (_, __) {
-        if (_selectedStoreId != null) {
-          setState(() => _selectedStoreId = null);
-        }
-      },
-    ),
-    children: [
-      TileLayer(
-        urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-        userAgentPackageName: "com.yourapp.app",
-      ),
-      MarkerLayer(
-        markers: _buildOSMMarkers(),
-      ),
-    ],
-  );
-}
-
-List<Marker> _buildOSMMarkers() {
-  final List<Marker> markers = _allResults.map((item) {
-    final String id = item is MockStore ? item.id : (item['_id'] ?? "");
-    final bool isSelected = _selectedStoreId == id;
-    final bool isFree = item is MockStore ? item.isFree : (item['pricing']?['isFree'] ?? false);
-    final String price = item is MockStore ? item.price : "₹${item['pricing']?['discountedPrice'] ?? 0}";
-
-    // 🔥 Real coordinates from pickupGeo
-    double lat = 12.9716;
-    double lng = 77.5946;
-
-    if (item is MockStore) {
-      // Distribute mock stores slightly for demo
-      lat = 12.9716 + (_allResults.indexOf(item) * 0.005);
-      lng = 77.5946 + (_allResults.indexOf(item) * 0.005);
-    } else {
-      final coords = item['pickupGeo']?['coordinates'];
-      if (coords != null && coords is List && coords.length >= 2) {
-        lng = (coords[0] as num).toDouble();
-        lat = (coords[1] as num).toDouble();
-      }
-    }
-
-    return Marker(
-      width: isSelected ? 120 : 100,
-      height: isSelected ? 60 : 50,
-      point: LatLng(lat, lng),
-      child: GestureDetector(
-        onTap: () {
-          setState(() => _selectedStoreId = id);
-          _mapController.move(LatLng(lat, lng), 14); // Focus on marker
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? Colors.white : AppColors.primary.withOpacity(0.3),
-              width: 2,
+        onTap: (_, __) {
+          if (_selectedStoreId != null) {
+            setState(() => _selectedStoreId = null);
+          }
+        },
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          userAgentPackageName: "com.yourapp.app",
+        ),
+        MarkerLayer(markers: _buildOSMMarkers()),
+      ],
+    );
+  }
+
+  List<Marker> _buildOSMMarkers() {
+    final List<Marker> markers = _allResults.map((item) {
+      final String id = item is MockStore ? item.id : (item['_id'] ?? "");
+      final bool isSelected = _selectedStoreId == id;
+      final bool isFree = item is MockStore
+          ? item.isFree
+          : (item['pricing']?['isFree'] ?? false);
+      final String price = item is MockStore
+          ? item.price
+          : "₹${item['pricing']?['discountedPrice'] ?? 0}";
+
+      // 🔥 Real coordinates from pickupGeo
+      double lat = 12.9716;
+      double lng = 77.5946;
+
+      if (item is MockStore) {
+        // Distribute mock stores slightly for demo
+        lat = 12.9716 + (_allResults.indexOf(item) * 0.005);
+        lng = 77.5946 + (_allResults.indexOf(item) * 0.005);
+      } else {
+        final coords = item['pickupGeo']?['coordinates'];
+        if (coords != null && coords is List && coords.length >= 2) {
+          lng = (coords[0] as num).toDouble();
+          lat = (coords[1] as num).toDouble();
+        }
+      }
+
+      return Marker(
+        width: isSelected ? 120 : 100,
+        height: isSelected ? 60 : 50,
+        point: LatLng(lat, lng),
+        child: GestureDetector(
+          onTap: () {
+            setState(() => _selectedStoreId = id);
+            _mapController.move(LatLng(lat, lng), 14); // Focus on marker
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isSelected ? AppColors.primary : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isSelected
+                    ? Colors.white
+                    : AppColors.primary.withOpacity(0.3),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: (isSelected ? AppColors.primary : Colors.black)
+                      .withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            boxShadow: [
-              BoxShadow(
-                color: (isSelected ? AppColors.primary : Colors.black).withOpacity(0.2),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                item is MockStore ? Icons.store_outlined : Icons.restaurant_menu,
-                size: 14,
-                color: isSelected ? Colors.white : AppColors.primary,
-              ),
-              const SizedBox(width: 4),
-              Flexible(
-                child: Text(
-                  isFree ? AppLocalizations.of(context)!.translate("FREE") : price,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: isSelected ? Colors.white : AppColors.textDark,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  item is MockStore
+                      ? Icons.store_outlined
+                      : Icons.restaurant_menu,
+                  size: 14,
+                  color: isSelected ? Colors.white : AppColors.primary,
+                ),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    isFree
+                        ? AppLocalizations.of(context)!.translate("FREE")
+                        : price,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: isSelected ? Colors.white : AppColors.textDark,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }).toList();
+      );
+    }).toList();
 
-  // 🔥 NEW: Add User's "Blue Dot" position
-  if (_livePosition != null) {
-    markers.add(
-      Marker(
-        width: 24,
-        height: 24,
-        point: LatLng(_livePosition!.latitude, _livePosition!.longitude),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.3),
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+    // 🔥 NEW: Add User's "Blue Dot" position
+    if (_livePosition != null) {
+      markers.add(
+        Marker(
+          width: 24,
+          height: 24,
+          point: LatLng(_livePosition!.latitude, _livePosition!.longitude),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    return markers;
   }
 
-  return markers;
-}
+  bool _checkVisibleResults(LatLngBounds? bounds) {
+    if (bounds == null) return true;
+    if (_allResults.isEmpty) return false;
 
-bool _checkVisibleResults(LatLngBounds? bounds) {
-  if (bounds == null) return true;
-  if (_allResults.isEmpty) return false;
+    for (final item in _allResults) {
+      double lat = 12.9716;
+      double lng = 77.5946;
 
-  for (final item in _allResults) {
-    double lat = 12.9716;
-    double lng = 77.5946;
+      if (item is MockStore) {
+        lat = 12.9716 + (_allResults.indexOf(item) * 0.005);
+        lng = 77.5946 + (_allResults.indexOf(item) * 0.005);
+      } else {
+        final coords = item['pickupGeo']?['coordinates'];
+        if (coords != null && coords is List && coords.length >= 2) {
+          lng = (coords[0] as num).toDouble();
+          lat = (coords[1] as num).toDouble();
+        }
+      }
 
-    if (item is MockStore) {
-      lat = 12.9716 + (_allResults.indexOf(item) * 0.005);
-      lng = 77.5946 + (_allResults.indexOf(item) * 0.005);
-    } else {
-      final coords = item['pickupGeo']?['coordinates'];
-      if (coords != null && coords is List && coords.length >= 2) {
-        lng = (coords[0] as num).toDouble();
-        lat = (coords[1] as num).toDouble();
+      if (bounds.contains(LatLng(lat, lng))) {
+        return true;
       }
     }
-
-    if (bounds.contains(LatLng(lat, lng))) {
-      return true;
-    }
+    return false;
   }
-  return false;
-}
 
-Widget _buildFloatingButton({
-  required IconData icon,
-  required String label,
-  required VoidCallback onTap,
-}) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: Colors.white, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
+  Widget _buildFloatingButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-  
+    );
+  }
+
   Widget _buildFloatingSearchHeader() {
     return SafeArea(
       child: Container(
@@ -585,7 +655,9 @@ Widget _buildFloatingButton({
                     controller: _searchController,
                     onChanged: (val) => setState(() => _searchQuery = val),
                     decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context)!.translate("search_browse_hint"),
+                      hintText: AppLocalizations.of(
+                        context,
+                      )!.translate("search_browse_hint"),
                       hintStyle: GoogleFonts.inter(
                         color: AppColors.textLight.withOpacity(0.5),
                         fontWeight: FontWeight.w500,
@@ -615,7 +687,10 @@ Widget _buildFloatingButton({
             const Divider(height: 20),
             Row(
               children: [
-                _buildHeaderFilter(AppLocalizations.of(context)!.translate("filter"), onTap: _showFilterDialog),
+                _buildHeaderFilter(
+                  AppLocalizations.of(context)!.translate("filter"),
+                  onTap: _showFilterDialog,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: SingleChildScrollView(
@@ -627,7 +702,9 @@ Widget _buildFloatingButton({
                           const SizedBox(width: 8),
                         ],
                         if (_onlyFree) ...[
-                          _buildActiveFilterChip(AppLocalizations.of(context)!.translate("FREE")),
+                          _buildActiveFilterChip(
+                            AppLocalizations.of(context)!.translate("FREE"),
+                          ),
                           const SizedBox(width: 8),
                         ],
                       ],
@@ -748,7 +825,9 @@ Widget _buildFloatingButton({
                   ),
                   const SizedBox(height: 12),
                   FilterChip(
-                    label: Text(AppLocalizations.of(context)!.translate("free_food_only")),
+                    label: Text(
+                      AppLocalizations.of(context)!.translate("free_food_only"),
+                    ),
                     selected: _onlyFree,
                     onSelected: (val) {
                       setModalState(() {});
@@ -773,7 +852,11 @@ Widget _buildFloatingButton({
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(AppLocalizations.of(context)!.translate("apply_filters")),
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.translate("apply_filters"),
+                      ),
                     ),
                   ),
                 ],
@@ -861,22 +944,25 @@ Widget _buildFloatingButton({
                       top: Radius.circular(20),
                     ),
                     child: Image.network(
-                      item is MockStore 
-                          ? item.image 
-                          : ((item['images'] as List?)?.isNotEmpty == true 
-                              ? BackendService.formatImageUrl(item['images'][0]) 
-                              : BackendService.generateFoodImageUrl(item['foodName'] ?? "")),
+                      item is MockStore
+                          ? item.image
+                          : ((item['images'] as List?)?.isNotEmpty == true
+                                ? BackendService.formatImageUrl(
+                                    item['images'][0],
+                                  )
+                                : BackendService.generateFoodImageUrl(
+                                    item['foodName'] ?? "",
+                                  )),
                       height: 150,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => 
-                        Container(
-                          height: 150,
-                          color: Colors.grey.shade300,
-                          child: const Center(
-                            child: Icon(Icons.image_not_supported, size: 40),
-                          ),
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        height: 150,
+                        color: Colors.grey.shade300,
+                        child: const Center(
+                          child: Icon(Icons.image_not_supported, size: 40),
                         ),
+                      ),
                     ),
                   ),
                   Positioned(
@@ -898,14 +984,16 @@ Widget _buildFloatingButton({
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            item is MockStore ? item.name : (item['foodName'] ?? "Unknown Food"),
+                            item is MockStore
+                                ? item.name
+                                : (item['foodName'] ?? "Unknown Food"),
                             style: GoogleFonts.inter(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
                           Text(
-                            item is MockStore 
+                            item is MockStore
                                 ? "${item.rating} ★ • ${item.isFree ? "Free" : item.price}"
                                 : "4.5 ★ • ${item['pricing']?['isFree'] == true ? "Free" : "₹${item['pricing']?['discountedPrice'] ?? 0}"}",
                             style: GoogleFonts.inter(color: Colors.grey),
@@ -918,7 +1006,10 @@ Widget _buildFloatingButton({
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => BuyerFoodDetailPage(listing: item is! MockStore ? item : null, store: item is MockStore ? item : null),
+                            builder: (_) => BuyerFoodDetailPage(
+                              listing: item is! MockStore ? item : null,
+                              store: item is MockStore ? item : null,
+                            ),
                           ),
                         );
                       },
@@ -955,29 +1046,34 @@ Widget _buildFloatingButton({
     final pricing = listing['pricing'] ?? {};
     final bool isFree = pricing['isFree'] ?? false;
     final int price = pricing['discountedPrice'] ?? 0;
-    
+
     final sellerProfile = listing['sellerProfileId'] ?? {};
     final String orgName = sellerProfile['orgName'] ?? "Local Seller";
-    final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0).toDouble();
+    final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0)
+        .toDouble();
     final int ratingCount = sellerProfile['stats']?['ratingCount'] ?? 0;
-    
+
     // Get expiry time for countdown
     final String? expiryStr = listing['pickupWindow']?['to'];
-    final DateTime? expiryTime = expiryStr != null ? DateTime.tryParse(expiryStr) : null;
-    
+    final DateTime? expiryTime = expiryStr != null
+        ? DateTime.tryParse(expiryStr)
+        : null;
+
     final List images = listing['images'] ?? [];
-    final String uploadedImageUrl = images.isNotEmpty 
+    final String uploadedImageUrl = images.isNotEmpty
         ? BackendService.formatImageUrl(images[0])
         : "";
-    final String imageUrl = BackendService.isValidImageUrl(uploadedImageUrl) 
-        ? uploadedImageUrl 
+    final String imageUrl = BackendService.isValidImageUrl(uploadedImageUrl)
+        ? uploadedImageUrl
         : BackendService.generateFoodImageUrl(name);
 
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => BuyerFoodDetailPage(listing: listing)),
+          MaterialPageRoute(
+            builder: (_) => BuyerFoodDetailPage(listing: listing),
+          ),
         );
       },
       child: Column(
@@ -992,14 +1088,13 @@ Widget _buildFloatingButton({
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => 
-                    Container(
-                      height: 200,
-                      color: Colors.grey.shade300,
-                      child: const Center(
-                        child: Icon(Icons.image_not_supported, size: 48),
-                      ),
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 200,
+                    color: Colors.grey.shade300,
+                    child: const Center(
+                      child: Icon(Icons.image_not_supported, size: 48),
                     ),
+                  ),
                 ),
               ),
               Positioned(
@@ -1009,25 +1104,37 @@ Widget _buildFloatingButton({
                   builder: (context, auth, _) {
                     final profile = auth.mongoProfile;
                     final dynamic rawSellerId = listing['sellerId'];
-                    final String sellerId = (rawSellerId is Map) ? (rawSellerId['_id'] ?? "").toString() : (rawSellerId ?? "").toString();
+                    final String sellerId = (rawSellerId is Map)
+                        ? (rawSellerId['_id'] ?? "").toString()
+                        : (rawSellerId ?? "").toString();
                     final List? favorites = profile?['favouriteSellers'];
-                    final bool isFavorited = favorites?.any((f) => f.toString() == sellerId) ?? false;
+                    final bool isFavorited =
+                        favorites?.any((f) => f.toString() == sellerId) ??
+                        false;
 
                     return GestureDetector(
                       onTap: () async {
-                        if (auth.currentUser == null || sellerId.isEmpty) return;
+                        if (auth.currentUser == null || sellerId.isEmpty)
+                          return;
                         final wasAlreadyFavorited = isFavorited;
                         try {
-                          final result = await BackendService.toggleFavoriteSeller(
-                              firebaseUid: auth.currentUser!.uid,
-                              sellerId: sellerId);
+                          final result =
+                              await BackendService.toggleFavoriteSeller(
+                                firebaseUid: auth.currentUser!.uid,
+                                sellerId: sellerId,
+                              );
                           await auth.refreshMongoUser();
                           if (mounted) {
-                            final nowFavorited = result['isFavorited'] ?? !wasAlreadyFavorited;
+                            final nowFavorited =
+                                result['isFavorited'] ?? !wasAlreadyFavorited;
                             AnimatedToast.show(
                               context,
-                              nowFavorited ? "Added restaurant to favorites" : "Removed restaurant from favorites",
-                              type: nowFavorited ? ToastType.success : ToastType.info,
+                              nowFavorited
+                                  ? "Added restaurant to favorites"
+                                  : "Removed restaurant from favorites",
+                              type: nowFavorited
+                                  ? ToastType.success
+                                  : ToastType.info,
                             );
                           }
                         } catch (e) {
@@ -1093,7 +1200,11 @@ Widget _buildFloatingButton({
                           const SizedBox(width: 12),
                         ],
                         if (expiryTime != null) ...[
-                          const Icon(Icons.access_time, size: 14, color: Colors.orange),
+                          const Icon(
+                            Icons.access_time,
+                            size: 14,
+                            color: Colors.orange,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             _formatTimeRemaining(expiryTime),
@@ -1109,7 +1220,11 @@ Widget _buildFloatingButton({
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                        const Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           listing['pickupAddressText'] ?? "Bangalore",
@@ -1162,7 +1277,10 @@ Widget _buildFloatingButton({
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 0,
+                      ),
                       minimumSize: const Size(0, 32),
                     ),
                     child: Text(
@@ -1212,25 +1330,33 @@ Widget _buildFloatingButton({
                   builder: (context, auth, _) {
                     final profile = auth.mongoProfile;
                     final List? favorites = profile?['favouriteSellers'];
-                    final bool isFavorited = favorites?.contains(store.id) ?? false;
+                    final bool isFavorited =
+                        favorites?.contains(store.id) ?? false;
 
                     return GestureDetector(
                       onTap: () async {
                         if (auth.currentUser == null) return;
                         try {
                           await BackendService.toggleFavoriteSeller(
-                              firebaseUid: auth.currentUser!.uid,
-                              sellerId: store.id);
+                            firebaseUid: auth.currentUser!.uid,
+                            sellerId: store.id,
+                          );
                           await auth.refreshMongoUser();
                           if (mounted) {
                             AnimatedToast.show(
                               context,
-                              isFavorited ? "Removed restaurant from favorites" : "Added restaurant to favorites",
-                              type: isFavorited ? ToastType.info : ToastType.success,
+                              isFavorited
+                                  ? "Removed restaurant from favorites"
+                                  : "Added restaurant to favorites",
+                              type: isFavorited
+                                  ? ToastType.info
+                                  : ToastType.success,
                             );
                           }
                         } catch (e) {
-                          debugPrint("Error toggling favorite for mock store: $e");
+                          debugPrint(
+                            "Error toggling favorite for mock store: $e",
+                          );
                         }
                       },
                       child: Container(

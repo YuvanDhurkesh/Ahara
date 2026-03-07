@@ -63,7 +63,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
       final userId = authProvider.mongoUser?['_id'];
       if (userId != null) {
         try {
-          final orders = await BackendService.getVolunteerOrders(userId.toString());
+          final orders = await BackendService.getVolunteerOrders(
+            userId.toString(),
+          );
           final computed = _computeLocalTrustFromOrders(orders);
           if (mounted) {
             setState(() {
@@ -97,9 +99,10 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
 
     final mongoUser = auth.mongoUser;
     final mongoProfile = auth.mongoProfile;
-    final backendTrustFromMongo = (mongoUser != null && mongoUser['trustScore'] != null)
-      ? mongoUser['trustScore']
-      : null;
+    final backendTrustFromMongo =
+        (mongoUser != null && mongoUser['trustScore'] != null)
+        ? mongoUser['trustScore']
+        : null;
     final name = (mongoUser?['name'] ?? 'Volunteer').toString();
     final rating = (mongoProfile?['stats']?['avgRating'] ?? 0).toDouble();
     final totalDeliveries =
@@ -129,7 +132,10 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                       letterSpacing: -0.5,
                     ),
                   ),
-                  _headerIconButton(Icons.settings_outlined, _openSettingsSheet),
+                  _headerIconButton(
+                    Icons.settings_outlined,
+                    _openSettingsSheet,
+                  ),
                 ],
               ),
               const SizedBox(height: 32),
@@ -137,8 +143,11 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                 children: [
                   Expanded(
                     child: _statCard(
-                      label: AppLocalizations.of(context)!.translate('trust_score'),
-                      value: ((_localTrustScore ?? backendTrustFromMongo) ?? 0).toString(),
+                      label: AppLocalizations.of(
+                        context,
+                      )!.translate('trust_score'),
+                      value: ((_localTrustScore ?? backendTrustFromMongo) ?? 0)
+                          .toString(),
                       icon: Icons.shield_rounded,
                       color: const Color(0xFF388E3C),
                     ),
@@ -155,7 +164,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _statCard(
-                      label: AppLocalizations.of(context)!.translate('total_deliveries'),
+                      label: AppLocalizations.of(
+                        context,
+                      )!.translate('total_deliveries'),
                       value: totalDeliveries,
                       icon: Icons.local_shipping_rounded,
                       color: AppColors.primary,
@@ -197,7 +208,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
             BoxShadow(
               color: const Color(0xFF9E7E6B).withOpacity(0.06),
               blurRadius: 10,
-            )
+            ),
           ],
           border: Border.all(color: Colors.grey.shade100),
         ),
@@ -246,9 +257,11 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
   int _computeLocalTrustFromOrders(List<Map<String, dynamic>> orders) {
     final terminalOrders = orders.where((o) {
       final status = o['status']?.toString() ?? '';
-      return status == 'delivered' || status == 'completed' || status == 'cancelled';
+      return status == 'delivered' ||
+          status == 'completed' ||
+          status == 'cancelled';
     }).toList();
-    
+
     int total = terminalOrders.length;
     if (total == 0) return 50;
 
@@ -260,12 +273,12 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
       final status = o['status']?.toString() ?? '';
       if (status == 'delivered' || status == 'completed') {
         completed += 1;
-        
+
         DateTime? scheduled;
         DateTime? delivered;
         final pickup = o['pickup'];
         final timeline = o['timeline'];
-        
+
         try {
           if (pickup != null && pickup['scheduledAt'] != null) {
             scheduled = DateTime.tryParse(pickup['scheduledAt'].toString());
@@ -274,7 +287,7 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
             delivered = DateTime.tryParse(timeline['deliveredAt'].toString());
           }
         } catch (_) {}
-        
+
         if (delivered != null) {
           if (scheduled != null) {
             final diff = delivered.difference(scheduled).inMinutes;
@@ -284,7 +297,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
           }
         }
       }
-      if (status == 'cancelled' && o['cancellation'] != null && o['cancellation']['cancelledBy'] == 'volunteer') {
+      if (status == 'cancelled' &&
+          o['cancellation'] != null &&
+          o['cancellation']['cancelledBy'] == 'volunteer') {
         cancelled += 1;
       }
     }
@@ -293,7 +308,11 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
     final cancelRate = cancelled / total;
     final onTimeRate = completed > 0 ? onTime / completed : 0;
 
-    int score = 50 + (completionRate * 30).round() - (cancelRate * 30).round() + (onTimeRate * 20).round();
+    int score =
+        50 +
+        (completionRate * 30).round() -
+        (cancelRate * 30).round() +
+        (onTimeRate * 20).round();
     if (score > 100) score = 100;
     if (score < 0) score = 0;
     return score;
@@ -389,11 +408,17 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                   controller: controller,
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   children: [
-                    _buildSectionHeader(AppLocalizations.of(context)!.translate('settings').toUpperCase()),
+                    _buildSectionHeader(
+                      AppLocalizations.of(
+                        context,
+                      )!.translate('settings').toUpperCase(),
+                    ),
                     _buildMenuItem(
                       ctx,
                       Icons.person_outline,
-                      AppLocalizations.of(context)!.translate('account_details'),
+                      AppLocalizations.of(
+                        context,
+                      )!.translate('account_details'),
                       onTap: () {
                         Navigator.pop(ctx);
                         _openManageAccountPage();
@@ -402,7 +427,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                     _buildMenuItem(
                       ctx,
                       Icons.lock_outline,
-                      AppLocalizations.of(context)!.translate('change_password'),
+                      AppLocalizations.of(
+                        context,
+                      )!.translate('change_password'),
                       onTap: () {
                         Navigator.pop(ctx);
                         _showChangePasswordDialog();
@@ -411,7 +438,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                     _buildMenuItem(
                       ctx,
                       Icons.language_outlined,
-                      AppLocalizations.of(context)!.translate('change_language'),
+                      AppLocalizations.of(
+                        context,
+                      )!.translate('change_language'),
                       onTap: () {
                         Navigator.pop(ctx);
                         Navigator.push(
@@ -686,6 +715,11 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
         labelText: label,
         hintText: hint,
         border: const OutlineInputBorder(),
+        filled: readOnly,
+        fillColor: readOnly ? Colors.grey.shade100 : null,
+        suffixIcon: readOnly
+            ? const Icon(Icons.lock_outline, size: 18, color: Colors.grey)
+            : null,
       ),
     );
   }

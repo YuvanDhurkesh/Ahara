@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'config/theme_config.dart';
@@ -19,16 +20,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'core/services/voice_service.dart';
 import 'data/services/backend_service.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Make status bar icons dark (visible on light/cream background)
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light, // iOS
+    ),
+  );
 
   // 🔥 LOAD ENV FILE FIRST
   await dotenv.load(fileName: ".env");
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
     MultiProvider(
@@ -71,12 +78,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class _CustomLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _CustomLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   final BuildContext context;
   const _CustomLocalizationsDelegate(this.context);
 
   @override
-  bool isSupported(Locale locale) => ['en', 'hi', 'ta', 'te'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      ['en', 'hi', 'ta', 'te'].contains(locale.languageCode);
 
   @override
   Future<AppLocalizations> load(Locale locale) async {
@@ -86,7 +95,6 @@ class _CustomLocalizationsDelegate extends LocalizationsDelegate<AppLocalization
   @override
   bool shouldReload(_CustomLocalizationsDelegate old) => false;
 }
-
 
 /// 🔥 AUTH WRAPPER
 /// Controls app entry based on login state
@@ -112,7 +120,7 @@ class AuthWrapper extends StatelessWidget {
     // 1. Check if we already have a Mongo user (either via Phone login or Firebase sync)
     if (auth.mongoUser != null) {
       final role = auth.mongoUser!['role'];
-      
+
       // Auto-sync preferences if needed
       final language = auth.mongoUser!['language'];
       final uiMode = auth.mongoUser!['uiMode'];
@@ -163,7 +171,9 @@ class AuthWrapper extends StatelessWidget {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text(AppLocalizations.of(context)!.translate("loading_profile")),
+                Text(
+                  AppLocalizations.of(context)!.translate("loading_profile"),
+                ),
               ],
             ),
           ),
