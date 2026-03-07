@@ -123,13 +123,17 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '${AppLocalizations.of(context)!.translate("hello")}, $name',
-                    style: GoogleFonts.ebGaramond(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1A1A1A),
-                      letterSpacing: -0.5,
+                  Expanded(
+                    child: Text(
+                      '${AppLocalizations.of(context)!.translate("hello")}, $name',
+                      style: GoogleFonts.ebGaramond(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        color: const Color(0xFF1A1A1A),
+                        letterSpacing: -0.5,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                   _headerIconButton(
@@ -387,11 +391,16 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      AppLocalizations.of(context)!.translate('manage_account'),
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        AppLocalizations.of(
+                          context,
+                        )!.translate('manage_account'),
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     IconButton(

@@ -66,7 +66,9 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
         totalOrders += 1;
 
         final status = (order['status'] ?? '').toString();
-        if (status == 'cancelled' && order['cancellation'] != null && order['cancellation']['cancelledBy'] == 'buyer') {
+        if (status == 'cancelled' &&
+            order['cancellation'] != null &&
+            order['cancellation']['cancelledBy'] == 'buyer') {
           cancelledOrders += 1;
         }
         if (status == 'delivered' || status == 'completed') {
@@ -109,11 +111,17 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
       if (totalOrders > 0) {
         final completionRate = completedOrders / totalOrders;
         final cancelRate = cancelledOrders / totalOrders;
-        final onTimeRate = completedOrders > 0 ? (onTimeCount / completedOrders) : 0;
+        final onTimeRate = completedOrders > 0
+            ? (onTimeCount / completedOrders)
+            : 0;
         final completionWeight = 30;
         final cancelWeight = 30;
         final onTimeWeight = 20;
-        localScore = 50 + (completionRate * completionWeight).round() - (cancelRate * cancelWeight).round() + (onTimeRate * onTimeWeight).round();
+        localScore =
+            50 +
+            (completionRate * completionWeight).round() -
+            (cancelRate * cancelWeight).round() +
+            (onTimeRate * onTimeWeight).round();
         if (localScore > 100) localScore = 100;
         if (localScore < 0) localScore = 0;
       }
@@ -143,7 +151,8 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
         (mongoUser?['name'] ?? auth.currentUser?.displayName ?? 'Buyer')
             .toString();
     final trustScore = mongoUser?['trustScore'];
-    final displayTrustScore = trustScore ?? (_isLoadingStats ? null : _localTrustScore);
+    final displayTrustScore =
+        trustScore ?? (_isLoadingStats ? null : _localTrustScore);
 
     return SafeArea(
       child: Center(
@@ -158,12 +167,16 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "${AppLocalizations.of(context)!.translate("hello")}, $displayName",
-                      style: GoogleFonts.lora(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textDark,
+                    Expanded(
+                      child: Text(
+                        "${AppLocalizations.of(context)!.translate("hello")}, $displayName",
+                        style: GoogleFonts.lora(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textDark,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                     IconButton(
@@ -181,13 +194,19 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                     Expanded(
                       child: _buildInfoCard(
                         context,
-                        title: AppLocalizations.of(context)!.translate("orders_placed"),
+                        title: AppLocalizations.of(
+                          context,
+                        )!.translate("orders_placed"),
                         value: _isLoadingStats
                             ? "..."
                             : _ordersPlaced.toString(),
                         subtext: _statsError != null
-                            ? AppLocalizations.of(context)!.translate("unable_to_load")
-                            : AppLocalizations.of(context)!.translate("your_order_journey"),
+                            ? AppLocalizations.of(
+                                context,
+                              )!.translate("unable_to_load")
+                            : AppLocalizations.of(
+                                context,
+                              )!.translate("your_order_journey"),
                         icon: Icons.star_outline,
                         color: AppColors.primary,
                       ),
@@ -196,11 +215,17 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                     Expanded(
                       child: _buildInfoCard(
                         context,
-                        title: AppLocalizations.of(context)!.translate("impact_score"),
+                        title: AppLocalizations.of(
+                          context,
+                        )!.translate("impact_score"),
                         value: displayTrustScore == null
-                          ? "N/A"
-                          : ((_localTrustScore ?? trustScore) ?? displayTrustScore).toString(),
-                        subtext: AppLocalizations.of(context)!.translate("impact_score_desc"),
+                            ? "N/A"
+                            : ((_localTrustScore ?? trustScore) ??
+                                      displayTrustScore)
+                                  .toString(),
+                        subtext: AppLocalizations.of(
+                          context,
+                        )!.translate("impact_score_desc"),
                         icon: Icons.shield_outlined,
                         color: AppColors.secondary,
                       ),
@@ -218,7 +243,9 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   runSpacing: 0,
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.translate("dietary_preferences"),
+                      AppLocalizations.of(
+                        context,
+                      )!.translate("dietary_preferences"),
                       style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -230,11 +257,29 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                       children: [
                         TextButton(
                           onPressed: () => _setAllPreferences(true),
-                          child: Text(AppLocalizations.of(context)!.translate("select_all"), style: GoogleFonts.inter(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                          child: Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.translate("select_all"),
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                         TextButton(
                           onPressed: () => _setAllPreferences(false),
-                          child: Text(AppLocalizations.of(context)!.translate("clear_all"), style: GoogleFonts.inter(fontSize: 12, color: AppColors.textLight, fontWeight: FontWeight.w600)),
+                          child: Text(
+                            AppLocalizations.of(
+                              context,
+                            )!.translate("clear_all"),
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: AppColors.textLight,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -253,10 +298,26 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   spacing: 12,
                   runSpacing: 12,
                   children: [
-                    _buildPreferenceChip("vegetarian", AppLocalizations.of(context)!.translate("vegetarian"), Icons.eco_outlined),
-                    _buildPreferenceChip("vegan", AppLocalizations.of(context)!.translate("vegan"), Icons.eco),
-                    _buildPreferenceChip("non_veg", AppLocalizations.of(context)!.translate("non_veg"), Icons.kebab_dining_outlined),
-                    _buildPreferenceChip("jain", AppLocalizations.of(context)!.translate("jain"), Icons.temple_hindu_outlined),
+                    _buildPreferenceChip(
+                      "vegetarian",
+                      AppLocalizations.of(context)!.translate("vegetarian"),
+                      Icons.eco_outlined,
+                    ),
+                    _buildPreferenceChip(
+                      "vegan",
+                      AppLocalizations.of(context)!.translate("vegan"),
+                      Icons.eco,
+                    ),
+                    _buildPreferenceChip(
+                      "non_veg",
+                      AppLocalizations.of(context)!.translate("non_veg"),
+                      Icons.kebab_dining_outlined,
+                    ),
+                    _buildPreferenceChip(
+                      "jain",
+                      AppLocalizations.of(context)!.translate("jain"),
+                      Icons.temple_hindu_outlined,
+                    ),
                   ],
                 ),
 
@@ -275,12 +336,16 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   mobile: Column(
                     children: [
                       _buildImpactStat(
-                        AppLocalizations.of(context)!.translate("orders_placed"),
+                        AppLocalizations.of(
+                          context,
+                        )!.translate("orders_placed"),
                         _isLoadingStats ? "..." : _ordersPlaced.toString(),
                         Icons.shopping_bag_outlined,
                       ),
                       _buildImpactStat(
-                        AppLocalizations.of(context)!.translate("orders_cancelled"),
+                        AppLocalizations.of(
+                          context,
+                        )!.translate("orders_cancelled"),
                         _isLoadingStats ? "..." : _ordersCancelled.toString(),
                         Icons.cancel_outlined,
                       ),
@@ -407,15 +472,18 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
         children: [
           Icon(icon, color: AppColors.textLight),
           const SizedBox(width: 16),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textDark,
+          Expanded(
+            child: Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textDark,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Spacer(),
+          const SizedBox(width: 8),
           Text(
             value,
             style: GoogleFonts.inter(
@@ -431,7 +499,9 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
 
   Widget _buildPreferenceChip(String key, String label, IconData icon) {
     final auth = context.watch<AppAuthProvider>();
-    final List<String> currentPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
+    final List<String> currentPrefs = List<String>.from(
+      auth.mongoProfile?['dietaryPreferences'] ?? [],
+    );
     final bool isSelected = currentPrefs.contains(key);
 
     return FilterChip(
@@ -439,9 +509,9 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
       selected: isSelected,
       onSelected: (bool selected) => _togglePreference(key, selected),
       avatar: Icon(
-        icon, 
-        color: isSelected ? Colors.white : AppColors.primary, 
-        size: 18
+        icon,
+        color: isSelected ? Colors.white : AppColors.primary,
+        size: 18,
       ),
       selectedColor: AppColors.primary,
       checkmarkColor: Colors.white,
@@ -468,30 +538,32 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
 
   Future<void> _setAllPreferences(bool selectAll) async {
     final auth = Provider.of<AppAuthProvider>(context, listen: false);
-    final List<String> newPrefs = selectAll 
-        ? ["vegetarian", "vegan", "non_veg", "jain"] 
+    final List<String> newPrefs = selectAll
+        ? ["vegetarian", "vegan", "non_veg", "jain"]
         : [];
-    
+
     await _updatePreferences(newPrefs);
   }
 
   Future<void> _togglePreference(String key, bool selected) async {
     final auth = Provider.of<AppAuthProvider>(context, listen: false);
-    final List<String> currentPrefs = List<String>.from(auth.mongoProfile?['dietaryPreferences'] ?? []);
+    final List<String> currentPrefs = List<String>.from(
+      auth.mongoProfile?['dietaryPreferences'] ?? [],
+    );
 
     if (selected) {
       if (!currentPrefs.contains(key)) currentPrefs.add(key);
     } else {
       currentPrefs.remove(key);
     }
-    
+
     await _updatePreferences(currentPrefs);
   }
 
   Future<void> _updatePreferences(List<String> prefs) async {
     final auth = Provider.of<AppAuthProvider>(context, listen: false);
     final String? firebaseUid = auth.currentUser?.uid;
-    
+
     if (firebaseUid == null) return;
 
     try {
@@ -500,7 +572,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
         dietaryPreferences: prefs,
       );
       await auth.refreshMongoUser();
-      
+
       if (mounted) {
         AnimatedToast.show(
           context,
@@ -640,12 +712,22 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                       Icons.visibility_off_outlined,
                       "Hidden Stores",
                     ),
-                    _buildMenuItem(context, Icons.article_outlined, AppLocalizations.of(context)!.translate("blog")),
-                    _buildMenuItem(context, Icons.gavel_outlined, AppLocalizations.of(context)!.translate("legal")),
+                    _buildMenuItem(
+                      context,
+                      Icons.article_outlined,
+                      AppLocalizations.of(context)!.translate("blog"),
+                    ),
+                    _buildMenuItem(
+                      context,
+                      Icons.gavel_outlined,
+                      AppLocalizations.of(context)!.translate("legal"),
+                    ),
                     _buildMenuItem(
                       context,
                       Icons.language_outlined,
-                      AppLocalizations.of(context)!.translate("change_language"),
+                      AppLocalizations.of(
+                        context,
+                      )!.translate("change_language"),
                     ),
 
                     const SizedBox(height: 12),
@@ -657,13 +739,20 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                         onPressed: () {
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (context) => LandingPage()),
+                            MaterialPageRoute(
+                              builder: (context) => LandingPage(),
+                            ),
                             (route) => false,
                           );
                         },
-                        icon: const Icon(Icons.login_outlined, color: AppColors.primary),
+                        icon: const Icon(
+                          Icons.login_outlined,
+                          color: AppColors.primary,
+                        ),
                         label: Text(
-                          AppLocalizations.of(context)!.translate("login_with_another_account"),
+                          AppLocalizations.of(
+                            context,
+                          )!.translate("login_with_another_account"),
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         style: OutlinedButton.styleFrom(
@@ -752,21 +841,25 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
       ),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
       onTap: () {
-        if (title == "Account details" || title == AppLocalizations.of(context)!.translate("account_details")) {
+        if (title == "Account details" ||
+            title ==
+                AppLocalizations.of(context)!.translate("account_details")) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const BuyerAccountDetailsPage(),
             ),
           );
-        } else if (title == "Notifications" || title == AppLocalizations.of(context)!.translate("notifications")) {
+        } else if (title == "Notifications" ||
+            title == AppLocalizations.of(context)!.translate("notifications")) {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const BuyerNotificationsPage(),
             ),
           );
-        } else if (title == AppLocalizations.of(context)!.translate("change_language")) {
+        } else if (title ==
+            AppLocalizations.of(context)!.translate("change_language")) {
           Navigator.push(
             context,
             MaterialPageRoute(

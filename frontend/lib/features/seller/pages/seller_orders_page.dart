@@ -80,17 +80,25 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
           body: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _error != null
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("${AppLocalizations.of(context)!.translate('error')}: $_error", style: const TextStyle(color: Colors.red)),
-                          const SizedBox(height: 16),
-                          ElevatedButton(onPressed: _fetchOrders, child: Text(AppLocalizations.of(context)!.translate('retry'))),
-                        ],
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "${AppLocalizations.of(context)!.translate('error')}: $_error",
+                        style: const TextStyle(color: Colors.red),
                       ),
-                    )
-                  : _buildTabbedView(),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _fetchOrders,
+                        child: Text(
+                          AppLocalizations.of(context)!.translate('retry'),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : _buildTabbedView(),
         );
       },
     );
@@ -103,7 +111,7 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
       "volunteer_assigned",
       "volunteer_accepted",
     ];
-    
+
     final activeOrders = _orders
         .where((o) => activeStatusList.contains(o['status']))
         .toList();
@@ -178,8 +186,12 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
   }
 
   Widget _buildOrderCard(BuildContext context, Map<String, dynamic> order) {
-    final foodName = order['listingId']?['foodName'] ?? AppLocalizations.of(context)!.translate("unknown_item");
-    final buyerName = order['buyerId']?['name'] ?? AppLocalizations.of(context)!.translate("unknown_item");
+    final foodName =
+        order['listingId']?['foodName'] ??
+        AppLocalizations.of(context)!.translate("unknown_item");
+    final buyerName =
+        order['buyerId']?['name'] ??
+        AppLocalizations.of(context)!.translate("unknown_item");
     final createdAt = DateTime.parse(order['createdAt']);
     final status = order['status'] ?? "pending";
     final orderId = order['_id'].toString();
@@ -214,28 +226,36 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${AppLocalizations.of(context)!.translate('order')} #${orderId.substring(orderId.length - 6).toUpperCase()}",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textLight.withOpacity(0.6),
-                          fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${AppLocalizations.of(context)!.translate('order')} #${orderId.substring(orderId.length - 6).toUpperCase()}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textLight.withOpacity(0.6),
+                            fontWeight: FontWeight.w600,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        AppLocalizations.of(context)!.translate(order['listingId']?['foodName'] ?? "unknown_item"),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textDark,
+                        const SizedBox(height: 4),
+                        Text(
+                          AppLocalizations.of(context)!.translate(
+                            order['listingId']?['foodName'] ?? "unknown_item",
+                          ),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   _buildStatusChip(status),
                 ],
               ),
@@ -248,12 +268,15 @@ class _SellerOrdersPageState extends State<SellerOrdersPage> {
                     color: AppColors.textLight.withOpacity(0.6),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    buyerName,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textLight.withOpacity(0.8),
-                      fontWeight: FontWeight.w500,
+                  Flexible(
+                    child: Text(
+                      buyerName,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textLight.withOpacity(0.8),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

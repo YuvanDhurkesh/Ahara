@@ -21,7 +21,8 @@ class VolunteerHomePage extends StatefulWidget {
   State<VolunteerHomePage> createState() => _VolunteerHomePageState();
 }
 
-class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTickerProviderStateMixin {
+class _VolunteerHomePageState extends State<VolunteerHomePage>
+    with SingleTickerProviderStateMixin {
   bool isAvailable = true;
   bool _isLoading = true;
   String? _error;
@@ -188,9 +189,15 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                         spacing: 16,
                         runSpacing: 4,
                         children: [
-                          _sectionTitle(AppLocalizations.of(context)!.translate("your_statistics")),
+                          _sectionTitle(
+                            AppLocalizations.of(
+                              context,
+                            )!.translate("your_statistics"),
+                          ),
                           Text(
-                            AppLocalizations.of(context)!.translate("last_updated_just_now"),
+                            AppLocalizations.of(
+                              context,
+                            )!.translate("last_updated_just_now"),
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 12,
                               color: Colors.grey.shade500,
@@ -201,22 +208,30 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                       ),
                       const SizedBox(height: 16),
                       _dashboardCards(screenWidth),
-                      
+
                       const SizedBox(height: 36),
-                      _sectionTitle(AppLocalizations.of(context)!.translate("achievements")),
+                      _sectionTitle(
+                        AppLocalizations.of(context)!.translate("achievements"),
+                      ),
                       const SizedBox(height: 16),
                       _badgeSection(),
-                      
+
                       const SizedBox(height: 36),
                       _alertBanner(),
-                      
+
                       const SizedBox(height: 32),
-                      _sectionTitle(AppLocalizations.of(context)!.translate("quick_access")),
+                      _sectionTitle(
+                        AppLocalizations.of(context)!.translate("quick_access"),
+                      ),
                       const SizedBox(height: 16),
                       _quickActions(screenWidth),
 
                       const SizedBox(height: 36),
-                      _sectionTitle(AppLocalizations.of(context)!.translate("incoming_requests")),
+                      _sectionTitle(
+                        AppLocalizations.of(
+                          context,
+                        )!.translate("incoming_requests"),
+                      ),
                       const SizedBox(height: 16),
                       _rescueRequestsSection(),
                     ] else ...[
@@ -258,10 +273,12 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
               BoxShadow(
                 color: const Color(0xFF9E7E6B).withOpacity(0.1),
                 blurRadius: 10,
-              )
+              ),
             ],
             image: const DecorationImage(
-              image: NetworkImage("https://ui-avatars.com/api/?background=E67E22&color=fff&name=V"),
+              image: NetworkImage(
+                "https://ui-avatars.com/api/?background=E67E22&color=fff&name=V",
+              ),
               fit: BoxFit.cover,
             ),
           ),
@@ -282,13 +299,20 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    isAvailable ? AppLocalizations.of(context)!.translate("online") : AppLocalizations.of(context)!.translate("away"),
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 11,
-                      color: isAvailable ? Colors.green : Colors.grey.shade400,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
+                  Flexible(
+                    child: Text(
+                      isAvailable
+                          ? AppLocalizations.of(context)!.translate("online")
+                          : AppLocalizations.of(context)!.translate("away"),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        color: isAvailable
+                            ? Colors.green
+                            : Colors.grey.shade400,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -337,7 +361,12 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
         _voiceModeIndicator(),
         const SizedBox(width: 8),
         _headerIconButton(Icons.notifications_none_rounded, () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const VolunteerNotificationsPage()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const VolunteerNotificationsPage(),
+            ),
+          );
         }),
       ],
     );
@@ -346,22 +375,26 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
   Widget _voiceModeIndicator() {
     final voiceService = Provider.of<VoiceService>(context);
     final isActive = voiceService.isListening;
-    
+
     return GestureDetector(
       onTap: _toggleVoiceMode,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFFF4B2B).withOpacity(0.1) : Colors.white,
+          color: isActive
+              ? const Color(0xFFFF4B2B).withOpacity(0.1)
+              : Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF9E7E6B).withOpacity(0.05),
               blurRadius: 10,
-            )
+            ),
           ],
           border: Border.all(
-            color: isActive ? const Color(0xFFFF4B2B).withOpacity(0.2) : Colors.grey.shade100,
+            color: isActive
+                ? const Color(0xFFFF4B2B).withOpacity(0.2)
+                : Colors.grey.shade100,
           ),
         ),
         child: Row(
@@ -371,13 +404,19 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                 padding: const EdgeInsets.only(right: 8),
                 child: RotationTransition(
                   turns: _pulseController,
-                  child: const Icon(Icons.graphic_eq, size: 18, color: Color(0xFFFF4B2B)),
+                  child: const Icon(
+                    Icons.graphic_eq,
+                    size: 18,
+                    color: Color(0xFFFF4B2B),
+                  ),
                 ),
               ),
             Icon(
               isActive ? Icons.mic_rounded : Icons.mic_none_rounded,
               size: 22,
-              color: isActive ? const Color(0xFFFF4B2B) : const Color(0xFF1A1A1A),
+              color: isActive
+                  ? const Color(0xFFFF4B2B)
+                  : const Color(0xFF1A1A1A),
             ),
           ],
         ),
@@ -398,7 +437,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
             BoxShadow(
               color: const Color(0xFF9E7E6B).withOpacity(0.05),
               blurRadius: 10,
-            )
+            ),
           ],
           border: Border.all(color: Colors.grey.shade100),
         ),
@@ -424,11 +463,32 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Expanded(child: _statItem(AppLocalizations.of(context)!.translate("deliveries"), _totalDeliveries.toString(), Icons.local_shipping_outlined, AppColors.primary)),
+          Expanded(
+            child: _statItem(
+              AppLocalizations.of(context)!.translate("deliveries"),
+              _totalDeliveries.toString(),
+              Icons.local_shipping_outlined,
+              AppColors.primary,
+            ),
+          ),
           Container(height: 40, width: 1, color: Colors.grey.shade100),
-          Expanded(child: _statItem(AppLocalizations.of(context)!.translate("today"), _todayCount.toString(), Icons.calendar_today_outlined, const Color(0xFFE67E22))),
+          Expanded(
+            child: _statItem(
+              AppLocalizations.of(context)!.translate("today"),
+              _todayCount.toString(),
+              Icons.calendar_today_outlined,
+              const Color(0xFFE67E22),
+            ),
+          ),
           Container(height: 40, width: 1, color: Colors.grey.shade100),
-          Expanded(child: _statItem(AppLocalizations.of(context)!.translate("rating"), _avgRating.toStringAsFixed(1), Icons.star_border_rounded, const Color(0xFFD35400))),
+          Expanded(
+            child: _statItem(
+              AppLocalizations.of(context)!.translate("rating"),
+              _avgRating.toStringAsFixed(1),
+              Icons.star_border_rounded,
+              const Color(0xFFD35400),
+            ),
+          ),
         ],
       ),
     );
@@ -468,19 +528,38 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
   }
 
   Widget _badgeSection() {
-    final stats = context.watch<AppAuthProvider>().mongoProfile?['stats'] as Map<String, dynamic>?;
-    final totalCompleted = (stats?['totalDeliveriesCompleted'] as num?)?.toInt() ?? 0;
-    
+    final stats =
+        context.watch<AppAuthProvider>().mongoProfile?['stats']
+            as Map<String, dynamic>?;
+    final totalCompleted =
+        (stats?['totalDeliveriesCompleted'] as num?)?.toInt() ?? 0;
+
     return SizedBox(
       height: 120,
       child: ListView(
         scrollDirection: Axis.horizontal,
         clipBehavior: Clip.none,
         children: [
-          _badgeItem(Icons.verified_user_rounded, AppLocalizations.of(context)!.translate("verified"), true),
-          _badgeItem(Icons.auto_awesome_rounded, AppLocalizations.of(context)!.translate("top_star"), _avgRating >= 4.5),
-          _badgeItem(Icons.local_fire_department_rounded, "20+ Club", totalCompleted >= 20),
-          _badgeItem(Icons.handshake_rounded, AppLocalizations.of(context)!.translate("social_hero"), totalCompleted >= 5),
+          _badgeItem(
+            Icons.verified_user_rounded,
+            AppLocalizations.of(context)!.translate("verified"),
+            true,
+          ),
+          _badgeItem(
+            Icons.auto_awesome_rounded,
+            AppLocalizations.of(context)!.translate("top_star"),
+            _avgRating >= 4.5,
+          ),
+          _badgeItem(
+            Icons.local_fire_department_rounded,
+            "20+ Club",
+            totalCompleted >= 20,
+          ),
+          _badgeItem(
+            Icons.handshake_rounded,
+            AppLocalizations.of(context)!.translate("social_hero"),
+            totalCompleted >= 5,
+          ),
         ],
       ),
     );
@@ -495,14 +574,18 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
         color: active ? Colors.white : Colors.grey.shade50.withOpacity(0.5),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: active ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+          color: active
+              ? AppColors.primary.withOpacity(0.1)
+              : Colors.transparent,
         ),
-        boxShadow: active ? [
-          BoxShadow(
-            color: const Color(0xFF9E7E6B).withOpacity(0.06),
-            blurRadius: 10,
-          )
-        ] : null,
+        boxShadow: active
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF9E7E6B).withOpacity(0.06),
+                  blurRadius: 10,
+                ),
+              ]
+            : null,
       ),
       child: Column(
         children: [
@@ -528,7 +611,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
 
   Widget _alertBanner() {
     if (_newRequests == 0) return const SizedBox.shrink();
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -554,7 +637,11 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
               color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.notifications_active_rounded, color: Colors.white, size: 24),
+            child: const Icon(
+              Icons.notifications_active_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -562,7 +649,9 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.translate("new_requests_nearby"),
+                  AppLocalizations.of(
+                    context,
+                  )!.translate("new_requests_nearby"),
                   style: GoogleFonts.plusJakartaSans(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -570,7 +659,9 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                   ),
                 ),
                 Text(
-                  AppLocalizations.of(context)!.translate("tasks_waiting").replaceAll("{count}", _newRequests.toString()),
+                  AppLocalizations.of(context)!
+                      .translate("tasks_waiting")
+                      .replaceAll("{count}", _newRequests.toString()),
                   style: GoogleFonts.plusJakartaSans(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 13,
@@ -580,7 +671,11 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+          const Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: Colors.white,
+            size: 16,
+          ),
         ],
       ),
     );
@@ -599,7 +694,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
             BoxShadow(
               color: const Color(0xFF9E7E6B).withOpacity(0.03),
               blurRadius: 20,
-            )
+            ),
           ],
         ),
         child: Column(
@@ -610,7 +705,11 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                 color: const Color(0xFFFFF7ED),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.radar_rounded, size: 32, color: Color(0xFFE67E22)),
+              child: const Icon(
+                Icons.radar_rounded,
+                size: 32,
+                color: Color(0xFFE67E22),
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -666,7 +765,11 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
               color: const Color(0xFFFFF7ED),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.fastfood_rounded, color: Color(0xFFE67E22), size: 24),
+            child: const Icon(
+              Icons.fastfood_rounded,
+              color: Color(0xFFE67E22),
+              size: 24,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -698,11 +801,14 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
           ),
           const SizedBox(width: 8),
           ElevatedButton(
-            onPressed: () => _acceptRescueRequest(req['data']?['orderId'], volunteerId),
+            onPressed: () =>
+                _acceptRescueRequest(req['data']?['orderId'], volunteerId),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               elevation: 0,
             ),
@@ -719,11 +825,23 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
   Widget _quickActions(double width) {
     return Row(
       children: [
-        _quickActionItem(Icons.receipt_long_rounded, AppLocalizations.of(context)!.translate("orders"), const VolunteerOrdersPage()),
+        _quickActionItem(
+          Icons.receipt_long_rounded,
+          AppLocalizations.of(context)!.translate("orders"),
+          const VolunteerOrdersPage(),
+        ),
         const SizedBox(width: 16),
-        _quickActionItem(Icons.auto_awesome_rounded, AppLocalizations.of(context)!.translate("ratings"), const VolunteerRatingsPage()),
+        _quickActionItem(
+          Icons.auto_awesome_rounded,
+          AppLocalizations.of(context)!.translate("ratings"),
+          const VolunteerRatingsPage(),
+        ),
         const SizedBox(width: 16),
-        _quickActionItem(Icons.settings_suggest_rounded, AppLocalizations.of(context)!.translate("settings"), const VolunteerProfilePage()),
+        _quickActionItem(
+          Icons.settings_suggest_rounded,
+          AppLocalizations.of(context)!.translate("settings"),
+          const VolunteerProfilePage(),
+        ),
       ],
     );
   }
@@ -731,7 +849,8 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
   Widget _quickActionItem(IconData icon, String title, Widget page) {
     return Expanded(
       child: InkWell(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
+        onTap: () =>
+            Navigator.push(context, MaterialPageRoute(builder: (_) => page)),
         borderRadius: BorderRadius.circular(24),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 20),
@@ -744,7 +863,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                 color: const Color(0xFF9E7E6B).withOpacity(0.04),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
-              )
+              ),
             ],
           ),
           child: Column(
@@ -777,7 +896,7 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
           BoxShadow(
             color: const Color(0xFF9E7E6B).withOpacity(0.05),
             blurRadius: 40,
-          )
+          ),
         ],
       ),
       child: Column(
@@ -788,7 +907,11 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
               color: Colors.grey.shade50,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.nightlight_round_rounded, size: 48, color: Colors.grey.shade300),
+            child: Icon(
+              Icons.nightlight_round_rounded,
+              size: 48,
+              color: Colors.grey.shade300,
+            ),
           ),
           const SizedBox(height: 32),
           Text(
@@ -820,12 +943,17 @@ class _VolunteerHomePageState extends State<VolunteerHomePage> with SingleTicker
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 0,
               ),
               child: Text(
                 "Go Online",
-                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w800, fontSize: 16),
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),

@@ -77,17 +77,39 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.translate("cancel_order"), style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.red)),
-        content: Text(AppLocalizations.of(context)!.translate("cancel_confirmation_msg")),
+        title: Text(
+          AppLocalizations.of(context)!.translate("cancel_order"),
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.bold,
+            color: Colors.red,
+          ),
+        ),
+        content: Text(
+          AppLocalizations.of(context)!.translate("cancel_confirmation_msg"),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context)!.translate("keep_it"), style: GoogleFonts.inter(color: Colors.grey)),
+            child: Text(
+              AppLocalizations.of(context)!.translate("keep_it"),
+              style: GoogleFonts.inter(color: Colors.grey),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-            child: Text(AppLocalizations.of(context)!.translate("yes_cancel"), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              AppLocalizations.of(context)!.translate("yes_cancel"),
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -103,14 +125,22 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
         );
         // Refresh mongo user to pick up updated trust score
         try {
-          await Provider.of<AppAuthProvider>(context, listen: false).refreshMongoUser();
+          await Provider.of<AppAuthProvider>(
+            context,
+            listen: false,
+          ).refreshMongoUser();
         } catch (e) {
           // ignore refresh errors
         }
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.translate("order_cancelled_success"), style: GoogleFonts.inter(color: Colors.white)),
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                )!.translate("order_cancelled_success"),
+                style: GoogleFonts.inter(color: Colors.white),
+              ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
@@ -121,7 +151,10 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("${AppLocalizations.of(context)!.translate('failed_to_cancel')}: $e", style: GoogleFonts.inter(color: Colors.white)),
+              content: Text(
+                "${AppLocalizations.of(context)!.translate('failed_to_cancel')}: $e",
+                style: GoogleFonts.inter(color: Colors.white),
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -146,7 +179,10 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
       appBar: AppBar(
         title: Text(
           AppLocalizations.of(context)!.translate("order_details"),
-          style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.black),
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -206,16 +242,24 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     final reason = cancellation?['reason']?.toString();
     final isFailed = order['status'] == 'failed';
 
-    final actorLabel = {
-      'buyer': AppLocalizations.of(context)!.translate('you_buyer'),
-      'seller': AppLocalizations.of(context)!.translate('seller_label'),
-      'volunteer': AppLocalizations.of(context)!.translate('volunteer_label'),
-      'system': AppLocalizations.of(context)!.translate('system_no_volunteer'),
-    }[cancelledBy] ?? cancelledBy;
+    final actorLabel =
+        {
+          'buyer': AppLocalizations.of(context)!.translate('you_buyer'),
+          'seller': AppLocalizations.of(context)!.translate('seller_label'),
+          'volunteer': AppLocalizations.of(
+            context,
+          )!.translate('volunteer_label'),
+          'system': AppLocalizations.of(
+            context,
+          )!.translate('system_no_volunteer'),
+        }[cancelledBy] ??
+        cancelledBy;
 
     final color = isFailed ? Colors.deepOrange : Colors.red;
     final icon = isFailed ? Icons.error_outline : Icons.cancel_outlined;
-    final title = isFailed ? AppLocalizations.of(context)!.translate('order_failed') : AppLocalizations.of(context)!.translate('order_cancelled_label');
+    final title = isFailed
+        ? AppLocalizations.of(context)!.translate('order_failed')
+        : AppLocalizations.of(context)!.translate('order_cancelled_label');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -234,7 +278,11 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 13, color: color),
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -243,15 +291,26 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
             text: TextSpan(
               style: GoogleFonts.inter(fontSize: 12, color: Colors.black87),
               children: [
-                TextSpan(text: AppLocalizations.of(context)!.translate('cancelled_by')),
-                TextSpan(text: actorLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(
+                  text: AppLocalizations.of(context)!.translate('cancelled_by'),
+                ),
+                TextSpan(
+                  text: actorLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ],
             ),
           ),
           if (reason != null && reason.isNotEmpty) ...[
             const SizedBox(height: 4),
-            Text("${AppLocalizations.of(context)!.translate('reason_label')}: $reason",
-                style: GoogleFonts.inter(fontSize: 12, color: Colors.black54, fontStyle: FontStyle.italic)),
+            Text(
+              "${AppLocalizations.of(context)!.translate('reason_label')}: $reason",
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.black54,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
           ],
         ],
       ),
@@ -335,9 +394,17 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                               color: AppColors.primary,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.store, color: Colors.white, size: 18),
+                            child: const Icon(
+                              Icons.store,
+                              color: Colors.white,
+                              size: 18,
+                            ),
                           ),
-                          const Icon(Icons.arrow_drop_down, color: AppColors.primary, size: 24),
+                          const Icon(
+                            Icons.arrow_drop_down,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
                         ],
                       ),
                     ),
@@ -359,7 +426,10 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                               decoration: BoxDecoration(
                                 color: Colors.blue,
                                 shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
                               ),
                             ),
                           ),
@@ -374,9 +444,14 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                   right: 12,
                   child: FloatingActionButton.small(
                     heroTag: "recenter",
-                    onPressed: () => _mapController.move(center, buyerPos != null ? 12 : 15),
+                    onPressed: () =>
+                        _mapController.move(center, buyerPos != null ? 12 : 15),
                     backgroundColor: Colors.white,
-                    child: const Icon(Icons.my_location, color: AppColors.primary, size: 18),
+                    child: const Icon(
+                      Icons.my_location,
+                      color: AppColors.primary,
+                      size: 18,
+                    ),
                   ),
                 ),
               ],
@@ -391,12 +466,16 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
           child: OutlinedButton.icon(
             onPressed: () => _openInGoogleMaps(pickupPos, buyerPos),
             icon: const Icon(Icons.directions, size: 18),
-            label: Text(AppLocalizations.of(context)!.translate("get_directions")),
+            label: Text(
+              AppLocalizations.of(context)!.translate("get_directions"),
+            ),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primary,
               side: const BorderSide(color: AppColors.primary),
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ),
@@ -408,13 +487,15 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     String url;
     if (origin != null) {
       // With origin: show route from buyer to seller
-      url = 'https://www.google.com/maps/dir/?api=1'
+      url =
+          'https://www.google.com/maps/dir/?api=1'
           '&origin=${origin.latitude},${origin.longitude}'
           '&destination=${destination.latitude},${destination.longitude}'
           '&travelmode=walking';
     } else {
       // Just show destination pin
-      url = 'https://www.google.com/maps/search/?api=1'
+      url =
+          'https://www.google.com/maps/search/?api=1'
           '&query=${destination.latitude},${destination.longitude}';
     }
 
@@ -424,16 +505,48 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     }
   }
 
-
   Widget _buildStatusBanner(String status) {
     final bannerConfig = {
-      'placed': {'color': Colors.blue, 'msg': AppLocalizations.of(context)!.translate('order_placed_msg') ?? 'Order placed successfully!'},
-      'awaiting_volunteer': {'color': Colors.orange, 'msg': AppLocalizations.of(context)!.translate('finding_volunteer')},
-      'volunteer_assigned': {'color': Colors.indigo, 'msg': AppLocalizations.of(context)!.translate('volunteer_assigned_msg') ?? 'Volunteer assigned & on the way!'},
-      'picked_up': {'color': Colors.purple, 'msg': AppLocalizations.of(context)!.translate('picked_up_msg') ?? 'Food picked up! Arriving soon.'},
-      'delivered': {'color': Colors.green, 'msg': AppLocalizations.of(context)!.translate('delivered_msg') ?? 'Food delivered. Enjoy!'},
-      'completed': {'color': Colors.green, 'msg': AppLocalizations.of(context)!.translate('completed_msg') ?? 'Hope you enjoyed the meal!'},
-      'cancelled': {'color': Colors.red, 'msg': AppLocalizations.of(context)!.translate('cancelled_msg') ?? 'This order was cancelled.'},
+      'placed': {
+        'color': Colors.blue,
+        'msg':
+            AppLocalizations.of(context)!.translate('order_placed_msg') ??
+            'Order placed successfully!',
+      },
+      'awaiting_volunteer': {
+        'color': Colors.orange,
+        'msg': AppLocalizations.of(context)!.translate('finding_volunteer'),
+      },
+      'volunteer_assigned': {
+        'color': Colors.indigo,
+        'msg':
+            AppLocalizations.of(context)!.translate('volunteer_assigned_msg') ??
+            'Volunteer assigned & on the way!',
+      },
+      'picked_up': {
+        'color': Colors.purple,
+        'msg':
+            AppLocalizations.of(context)!.translate('picked_up_msg') ??
+            'Food picked up! Arriving soon.',
+      },
+      'delivered': {
+        'color': Colors.green,
+        'msg':
+            AppLocalizations.of(context)!.translate('delivered_msg') ??
+            'Food delivered. Enjoy!',
+      },
+      'completed': {
+        'color': Colors.green,
+        'msg':
+            AppLocalizations.of(context)!.translate('completed_msg') ??
+            'Hope you enjoyed the meal!',
+      },
+      'cancelled': {
+        'color': Colors.red,
+        'msg':
+            AppLocalizations.of(context)!.translate('cancelled_msg') ??
+            'This order was cancelled.',
+      },
     };
 
     final config = bannerConfig[status] ?? bannerConfig['placed']!;
@@ -447,9 +560,17 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
         children: [
           Icon(Icons.info_outline, size: 18, color: color),
           const SizedBox(width: 12),
-          Text(
-            config['msg'] as String,
-            style: GoogleFonts.inter(color: color, fontWeight: FontWeight.bold, fontSize: 13),
+          Flexible(
+            child: Text(
+              config['msg'] as String,
+              style: GoogleFonts.inter(
+                color: color,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
           ),
         ],
       ),
@@ -457,24 +578,39 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
   }
 
   Widget _buildOrderIdentity(Map<String, dynamic> order) {
-    final date = order['createdAt'] != null ? DateTime.parse(order['createdAt']) : DateTime.now();
+    final date = order['createdAt'] != null
+        ? DateTime.parse(order['createdAt'])
+        : DateTime.now();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "${AppLocalizations.of(context)!.translate('order')} #${order['_id']?.toString().substring(order['_id'].length - 7).toUpperCase() ?? 'N/A'}",
-              style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: -0.5),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "${AppLocalizations.of(context)!.translate('placed')}: ${DateFormat('dd MMM').format(date)} • ${DateFormat('hh:mm a').format(date)}",
-              style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 12, fontWeight: FontWeight.w500),
-            ),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "${AppLocalizations.of(context)!.translate('order')} #${order['_id']?.toString().substring(order['_id'].length - 7).toUpperCase() ?? 'N/A'}",
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "${AppLocalizations.of(context)!.translate('placed')}: ${DateFormat('dd MMM').format(date)} • ${DateFormat('hh:mm a').format(date)}",
+                style: GoogleFonts.inter(
+                  color: AppColors.textLight,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
+        const SizedBox(width: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
@@ -482,8 +618,14 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            AppLocalizations.of(context)!.translate(order['status']?.toString() ?? "placed"),
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800),
+            AppLocalizations.of(
+              context,
+            )!.translate(order['status']?.toString() ?? "placed"),
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
       ],
@@ -500,13 +642,27 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
       ),
       child: Row(
         children: [
-          Icon(isDelivery ? Icons.moped : Icons.directions_walk, color: AppColors.primary, size: 20),
-          const SizedBox(width: 12),
-          Text(
-            isDelivery ? AppLocalizations.of(context)!.translate("volunteer_delivery") : AppLocalizations.of(context)!.translate("self_pickup"),
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
+          Icon(
+            isDelivery ? Icons.moped : Icons.directions_walk,
+            color: AppColors.primary,
+            size: 20,
           ),
-          const Spacer(),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              isDelivery
+                  ? AppLocalizations.of(
+                      context,
+                    )!.translate("volunteer_delivery")
+                  : AppLocalizations.of(context)!.translate("self_pickup"),
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
           Text(
             AppLocalizations.of(context)!.translate("fulfillment_mode"),
             style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 11),
@@ -516,9 +672,14 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     );
   }
 
-  Widget _buildSellerCard(Map<String, dynamic> seller, Map<String, dynamic> listing) {
+  Widget _buildSellerCard(
+    Map<String, dynamic> seller,
+    Map<String, dynamic> listing,
+  ) {
     final trustScore = seller['trustScore'] ?? 90;
-    final rating = (trustScore / 20).toStringAsFixed(1); // 100 -> 5.0, 80 -> 4.0
+    final rating = (trustScore / 20).toStringAsFixed(
+      1,
+    ); // 100 -> 5.0, 80 -> 4.0
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -526,7 +687,9 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,8 +706,14 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      seller['name'] ?? AppLocalizations.of(context)!.translate("unknown_donor"),
-                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
+                      seller['name'] ??
+                          AppLocalizations.of(
+                            context,
+                          )!.translate("unknown_donor"),
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -553,7 +722,10 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                         const SizedBox(width: 4),
                         Text(
                           "$rating • 1.2 ${AppLocalizations.of(context)!.translate('km_away')}",
-                          style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 12),
+                          style: GoogleFonts.inter(
+                            color: AppColors.textLight,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -562,7 +734,10 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
               ),
               IconButton(
                 onPressed: () {
-                  final auth = Provider.of<AppAuthProvider>(context, listen: false);
+                  final auth = Provider.of<AppAuthProvider>(
+                    context,
+                    listen: false,
+                  );
                   final currentUserId = auth.mongoUser?['_id'] ?? '';
                   Navigator.push(
                     context,
@@ -580,7 +755,11 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                 icon: const CircleAvatar(
                   backgroundColor: AppColors.primary,
                   radius: 18,
-                  child: Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 18),
+                  child: Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    color: Colors.white,
+                    size: 18,
+                  ),
                 ),
               ),
               IconButton(
@@ -599,12 +778,22 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
           ),
           Row(
             children: [
-              const Icon(Icons.location_on_outlined, color: AppColors.primary, size: 16),
+              const Icon(
+                Icons.location_on_outlined,
+                color: AppColors.primary,
+                size: 16,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  listing['pickupAddressText'] ?? AppLocalizations.of(context)!.translate("no_address_provided"),
-                  style: GoogleFonts.inter(fontSize: 12, color: AppColors.textLight),
+                  listing['pickupAddressText'] ??
+                      AppLocalizations.of(
+                        context,
+                      )!.translate("no_address_provided"),
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: AppColors.textLight,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -616,9 +805,16 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
             children: [
               const Icon(Icons.access_time, color: Colors.blue, size: 16),
               const SizedBox(width: 8),
-              Text(
-                "${AppLocalizations.of(context)!.translate('pickup_before')}: ${listing['pickupWindow']?['to'] != null ? DateFormat('hh:mm a').format(DateTime.parse(listing['pickupWindow']['to'])) : '7:00 AM'}",
-                style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.blue),
+              Flexible(
+                child: Text(
+                  "${AppLocalizations.of(context)!.translate('pickup_before')}: ${listing['pickupWindow']?['to'] != null ? DateFormat('hh:mm a').format(DateTime.parse(listing['pickupWindow']['to'])) : '7:00 AM'}",
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
@@ -645,16 +841,28 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                   const SizedBox(width: 8),
                   Text(
                     AppLocalizations.of(context)!.translate("handover_otp"),
-                    style: GoogleFonts.inter(color: Colors.amber, fontWeight: FontWeight.w800, fontSize: 12, letterSpacing: 1),
+                    style: GoogleFonts.inter(
+                      color: Colors.amber,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                      letterSpacing: 1,
+                    ),
                   ),
                 ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(6)),
+                decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(6),
+                ),
                 child: Text(
                   "${AppLocalizations.of(context)!.translate('expires_in')} ${_formatTimer(_otpExpirySeconds)}",
-                  style: GoogleFonts.inter(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.inter(
+                    color: Colors.white70,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -662,7 +870,12 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
           const SizedBox(height: 16),
           Text(
             otp?.toString() ?? "----",
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 42, fontWeight: FontWeight.w900, letterSpacing: 16),
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 42,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 16,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -674,7 +887,12 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
             onPressed: () {},
             child: Text(
               AppLocalizations.of(context)!.translate("regenerate_otp"),
-              style: GoogleFonts.inter(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+              style: GoogleFonts.inter(
+                color: Colors.amber,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              ),
             ),
           ),
         ],
@@ -682,7 +900,11 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     );
   }
 
-  Widget _buildVolunteerSection(bool isDelivery, dynamic volunteer, String status) {
+  Widget _buildVolunteerSection(
+    bool isDelivery,
+    dynamic volunteer,
+    String status,
+  ) {
     if (!isDelivery) return const SizedBox.shrink();
 
     if (volunteer == null) {
@@ -699,12 +921,20 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
             const SizedBox(height: 16),
             Text(
               AppLocalizations.of(context)!.translate("finding_volunteer"),
-              style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.blue.shade900),
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Colors.blue.shade900,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
-              AppLocalizations.of(context)!.translate("notify_once_assigned") ?? "You'll be notified once assigned.",
-              style: GoogleFonts.inter(fontSize: 12, color: Colors.blue.shade700),
+              AppLocalizations.of(context)!.translate("notify_once_assigned") ??
+                  "You'll be notified once assigned.",
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.blue.shade700,
+              ),
             ),
           ],
         ),
@@ -717,7 +947,9 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -735,13 +967,22 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      volunteer['name'] ?? AppLocalizations.of(context)!.translate("volunteer_hero"),
-                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
+                      volunteer['name'] ??
+                          AppLocalizations.of(
+                            context,
+                          )!.translate("volunteer_hero"),
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       "Bike • ⭐ 4.8",
-                      style: GoogleFonts.inter(color: AppColors.textLight, fontSize: 12),
+                      style: GoogleFonts.inter(
+                        color: AppColors.textLight,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -759,7 +1000,9 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.black,
                     side: const BorderSide(color: Colors.black12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ),
@@ -768,10 +1011,14 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                 child: ElevatedButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.location_on, size: 16),
-                  label: Text(AppLocalizations.of(context)!.translate("track_live")),
+                  label: Text(
+                    AppLocalizations.of(context)!.translate("track_live"),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ),
@@ -782,7 +1029,10 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     );
   }
 
-  Widget _buildOrderSummary(Map<String, dynamic> order, Map<String, dynamic> listing) {
+  Widget _buildOrderSummary(
+    Map<String, dynamic> order,
+    Map<String, dynamic> listing,
+  ) {
     final pricing = order['pricing'] ?? {};
     final isDelivery = order['fulfillment'] == 'volunteer_delivery';
 
@@ -795,18 +1045,43 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(AppLocalizations.of(context)!.translate("order_summary"), style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.textLight)),
+          Text(
+            AppLocalizations.of(context)!.translate("order_summary"),
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w800,
+              fontSize: 11,
+              color: AppColors.textLight,
+            ),
+          ),
           const SizedBox(height: 16),
-          _buildSummaryLine("${order['quantityOrdered'] ?? 1} × ${AppLocalizations.of(context)!.translate(listing['foodName'] ?? 'items_text')}", "₹${pricing['itemTotal'] ?? 0}"),
-          if (isDelivery) _buildSummaryLine(AppLocalizations.of(context)!.translate("delivery_fee"), "₹${pricing['deliveryFee'] ?? 0}"),
-          _buildSummaryLine(AppLocalizations.of(context)!.translate("platform_fee"), "₹${pricing['platformFee'] ?? 0}"),
+          _buildSummaryLine(
+            "${order['quantityOrdered'] ?? 1} × ${AppLocalizations.of(context)!.translate(listing['foodName'] ?? 'items_text')}",
+            "₹${pricing['itemTotal'] ?? 0}",
+          ),
+          if (isDelivery)
+            _buildSummaryLine(
+              AppLocalizations.of(context)!.translate("delivery_fee"),
+              "₹${pricing['deliveryFee'] ?? 0}",
+            ),
+          _buildSummaryLine(
+            AppLocalizations.of(context)!.translate("platform_fee"),
+            "₹${pricing['platformFee'] ?? 0}",
+          ),
           const Divider(height: 24),
-          _buildSummaryLine("Total", "₹${pricing['total'] ?? 0}", isTotal: true),
-          if (order['specialInstructions'] != null && order['specialInstructions'].toString().isNotEmpty) ...[
+          _buildSummaryLine(
+            "Total",
+            "₹${pricing['total'] ?? 0}",
+            isTotal: true,
+          ),
+          if (order['specialInstructions'] != null &&
+              order['specialInstructions'].toString().isNotEmpty) ...[
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.amber.shade100, borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Row(
                 children: [
                   Icon(Icons.notes, size: 16, color: Colors.amber.shade900),
@@ -814,7 +1089,11 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                   Expanded(
                     child: Text(
                       order['specialInstructions'],
-                      style: GoogleFonts.inter(fontSize: 12, color: Colors.amber.shade900, fontWeight: FontWeight.w600),
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: Colors.amber.shade900,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -832,8 +1111,24 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: GoogleFonts.inter(fontSize: isTotal ? 16 : 13, fontWeight: isTotal ? FontWeight.w900 : FontWeight.w500)),
-          Text(value, style: GoogleFonts.inter(fontSize: isTotal ? 18 : 13, fontWeight: isTotal ? FontWeight.w900 : FontWeight.bold)),
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: isTotal ? 16 : 13,
+                fontWeight: isTotal ? FontWeight.w900 : FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: isTotal ? 18 : 13,
+              fontWeight: isTotal ? FontWeight.w900 : FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
@@ -843,10 +1138,26 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     final timeline = order['timeline'] ?? {};
     final status = order['status'] ?? "placed";
     final stages = [
-      {'key': 'placed', 'label': 'Order Received', 'time': timeline['placedAt']},
-      {'key': 'volunteer_assigned', 'label': 'Volunteer Assigned', 'time': order['volunteerAssignedAt']},
-      {'key': 'picked_up', 'label': 'Food Picked Up', 'time': timeline['pickedUpAt']},
-      {'key': 'delivered', 'label': 'Food Delivered', 'time': timeline['deliveredAt']},
+      {
+        'key': 'placed',
+        'label': 'Order Received',
+        'time': timeline['placedAt'],
+      },
+      {
+        'key': 'volunteer_assigned',
+        'label': 'Volunteer Assigned',
+        'time': order['volunteerAssignedAt'],
+      },
+      {
+        'key': 'picked_up',
+        'label': 'Food Picked Up',
+        'time': timeline['pickedUpAt'],
+      },
+      {
+        'key': 'delivered',
+        'label': 'Food Delivered',
+        'time': timeline['deliveredAt'],
+      },
     ];
 
     return Container(
@@ -859,7 +1170,14 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("LIVE TRACKING", style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 11, color: AppColors.textLight)),
+          Text(
+            "LIVE TRACKING",
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w800,
+              fontSize: 11,
+              color: AppColors.textLight,
+            ),
+          ),
           const SizedBox(height: 20),
           ...stages.map((stage) {
             int idx = stages.indexOf(stage);
@@ -877,12 +1195,26 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                       height: 18,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isDone ? Colors.green : (isCurrent ? Colors.orange : Colors.grey.shade200),
+                        color: isDone
+                            ? Colors.green
+                            : (isCurrent
+                                  ? Colors.orange
+                                  : Colors.grey.shade200),
                       ),
-                      child: isDone ? const Icon(Icons.check, size: 11, color: Colors.white) : null,
+                      child: isDone
+                          ? const Icon(
+                              Icons.check,
+                              size: 11,
+                              color: Colors.white,
+                            )
+                          : null,
                     ),
                     if (!isLast)
-                      Container(width: 2, height: 30, color: isDone ? Colors.green : Colors.grey.shade200),
+                      Container(
+                        width: 2,
+                        height: 30,
+                        color: isDone ? Colors.green : Colors.grey.shade200,
+                      ),
                   ],
                 ),
                 const SizedBox(width: 16),
@@ -893,17 +1225,35 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                       Text(
                         stage['label'] as String,
                         style: GoogleFonts.inter(
-                            fontWeight: isDone || isCurrent ? FontWeight.bold : FontWeight.w500,
-                            color: isDone ? Colors.green : (isCurrent ? Colors.orange : AppColors.textLight),
-                            fontSize: 14),
+                          fontWeight: isDone || isCurrent
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                          color: isDone
+                              ? Colors.green
+                              : (isCurrent
+                                    ? Colors.orange
+                                    : AppColors.textLight),
+                          fontSize: 14,
+                        ),
                       ),
                       if (stage['time'] != null)
                         Text(
-                          DateFormat('hh:mm a').format(DateTime.parse(stage['time'])),
-                          style: GoogleFonts.inter(fontSize: 11, color: AppColors.textLight),
+                          DateFormat(
+                            'hh:mm a',
+                          ).format(DateTime.parse(stage['time'])),
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: AppColors.textLight,
+                          ),
                         )
                       else if (isCurrent || !isDone)
-                        Text("Pending", style: GoogleFonts.inter(fontSize: 11, color: Colors.grey.shade400)),
+                        Text(
+                          "Pending",
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
                       const SizedBox(height: 12),
                     ],
                   ),
@@ -917,14 +1267,18 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
   }
 
   Widget _buildFoodSafetyCard(Map<String, dynamic> listing) {
-    final preparedAt = listing['createdAt'] != null 
-        ? DateFormat('hh:mm a').format(DateTime.parse(listing['createdAt'])) 
+    final preparedAt = listing['createdAt'] != null
+        ? DateFormat('hh:mm a').format(DateTime.parse(listing['createdAt']))
         : "4:30 AM";
     final consumeBefore = listing['safetyThreshold'] != null
-        ? DateFormat('hh:mm a').format(DateTime.parse(listing['safetyThreshold']))
-        : (listing['pickupWindow']?['to'] != null 
-            ? DateFormat('hh:mm a').format(DateTime.parse(listing['pickupWindow']['to'])) 
-            : "10:30 AM");
+        ? DateFormat(
+            'hh:mm a',
+          ).format(DateTime.parse(listing['safetyThreshold']))
+        : (listing['pickupWindow']?['to'] != null
+              ? DateFormat(
+                  'hh:mm a',
+                ).format(DateTime.parse(listing['pickupWindow']['to']))
+              : "10:30 AM");
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -938,11 +1292,19 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
         children: [
           Row(
             children: [
-              const Icon(Icons.health_and_safety_outlined, color: Colors.red, size: 18),
+              const Icon(
+                Icons.health_and_safety_outlined,
+                color: Colors.red,
+                size: 18,
+              ),
               const SizedBox(width: 8),
               Text(
                 "FOOD SAFETY INFO",
-                style: GoogleFonts.inter(color: Colors.red.shade800, fontWeight: FontWeight.w800, fontSize: 11),
+                style: GoogleFonts.inter(
+                  color: Colors.red.shade800,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 11,
+                ),
               ),
             ],
           ),
@@ -969,8 +1331,18 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.inter(fontSize: 12, color: Colors.red.shade700)),
-        Text(val, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.red.shade900)),
+        Text(
+          label,
+          style: GoogleFonts.inter(fontSize: 12, color: Colors.red.shade700),
+        ),
+        Text(
+          val,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.red.shade900,
+          ),
+        ),
       ],
     );
   }
@@ -978,8 +1350,19 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
   Widget _buildSafetyBadge(String label) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.red.shade200)),
-      child: Text(label, style: GoogleFonts.inter(fontSize: 9, color: Colors.red, fontWeight: FontWeight.bold)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 9,
+          color: Colors.red,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 
@@ -995,7 +1378,12 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
             child: ElevatedButton(
               onPressed: _cancelOrder,
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               child: const Text("Cancel Order"),
             ),
           ),
@@ -1004,12 +1392,21 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () {},
-              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: Text(AppLocalizations.of(context)!.translate("contact_support") ?? "Contact Support"),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.translate("contact_support") ??
+                    "Contact Support",
+              ),
             ),
           ),
         ],
-        if (isDelivery && (status == 'volunteer_assigned' || status == 'picked_up')) ...[
+        if (isDelivery &&
+            (status == 'volunteer_assigned' || status == 'picked_up')) ...[
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -1017,15 +1414,21 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => BuyerOrderTrackPage(
-                      order: _localOrder,
-                    ),
+                    builder: (_) => BuyerOrderTrackPage(order: _localOrder),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: Text(AppLocalizations.of(context)!.translate("live_tracking") ?? "Live Tracking"),
+                backgroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.translate("live_tracking") ??
+                    "Live Tracking",
+              ),
             ),
           ),
         ],
@@ -1034,11 +1437,24 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                 Navigator.push(context, MaterialPageRoute(builder: (_) => BuyerOrderRatePage(order: _localOrder)));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BuyerOrderRatePage(order: _localOrder),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: Text(AppLocalizations.of(context)!.translate("rate_review") ?? "Rate & Review Experience"),
+                backgroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.translate("rate_review") ??
+                    "Rate & Review Experience",
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -1046,8 +1462,16 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () {},
-              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              child: Text(AppLocalizations.of(context)!.translate("report_issue") ?? "Report an Issue"),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.translate("report_issue") ??
+                    "Report an Issue",
+              ),
             ),
           ),
         ],
@@ -1056,19 +1480,49 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
   }
 
   bool _isStageDone(String currentStatus, String stage) {
-    const sequence = ['placed', 'awaiting_volunteer', 'volunteer_assigned', 'volunteer_accepted', 'picked_up', 'in_transit', 'delivered', 'completed'];
+    const sequence = [
+      'placed',
+      'awaiting_volunteer',
+      'volunteer_assigned',
+      'volunteer_accepted',
+      'picked_up',
+      'in_transit',
+      'delivered',
+      'completed',
+    ];
     int currentIdx = sequence.indexOf(currentStatus);
     int stageIdx = sequence.indexOf(stage);
-    return currentIdx > stageIdx || (currentIdx == stageIdx && currentStatus == 'delivered'); // delivered is effectively completion for UI
+    return currentIdx > stageIdx ||
+        (currentIdx == stageIdx &&
+            currentStatus ==
+                'delivered'); // delivered is effectively completion for UI
   }
 
   Widget _buildListingImage(Map<String, dynamic> listing, {double size = 50}) {
     final images = listing['images'] as List?;
-    final imageUrl = (images != null && images.isNotEmpty) ? BackendService.formatImageUrl(images.first) : null;
+    final imageUrl = (images != null && images.isNotEmpty)
+        ? BackendService.formatImageUrl(images.first)
+        : null;
 
     if (imageUrl == null) {
-      return Container(width: size, height: size, color: Colors.grey.shade100, child: Icon(Icons.fastfood, size: size * 0.4, color: Colors.grey));
+      return Container(
+        width: size,
+        height: size,
+        color: Colors.grey.shade100,
+        child: Icon(Icons.fastfood, size: size * 0.4, color: Colors.grey),
+      );
     }
-    return Image.network(imageUrl, width: size, height: size, fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(width: size, height: size, color: Colors.grey.shade100, child: Icon(Icons.error_outline, size: size * 0.4, color: Colors.grey)));
+    return Image.network(
+      imageUrl,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (c, e, s) => Container(
+        width: size,
+        height: size,
+        color: Colors.grey.shade100,
+        child: Icon(Icons.error_outline, size: size * 0.4, color: Colors.grey),
+      ),
+    );
   }
 }

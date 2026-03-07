@@ -22,7 +22,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
   List<Listing> _allListings = [];
   bool _isLoading = true;
   String? _errorMessage;
-  
+
   // Real-time state for dynamic expiry
   DateTime _now = DateTime.now();
   Timer? _timer;
@@ -64,9 +64,18 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
       final mongoSellerId = profileData['user']['_id'];
 
       // 2. Fetch all listings (we'll filter client-side for real-time updates)
-      final activeJson = await BackendService.getSellerListings(mongoSellerId, 'active');
-      final completedJson = await BackendService.getSellerListings(mongoSellerId, 'completed');
-      final expiredJson = await BackendService.getSellerListings(mongoSellerId, 'expired');
+      final activeJson = await BackendService.getSellerListings(
+        mongoSellerId,
+        'active',
+      );
+      final completedJson = await BackendService.getSellerListings(
+        mongoSellerId,
+        'completed',
+      );
+      final expiredJson = await BackendService.getSellerListings(
+        mongoSellerId,
+        'expired',
+      );
 
       if (mounted) {
         setState(() {
@@ -92,21 +101,24 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
   // Dynamic getters for real-time filtering
   List<Listing> get _activeListings {
     return _allListings.where((l) {
-      return l.expiryTime.isAfter(_now) && 
-             l.status != ListingStatus.claimed &&
-             (l.remainingQuantity > 0);
+      return l.expiryTime.isAfter(_now) &&
+          l.status != ListingStatus.claimed &&
+          (l.remainingQuantity > 0);
     }).toList();
   }
 
   List<Listing> get _expiredListings {
     return _allListings.where((l) {
-      return (l.expiryTime.isBefore(_now) || l.expiryTime.isAtSameMomentAs(_now)) &&
-             l.status != ListingStatus.claimed;
+      return (l.expiryTime.isBefore(_now) ||
+              l.expiryTime.isAtSameMomentAs(_now)) &&
+          l.status != ListingStatus.claimed;
     }).toList();
   }
 
   List<Listing> get _completedListings {
-    return _allListings.where((l) => l.status == ListingStatus.claimed).toList();
+    return _allListings
+        .where((l) => l.status == ListingStatus.claimed)
+        .toList();
   }
 
   @override
@@ -148,7 +160,9 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                   _fetchListings(); // Refresh after return
                 },
                 icon: const Icon(Icons.add, size: 18),
-                label: Text(AppLocalizations.of(context)!.translate("new_listing")),
+                label: Text(
+                  AppLocalizations.of(context)!.translate("new_listing"),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary.withOpacity(0.1),
                   foregroundColor: AppColors.primary,
@@ -167,22 +181,38 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
             const SizedBox(width: 8),
           ],
         ),
-        body: _isLoading 
+        body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _errorMessage != null
-                ? Center(child: Text("${AppLocalizations.of(context)!.translate("error")}: $_errorMessage"))
-                : Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 900),
-                      child: TabBarView(
-                        children: [
-                          _buildListingList(context, _activeListings, ListingStatus.active),
-                          _buildListingList(context, _completedListings, ListingStatus.claimed), // Backend uses 'completed' or remainingQuantity: 0
-                          _buildListingList(context, _expiredListings, ListingStatus.expired),
-                        ],
+            ? Center(
+                child: Text(
+                  "${AppLocalizations.of(context)!.translate("error")}: $_errorMessage",
+                ),
+              )
+            : Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 900),
+                  child: TabBarView(
+                    children: [
+                      _buildListingList(
+                        context,
+                        _activeListings,
+                        ListingStatus.active,
                       ),
-                    ),
+                      _buildListingList(
+                        context,
+                        _completedListings,
+                        ListingStatus.claimed,
+                      ), // Backend uses 'completed' or remainingQuantity: 0
+                      _buildListingList(
+                        context,
+                        _expiredListings,
+                        ListingStatus.expired,
+                      ),
+                    ],
                   ),
+                ),
+              ),
       ),
     );
   }
@@ -245,7 +275,11 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                   }
                 }
               },
-              child: Text(newFrom == null ? "Select Start Time" : "From: ${newFrom!.toString().substring(0, 16)}"),
+              child: Text(
+                newFrom == null
+                    ? "Select Start Time"
+                    : "From: ${newFrom!.toString().substring(0, 16)}",
+              ),
             ),
             const SizedBox(height: 8),
             ElevatedButton(
@@ -272,7 +306,11 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                   }
                 }
               },
-              child: Text(newTo == null ? "Select End Time" : "To: ${newTo!.toString().substring(0, 16)}"),
+              child: Text(
+                newTo == null
+                    ? "Select End Time"
+                    : "To: ${newTo!.toString().substring(0, 16)}",
+              ),
             ),
           ],
         ),
@@ -287,11 +325,15 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                 Navigator.pop(context, true);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Please select both start and end times")),
+                  const SnackBar(
+                    content: Text("Please select both start and end times"),
+                  ),
                 );
               }
             },
-            child: Text(AppLocalizations.of(context)!.translate("relist_listing")),
+            child: Text(
+              AppLocalizations.of(context)!.translate("relist_listing"),
+            ),
           ),
         ],
       ),
@@ -311,9 +353,9 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to relist: $e")),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Failed to relist: $e")));
         }
       }
     }
@@ -321,8 +363,12 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
 
   Widget _buildEmptyState(BuildContext context, ListingStatus status) {
     String message = AppLocalizations.of(context)!.translate("no_listings_yet");
-    if (status == ListingStatus.claimed) message = AppLocalizations.of(context)!.translate("no_completed_listings");
-    if (status == ListingStatus.expired) message = AppLocalizations.of(context)!.translate("no_expired_listings");
+    if (status == ListingStatus.claimed)
+      message = AppLocalizations.of(
+        context,
+      )!.translate("no_completed_listings");
+    if (status == ListingStatus.expired)
+      message = AppLocalizations.of(context)!.translate("no_expired_listings");
 
     return Center(
       child: Column(
@@ -345,7 +391,9 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
           const SizedBox(height: 8),
           if (status == ListingStatus.active)
             Text(
-              AppLocalizations.of(context)!.translate("start_creating_listing_desc"),
+              AppLocalizations.of(
+                context,
+              )!.translate("start_creating_listing_desc"),
               style: TextStyle(color: AppColors.textLight.withOpacity(0.6)),
             ),
         ],
@@ -366,7 +414,7 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
 
   Widget _buildListingCard(BuildContext context, Listing listing) {
     final bool isExpired = _now.isAfter(listing.expiryTime);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
@@ -397,7 +445,8 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                     return Center(
                       child: CircularProgressIndicator(
                         value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
                             : null,
                       ),
                     );
@@ -418,9 +467,13 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                   ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: listing.redistributionMode == RedistributionMode.free
+                      colors:
+                          listing.redistributionMode == RedistributionMode.free
                           ? [Colors.green.shade400, Colors.green.shade600]
-                          : [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+                          : [
+                              AppColors.primary,
+                              AppColors.primary.withOpacity(0.8),
+                            ],
                     ),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
@@ -435,9 +488,9 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        listing.redistributionMode == RedistributionMode.free 
-                          ? Icons.volunteer_activism_outlined 
-                          : Icons.currency_rupee_outlined,
+                        listing.redistributionMode == RedistributionMode.free
+                            ? Icons.volunteer_activism_outlined
+                            : Icons.currency_rupee_outlined,
                         size: 14,
                         color: Colors.white,
                       ),
@@ -512,11 +565,14 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                       color: AppColors.textLight.withOpacity(0.6),
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      "${listing.totalQuantity} ${listing.quantityUnit}",
-                      style: TextStyle(
-                        color: AppColors.textLight.withOpacity(0.8),
-                        fontWeight: FontWeight.w500,
+                    Flexible(
+                      child: Text(
+                        "${listing.totalQuantity} ${listing.quantityUnit}",
+                        style: TextStyle(
+                          color: AppColors.textLight.withOpacity(0.8),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -526,16 +582,19 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                       color: AppColors.textLight.withOpacity(0.6),
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      _now.isBefore(listing.expiryTime)
-                          ? "${AppLocalizations.of(context)!.translate("expires_in")} ${_formatDuration(listing.expiryTime.difference(_now))}"
-                          : "${AppLocalizations.of(context)!.translate("expired_ago")} ${_formatDuration(_now.difference(listing.expiryTime))}",
-                      style: TextStyle(
-                        color: _now.isBefore(listing.expiryTime) 
-                            ? Colors.orange.shade700 
-                            : Colors.red,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                    Flexible(
+                      child: Text(
+                        _now.isBefore(listing.expiryTime)
+                            ? "${AppLocalizations.of(context)!.translate("expires_in")} ${_formatDuration(listing.expiryTime.difference(_now))}"
+                            : "${AppLocalizations.of(context)!.translate("expired_ago")} ${_formatDuration(_now.difference(listing.expiryTime))}",
+                        style: TextStyle(
+                          color: _now.isBefore(listing.expiryTime)
+                              ? Colors.orange.shade700
+                              : Colors.red,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -553,7 +612,9 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          AppLocalizations.of(context)!.translate("hygiene_status"),
+                          AppLocalizations.of(
+                            context,
+                          )!.translate("hygiene_status"),
                           style: TextStyle(
                             fontSize: 11,
                             color: AppColors.textLight.withOpacity(0.5),
@@ -587,14 +648,20 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                             );
                             _fetchListings();
                           },
-                          child: Text(AppLocalizations.of(context)!.translate("edit")),
+                          child: Text(
+                            AppLocalizations.of(context)!.translate("edit"),
+                          ),
                         ),
                         const SizedBox(width: 4),
                         if (isExpired)
                           ElevatedButton.icon(
                             onPressed: () => _showRelistDialog(listing),
                             icon: const Icon(Icons.refresh, size: 16),
-                            label: Text(AppLocalizations.of(context)!.translate("relist_listing")),
+                            label: Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.translate("relist_listing"),
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                               foregroundColor: Colors.white,
@@ -610,7 +677,10 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                               final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => SellerListingDetailsPage(listing: listing),
+                                  builder: (context) =>
+                                      SellerListingDetailsPage(
+                                        listing: listing,
+                                      ),
                                 ),
                               );
                               if (result == true) {
@@ -626,7 +696,9 @@ class _SellerListingsPageState extends State<SellerListingsPage> {
                               ),
                             ),
                             child: Text(
-                              AppLocalizations.of(context)!.translate("view_details"),
+                              AppLocalizations.of(
+                                context,
+                              )!.translate("view_details"),
                               style: const TextStyle(color: AppColors.primary),
                             ),
                           ),

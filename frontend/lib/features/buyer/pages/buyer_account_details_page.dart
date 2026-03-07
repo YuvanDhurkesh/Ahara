@@ -213,11 +213,15 @@ class _BuyerAccountDetailsPageState extends State<BuyerAccountDetailsPage> {
                     color: AppColors.textLight.withOpacity(0.5),
                   ),
                   const SizedBox(width: 4),
-                  Text(
-                    "Email and phone number cannot be changed here.",
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      color: AppColors.textLight.withOpacity(0.5),
+                  Flexible(
+                    child: Text(
+                      "Email and phone number cannot be changed here.",
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: AppColors.textLight.withOpacity(0.5),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
                     ),
                   ),
                 ],

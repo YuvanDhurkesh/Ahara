@@ -20,7 +20,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
   String _selectedPayment = "UPI";
   String _promoCode = "";
   final TextEditingController _promoController = TextEditingController();
-  
+
   // Payment Variables
   late Razorpay _razorpay;
   final PaymentRepository _paymentRepo = PaymentRepository();
@@ -65,9 +65,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
           // Navigate to Dashboard and clear stack
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-              builder: (context) => const BuyerDashboardPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const BuyerDashboardPage()),
             (route) => false,
           );
         }
@@ -84,10 +82,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -159,13 +154,8 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
           'name': 'Ahara',
           'description': 'Food Order from ${widget.store.name}',
           'order_id': order['id'],
-          'prefill': {
-            'email': 'user@ahara.com',
-            'contact': '9999999999',
-          },
-          'theme': {
-            'color': '#000000'
-          }
+          'prefill': {'email': 'user@ahara.com', 'contact': '9999999999'},
+          'theme': {'color': '#000000'},
         };
 
         _razorpay.open(options);
@@ -173,7 +163,9 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error creating order: ${orderResponse.toString()}'),
+              content: Text(
+                'Error creating order: ${orderResponse.toString()}',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -182,10 +174,7 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -274,33 +263,41 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
 
                   // Items Header
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "ITEMS",
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: 0.5,
+                      Expanded(
+                        child: Text(
+                          "ITEMS",
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
-                      Text(
-                        "DESCRIPTION",
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: 0.5,
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          "DESCRIPTION",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
-                      Text(
-                        "PRICE",
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          letterSpacing: 0.5,
+                      Expanded(
+                        child: Text(
+                          "PRICE",
+                          textAlign: TextAlign.end,
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ],
@@ -490,14 +487,18 @@ class _BuyerCheckoutPageState extends State<BuyerCheckoutPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: isTotal ? 16 : 14,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.w400,
-            color: Colors.black,
+        Flexible(
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: isTotal ? 16 : 14,
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.w400,
+              color: Colors.black,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
         ),
+        const SizedBox(width: 8),
         Text(
           value,
           style: GoogleFonts.inter(

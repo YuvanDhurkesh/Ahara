@@ -6,15 +6,13 @@ import 'buyer_dashboard_page.dart';
 class BuyerOrderConfirmationPage extends StatelessWidget {
   final Map<String, dynamic> order;
 
-  const BuyerOrderConfirmationPage({
-    super.key,
-    required this.order,
-  });
+  const BuyerOrderConfirmationPage({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
     final orderId = order['order']?['_id'] ?? 'N/A';
-    final pickupAddress = order['order']?['pickup']?['addressText'] ?? 'Pickup location';
+    final pickupAddress =
+        order['order']?['pickup']?['addressText'] ?? 'Pickup location';
     final scheduledAt = order['order']?['pickup']?['scheduledAt'];
     final total = order['order']?['pricing']?['total'] ?? 0;
     final isFree = total == 0;
@@ -95,7 +93,7 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                           if (order['order']?['handoverOtp'] != null) ...[
                             const Divider(height: 24),
                             _buildDetailRow(
-                              'Handover OTP', 
+                              'Handover OTP',
                               order['order']?['handoverOtp'],
                               valueColor: Colors.blue.shade700,
                             ),
@@ -104,7 +102,9 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                           _buildDetailRow(
                             'Total',
                             isFree ? 'FREE' : '₹$total',
-                            valueColor: isFree ? Colors.green : AppColors.primary,
+                            valueColor: isFree
+                                ? Colors.green
+                                : AppColors.primary,
                           ),
                         ],
                       ),
@@ -175,7 +175,8 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Pickup Before',
@@ -186,9 +187,9 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        DateTime.parse(scheduledAt)
-                                            .toString()
-                                            .substring(0, 16),
+                                        DateTime.parse(
+                                          scheduledAt,
+                                        ).toString().substring(0, 16),
                                         style: GoogleFonts.inter(
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
@@ -250,7 +251,8 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const BuyerDashboardPage(initialIndex: 2),
+                            builder: (_) =>
+                                const BuyerDashboardPage(initialIndex: 2),
                           ),
                           (route) => false,
                         );
@@ -280,7 +282,8 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const BuyerDashboardPage(initialIndex: 1),
+                            builder: (_) =>
+                                const BuyerDashboardPage(initialIndex: 1),
                           ),
                           (route) => false,
                         );
@@ -314,20 +317,28 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
   Widget _buildDetailRow(String label, String value, {Color? valueColor}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            color: Colors.grey.shade600,
+        Flexible(
+          flex: 2,
+          child: Text(
+            label,
+            style: GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade600),
           ),
         ),
-        Text(
-          value,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: valueColor ?? Colors.black,
+        const SizedBox(width: 12),
+        Flexible(
+          flex: 3,
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: valueColor ?? Colors.black,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
           ),
         ),
       ],
