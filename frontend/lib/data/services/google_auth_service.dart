@@ -16,31 +16,36 @@ class GoogleAuthService {
 
   Future<User?> signInWithGoogle() async {
     try {
+      if (kIsWeb) {
+        // Use Firebase natively for web, which doesn't require extra client ID setup
+        GoogleAuthProvider authProvider = GoogleAuthProvider();
+        final UserCredential userCredential = await _auth.signInWithPopup(authProvider);
+        return userCredential.user;
+      } else {
+        // Trigger Google Sign-In popup
+        final GoogleSignInAccount? googleUser =
+            await _googleSignIn.signIn();
 
-      // Trigger Google Sign-In popup
-      final GoogleSignInAccount? googleUser =
-          await _googleSignIn.signIn();
+        if (googleUser == null) {
+          return null; // User cancelled login
+        }
 
-      if (googleUser == null) {
-        return null; // User cancelled login
+        // Get authentication details
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        // Create Firebase credential
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        // Sign in with Firebase
+        final userCredential =
+            await _auth.signInWithCredential(credential);
+
+        return userCredential.user;
       }
-
-      // Get authentication details
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // Create Firebase credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Sign in with Firebase
-      final userCredential =
-          await _auth.signInWithCredential(credential);
-
-      return userCredential.user;
-
     } catch (e, stackTrace) {
       debugPrint("Google Sign-In Error: $e");
       debugPrint(stackTrace.toString());
