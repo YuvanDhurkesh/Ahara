@@ -5,6 +5,9 @@ if (process.env.NODE_ENV === 'test') {
     dotenv.config({ path: '.env.test' });
 }
 
+// Disable MD5 check for mongodb-memory-server (upstream checkfile mismatch for 6.0.4)
+process.env.MONGOMS_MD5_CHECK = '0';
+
 module.exports = {
     testEnvironment: 'node',
     verbose: true,
