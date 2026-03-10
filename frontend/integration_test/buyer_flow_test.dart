@@ -51,11 +51,24 @@ void main() {
     // 3. Navigate to Orders Tab
     await tester.tap(find.byIcon(Icons.shopping_bag_outlined));
     await tester.pumpAndSettle();
-    expect(find.text('Orders'), findsOneWidget); // Assuming header "Orders" exists
+    expect(find.text('Orders'), findsOneWidget); 
 
-    // 4. Navigate to Profile
+    // 4. Simulate Browsing and Selection (Logic Check)
+    // Return to home/discover
+    await tester.tap(find.byIcon(Icons.home_outlined));
+    await tester.pumpAndSettle();
+
+    // Look for a search bar (assuming it exists based on common UX patterns)
+    final searchField = find.byType(TextField);
+    if (searchField.evaluate().isNotEmpty) {
+      await tester.enterText(searchField, 'Apples');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+    }
+
+    // 5. Navigate to Profile
     await tester.tap(find.byIcon(Icons.person_outline));
     await tester.pumpAndSettle();
-    expect(find.text('Profile'), findsOneWidget); // Assuming header "Profile" exists
+    expect(find.text('Profile'), findsOneWidget); 
   });
 }

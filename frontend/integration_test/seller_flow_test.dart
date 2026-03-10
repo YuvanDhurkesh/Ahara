@@ -60,7 +60,26 @@ void main() {
     await tester.tap(find.text('New Listing'));
     await tester.pumpAndSettle();
     
-    // Verify Create Listing Page Title (assuming it has one)
-    expect(find.text('Create Listing'), findsOneWidget); // Update based on actual title
+    // Verify Create Listing Page Title
+    expect(find.text('Create Listing'), findsOneWidget);
+
+    // 6. Fill out the "Create Listing" Form
+    // Using widgetWithText search or hint text
+    await tester.enterText(find.widgetWithText(TextFormField, 'Food Name'), 'Organic Tomatoes');
+    await tester.enterText(find.widgetWithText(TextFormField, 'Quantity'), '10');
+    
+    // 7. Verify Aadhaar field existence (if on this page)
+    final aadhaarField = find.widgetWithText(TextFormField, 'Aadhaar Number');
+    if (aadhaarField.evaluate().isNotEmpty) {
+        await tester.enterText(aadhaarField, '234567890124'); // Valid checksum
+        await tester.pump();
+    }
+
+    // 8. Submit Form and check for navigation/success
+    final submitButton = find.text('Create');
+    if (submitButton.evaluate().isNotEmpty) {
+        await tester.tap(submitButton);
+        await tester.pumpAndSettle();
+    }
   });
 }

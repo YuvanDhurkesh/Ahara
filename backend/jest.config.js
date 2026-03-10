@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 
 // Load .env.test for test environment
 if (process.env.NODE_ENV === 'test') {
-    dotenv.config({ path: '.env.test' });
+    dotenv.config({ path: '.env.test', quiet: true });
 }
 
 module.exports = {

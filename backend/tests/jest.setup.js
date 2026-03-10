@@ -8,14 +8,34 @@
  * originals after each test suite so nothing leaks between suites.
  */
 
+// ── Suppress Mongoose deprecation warnings (emitted via process.warning) ──
+const _origEmit = process.emitWarning;
+process.emitWarning = function (msg, ...rest) {
+    if (typeof msg === 'string' && msg.includes('mongoose')) return;
+    return _origEmit.call(this, msg, ...rest);
+};
+
+// ── Suppress dotenv injection log ──
+process.env.DOTENV_CONFIG_QUIET = 'true';
+
 const originalConsole = {
     log: console.log,
     warn: console.warn,
     error: console.error,
 };
 
+// ── Immediately suppress noisy module-load logs (Razorpay key, dotenv) ──
+console.log = (...args) => {
+    const msg = args[0]?.toString() ?? '';
+    if (msg.startsWith('✅') || msg.startsWith('❌')) {
+        originalConsole.log(...args);
+    }
+};
+console.warn = () => { };
+console.error = () => { };
+
 beforeAll(() => {
-    // Suppress everything except critical infra messages (✅/❌ prefixed)
+    // Re-apply in case another setup file restored them
     console.log = (...args) => {
         const msg = args[0]?.toString() ?? '';
         if (msg.startsWith('✅') || msg.startsWith('❌')) {
@@ -24,11 +44,7 @@ beforeAll(() => {
     };
     console.warn = () => { };
     console.error = (...args) => {
-        const msg = args[0]?.toString() ?? '';
-        // Only show true infrastructure failures, not controller validation logs
-        if (msg.startsWith('❌')) {
-            originalConsole.error(...args);
-        }
+        // Suppress all controller errors during tests — they are expected
     };
 });
 

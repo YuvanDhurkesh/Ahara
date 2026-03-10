@@ -52,12 +52,24 @@ The platform focuses on **reducing food waste**, **ensuring public health**, and
 
 ## Testing Strategy
 
-| Test Type              | Tool Used |
-|------------------------|------------|
-| Unit Testing           | Flutter Test, Jest |
-| API Testing            | Supertest |
-| Integration Testing    | End-to-end workflow validation |
-| Manual Testing         | Structured Test Case Documentation |
+The project employs a multi-layered testing strategy to ensure reliability, security, and a seamless user experience.
+
+| Test Type              | Scope & Tools | Key Coverage |
+|------------------------|---------------|--------------|
+| **Unit Testing**       | Flutter Test, Jest | Core logic, utility functions, and state management. |
+| **Validation Testing** | Unit Tests (Dart/JS) | Aadhaar Verhoeff checksum, email/phone formats, and input rules. |
+| **Integration Testing**| Supertest, Flutter | API endpoint interactions and cross-component communication. |
+| **End-to-End (E2E)**   | Flutter Integration Test | Full user journeys (e.g., Buyer Order Flow, Seller Listing Flow). |
+
+### Backend Testing (Jest)
+- **Unit**: Controllers, perishability engine, and Aadhaar validator.
+- **Integration**: Route-to-database flows, payment gateway mocks, and lifecycle hooks.
+- **Run**: `cd backend && npm test`
+
+### Frontend Testing (Flutter)
+- **Unit/Widget**: Localization, providers, and individual UI components.
+- **E2E Integration**: Full flow testing on real devices/emulators (located in `integration_test/`).
+- **Run**: `cd frontend && flutter test`
 
 ---
 ## CI/CD Pipeline
@@ -80,20 +92,21 @@ Triggered automatically on **Push to main** and **Pull Requests**:
 
 ### Continuous Deployment (CD)
 
-GitHub Actions pipelines are configured to support controlled deployment workflows to production.
+GitHub Actions pipelines are configured to automate deployment workflows, ensuring that every push to the `main` branch is reliably delivered.
 
 Key capabilities include:
 
-- **Automated Deployment:** Deploys to AWS EC2 only after tests pass.
-- **Secure Access:** Uses SSH keys enabling secure remote execution.
-- **Zero Downtime:** Uses `pm2` for seamless process restarts.
+- **Automated Deployment:** Deploys the backend directly to **AWS Elastic Beanstalk** and the frontend to an **AWS S3 bucket** automatically after all tests pass.
+- **Zero Downtime:** Leveraging AWS Elastic Beanstalk for seamless, managed updates of the backend services.
+- **Continuous Delivery:** Ensures that the latest verified code is always live and ready for production.
 
 ---
 
 ### Deployment Infrastructure
-- **Backend Hosting:** AWS EC2 (Ubuntu/Linux)
+- **Backend Hosting:** AWS Elastic Beanstalk (Node.js Environment)
+- **Frontend Hosting:** AWS S3 (Static Web Hosting)
 - **Database Hosting:** MongoDB Atlas
-- **Process Management:** PM2 (Node.js)
+- **Process Management:** Managed by AWS Elastic Beanstalk
 
 ---
 
@@ -180,7 +193,6 @@ The frontend is a Flutter-based mobile application.
 ## Development Tools
 - **Git & GitHub** – Version control and collaborative development  
 - **Postman** – API testing and debugging  
-- **Docker (Optional)** – Containerized local setup  
 - **GitHub Actions** – Automated workflows  
 
 ---
