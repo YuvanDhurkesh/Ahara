@@ -2,7 +2,6 @@
 
 **Version:** 1.0  
 **Document Type:** Technical Architecture & System Design  
-**Author:** Software Architecture Team  
 
 ---
 
@@ -14,6 +13,9 @@ The Ahara platform tackles food waste by facilitating the redistribution of surp
 
 ## 2. High-Level Architecture
 Ahara uses a **client-server** architectural style built upon **layered architecture** principles.
+
+![System Architecture](./images/architecture-diagram.jpeg)
+
 - **Frontend:** Cross-platform mobile application.
 - **API Gateway:** Nginx reverse proxy.
 - **Backend:** Monolithic Node.js REST API (designed for future microservice decomposition).
