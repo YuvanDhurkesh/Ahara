@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "749279094566-8kg074mmhmf8jal36fnfucuma234p7je.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ahara.app",
+            "certificate_hash": "fdf4afbbb1ace583953034a169d2721518984d21"
+          }
+        },
+        {
           "client_id": "749279094566-2noq3489hi32i8iskkto3uqcfh525t71.apps.googleusercontent.com",
           "client_type": 3
         }
