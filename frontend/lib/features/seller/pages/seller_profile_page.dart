@@ -9,6 +9,7 @@ import '../../../data/services/backend_service.dart';
 import 'seller_business_details_page.dart';
 import 'seller_verification_page.dart';
 import 'seller_notifications_page.dart';
+import 'fssai_upload_page.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/localization/language_selection_page.dart';
 
@@ -545,6 +546,11 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
                       Icons.verified_user_outlined,
                       AppLocalizations.of(context)!.translate('get_verified'),
                     ),
+                    _buildMenuItem(
+                      context,
+                      Icons.security_outlined,
+                      'FSSAI Certificate',
+                    ),
 
                     const SizedBox(height: 24),
                     _buildSectionHeader(
@@ -681,6 +687,13 @@ class _SellerProfilePageState extends State<SellerProfilePage> {
             context,
             MaterialPageRoute(
               builder: (context) => const LanguageSelectionPage(),
+            ),
+          );
+        } else if (title == 'FSSAI Certificate') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const FssaiUploadPage(),
             ),
           );
         }

@@ -44,6 +44,9 @@ class Listing {
   final String description;
   final ListingStatus status;
   final BusinessType? businessType;
+  final bool isFssaiVerified;
+  final String? fssaiCertificateUrl;
+  final String? sellerName;
 
   Listing({
     required this.id,
@@ -65,6 +68,9 @@ class Listing {
     required this.description,
     required this.status,
     this.businessType,
+    this.isFssaiVerified = false,
+    this.fssaiCertificateUrl,
+    this.sellerName,
   });
 
   Map<String, dynamic> toJson() {
@@ -88,6 +94,9 @@ class Listing {
       'description': description,
       'status': status.name,
       'businessType': businessType?.name,
+      'isFssaiVerified': isFssaiVerified,
+      'fssaiCertificateUrl': fssaiCertificateUrl,
+      'sellerName': sellerName,
     };
   }
 
@@ -114,6 +123,17 @@ class Listing {
   factory Listing.fromJson(Map<String, dynamic> json) {
     final pricing = json['pricing'] as Map<String, dynamic>?;
     final pickupWindow = json['pickupWindow'] as Map<String, dynamic>?;
+
+    // Extract FSSAI verified status from populated sellerProfileId
+    // sellerProfileId may be a plain String (ObjectId) or a populated Map
+    final rawProfile = json['sellerProfileId'];
+    final sellerProfile = (rawProfile is Map<String, dynamic>) ? rawProfile : null;
+    final fssaiData = (sellerProfile?['fssai'] is Map<String, dynamic>)
+        ? sellerProfile!['fssai'] as Map<String, dynamic>
+        : null;
+    final isFssaiVerified = fssaiData?['verified'] == true;
+    final fssaiCertificateUrl = fssaiData?['certificateUrl'] as String?;
+    final sellerName = sellerProfile?['orgName'] as String?;
 
     return Listing(
       id: json['_id'] ?? json['id'] ?? '',
@@ -143,6 +163,9 @@ class Listing {
       description: json['description'] ?? "",
       status: _parseStatus(json['status']),
       businessType: _parseBusinessType(json['businessType']),
+      isFssaiVerified: isFssaiVerified,
+      fssaiCertificateUrl: fssaiCertificateUrl,
+      sellerName: sellerName,
     );
   }
 

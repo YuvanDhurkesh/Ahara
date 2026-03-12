@@ -21,6 +21,7 @@
     "multer-storage-cloudinary": "^4.0.0",
     "razorpay": "^2.9.6",
     "socket.io": "^4.8.3",
+    "tesseract.js": "^7.0.0",
     "twilio": "^5.12.2"
   },
   "devDependencies": {

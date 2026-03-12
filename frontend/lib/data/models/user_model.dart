@@ -10,6 +10,8 @@ class UserModel {
   final DateTime? createdAt;
   final String? businessName;
   final String? fssaiNumber;
+  final String? fssaiCertificateUrl;
+  final bool isFssaiVerified;
   final String? officeAddress;
   final String? contactNumber;
   final String? operatingHours;
@@ -27,6 +29,8 @@ class UserModel {
     this.createdAt,
     this.businessName,
     this.fssaiNumber,
+    this.fssaiCertificateUrl,
+    this.isFssaiVerified = false,
     this.officeAddress,
     this.contactNumber,
     this.operatingHours,
@@ -47,6 +51,8 @@ class UserModel {
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       businessName: data['businessName'],
       fssaiNumber: data['fssaiNumber'],
+      fssaiCertificateUrl: data['fssaiCertificateUrl'],
+      isFssaiVerified: data['isFssaiVerified'] ?? false,
       officeAddress: data['officeAddress'],
       contactNumber: data['contactNumber'],
       operatingHours: data['operatingHours'],
@@ -67,6 +73,8 @@ class UserModel {
       'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
       'businessName': businessName,
       'fssaiNumber': fssaiNumber,
+      'fssaiCertificateUrl': fssaiCertificateUrl,
+      'isFssaiVerified': isFssaiVerified,
       'officeAddress': officeAddress,
       'contactNumber': contactNumber,
       'operatingHours': operatingHours,

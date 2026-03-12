@@ -23,4 +23,8 @@ router.post("/:uid/toggle-favorite-listing", userController.toggleFavoriteListin
 router.post("/:uid/toggle-favorite-seller", userController.toggleFavoriteSeller);
 router.get("/:uid/favorite-sellers", userController.getFavoriteSellers);
 
+// FSSAI Verification (OCR-gated)
+const fssaiController = require('../controllers/fssaiController');
+router.post("/seller/fssai/:uid", fssaiController.uploadMiddleware, fssaiController.verifyFssaiCertificate);
+
 module.exports = router;
