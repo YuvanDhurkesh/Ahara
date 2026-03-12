@@ -14,6 +14,7 @@ import '../../../data/providers/app_auth_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
 import '../../../shared/utils/location_util.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../../shared/widgets/fssai_verified_badge.dart';
 
 class BuyerHomePage extends StatefulWidget {
   const BuyerHomePage({super.key});
@@ -499,6 +500,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     final sellerProfile = listing['sellerProfileId'] ?? {};
     final String orgName = sellerProfile['orgName'] ?? AppLocalizations.of(context)!.translate("local_seller");
     final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0).toDouble();
+    final bool isFssaiVerified = sellerProfile['fssai']?['verified'] == true;
 
     final String? expiryStr = listing['pickupWindow']?['to'];
     final DateTime? expiryTime = expiryStr != null ? DateTime.tryParse(expiryStr) : null;
@@ -648,6 +650,10 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                         ],
                         const SizedBox(width: 8),
                         Flexible(child: _buildIconLabel(Icons.store, orgName)),
+                        if (isFssaiVerified) ...[
+                          const SizedBox(width: 4),
+                          const FssaiVerifiedBadge(compact: true),
+                        ],
                         const SizedBox(width: 8),
                         if (isRescueUpcoming)
                           Container(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8), decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(12)), child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.lock_clock_outlined, size: 13, color: Colors.grey.shade500), const SizedBox(width: 4), Text(AppLocalizations.of(context)!.translate('locked'), style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold))]))

@@ -13,6 +13,7 @@ import '../../../../core/utils/responsive_layout.dart';
 import '../../../data/services/backend_service.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
+import '../../../shared/widgets/fssai_verified_badge.dart';
 
 class BuyerFoodDetailPage extends StatelessWidget {
   final MockStore? store;
@@ -135,6 +136,10 @@ class BuyerFoodDetailPage extends StatelessWidget {
     final String orgName =
         store?.name ??
         (listing?['sellerProfileId']?['orgName'] ?? "Local Seller");
+    final bool isFssaiVerified = 
+        listing?['sellerProfileId']?['fssai']?['verified'] == true;
+    final String? fssaiCertificateUrl = 
+        listing?['sellerProfileId']?['fssai']?['certificateUrl'] as String?;
 
     final Map<String, double> reviews =
         store?.reviews ??
@@ -168,6 +173,8 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     name,
                     address,
                     orgName,
+                    isFssaiVerified,
+                    fssaiCertificateUrl,
                   ),
                   const SizedBox(height: 32),
                   _buildDirectionsButton(),
@@ -297,6 +304,8 @@ class BuyerFoodDetailPage extends StatelessWidget {
     String name,
     String address,
     String orgName,
+    bool isFssaiVerified,
+    String? fssaiCertificateUrl,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,14 +401,59 @@ class BuyerFoodDetailPage extends StatelessWidget {
                       color: AppColors.textLight.withOpacity(0.6),
                     ),
                   ),
-                  Text(
-                    orgName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          orgName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
+                  if (isFssaiVerified) ...[
+                    const SizedBox(height: 4),
+                    InkWell(
+                      onTap: fssaiCertificateUrl != null
+                          ? () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => Dialog(
+                                  backgroundColor: Colors.transparent,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Image.network(
+                                      BackendService.formatImageUrl(fssaiCertificateUrl),
+                                      fit: BoxFit.contain,
+                                      loadingBuilder: (context, child, progress) {
+                                        if (progress == null) return child;
+                                        return Container(
+                                          height: 300,
+                                          color: Colors.white,
+                                          child: const Center(child: CircularProgressIndicator()),
+                                        );
+                                      },
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          height: 200,
+                                          color: Colors.white,
+                                          child: const Center(child: Icon(Icons.broken_image, size: 48)),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          : null,
+                      child: const FssaiVerifiedBadge(compact: true),
+                    ),
+                  ],
                 ],
               ),
             ),

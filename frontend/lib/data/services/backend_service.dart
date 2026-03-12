@@ -514,6 +514,53 @@ class BackendService {
     }
   }
 
+  // ========================= FSSAI VERIFICATION =========================
+
+  /// Uploads an FSSAI certificate image with OCR validation.
+  /// Returns the response body on success.
+  /// Throws an Exception with the backend's rejection message on failure.
+  static Future<Map<String, dynamic>> uploadFssaiCertificate({
+    required String firebaseUid,
+    required String fssaiNumber,
+    required Uint8List imageBytes,
+    required String filename,
+  }) async {
+    final url = Uri.parse("$baseUrl/users/seller/fssai/$firebaseUid");
+
+    final request = http.MultipartRequest("POST", url);
+    request.headers.addAll({"ngrok-skip-browser-warning": "true"});
+
+    // Attach the FSSAI number as a text field
+    request.fields['fssaiNumber'] = fssaiNumber;
+
+    // Attach the certificate image
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'certificate',
+        imageBytes,
+        filename: filename,
+        contentType: MediaType('image', filename.split('.').last.toLowerCase()),
+      ),
+    );
+
+    try {
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return data;
+      } else {
+        // Propagate the backend's specific error message
+        throw Exception(data['error'] ?? 'FSSAI verification failed');
+      }
+    } catch (e) {
+      debugPrint("FSSAI upload exception: $e");
+      rethrow;
+    }
+  }
+
   // ========================= ORDERS =========================
 
   static Future<Map<String, dynamic>> createOrder(
