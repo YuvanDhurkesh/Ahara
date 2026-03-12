@@ -1,2 +1,2 @@
-// const String BASE_URL = "http://localhost:5000/api";
-const String BASE_URL = "http://aharabackend-env.eba-nn8ggm5m.ap-south-1.elasticbeanstalk.com/api";
+const String BASE_URL = "http://localhost:5000/api";
+// const String BASE_URL = "http://aharabackend-env.eba-nn8ggm5m.ap-south-1.elasticbeanstalk.com/api";
