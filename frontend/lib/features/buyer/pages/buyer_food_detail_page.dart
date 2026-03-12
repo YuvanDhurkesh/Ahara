@@ -106,7 +106,10 @@ class BuyerFoodDetailPage extends StatelessWidget {
     final String type = store?.type ?? listing?['foodType'] ?? "Meal";
 
     // Get rating from seller profile or use default
-    final sellerProfile = listing?['sellerProfileId'] ?? {};
+    final dynamic rawSellerProfile = listing?['sellerProfileId'];
+    final Map<String, dynamic> sellerProfile = 
+        rawSellerProfile is Map ? rawSellerProfile as Map<String, dynamic> : {};
+    
     final double sellerRating = (sellerProfile['stats']?['avgRating'] ?? 0.0)
         .toDouble();
     final int ratingCount = sellerProfile['stats']?['ratingCount'] ?? 0;
@@ -135,11 +138,11 @@ class BuyerFoodDetailPage extends StatelessWidget {
         store?.address ?? (listing?['pickupAddressText'] ?? "Bangalore");
     final String orgName =
         store?.name ??
-        (listing?['sellerProfileId']?['orgName'] ?? "Local Seller");
+        (sellerProfile['orgName'] ?? "Local Seller");
     final bool isFssaiVerified = 
-        listing?['sellerProfileId']?['fssai']?['verified'] == true;
+        sellerProfile['fssai']?['verified'] == true;
     final String? fssaiCertificateUrl = 
-        listing?['sellerProfileId']?['fssai']?['certificateUrl'] as String?;
+        sellerProfile['fssai']?['certificateUrl'] as String?;
 
     final Map<String, double> reviews =
         store?.reviews ??

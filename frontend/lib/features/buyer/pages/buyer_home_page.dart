@@ -497,7 +497,9 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
     final int price = pricing['discountedPrice'] ?? 0;
     final int? originalPrice = pricing['originalPrice'];
 
-    final sellerProfile = listing['sellerProfileId'] ?? {};
+    final dynamic rawSellerProfile = listing['sellerProfileId'];
+    final Map<String, dynamic> sellerProfile = 
+        rawSellerProfile is Map ? rawSellerProfile as Map<String, dynamic> : {};
     final String orgName = sellerProfile['orgName'] ?? AppLocalizations.of(context)!.translate("local_seller");
     final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0).toDouble();
     final bool isFssaiVerified = sellerProfile['fssai']?['verified'] == true;
@@ -649,7 +651,7 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                           _buildIconLabel(Icons.timer_outlined, '${AppLocalizations.of(context)!.translate("ends")} ${_formatTimeRemaining(expiryTime)}'),
                         ],
                         const SizedBox(width: 8),
-                        Flexible(child: _buildIconLabel(Icons.store, orgName)),
+                        _buildIconLabel(Icons.store, orgName),
                         if (isFssaiVerified) ...[
                           const SizedBox(width: 4),
                           const FssaiVerifiedBadge(compact: true),

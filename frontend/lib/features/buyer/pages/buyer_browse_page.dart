@@ -1047,7 +1047,9 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
     final bool isFree = pricing['isFree'] ?? false;
     final int price = pricing['discountedPrice'] ?? 0;
 
-    final sellerProfile = listing['sellerProfileId'] ?? {};
+    final dynamic rawSellerProfile = listing['sellerProfileId'];
+    final Map<String, dynamic> sellerProfile = 
+        rawSellerProfile is Map ? rawSellerProfile as Map<String, dynamic> : {};
     final String orgName = sellerProfile['orgName'] ?? "Local Seller";
     final double rating = (sellerProfile['stats']?['avgRating'] ?? 0.0)
         .toDouble();
