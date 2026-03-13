@@ -133,6 +133,7 @@ describe('Order Controller - createOrder', () => {
             _id: 'order-id-1',
             status: 'placed',
             save: jest.fn().mockResolvedValue(true),
+            populate: jest.fn().mockResolvedValue(true),
         };
         Order.mockImplementation(() => mockOrder);
 
@@ -160,7 +161,11 @@ describe('Order Controller - createOrder', () => {
         let capturedOrderData;
         Order.mockImplementation((data) => {
             capturedOrderData = data;
-            return { ...data, save: jest.fn().mockResolvedValue(true) };
+            return {
+                ...data,
+                save: jest.fn().mockResolvedValue(true),
+                populate: jest.fn().mockResolvedValue(true),
+            };
         });
 
         Notification.create.mockResolvedValue([{}]);
@@ -183,7 +188,8 @@ describe('Order Controller - createOrder', () => {
         Listing.findById.mockReturnValue({ session: jest.fn().mockResolvedValue(listing) });
 
         Order.mockImplementation(() => ({
-            save: jest.fn().mockResolvedValue(true)
+            save: jest.fn().mockResolvedValue(true),
+            populate: jest.fn().mockResolvedValue(true),
         }));
         Notification.create.mockResolvedValue([{}]);
 
