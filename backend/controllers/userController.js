@@ -196,6 +196,10 @@ exports.getUserByFirebaseUid = async (req, res) => {
     if (user.role === "seller") {
       profile = await SellerProfile.findOne({ userId: user._id });
     } else if (user.role === "buyer") {
+      // Temporarily backfill/recompute impact statistics on profile load
+      const orderController = require("./orderController");
+      await orderController.recomputeBuyerImpact(user._id);
+
       profile = await BuyerProfile.findOne({ userId: user._id });
     } else if (user.role === "volunteer") {
       profile = await VolunteerProfile.findOne({ userId: user._id });
@@ -232,6 +236,10 @@ exports.getUserByPhone = async (req, res) => {
     if (user.role === "seller") {
       profile = await SellerProfile.findOne({ userId: user._id });
     } else if (user.role === "buyer") {
+      // Temporarily backfill/recompute impact statistics on profile load
+      const orderController = require("./orderController");
+      await orderController.recomputeBuyerImpact(user._id);
+
       profile = await BuyerProfile.findOne({ userId: user._id });
     } else if (user.role === "volunteer") {
       profile = await VolunteerProfile.findOne({ userId: user._id });
