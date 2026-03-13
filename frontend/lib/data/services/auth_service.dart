@@ -4,8 +4,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../config/api_config.dart';
 
-
-
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -117,19 +115,26 @@ class AuthService {
     if (response.statusCode != 200) {
       final errorData = jsonDecode(response.body);
       String errorMessage = errorData['error'] ?? "Failed to send OTP";
-      
+      String? details = errorData['details'];
+
       // Special handling for Twilio Trial restrictions
       if (errorData['isTrialError'] == true) {
-         errorMessage = "Twilio Trial: Go to Twilio console and verify this number as a Caller ID!";
+        errorMessage =
+            "Twilio Trial: Go to Twilio console and verify this number as a Caller ID!";
+      } else if (details != null) {
+        errorMessage = "$errorMessage: $details";
       }
-      
+
       throw Exception(errorMessage);
     }
 
     return jsonDecode(response.body);
   }
 
-  Future<Map<String, dynamic>> verifyOtpSync(String phoneNumber, String otp) async {
+  Future<Map<String, dynamic>> verifyOtpSync(
+    String phoneNumber,
+    String otp,
+  ) async {
     final response = await http.post(
       Uri.parse("$backendBaseUrl/otp/verify"),
       headers: {"Content-Type": "application/json"},
@@ -137,7 +142,9 @@ class AuthService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception(jsonDecode(response.body)['error'] ?? "Verification failed");
+      throw Exception(
+        jsonDecode(response.body)['error'] ?? "Verification failed",
+      );
     }
 
     return jsonDecode(response.body);
@@ -163,7 +170,7 @@ class AuthService {
   }) async {
     try {
       final token = await user.getIdToken();
-      
+
       final response = await http.post(
         Uri.parse("$backendBaseUrl/users/create"),
         headers: {

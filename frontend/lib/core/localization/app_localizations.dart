@@ -79,7 +79,8 @@ class AppLocalizations {
       'accept_delivery': 'Accept Delivery',
       'pickup': 'Pickup',
       'delivery_label': 'Delivery',
-      'inactive_msg': 'You are currently inactive.\nTurn on availability to receive deliveries and view performance.',
+      'inactive_msg':
+          'You are currently inactive.\nTurn on availability to receive deliveries and view performance.',
       'new_requests_banner': 'You have 2 new delivery requests waiting!',
       'verified_volunteer': 'Verified Volunteer',
       'top_volunteer': 'Top Volunteer',
@@ -98,7 +99,8 @@ class AppLocalizations {
       'create_an_account': 'Create an Account',
       'community_driven_food_sharing': 'COMMUNITY-DRIVEN FOOD SHARING',
       'hero_title': 'Small Acts,\nBig Plates.',
-      'hero_body': 'Join a community of food donors and volunteers turning local surplus into neighborhood meals with care and transparency.',
+      'hero_body':
+          'Join a community of food donors and volunteers turning local surplus into neighborhood meals with care and transparency.',
       'give_food': 'Give Food',
       'give_food_desc': 'Share surplus food',
       'volunteer': 'Volunteer',
@@ -108,25 +110,29 @@ class AppLocalizations {
       'why_trust_us': 'Why Trust Us',
       'our_global_impact': 'Our Global Impact',
       'welcome_back': 'Welcome Back',
-      'login_desc': 'Login to continue your journey with Ahara and help the community.',
+      'login_desc':
+          'Login to continue your journey with Ahara and help the community.',
       'EMAIL ADDRESS': 'EMAIL ADDRESS',
       'PASSWORD': 'PASSWORD',
       'email_hint': 'name@example.com',
       'password_hint': 'Enter your password',
       'OR': 'OR',
-      'sign_in_with_google': 'Sign in with Google',
-      'sign_in_with_phone': 'Sign in with Phone (OTP)',
+      'sign_in_with_google': 'Log in with Google',
+      'sign_in_with_phone': 'Log in with Phone (OTP)',
       'dont_have_account': "Don't have an account?",
       'loading_profile': 'Loading profile...',
       'how_would_you_like_to_join': 'How would you like\nto join us?',
-      'select_role_desc': 'Select your role to get started with the community and help reduce food waste.',
+      'select_role_desc':
+          'Select your role to get started with the community and help reduce food waste.',
       'already_registered': 'Already registered?',
       'register_as_buyer': 'Register as Buyer',
       'register_as_seller': 'Register as Seller',
       'register_as_volunteer': 'Register as Volunteer',
-      'buyer_reg_desc': 'Find and purchase surplus meals near you at great prices.',
+      'buyer_reg_desc':
+          'Find and purchase surplus meals near you at great prices.',
       'seller_reg_desc': 'List your surplus food and help reduce local waste.',
-      'volunteer_reg_desc': 'Lend a hand in distributing food to those who need it.',
+      'volunteer_reg_desc':
+          'Lend a hand in distributing food to those who need it.',
       'hello': 'Hello',
       'orders_placed': 'Orders Placed',
       'unable_to_load': 'Unable to load',
@@ -154,7 +160,8 @@ class AppLocalizations {
       'soon': 'Soon',
       'favorite_restaurants': 'Favorite Restaurants',
       'no_favorite_restaurants': 'No favorite restaurants yet',
-      'follow_favorites_desc': 'Follow your favorite places to see their items here!',
+      'follow_favorites_desc':
+          'Follow your favorite places to see their items here!',
       'discover_more': 'Discover More',
       'close': 'Close',
       'items': 'Items',
@@ -168,8 +175,10 @@ class AppLocalizations {
       'search_in_this_area': 'Search in this area',
       'searching_in_area': 'Searching in this area...',
       'no_listings_here': 'No listings here yet',
-      'try_changing_filters': 'Try changing your filters or searching another area.',
-      'invite_sellers_desc': 'Invite sellers in this area to encourage community growth!',
+      'try_changing_filters':
+          'Try changing your filters or searching another area.',
+      'invite_sellers_desc':
+          'Invite sellers in this area to encourage community growth!',
       'search_browse_hint': 'Search city, food or category...',
       'filter': 'Filter',
       'results': 'results',
@@ -188,7 +197,8 @@ class AppLocalizations {
       'your_badges': 'Your Badges',
       'quick_actions': 'Quick Actions',
       'view_orders': 'View Orders',
-      'error_unsafe_donation': 'Safety Warning: Selected pickup window exceeds safe consumption limit for this food type.',
+      'error_unsafe_donation':
+          'Safety Warning: Selected pickup window exceeds safe consumption limit for this food type.',
       'voice_mode_on': 'Voice mode activated. How can I help you?',
       'online': 'Online',
       'away': 'Away',
@@ -222,7 +232,8 @@ class AppLocalizations {
       'no_listings_yet': 'No listings yet',
       'no_completed_listings': 'No completed listings',
       'no_expired_listings': 'No expired listings',
-      'start_creating_listing_desc': 'Start by creating your first food listing',
+      'start_creating_listing_desc':
+          'Start by creating your first food listing',
       'expires_in': 'Expires in',
       'expired_ago': 'Expired ago',
       'hygiene_status': 'Hygiene Status',
@@ -246,7 +257,8 @@ class AppLocalizations {
       'order': 'Order',
       'order_details': 'Order Details',
       'cancel_order': 'Cancel Order',
-      'cancel_confirmation_msg': 'Are you sure you want to cancel this order? This action cannot be undone.',
+      'cancel_confirmation_msg':
+          'Are you sure you want to cancel this order? This action cannot be undone.',
       'keep_it': 'No, Keep it',
       'yes_cancel': 'Yes, Cancel',
       'order_cancelled_success': 'Order cancelled successfully',
@@ -271,7 +283,8 @@ class AppLocalizations {
       'total': 'Total',
       'order_timeline': 'ORDER TIMELINE',
       'food_safety_title': 'FOOD SAFETY & QUALITY',
-      'food_safety_desc': 'This item has been inspected for quality and safety by our volunteers.',
+      'food_safety_desc':
+          'This item has been inspected for quality and safety by our volunteers.',
       'get_directions': 'Get Directions',
       'amount': 'Amount',
       'date': 'Date',
@@ -289,7 +302,8 @@ class AppLocalizations {
       'delivery_address': 'Delivery Address',
       'rescue_details': 'Rescue Details',
       'report_emergency': 'Report Emergency',
-      'emergency_desc': 'Are you facing an issue? This will notify the buyer and seller of a potential delay.',
+      'emergency_desc':
+          'Are you facing an issue? This will notify the buyer and seller of a potential delay.',
       'report': 'Report',
       'delivery_verified': 'Delivery verified. Order completed!',
       'get_help': 'GET HELP',
@@ -297,7 +311,8 @@ class AppLocalizations {
       'deliver_to': 'DELIVER TO',
       'message': 'Message',
       'cancel_rescue': 'Cancel Rescue',
-      'cancel_rescue_msg': 'Are you sure you want to cancel this rescue? This will return the order to the pool and notify everyone.',
+      'cancel_rescue_msg':
+          'Are you sure you want to cancel this rescue? This will return the order to the pool and notify everyone.',
       'rescue_id': 'RESCUE #',
       'items_count': 'ITEMS',
       'order_failed': 'Order Failed',
@@ -330,8 +345,10 @@ class AppLocalizations {
       'rescue_cancelled': 'Rescue Cancelled',
       'could_not_launch_nav': 'Could not launch navigation',
       'pickup_code': 'PICKUP CODE',
-      'handover_instruction_buyer': "Enter Buyer's Handover OTP once they arrive for pickup.",
-      'handover_instruction_volunteer': "Enter Volunteer's Pickup OTP to record the collection.",
+      'handover_instruction_buyer':
+          "Enter Buyer's Handover OTP once they arrive for pickup.",
+      'handover_instruction_volunteer':
+          "Enter Volunteer's Pickup OTP to record the collection.",
       'contact_support': 'Contact Support',
       'live_tracking': 'Live Tracking',
       'rate_review': 'Rate & Review Experience',
@@ -427,7 +444,8 @@ class AppLocalizations {
       'accept_delivery': 'डिलीवरी स्वीकार करें',
       'pickup': 'पिकअप',
       'delivery_label': 'डिलीवरी',
-      'inactive_msg': 'आप वर्तमान में निष्क्रिय हैं।\nडिलीवरी प्राप्त करने और प्रदर्शन देखने के लिए उपलब्धता चालू करें।',
+      'inactive_msg':
+          'आप वर्तमान में निष्क्रिय हैं।\nडिलीवरी प्राप्त करने और प्रदर्शन देखने के लिए उपलब्धता चालू करें।',
       'new_requests_banner': 'आपके पास 2 नए डिलीवरी अनुरोध प्रतीक्षारत हैं!',
       'verified_volunteer': 'सत्यापित स्वयंसेवक',
       'top_volunteer': 'शीर्ष स्वयंसेवक',
@@ -442,7 +460,8 @@ class AppLocalizations {
       'dietary_preferences': 'आहार संबंधी प्राथमिकताएं',
       'select_all': 'सभी चुनें',
       'clear_all': 'सभी साफ़ करें',
-      'dietary_prefs_desc': 'हम इन विकल्पों के आधार पर आपकी फीड को फ़िल्टर करेंगे।',
+      'dietary_prefs_desc':
+          'हम इन विकल्पों के आधार पर आपकी फीड को फ़िल्टर करेंगे।',
       'your_impact': 'आपका प्रभाव',
       'orders_cancelled': 'रद्द किए गए ऑर्डर',
       'total_spent': 'कुल खर्च',
@@ -460,7 +479,8 @@ class AppLocalizations {
       'soon': 'जल्द ही',
       'favorite_restaurants': 'पसंदीदा रेस्टोरेंट',
       'no_favorite_restaurants': 'अभी तक कोई पसंदीदा रेस्टोरेंट नहीं',
-      'follow_favorites_desc': 'अपने पसंदीदा स्थानों को यहाँ देखने के लिए उनका अनुसरण करें!',
+      'follow_favorites_desc':
+          'अपने पसंदीदा स्थानों को यहाँ देखने के लिए उनका अनुसरण करें!',
       'discover_more': 'और खोजें',
       'close': 'बंद करें',
       'items': 'वस्तुएं',
@@ -474,8 +494,10 @@ class AppLocalizations {
       'search_in_this_area': 'इस क्षेत्र में खोजें',
       'searching_in_area': 'क्षेत्र में खोजा जा रहा है...',
       'no_listings_here': 'यहाँ अभी तक कोई लिस्टिंग नहीं है',
-      'try_changing_filters': 'अपने फ़िल्टर बदलने या किसी अन्य क्षेत्र में खोजने का प्रयास करें।',
-      'invite_sellers_desc': 'सामुदायिक विकास को प्रोत्साहित करने के लिए इस क्षेत्र में विक्रेताओं को आमंत्रित करें!',
+      'try_changing_filters':
+          'अपने फ़िल्टर बदलने या किसी अन्य क्षेत्र में खोजने का प्रयास करें।',
+      'invite_sellers_desc':
+          'सामुदायिक विकास को प्रोत्साहित करने के लिए इस क्षेत्र में विक्रेताओं को आमंत्रित करें!',
       'search_browse_hint': 'शहर, भोजन या श्रेणी खोजें...',
       'filter': 'फ़िल्टर',
       'results': 'परिणाम',
@@ -499,7 +521,8 @@ class AppLocalizations {
       'your_badges': 'आपके बैज',
       'quick_actions': 'त्वरित कार्य',
       'view_orders': 'ऑर्डर देखें',
-      'error_unsafe_donation': 'सुरक्षा चेतावनी: चयनित पिकアップ विंडो इस प्रकार के भोजन के लिए सुरक्षित उपभोग सीमा से अधिक है।',
+      'error_unsafe_donation':
+          'सुरक्षा चेतावनी: चयनित पिकアップ विंडो इस प्रकार के भोजन के लिए सुरक्षित उपभोग सीमा से अधिक है।',
       'voice_mode_on': 'वॉयस मोड सक्रिय। मैं आपकी क्या मदद कर सकता हूँ?',
       'online': 'ऑनलाइन',
       'away': 'अनुपलब्ध',
@@ -554,7 +577,8 @@ class AppLocalizations {
       'order': 'ऑर्डर',
       'order_details': 'ऑर्डर विवरण',
       'cancel_order': 'ऑर्डर रद्द करें',
-      'cancel_confirmation_msg': 'क्या आप वाकई इस ऑर्डर को रद्द करना चाहते हैं? इस क्रिया को पूर्ववत नहीं किया जा सकता।',
+      'cancel_confirmation_msg':
+          'क्या आप वाकई इस ऑर्डर को रद्द करना चाहते हैं? इस क्रिया को पूर्ववत नहीं किया जा सकता।',
       'keep_it': 'नहीं, रखें',
       'yes_cancel': 'हाँ, रद्द करें',
       'order_cancelled_success': 'ऑर्डर सफलतापूर्वक रद्द कर दिया गया',
@@ -579,7 +603,8 @@ class AppLocalizations {
       'total': 'कुल',
       'order_timeline': 'ऑर्डर टाइमलाइन',
       'food_safety_title': 'खाद्य सुरक्षा और गुणवत्ता',
-      'food_safety_desc': 'हमारे स्वयंसेवकों द्वारा इस वस्तु की गुणवत्ता और सुरक्षा की जांच की गई है।',
+      'food_safety_desc':
+          'हमारे स्वयंसेवकों द्वारा इस वस्तु की गुणवत्ता और सुरक्षा की जांच की गई है।',
       'get_directions': 'दिशा-निर्देश प्राप्त करें',
       'amount': 'राशि',
       'date': 'दिनांक',
@@ -597,7 +622,8 @@ class AppLocalizations {
       'delivery_address': 'डिलीवरी का पता',
       'rescue_details': 'रेस्क्यू विवरण',
       'report_emergency': 'आपातकाल की रिपोर्ट करें',
-      'emergency_desc': 'क्या आप किसी समस्या का सामना कर रहे हैं? यह खरीदार और विक्रेता को संभावित देरी के बारे में सूचित करेगा।',
+      'emergency_desc':
+          'क्या आप किसी समस्या का सामना कर रहे हैं? यह खरीदार और विक्रेता को संभावित देरी के बारे में सूचित करेगा।',
       'report': 'रिपोर्ट',
       'delivery_verified': 'डिलीवरी सत्यापित। ऑर्डर पूरा हुआ!',
       'get_help': 'मदद लें',
@@ -605,7 +631,8 @@ class AppLocalizations {
       'deliver_to': 'यहाँ पहुँचाएँ',
       'message': 'संदेश',
       'cancel_rescue': 'रेस्क्यू रद्द करें',
-      'cancel_rescue_msg': 'क्या आप वाकई इस रेस्क्यू को रद्द करना चाहते हैं? यह ऑर्डर को पूल में वापस भेज देगा और सभी को सूचित करेगा।',
+      'cancel_rescue_msg':
+          'क्या आप वाकई इस रेस्क्यू को रद्द करना चाहते हैं? यह ऑर्डर को पूल में वापस भेज देगा और सभी को सूचित करेगा।',
       'rescue_id': 'रेस्क्यू #',
       'items_count': 'वस्तुएं',
       'order_failed': 'ऑर्डर विफल',
@@ -633,13 +660,16 @@ class AppLocalizations {
       'completed_msg': 'आशा है कि आपने भोजन का आनंद लिया!',
       'cancelled_msg': 'यह ऑर्डर रद्द कर दिया गया था।',
       'emergency_hint': 'कारण (दुर्घटना, बाइक की समस्या, आदि)',
-      'emergency_reported_msg': 'आपातकाल की रिपोर्ट दी गई। सहायता को सूचित कर दिया गया है।',
+      'emergency_reported_msg':
+          'आपातकाल की रिपोर्ट दी गई। सहायता को सूचित कर दिया गया है।',
       'rescue_failed': 'रेस्क्यू विफल',
       'rescue_cancelled': 'रेस्क्यू रद्द',
       'could_not_launch_nav': 'नेविगेशन शुरू नहीं किया जा सका',
       'pickup_code': 'पिकअप कोड',
-      'handover_instruction_buyer': 'खरीदार के आने पर उनका हैंडओवर ओटीपी दर्ज करें।',
-      'handover_instruction_volunteer': 'कलेक्शन रिकॉर्ड करने के लिए स्वयंसेवक का पिकअप ओटीपी दर्ज करें।',
+      'handover_instruction_buyer':
+          'खरीदार के आने पर उनका हैंडओवर ओटीपी दर्ज करें।',
+      'handover_instruction_volunteer':
+          'कलेक्शन रिकॉर्ड करने के लिए स्वयंसेवक का पिकअप ओटीपी दर्ज करें।',
       'contact_support': 'सहायता से संपर्क करें',
       'live_tracking': 'लाइव ट्रैकिंग',
       'rate_review': 'रेटिंग और समीक्षा',
@@ -733,7 +763,8 @@ class AppLocalizations {
       'accept_delivery': 'டெலிவரியை ஏற்கவும்',
       'pickup': 'பிக்கப்',
       'delivery_label': 'டெலிவரி',
-      'inactive_msg': 'நீங்கள் தற்போது செயலில் இல்லை.\nடெலிவரிகளைப் பெறவும் செயல்திறனைப் பார்க்கவும் கிடைக்கும் தன்மையை (availability) இயக்கவும்.',
+      'inactive_msg':
+          'நீங்கள் தற்போது செயலில் இல்லை.\nடெலிவரிகளைப் பெறவும் செயல்திறனைப் பார்க்கவும் கிடைக்கும் தன்மையை (availability) இயக்கவும்.',
       'new_requests_banner': 'உங்களிடம் 2 புதிய டெலிவரி கோரிக்கைகள் உள்ளன!',
       'verified_volunteer': 'சரிபார்க்கப்பட்ட தன்னார்வலர்',
       'top_volunteer': 'சிறந்த தன்னார்வலர்',
@@ -748,7 +779,8 @@ class AppLocalizations {
       'dietary_preferences': 'உணவு விருப்பங்கள்',
       'select_all': 'அனைத்தையும் தேர்ந்தெடு',
       'clear_all': 'அனைத்தையும் நீக்கு',
-      'dietary_prefs_desc': 'இந்தத் தேர்வுகளின் அடிப்படையில் உங்கள் பீடை வடிகட்டுவோம்.',
+      'dietary_prefs_desc':
+          'இந்தத் தேர்வுகளின் அடிப்படையில் உங்கள் பீடை வடிகட்டுவோம்.',
       'your_impact': 'உங்கள் தாக்கம்',
       'orders_cancelled': 'ஆர்டர்கள் ரத்து செய்யப்பட்டன',
       'total_spent': 'மொத்த செலவு',
@@ -766,7 +798,8 @@ class AppLocalizations {
       'soon': 'விரைவில்',
       'favorite_restaurants': 'விருப்பமான உணவகங்கள்',
       'no_favorite_restaurants': 'இன்னும் விருப்பமான உணவகங்கள் இல்லை',
-      'follow_favorites_desc': 'உங்களுக்குப் பிடித்த இடங்களை இங்கே காண அவற்றைப் பின்தொடரவும்!',
+      'follow_favorites_desc':
+          'உங்களுக்குப் பிடித்த இடங்களை இங்கே காண அவற்றைப் பின்தொடரவும்!',
       'discover_more': 'மேலும் கண்டறியவும்',
       'close': 'மூடு',
       'items': 'பொருட்கள்',
@@ -780,8 +813,10 @@ class AppLocalizations {
       'search_in_this_area': 'இந்த பகுதியில் தேடவும்',
       'searching_in_area': 'இந்த பகுதியில் தேடுகிறது...',
       'no_listings_here': 'இங்கே இன்னும் பட்டியல்கள் இல்லை',
-      'try_changing_filters': 'உங்கள் வடிகட்டிகளை மாற்ற அல்லது வேறு பகுதியைத் தேட முயற்சிக்கவும்.',
-      'invite_sellers_desc': 'சமூக வளர்ச்சியை ஊக்குவிக்க இந்த பகுதியில் உள்ள விற்பனையாளர்களை அழைக்கவும்!',
+      'try_changing_filters':
+          'உங்கள் வடிகட்டிகளை மாற்ற அல்லது வேறு பகுதியைத் தேட முயற்சிக்கவும்.',
+      'invite_sellers_desc':
+          'சமூக வளர்ச்சியை ஊக்குவிக்க இந்த பகுதியில் உள்ள விற்பனையாளர்களை அழைக்கவும்!',
       'search_browse_hint': 'நகரம், உணவு அல்லது வகையைத் தேடுங்கள்...',
       'filter': 'வடிகட்டி',
       'results': 'முடிவுகள்',
@@ -805,8 +840,10 @@ class AppLocalizations {
       'your_badges': 'உங்கள் பேட்ஜ்கள்',
       'quick_actions': 'விரைவான செயல்கள்',
       'view_orders': 'ஆர்டர்களைப் பார்',
-      'error_unsafe_donation': 'பாதுகாப்பு எச்சரிக்கை: தேர்ந்தெடுக்கப்பட்ட பிக்கப் சாளரம் இந்த வகை உணவிற்கான பாதுகாப்பான நுகர்வு வரம்பை மீறுகிறது।',
-      'voice_mode_on': 'குரல் பயன்முறை செயல்படுத்தப்பட்டது. நான் உங்களுக்கு எப்படி உதவ முடியும்?',
+      'error_unsafe_donation':
+          'பாதுகாப்பு எச்சரிக்கை: தேர்ந்தெடுக்கப்பட்ட பிக்கப் சாளரம் இந்த வகை உணவிற்கான பாதுகாப்பான நுகர்வு வரம்பை மீறுகிறது।',
+      'voice_mode_on':
+          'குரல் பயன்முறை செயல்படுத்தப்பட்டது. நான் உங்களுக்கு எப்படி உதவ முடியும்?',
       'online': 'ஆன்லைன்',
       'away': 'வெளியே',
       'your_statistics': 'உங்கள் புள்ளிவிவரங்கள்',
@@ -838,7 +875,8 @@ class AppLocalizations {
       'no_listings_yet': 'இன்னும் பட்டியல்கள் இல்லை',
       'no_completed_listings': 'முடிந்த பட்டியல்கள் இல்லை',
       'no_expired_listings': 'காலாவதியான பட்டியல்கள் இல்லை',
-      'start_creating_listing_desc': 'உங்கள் முதல் உணவுப் பட்டியலை உருவாக்குவதன் மூலம் தொடங்கவும்',
+      'start_creating_listing_desc':
+          'உங்கள் முதல் உணவுப் பட்டியலை உருவாக்குவதன் மூலம் தொடங்கவும்',
       'expires_in': 'காலாவதியாக இன்னும்',
       'expired_ago': 'முன்பு காலாவதியானது',
       'hygiene_status': 'சுகாதார நிலை',
@@ -860,7 +898,8 @@ class AppLocalizations {
       'order': 'ஆர்டர்',
       'order_details': 'ஆர்டர் விவரங்கள்',
       'cancel_order': 'ஆர்டரை ரத்துசெய்',
-      'cancel_confirmation_msg': 'நிச்சயமாக இந்த ஆர்டரை ரத்துசெய்ய வேண்டுமா? இந்தச் செயலை மாற்ற முடியாது.',
+      'cancel_confirmation_msg':
+          'நிச்சயமாக இந்த ஆர்டரை ரத்துசெய்ய வேண்டுமா? இந்தச் செயலை மாற்ற முடியாது.',
       'keep_it': 'இல்லை, அப்படியே இருக்கட்டும்',
       'yes_cancel': 'ஆம், ரத்துசெய்',
       'order_cancelled_success': 'ஆர்டர் வெற்றிகரமாக ரத்துசெய்யப்பட்டது',
@@ -885,7 +924,8 @@ class AppLocalizations {
       'total': 'மொத்தம்',
       'order_timeline': 'ஆர்டர் காலவரிசை',
       'food_safety_title': 'உணவு பாதுகாப்பு மற்றும் தரம்',
-      'food_safety_desc': 'இந்த பொருள் எங்கள் தன்னார்வலர்களால் தரம் மற்றும் பாதுகாப்பிற்காக ஆய்வு செய்யப்பட்டது.',
+      'food_safety_desc':
+          'இந்த பொருள் எங்கள் தன்னார்வலர்களால் தரம் மற்றும் பாதுகாப்பிற்காக ஆய்வு செய்யப்பட்டது.',
       'get_directions': 'வழிமுறைகளைப் பெறுங்கள்',
       'amount': 'தொகை',
       'date': 'தேதி',
@@ -903,7 +943,8 @@ class AppLocalizations {
       'delivery_address': 'டெலிவரி முகவரி',
       'rescue_details': 'மீட்பு விவரங்கள்',
       'report_emergency': 'அவசரநிலையைப் புகாரளி',
-      'emergency_desc': 'நீங்கள் ஏதேனும் சிக்கலை எதிர்கொள்கிறீர்களா? இது வாங்குபவர் மற்றும் விற்பனையாளருக்கு தாமதம் ஏற்படக்கூடும் என்று தெரிவிக்கும்.',
+      'emergency_desc':
+          'நீங்கள் ஏதேனும் சிக்கலை எதிர்கொள்கிறீர்களா? இது வாங்குபவர் மற்றும் விற்பனையாளருக்கு தாமதம் ஏற்படக்கூடும் என்று தெரிவிக்கும்.',
       'report': 'புகாரளி',
       'delivery_verified': 'டெலிவரி சரிபார்க்கப்பட்டது. ஆர்டர் முடிந்தது!',
       'get_help': 'உதவி பெறு',
@@ -911,7 +952,8 @@ class AppLocalizations {
       'deliver_to': 'இங்கே வழங்கவும்',
       'message': 'செய்தி',
       'cancel_rescue': 'மீட்பை ரத்துசெய்',
-      'cancel_rescue_msg': 'நிச்சயமாக இந்த மீட்பை ரத்துசெய்ய வேண்டுமா? இது ஆர்டரை மீண்டும் பொதுப் பட்டியலுக்கு அனுப்பும்.',
+      'cancel_rescue_msg':
+          'நிச்சயமாக இந்த மீட்பை ரத்துசெய்ய வேண்டுமா? இது ஆர்டரை மீண்டும் பொதுப் பட்டியலுக்கு அனுப்பும்.',
       'rescue_id': 'மீட்பு #',
       'items_count': 'பொருட்கள்',
       'order_failed': 'ஆர்டர் தோல்வியுற்றது',
@@ -939,7 +981,8 @@ class AppLocalizations {
       'completed_msg': 'நீங்கள் உணவை ரசித்தீர்கள் என்று நம்புகிறோம்!',
       'cancelled_msg': 'இந்த ஆர்டர் ரத்து செய்யப்பட்டது.',
       'emergency_hint': 'காரணம் (விபத்து, பைக் பிரச்சனை போன்றவை)',
-      'emergency_reported_msg': 'அவசரநிலை புகாரளிக்கப்பட்டது. உதவி அறிவிக்கப்பட்டது.',
+      'emergency_reported_msg':
+          'அவசரநிலை புகாரளிக்கப்பட்டது. உதவி அறிவிக்கப்பட்டது.',
       'rescue_failed': 'மீட்பு தோல்வியுற்றது',
       'rescue_cancelled': 'மீட்பு ரத்து செய்யப்பட்டது',
       'could_not_launch_nav': 'வழிசெலுத்தலைத் தொடங்க முடியவில்லை',
@@ -1029,7 +1072,8 @@ class AppLocalizations {
       'accept_delivery': 'డెలివరీని అంగీకరించు',
       'pickup': 'పికప్',
       'delivery_label': 'డెలివరీ',
-      'inactive_msg': 'మీరు ప్రస్తుతం నిష్క్రియంగా ఉన్నారు.\nడెలివరీలను స్వీకరించడానికి మరియు పనితీరును చూడటానికి అందుబాటును ఆన్ చేయండి.',
+      'inactive_msg':
+          'మీరు ప్రస్తుతం నిష్క్రియంగా ఉన్నారు.\nడెలివరీలను స్వీకరించడానికి మరియు పనితీరును చూడటానికి అందుబాటును ఆన్ చేయండి.',
       'new_requests_banner': 'మీకు 2 కొత్త డెలివరీ అభ్యర్థనలు వేచి ఉన్నాయి!',
       'verified_volunteer': 'ధృవీకరించబడిన వాలంటీర్',
       'top_volunteer': 'టాప్ వాలంటీర్',
@@ -1044,7 +1088,8 @@ class AppLocalizations {
       'dietary_preferences': 'ఆహార ప్రాధాన్యతలు',
       'select_all': 'అన్నీ ఎంచుకోండి',
       'clear_all': 'అన్నీ తీసివేయండి',
-      'dietary_prefs_desc': 'ఈ ఎంపికల ఆధారంగా మేము మీ ఫీడ్‌ను ఫిల్టర్ చేస్తాము.',
+      'dietary_prefs_desc':
+          'ఈ ఎంపికల ఆధారంగా మేము మీ ఫీడ్‌ను ఫిల్టర్ చేస్తాము.',
       'your_impact': 'మీ ప్రభావం',
       'orders_cancelled': 'ఆర్డర్లు రద్దు చేయబడ్డాయి',
       'total_spent': 'మొత్తం ఖర్చు',
@@ -1062,7 +1107,8 @@ class AppLocalizations {
       'soon': 'త్వరలో',
       'favorite_restaurants': 'ఇష్టమైన రెస్టారెంట్లు',
       'no_favorite_restaurants': 'ఇంకా ఇష్టమైన రెస్టారెంట్లు లేవు',
-      'follow_favorites_desc': 'మీకు ఇష్టమైన ప్రదేశాలను ఇక్కడ చూడటానికి వాటిని అనుసరించండి!',
+      'follow_favorites_desc':
+          'మీకు ఇష్టమైన ప్రదేశాలను ఇక్కడ చూడటానికి వాటిని అనుసరించండి!',
       'discover_more': 'మరిన్ని కనుగొనండి',
       'close': 'మూసివేయి',
       'items': 'వస్తువులు',
@@ -1076,8 +1122,10 @@ class AppLocalizations {
       'search_in_this_area': 'ఈ ప్రాంతంలో వెతకండి',
       'searching_in_area': 'ప్రాంతంలో వెతుకుతున్నాము...',
       'no_listings_here': 'ఇక్కడ ఇంకా జాబితాలు లేవు',
-      'try_changing_filters': 'మీ ఫిల్టర్లను మార్చడానికి లేదా మరొక ప్రాంతంలో వెతకడానికి ప్రయత్నించండి.',
-      'invite_sellers_desc': 'కమ్యూనిటీ వృద్ధిని ప్రోత్సహించడానికి ఈ ప్రాంతంలోని విక్రేతలను ఆహ్వానించండి!',
+      'try_changing_filters':
+          'మీ ఫిల్టర్లను మార్చడానికి లేదా మరొక ప్రాంతంలో వెతకడానికి ప్రయత్నించండి.',
+      'invite_sellers_desc':
+          'కమ్యూనిటీ వృద్ధిని ప్రోత్సహించడానికి ఈ ప్రాంతంలోని విక్రేతలను ఆహ్వానించండి!',
       'search_browse_hint': 'నగరం, ఆహారం లేదా వర్గాన్ని వెతకండి...',
       'filter': 'ఫిల్టర్',
       'results': 'ఫలితాలు',
@@ -1101,8 +1149,10 @@ class AppLocalizations {
       'your_badges': 'మీ బ్యాడ్జ్‌లు',
       'quick_actions': 'త్వరిత చర్యలు',
       'view_orders': 'ఆర్డర్‌లను చూడండి',
-      'error_unsafe_donation': 'భద్రతా హెచ్చరిక: ఎంచుకున్న పికప్ విండో ఈ రకమైన ఆహారం కోసం సురక్షితమైన వినియోగ పరిమితిని మించిపోయింది।',
-      'voice_mode_on': 'వాయిస్ మోడ్ యాక్టివేట్ చేయబడింది. నేను మీకు ఎలా సహాయం చేయగలను?',
+      'error_unsafe_donation':
+          'భద్రతా హెచ్చరిక: ఎంచుకున్న పికప్ విండో ఈ రకమైన ఆహారం కోసం సురక్షితమైన వినియోగ పరిమితిని మించిపోయింది।',
+      'voice_mode_on':
+          'వాయిస్ మోడ్ యాక్టివేట్ చేయబడింది. నేను మీకు ఎలా సహాయం చేయగలను?',
       'online': 'ఆన్‌లైన్',
       'away': 'దూరంగా',
       'your_statistics': 'మీ గణాంకాలు',
@@ -1134,7 +1184,8 @@ class AppLocalizations {
       'no_listings_yet': 'ఇంకా జాబితాలు లేవు',
       'no_completed_listings': 'పూర్తయిన జాబితాలు లేవు',
       'no_expired_listings': 'గడువు ముగిసిన జాబితాలు లేవు',
-      'start_creating_listing_desc': 'మీ మొదటి ఆహార జాబితాను సృష్టించడం ద్వారా ప్రారంభించండి',
+      'start_creating_listing_desc':
+          'మీ మొదటి ఆహార జాబితాను సృష్టించడం ద్వారా ప్రారంభించండి',
       'expires_in': 'గడువు ముగియడానికి సమయం',
       'expired_ago': 'క్రితం గడువు ముగిసింది',
       'hygiene_status': 'పరిశుభ్రత స్థితి',
@@ -1156,7 +1207,8 @@ class AppLocalizations {
       'order': 'ఆర్డర్',
       'order_details': 'ఆర్డర్ వివరాలు',
       'cancel_order': 'ఆర్డర్ రద్దు చేయండి',
-      'cancel_confirmation_msg': 'మీరు ఖచ్చితంగా ఈ ఆర్డర్‌ను రద్దు చేయాలనుకుంటున్నారా? ఈ చర్యను తిరిగి పొందలేము.',
+      'cancel_confirmation_msg':
+          'మీరు ఖచ్చితంగా ఈ ఆర్డర్‌ను రద్దు చేయాలనుకుంటున్నారా? ఈ చర్యను తిరిగి పొందలేము.',
       'keep_it': 'వద్దు, అలాగే ఉంచండి',
       'yes_cancel': 'అవును, రద్దు చేయండి',
       'order_cancelled_success': 'ఆర్డర్ విజయవంతంగా రద్దు చేయబడింది',
@@ -1170,7 +1222,8 @@ class AppLocalizations {
       'no_address_provided': 'చిరునామా అందించబడలేదు',
       'pickup_before': 'దీనికి ముందు తీసుకోండి',
       'handover_otp': 'హ్యాండోవర్ ఓటీపీ',
-      'otp_share_warning': 'ఆహారం అందుకున్న తర్వాత మరియు తనిఖీ చేసిన తర్వాత మాత్రమే షేర్ చేయండి.',
+      'otp_share_warning':
+          'ఆహారం అందుకున్న తర్వాత మరియు తనిఖీ చేసిన తర్వాత మాత్రమే షేర్ చేయండి.',
       'regenerate_otp': 'గడువు ముగిస్తే మళ్ళీ సృష్టించండి',
       'finding_volunteer': 'వాలంటీర్ కోసం వెతుకుతున్నాము...',
       'volunteer_hero': 'వాలంటీర్ హీరో',
@@ -1181,7 +1234,8 @@ class AppLocalizations {
       'total': 'మొత్తం',
       'order_timeline': 'ఆర్డర్ కాలక్రమం',
       'food_safety_title': 'ఆహార భద్రత మరియు నాణ్యత',
-      'food_safety_desc': 'మా వాలంటీర్ల ద్వారా ఈ వస్తువు నాణ్యత మరియు భద్రత కోసం తనిఖీ చేయబడింది.',
+      'food_safety_desc':
+          'మా వాలంటీర్ల ద్వారా ఈ వస్తువు నాణ్యత మరియు భద్రత కోసం తనిఖీ చేయబడింది.',
       'get_directions': 'దిశలు పొందండి',
       'amount': 'మొత్తం',
       'date': 'తేదీ',
@@ -1199,7 +1253,8 @@ class AppLocalizations {
       'delivery_address': 'డెలివరీ చిరునామా',
       'rescue_details': 'రెస్క్యూ వివరాలు',
       'report_emergency': 'అత్యవసర రిపోర్ట్ చేయండి',
-      'emergency_desc': 'మీరు ఏదైనా సమస్యను ఎదుర్కొంటున్నారా? ఇది కొనుగోలుదారు మరియు విక్రేతకు ఆలస్యం అయ్యే అవకాశం ఉందని తెలియజేస్తుంది.',
+      'emergency_desc':
+          'మీరు ఏదైనా సమస్యను ఎదుర్కొంటున్నారా? ఇది కొనుగోలుదారు మరియు విక్రేతకు ఆలస్యం అయ్యే అవకాశం ఉందని తెలియజేస్తుంది.',
       'report': 'రిపోర్ట్',
       'delivery_verified': 'డెలివరీ ధృవీకరించబడింది. ఆర్డర్ పూర్తయింది!',
       'get_help': 'సహాయం పొందండి',
@@ -1207,7 +1262,8 @@ class AppLocalizations {
       'deliver_to': 'ఇక్కడ డెలివరీ చేయండి',
       'message': 'సందేశం',
       'cancel_rescue': 'రెస్క్యూ రద్దు చేయండి',
-      'cancel_rescue_msg': 'మీరు ఖచ్చితంగా ఈ రెస్క్యూని రద్దు చేయాలనుకుంటున్నారా? ఇది ఆర్డర్‌ను మళ్ళీ పూల్‌కు పంపుతుంది.',
+      'cancel_rescue_msg':
+          'మీరు ఖచ్చితంగా ఈ రెస్క్యూని రద్దు చేయాలనుకుంటున్నారా? ఇది ఆర్డర్‌ను మళ్ళీ పూల్‌కు పంపుతుంది.',
       'rescue_id': 'రెస్క్యూ #',
       'items_count': 'వస్తువులు',
       'order_failed': 'ఆర్డర్ విఫలమైంది',
@@ -1235,7 +1291,8 @@ class AppLocalizations {
       'completed_msg': 'మీరు ఆహారాన్ని ఆస్వాదించారని ఆశిస్తున్నాము!',
       'cancelled_msg': 'ఈ ఆర్డర్ రద్దు చేయబడింది.',
       'emergency_hint': 'కారణం (ప్రమాదం, బైక్ సమస్య మొదలైనవి)',
-      'emergency_reported_msg': 'అత్యవసర రిపోర్ట్ చేయబడింది. సహాయం తెలియజేయబడింది.',
+      'emergency_reported_msg':
+          'అత్యవసర రిపోర్ట్ చేయబడింది. సహాయం తెలియజేయబడింది.',
       'rescue_failed': 'రెస్క్యూ విఫలమైంది',
       'rescue_cancelled': 'రెస్క్యూ రద్దు చేయబడింది',
       'could_not_launch_nav': 'నావిగేషన్ ప్రారంభించలేకపోయింది',
@@ -1269,7 +1326,10 @@ class AppLocalizations {
     if (staticTranslation != null) return staticTranslation;
 
     // 2. Check dynamic cache (instant if already translated)
-    final cachedTranslation = TranslationCache.getTranslation(key, locale.languageCode);
+    final cachedTranslation = TranslationCache.getTranslation(
+      key,
+      locale.languageCode,
+    );
     if (cachedTranslation != null) return cachedTranslation;
 
     // 3. Fallback: Trigger dynamic translation (async)
@@ -1283,7 +1343,10 @@ class AppLocalizations {
   void _triggerDynamicTranslation(String text) async {
     if (locale.languageCode == 'en') return;
 
-    final translation = await TranslationService.translate(text, locale.languageCode);
+    final translation = await TranslationService.translate(
+      text,
+      locale.languageCode,
+    );
     if (translation != null && context != null) {
       // Refresh UI to show the new translation
       final provider = Provider.of<LanguageProvider>(context!, listen: false);
@@ -1296,14 +1359,18 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => ['en', 'hi', 'ta', 'te'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      ['en', 'hi', 'ta', 'te'].contains(locale.languageCode);
 
   @override
-  Future<AppLocalizations> load(Locale locale) async => AppLocalizations(locale);
+  Future<AppLocalizations> load(Locale locale) async =>
+      AppLocalizations(locale);
 
   // Added overload to pass context from a custom delegate if needed
-  Future<AppLocalizations> loadWithContext(Locale locale, BuildContext context) async => 
-      AppLocalizations(locale, context);
+  Future<AppLocalizations> loadWithContext(
+    Locale locale,
+    BuildContext context,
+  ) async => AppLocalizations(locale, context);
 
   @override
   bool shouldReload(AppLocalizationsDelegate old) => false;

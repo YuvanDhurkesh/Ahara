@@ -10,11 +10,13 @@ import '../../../main.dart'; // Add this import to access AuthWrapper
 class OTPVerificationPage extends StatefulWidget {
   final String phoneNumber;
   final bool isRegistration;
+  final String? mockOtp;
 
   const OTPVerificationPage({
     super.key,
     required this.phoneNumber,
     this.isRegistration = false,
+    this.mockOtp,
   });
 
   @override
@@ -22,7 +24,10 @@ class OTPVerificationPage extends StatefulWidget {
 }
 
 class _OTPVerificationPageState extends State<OTPVerificationPage> {
-  final List<TextEditingController> _controllers = List.generate(6, (index) => TextEditingController());
+  final List<TextEditingController> _controllers = List.generate(
+    6,
+    (index) => TextEditingController(),
+  );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
 
   int _resendTimer = 30;
@@ -87,28 +92,32 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
         } else {
           // If login and user exists
           if (result['isExistingUser'] == true) {
-             ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Logged in successfully!")),
-             );
-             
-             // Navigate to AuthWrapper and clear navigation history
-             Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const AuthWrapper()),
-                (route) => false,
-             );
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Logged in successfully!")),
+            );
+
+            // Navigate to AuthWrapper and clear navigation history
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const AuthWrapper()),
+              (route) => false,
+            );
           } else {
-             ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("No account found for this number. Please register.")),
-             );
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  "No account found for this number. Please register.",
+                ),
+              ),
+            );
           }
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isVerifying = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -146,8 +155,25 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
                 height: 1.5,
               ),
             ),
+            if (widget.mockOtp != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  "DEBUG MODE: Use code ${widget.mockOtp}",
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 40),
-            
+
             // OTP Fields
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -184,7 +210,9 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
                   child: Text(
                     _canResend ? "Resend OTP" : "Resend in ${_resendTimer}s",
                     style: TextStyle(
-                      color: _canResend ? AppColors.primary : AppColors.textLight,
+                      color: _canResend
+                          ? AppColors.primary
+                          : AppColors.textLight,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -206,7 +234,9 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
         color: const Color(0xFFF1F0EB), // Explicit background
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _focusNodes[index].hasFocus ? AppColors.primary : AppColors.textLight.withOpacity(0.2),
+          color: _focusNodes[index].hasFocus
+              ? AppColors.primary
+              : AppColors.textLight.withOpacity(0.2),
           width: 2,
         ),
       ),
@@ -223,9 +253,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
           fontWeight: FontWeight.w900,
           color: Colors.black, // Absolute black
         ),
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-        ],
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         decoration: const InputDecoration(
           counterText: "",
           filled: false, // Disable theme-level fill
