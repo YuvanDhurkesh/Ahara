@@ -140,6 +140,18 @@ exports.createOrder = async (req, res) => {
             await session.commitTransaction();
             session.endSession();
 
+            // Populate listing and seller for the frontend
+            await newOrder.populate([
+                {
+                    path: "listingId",
+                    select: "foodName images pricing pickupAddressText pickupWindow safetyStatus isSafetyValidated pickupGeo"
+                },
+                {
+                    path: "sellerId",
+                    select: "name email phone firebaseUid trustScore role addressText"
+                }
+            ]);
+
             // If volunteer delivery, trigger matching
             if (fulfillment === "volunteer_delivery") {
                 initiateVolunteerMatching(newOrder, listing);

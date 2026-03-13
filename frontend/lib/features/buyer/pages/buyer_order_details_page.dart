@@ -29,6 +29,7 @@ class BuyerOrderDetailsPage extends StatefulWidget {
 
 class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
   late Map<String, dynamic> _localOrder;
+  bool _isLoading = false;
   bool _isCancelled = false;
   int _otpExpirySeconds = 492; // Mock 8:12
   Timer? _otpTimer;
@@ -42,6 +43,26 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     _isCancelled = _localOrder['status'] == 'cancelled';
     _startOtpTimer();
     _fetchBuyerLocation(); // 🔥 Fetch buyer's live location
+    _checkAndFetchFullOrder();
+  }
+
+  Future<void> _checkAndFetchFullOrder() async {
+    // If listingId is a String, the order is incomplete (IDs instead of objects)
+    if (_localOrder['listingId'] is String) {
+      setState(() => _isLoading = true);
+      try {
+        final fullOrder = await BackendService.getOrderById(_localOrder['_id']);
+        if (mounted) {
+          setState(() {
+            _localOrder = fullOrder;
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
+        debugPrint("Error fetching full order: $e");
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
   }
 
   Future<void> _fetchBuyerLocation() async {
@@ -165,9 +186,22 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+    }
+
     final status = _localOrder['status'] ?? "placed";
-    final listing = _localOrder['listingId'] ?? {};
-    final seller = _localOrder['sellerId'] ?? {};
+    final listing = _localOrder['listingId'] is Map<String, dynamic>
+        ? _localOrder['listingId']
+        : {};
+    final seller = _localOrder['sellerId'] is Map<String, dynamic>
+        ? _localOrder['sellerId']
+        : {};
     final volunteer = _localOrder['volunteerId'];
     final pricing = _localOrder['pricing'] ?? {};
     final isDelivery = _localOrder['fulfillment'] == 'volunteer_delivery';
