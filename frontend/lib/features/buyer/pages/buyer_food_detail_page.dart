@@ -14,6 +14,7 @@ import '../../../data/services/backend_service.dart';
 import '../../../data/providers/app_auth_provider.dart';
 import '../../../shared/widgets/animated_toast.dart';
 import '../../../shared/widgets/fssai_verified_badge.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BuyerFoodDetailPage extends StatelessWidget {
   final MockStore? store;
@@ -107,9 +108,10 @@ class BuyerFoodDetailPage extends StatelessWidget {
 
     // Get rating from seller profile or use default
     final dynamic rawSellerProfile = listing?['sellerProfileId'];
-    final Map<String, dynamic> sellerProfile = 
-        rawSellerProfile is Map ? rawSellerProfile as Map<String, dynamic> : {};
-    
+    final Map<String, dynamic> sellerProfile = rawSellerProfile is Map
+        ? rawSellerProfile as Map<String, dynamic>
+        : {};
+
     final double sellerRating = (sellerProfile['stats']?['avgRating'] ?? 0.0)
         .toDouble();
     final int ratingCount = sellerProfile['stats']?['ratingCount'] ?? 0;
@@ -137,11 +139,9 @@ class BuyerFoodDetailPage extends StatelessWidget {
     final String address =
         store?.address ?? (listing?['pickupAddressText'] ?? "Bangalore");
     final String orgName =
-        store?.name ??
-        (sellerProfile['orgName'] ?? "Local Seller");
-    final bool isFssaiVerified = 
-        sellerProfile['fssai']?['verified'] == true;
-    final String? fssaiCertificateUrl = 
+        store?.name ?? (sellerProfile['orgName'] ?? "Local Seller");
+    final bool isFssaiVerified = sellerProfile['fssai']?['verified'] == true;
+    final String? fssaiCertificateUrl =
         sellerProfile['fssai']?['certificateUrl'] as String?;
 
     final Map<String, double> reviews =
@@ -180,7 +180,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     fssaiCertificateUrl,
                   ),
                   const SizedBox(height: 32),
-                  _buildDirectionsButton(),
+                  _buildDirectionsButton(context),
                   const SizedBox(height: 48),
                   _buildReviewSection(context, rating, reviews),
                   const SizedBox(height: 48),
@@ -224,8 +224,11 @@ class BuyerFoodDetailPage extends StatelessWidget {
           child: Consumer<AppAuthProvider>(
             builder: (context, auth, _) {
               final dynamic rawSellerId = listing?['sellerId'];
-              final String sellerId = store?.id ?? 
-                                     ((rawSellerId is Map) ? (rawSellerId['_id'] ?? "").toString() : (rawSellerId ?? "").toString());
+              final String sellerId =
+                  store?.id ??
+                  ((rawSellerId is Map)
+                      ? (rawSellerId['_id'] ?? "").toString()
+                      : (rawSellerId ?? "").toString());
               final profile = auth.mongoProfile;
               final List? favorites = profile?['favouriteSellers'];
               final bool isFavorited = favorites?.contains(sellerId) ?? false;
@@ -431,23 +434,35 @@ class BuyerFoodDetailPage extends StatelessWidget {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(16),
                                     child: Image.network(
-                                      BackendService.formatImageUrl(fssaiCertificateUrl),
+                                      BackendService.formatImageUrl(
+                                        fssaiCertificateUrl,
+                                      ),
                                       fit: BoxFit.contain,
-                                      loadingBuilder: (context, child, progress) {
-                                        if (progress == null) return child;
-                                        return Container(
-                                          height: 300,
-                                          color: Colors.white,
-                                          child: const Center(child: CircularProgressIndicator()),
-                                        );
-                                      },
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Container(
-                                          height: 200,
-                                          color: Colors.white,
-                                          child: const Center(child: Icon(Icons.broken_image, size: 48)),
-                                        );
-                                      },
+                                      loadingBuilder:
+                                          (context, child, progress) {
+                                            if (progress == null) return child;
+                                            return Container(
+                                              height: 300,
+                                              color: Colors.white,
+                                              child: const Center(
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              ),
+                                            );
+                                          },
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Container(
+                                              height: 200,
+                                              color: Colors.white,
+                                              child: const Center(
+                                                child: Icon(
+                                                  Icons.broken_image,
+                                                  size: 48,
+                                                ),
+                                              ),
+                                            );
+                                          },
                                     ),
                                   ),
                                 ),
@@ -468,11 +483,54 @@ class BuyerFoodDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDirectionsButton() {
+  Widget _buildDirectionsButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: () {},
+        onPressed: () async {
+          String? url;
+
+          if (listing != null && listing!['pickupGeo'] != null) {
+            final coords = listing!['pickupGeo']['coordinates'];
+            if (coords != null && coords is List && coords.length >= 2) {
+              // GeoJSON is [long, lat]
+              final double lat = (coords[1] as num).toDouble();
+              final double lng = (coords[0] as num).toDouble();
+              url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+            }
+          }
+
+          if (url == null) {
+            final String address =
+                store?.address ?? listing?['pickupAddressText'] ?? "Bangalore";
+            final String encodedAddress = Uri.encodeComponent(address);
+            url =
+                'https://www.google.com/maps/search/?api=1&query=$encodedAddress';
+          }
+
+          final uri = Uri.parse(url);
+          try {
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } else {
+              if (context.mounted) {
+                AnimatedToast.show(
+                  context,
+                  "Could not open maps",
+                  type: ToastType.error,
+                );
+              }
+            }
+          } catch (e) {
+            if (context.mounted) {
+              AnimatedToast.show(
+                context,
+                "Error opening maps",
+                type: ToastType.error,
+              );
+            }
+          }
+        },
         icon: const Icon(Icons.directions_outlined, size: 20),
         label: Text(
           "Get Directions",
@@ -783,7 +841,9 @@ class BuyerFoodDetailPage extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => BuyerPaymentPage(
-                            amount: (listing?['pricing']?['discountedPrice'] ?? 0).toDouble(),
+                            amount:
+                                (listing?['pricing']?['discountedPrice'] ?? 0)
+                                    .toDouble(),
                           ),
                         ),
                       );
@@ -1641,14 +1701,19 @@ class BuyerFoodDetailPage extends StatelessWidget {
                         'No volunteer found — cancelled by buyer',
                       );
                       try {
-                        Provider.of<AppAuthProvider>(context, listen: false).refreshMongoUser();
+                        Provider.of<AppAuthProvider>(
+                          context,
+                          listen: false,
+                        ).refreshMongoUser();
                       } catch (_) {}
                       if (context.mounted) Navigator.pop(context);
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Failed to cancel: ${e.toString().replaceAll("Exception: ", "")}'),
+                            content: Text(
+                              'Failed to cancel: ${e.toString().replaceAll("Exception: ", "")}',
+                            ),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -1708,9 +1773,8 @@ class BuyerFoodDetailPage extends StatelessWidget {
                                 final method = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => BuyerPaymentPage(
-                                      amount: total,
-                                    ),
+                                    builder: (_) =>
+                                        BuyerPaymentPage(amount: total),
                                   ),
                                 );
                                 if (method == null) return;
@@ -1730,9 +1794,8 @@ class BuyerFoodDetailPage extends StatelessWidget {
                               final method = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => BuyerPaymentPage(
-                                    amount: total,
-                                  ),
+                                  builder: (_) =>
+                                      BuyerPaymentPage(amount: total),
                                 ),
                               );
                               if (method == null) return;
@@ -1775,9 +1838,8 @@ class BuyerFoodDetailPage extends StatelessWidget {
                               final method = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => BuyerPaymentPage(
-                                    amount: total,
-                                  ),
+                                  builder: (_) =>
+                                      BuyerPaymentPage(amount: total),
                                 ),
                               );
                               if (method != null) {
