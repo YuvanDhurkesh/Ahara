@@ -95,92 +95,337 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
     return "${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}";
   }
 
-  Future<void> _cancelOrder() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          AppLocalizations.of(context)!.translate("cancel_order"),
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            color: Colors.red,
-          ),
-        ),
-        content: Text(
-          AppLocalizations.of(context)!.translate("cancel_confirmation_msg"),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              AppLocalizations.of(context)!.translate("keep_it"),
-              style: GoogleFonts.inter(color: Colors.grey),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              AppLocalizations.of(context)!.translate("yes_cancel"),
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-      barrierColor: Colors.black.withOpacity(0.5),
-    );
+  Future<String?> _showCancellationReasonBottomSheet() async {
+    String? selectedReason;
+    final otherController = TextEditingController();
+    final reasons = [
+      AppLocalizations.of(context)!.translate("reason_changed_mind"),
+      AppLocalizations.of(context)!.translate("reason_accidental"),
+      AppLocalizations.of(context)!.translate("reason_too_far"),
+      AppLocalizations.of(context)!.translate("reason_not_responsive"),
+      AppLocalizations.of(context)!.translate("reason_other"),
+    ];
 
-    if (confirm == true) {
-      try {
-        await BackendService.cancelOrder(
-          _localOrder['_id'],
-          "buyer",
-          "Cancelled by buyer",
-        );
-        // Refresh mongo user to pick up updated trust score
-        try {
-          await Provider.of<AppAuthProvider>(
-            context,
-            listen: false,
-          ).refreshMongoUser();
-        } catch (e) {
-          // ignore refresh errors
-        }
+    return showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setBottomSheetState) {
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(28),
+                topRight: Radius.circular(28),
+              ),
+            ),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              top: 12,
+              left: 20,
+              right: 20,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    AppLocalizations.of(context)!.translate("cancel_order") ??
+                        "Cancel Order",
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    AppLocalizations.of(
+                          context,
+                        )!.translate("cancel_confirmation_msg") ??
+                        "Please select a reason for cancellation.",
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ...reasons.map((reason) {
+                    final isSelected = selectedReason == reason;
+                    return GestureDetector(
+                      onTap: () {
+                        setBottomSheetState(() => selectedReason = reason);
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Colors.red.withOpacity(0.05)
+                              : Colors.grey[50],
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isSelected
+                                ? Colors.red.withOpacity(0.3)
+                                : Colors.transparent,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              isSelected
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_off,
+                              color: isSelected ? Colors.red : Colors.grey[400],
+                              size: 22,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                reason ?? '',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
+                                  color: isSelected
+                                      ? Colors.red[900]
+                                      : Colors.black87,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  if (selectedReason ==
+                      AppLocalizations.of(context)!.translate("reason_other"))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 16),
+                      child: TextField(
+                        controller: otherController,
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          hintText: AppLocalizations.of(
+                            context,
+                          )!.translate("enter_reason_hint"),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Colors.red,
+                              width: 1.5,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                        ),
+                        style: GoogleFonts.inter(fontSize: 15),
+                        maxLines: 2,
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            AppLocalizations.of(
+                                  context,
+                                )!.translate("keep_it") ??
+                                "Keep It",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: selectedReason == null
+                              ? null
+                              : () {
+                                  if (selectedReason ==
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.translate("reason_other")) {
+                                    Navigator.pop(
+                                      context,
+                                      otherController.text.trim(),
+                                    );
+                                  } else {
+                                    Navigator.pop(context, selectedReason);
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            disabledBackgroundColor: Colors.grey[300],
+                          ),
+                          child: Text(
+                            AppLocalizations.of(
+                                  context,
+                                )!.translate("yes_cancel") ??
+                                "Yes, Cancel",
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _cancelOrder() async {
+    // 1. Check 30-min window constraint
+    final listing = _localOrder['listingId'];
+    DateTime? pickupAt;
+    if (_localOrder['pickup'] != null &&
+        _localOrder['pickup']['scheduledAt'] != null) {
+      pickupAt = DateTime.tryParse(_localOrder['pickup']['scheduledAt']);
+    } else if (listing is Map && listing['pickupWindow'] != null) {
+      pickupAt = DateTime.tryParse(listing['pickupWindow']['from'] ?? '');
+    }
+
+    if (pickupAt != null) {
+      final difference = pickupAt.difference(DateTime.now());
+      if (difference.inMinutes >= 0 && difference.inMinutes < 30) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                AppLocalizations.of(
-                  context,
-                )!.translate("order_cancelled_success"),
-                style: GoogleFonts.inter(color: Colors.white),
+                AppLocalizations.of(context)!.translate("cannot_cancel_now") ??
+                    "Cannot cancel within 30 minutes of pickup.",
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.black87,
               behavior: SnackBarBehavior.floating,
-            ),
-          );
-          Navigator.pop(context, true); // Pop back to orders list
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "${AppLocalizations.of(context)!.translate('failed_to_cancel')}: $e",
-                style: GoogleFonts.inter(color: Colors.white),
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              backgroundColor: Colors.red,
             ),
           );
         }
+        return;
+      }
+    }
+
+    final reason = await _showCancellationReasonBottomSheet();
+    if (reason == null || reason.isEmpty) return;
+
+    try {
+      setState(() => _isLoading = true);
+      await BackendService.cancelOrder(_localOrder['_id'], "buyer", reason);
+      // Refresh mongo user to pick up updated trust score
+      try {
+        await Provider.of<AppAuthProvider>(
+          context,
+          listen: false,
+        ).refreshMongoUser();
+      } catch (e) {
+        // ignore refresh errors
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Text(
+                  AppLocalizations.of(
+                        context,
+                      )!.translate("order_cancelled_success") ??
+                      "Order cancelled successfully",
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green[600],
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+        Navigator.pop(context, true); // Pop back to orders list
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "${AppLocalizations.of(context)!.translate('failed_to_cancel')}: $e",
+              style: GoogleFonts.inter(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
       }
     }
   }
