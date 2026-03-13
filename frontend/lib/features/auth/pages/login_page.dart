@@ -30,8 +30,10 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<LanguageProvider>(context, listen: false)
-          .confirmCurrentLanguage();
+      Provider.of<LanguageProvider>(
+        context,
+        listen: false,
+      ).confirmCurrentLanguage();
     });
   }
 
@@ -88,9 +90,9 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } on fb.FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? "Login failed")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message ?? "Login failed")));
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -103,57 +105,57 @@ class _LoginPageState extends State<LoginPage> {
   //-------------------------------------------------------------
 
   Future<void> _handleGoogleSignIn() async {
-  if (_isLoading) return;
+    if (_isLoading) return;
 
-  setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
-  final auth = context.read<AppAuthProvider>();
+    final auth = context.read<AppAuthProvider>();
 
-  try {
-    final user = await auth.signInWithGoogle();
-
-    if (!mounted) return;
-
-    if (user != null) {
-      final role = await auth.getUserRole(user.uid);
+    try {
+      final user = await auth.signInWithGoogle();
 
       if (!mounted) return;
 
-      Widget destination;
+      if (user != null) {
+        final role = await auth.getUserRole(user.uid);
 
-      switch (role?.toLowerCase()) {
-        case 'seller':
-          destination = const SellerDashboardPage();
-          break;
-        case 'volunteer':
-          destination = const VolunteerDashboardPage();
-          break;
-        case 'buyer':
-        default:
-          destination = const BuyerDashboardPage();
-          break;
+        if (!mounted) return;
+
+        Widget destination;
+
+        switch (role?.toLowerCase()) {
+          case 'seller':
+            destination = const SellerDashboardPage();
+            break;
+          case 'volunteer':
+            destination = const VolunteerDashboardPage();
+            break;
+          case 'buyer':
+          default:
+            destination = const BuyerDashboardPage();
+            break;
+        }
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => destination),
+          (route) => false,
+        );
       }
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => destination),
-        (route) => false,
+    } on fb.FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? "Google Sign-In Failed")),
       );
-    }
-  } on fb.FirebaseAuthException catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(e.message ?? "Google Sign-In Failed")),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Google Sign-In Failed")),
-    );
-  } finally {
-    if (mounted) {
-      setState(() => _isLoading = false);
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Google Sign-In Failed")));
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
-}
 
   //-------------------------------------------------------------
 
@@ -270,9 +272,11 @@ class _LoginPageState extends State<LoginPage> {
                               height: 24,
                             ),
                             const SizedBox(width: 10),
-                            const Text(
-                              "Sign in with Google",
-                              style: TextStyle(fontSize: 16),
+                            Text(
+                              AppLocalizations.of(
+                                context,
+                              )!.translate('sign_in_with_google'),
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ],
                         ),
@@ -285,10 +289,15 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 height: 55,
                 child: OutlinedButton.icon(
-                  icon: const Icon(Icons.phone_android_outlined, color: AppColors.primary),
-                  label: const Text(
-                    "Sign in with Phone",
-                    style: TextStyle(fontSize: 16),
+                  icon: const Icon(
+                    Icons.phone_android_outlined,
+                    color: AppColors.primary,
+                  ),
+                  label: Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.translate('sign_in_with_phone'),
+                    style: const TextStyle(fontSize: 16),
                   ),
                   onPressed: () {
                     Navigator.push(
@@ -342,8 +351,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10, left: 4),
-      child: Text(label,
-          style: Theme.of(context).textTheme.labelMedium),
+      child: Text(label, style: Theme.of(context).textTheme.labelMedium),
     );
   }
 }

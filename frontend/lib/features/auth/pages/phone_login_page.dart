@@ -15,6 +15,7 @@ class PhoneLoginPage extends StatefulWidget {
 
 class _PhoneLoginPageState extends State<PhoneLoginPage> {
   final _phoneController = TextEditingController();
+  String _countryCode = "+91";
   bool _isLoading = false;
 
   @override
@@ -35,7 +36,8 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
 
     try {
       final auth = context.read<AppAuthProvider>();
-      await auth.sendOtp(_phoneController.text.trim());
+      final fullNumber = "$_countryCode${_phoneController.text.trim()}";
+      final result = await auth.sendOtp(fullNumber);
 
       if (mounted) {
         setState(() => _isLoading = false);
@@ -43,8 +45,10 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
           context,
           MaterialPageRoute(
             builder: (_) => OTPVerificationPage(
-              phoneNumber: _phoneController.text.trim(),
+              phoneNumber: fullNumber,
               isRegistration: false,
+              mockOtp:
+                  result['otp'], // Pass the OTP if it was returned (Mock Mode)
             ),
           ),
         );
@@ -52,9 +56,9 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -95,6 +99,9 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
               controller: _phoneController,
               label: "PHONE NUMBER",
               hintText: "Enter 10-digit number",
+              onCountryCodeChanged: (code) {
+                setState(() => _countryCode = code);
+              },
             ),
             const Spacer(),
             SizedBox(
