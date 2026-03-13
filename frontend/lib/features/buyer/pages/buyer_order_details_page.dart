@@ -16,6 +16,7 @@ import 'buyer_order_track_page.dart';
 import '../data/mock_orders.dart';
 import '../data/mock_stores.dart';
 import '../../common/widgets/chat_screen.dart';
+import 'buyer_dashboard_page.dart';
 import '../../../core/localization/app_localizations.dart';
 
 class BuyerOrderDetailsPage extends StatefulWidget {
@@ -220,7 +221,18 @@ class _BuyerOrderDetailsPageState extends State<BuyerOrderDetailsPage> {
         ),
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const BackButton(color: Colors.black),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const BuyerDashboardPage(initialIndex: 2),
+              ),
+              (route) => false,
+            );
+          },
+        ),
         actions: [
           IconButton(
             onPressed: () {},
