@@ -123,6 +123,8 @@ class BuyerFoodDetailPage extends StatelessWidget {
         store?.isFree ?? (listing?['pricing']?['isFree'] ?? false);
     final String price =
         store?.price ?? "₹${listing?['pricing']?['discountedPrice'] ?? 0}";
+    final double? originalPrice =
+        (listing?['pricing']?['originalPrice'] as num?)?.toDouble();
 
     final List images = listing?['images'] ?? [];
     final String foodName =
@@ -198,6 +200,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
         isFree,
         price,
         offersDelivery,
+        originalPrice,
       ),
     );
   }
@@ -964,6 +967,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
     bool isFree,
     String price,
     bool offersDelivery,
+    double? originalPrice,
   ) {
     // Only show button for real listings (not mock stores)
     if (listing == null) {
@@ -998,6 +1002,17 @@ class BuyerFoodDetailPage extends StatelessWidget {
                     color: Colors.grey.shade600,
                   ),
                 ),
+                if (originalPrice != null &&
+                    originalPrice >
+                        (listing?['pricing']?['discountedPrice'] ?? 0))
+                  Text(
+                    '₹${originalPrice.toInt()}',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: Colors.grey.shade400,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
                 Text(
                   isFree ? 'FREE' : price,
                   style: GoogleFonts.inter(

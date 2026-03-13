@@ -27,6 +27,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
   final _foodNameController = TextEditingController();
   final _quantityController = TextEditingController();
   final _priceController = TextEditingController();
+  final _originalPriceController = TextEditingController();
   final _locationController = TextEditingController();
   final _descriptionController = TextEditingController();
 
@@ -62,6 +63,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
       _foodNameController.text = l.foodName;
       _quantityController.text = l.totalQuantity.toString();
       _priceController.text = l.price?.toString() ?? "";
+      _originalPriceController.text = l.originalPrice?.toString() ?? "";
       _locationController.text = l.locationAddress;
       _pincodeController.text = l.pincode ?? "";
       _descriptionController.text = l.description;
@@ -101,6 +103,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
     _priceController.dispose();
     _locationController.dispose();
     _pincodeController.dispose();
+    _originalPriceController.dispose();
     _descriptionController.dispose();
     _debounceTimer?.cancel();
     super.dispose();
@@ -341,6 +344,10 @@ class _CreateListingPageState extends State<CreateListingPage> {
                 _redistributionMode == RedistributionMode.discounted
                 ? double.tryParse(_priceController.text) ?? 0
                 : 0,
+            "originalPrice":
+                _redistributionMode == RedistributionMode.discounted
+                ? double.tryParse(_originalPriceController.text)
+                : null,
             "isFree": _redistributionMode == RedistributionMode.free,
           },
           "pickupWindow": {
@@ -509,7 +516,20 @@ class _CreateListingPageState extends State<CreateListingPage> {
                       const SizedBox(height: 16),
                       _buildTextField(
                         controller: _priceController,
-                        label: "Price (₹)",
+                        label: "Discounted Price (₹)",
+                        hint: "0.00",
+                        keyboardType: TextInputType.number,
+                        validator: (v) =>
+                            _redistributionMode ==
+                                    RedistributionMode.discounted &&
+                                (v?.isEmpty ?? true)
+                            ? "Required"
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _originalPriceController,
+                        label: "Original Price (₹)",
                         hint: "0.00",
                         keyboardType: TextInputType.number,
                         validator: (v) =>
