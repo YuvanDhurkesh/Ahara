@@ -33,6 +33,7 @@ class Listing {
   final String quantityUnit; // kg, portions, pieces, liters
   final RedistributionMode redistributionMode;
   final double? price; // Required if mode is discounted
+  final double? originalPrice;
   final DateTime preparedAt;
   final DateTime expiryTime;
   final HygieneStatus hygieneStatus;
@@ -57,6 +58,7 @@ class Listing {
     required this.quantityUnit,
     required this.redistributionMode,
     this.price,
+    this.originalPrice,
     required this.preparedAt,
     required this.expiryTime,
     required this.hygieneStatus,
@@ -83,6 +85,7 @@ class Listing {
       'quantityUnit': quantityUnit,
       'redistributionMode': redistributionMode.name,
       'price': price,
+      'originalPrice': originalPrice,
       'preparedAt': preparedAt.toIso8601String(),
       'expiryTime': expiryTime.toIso8601String(),
       'hygieneStatus': hygieneStatus.name,
@@ -106,15 +109,16 @@ class Listing {
     if (imageUrl.isNotEmpty) {
       final formattedUrl = BackendService.formatImageUrl(imageUrl);
       // Filter out old SVG generator URLs (DiceBear/Placeholder) to ensure real food photos
-      final isOldGenerator = formattedUrl.contains('dicebear.com') || 
-                            formattedUrl.contains('placeholder.com');
-                            
+      final isOldGenerator =
+          formattedUrl.contains('dicebear.com') ||
+          formattedUrl.contains('placeholder.com');
+
       if (BackendService.isValidImageUrl(formattedUrl) && !isOldGenerator) {
         debugPrint("📸 Using uploaded image for '$foodName': $formattedUrl");
         return formattedUrl;
       }
     }
-    
+
     final generatedUrl = BackendService.generateFoodImageUrl(foodName);
     debugPrint("🎨 Using generated image for '$foodName': $generatedUrl");
     return generatedUrl;
@@ -127,7 +131,9 @@ class Listing {
     // Extract FSSAI verified status from populated sellerProfileId
     // sellerProfileId may be a plain String (ObjectId) or a populated Map
     final rawProfile = json['sellerProfileId'];
-    final sellerProfile = (rawProfile is Map<String, dynamic>) ? rawProfile : null;
+    final sellerProfile = (rawProfile is Map<String, dynamic>)
+        ? rawProfile
+        : null;
     final fssaiData = (sellerProfile?['fssai'] is Map<String, dynamic>)
         ? sellerProfile!['fssai'] as Map<String, dynamic>
         : null;
@@ -146,15 +152,23 @@ class Listing {
           ? RedistributionMode.discounted
           : RedistributionMode.free,
       price: (pricing?['discountedPrice'] as num?)?.toDouble(),
-      preparedAt: DateTime.tryParse(pickupWindow?['from'] ?? '') ?? DateTime.now(),
-      expiryTime: DateTime.tryParse(pickupWindow?['to'] ?? '') ?? DateTime.now(),
+      originalPrice: (pricing?['originalPrice'] as num?)?.toDouble(),
+      preparedAt:
+          DateTime.tryParse(pickupWindow?['from'] ?? '') ?? DateTime.now(),
+      expiryTime:
+          DateTime.tryParse(pickupWindow?['to'] ?? '') ?? DateTime.now(),
       hygieneStatus: _parseHygieneStatus(json['hygieneStatus']),
-      locationAddress: json['pickupAddressText'] ?? json['locationAddress'] ?? '',
+      locationAddress:
+          json['pickupAddressText'] ?? json['locationAddress'] ?? '',
       pincode: json['pincode']?.toString(),
-      latitude: (json['pickupGeo'] != null && json['pickupGeo']['coordinates'] != null)
+      latitude:
+          (json['pickupGeo'] != null &&
+              json['pickupGeo']['coordinates'] != null)
           ? (json['pickupGeo']['coordinates'][1] as num).toDouble()
           : 0.0,
-      longitude: (json['pickupGeo'] != null && json['pickupGeo']['coordinates'] != null)
+      longitude:
+          (json['pickupGeo'] != null &&
+              json['pickupGeo']['coordinates'] != null)
           ? (json['pickupGeo']['coordinates'][0] as num).toDouble()
           : 0.0,
       imageUrl: (json['images'] != null && (json['images'] as List).isNotEmpty)
@@ -190,7 +204,8 @@ class Listing {
   static ListingStatus _parseStatus(dynamic value) {
     if (value == null) return ListingStatus.active;
     try {
-      if (value == 'completed') return ListingStatus.claimed; // Map backend completed to claimed
+      if (value == 'completed')
+        return ListingStatus.claimed; // Map backend completed to claimed
       return ListingStatus.values.byName(value.toString());
     } catch (_) {
       return ListingStatus.active;
