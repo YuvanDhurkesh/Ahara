@@ -45,9 +45,8 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
     try {
       final authProvider = Provider.of<AppAuthProvider>(context, listen: false);
 
-      if (authProvider.mongoUser == null) {
-        await authProvider.refreshMongoUser();
-      }
+      // Always explicitly refresh the profile to get the latest backend stats (like impact)
+      await authProvider.refreshMongoUser();
 
       final buyerId = authProvider.mongoUser?['_id'];
       if (buyerId == null) {
@@ -324,7 +323,8 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                 const SizedBox(height: 40),
 
                 Text(
-                  AppLocalizations.of(context)!.translate("your_impact"),
+                  AppLocalizations.of(context)!.translate("your_impact") ??
+                      "Your Impact",
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -332,6 +332,7 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                _buildEnvironmentalImpact(auth.mongoProfile),
                 ResponsiveLayout(
                   mobile: Column(
                     children: [
@@ -809,6 +810,165 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildEnvironmentalImpact(Map<String, dynamic>? profile) {
+    if (profile == null) return const SizedBox.shrink();
+    final impact = profile['impact'] as Map<String, dynamic>?;
+    final double foodSavedKg =
+        (impact?['foodSavedKg'] as num?)?.toDouble() ?? 0.0;
+    final double co2SavedKg =
+        (impact?['co2SavedKg'] as num?)?.toDouble() ?? 0.0;
+
+    if (foodSavedKg <= 0 && co2SavedKg <= 0) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.green.shade50,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.green.shade100),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.eco, color: Colors.green, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Start your rescue journey",
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Place your first order to start saving food and tracking your environmental impact!",
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: Colors.green.shade800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.green.shade700, Colors.green.shade500],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.green.withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.public, color: Colors.white, size: 28),
+              const SizedBox(width: 12),
+              Text(
+                "Personal Impact",
+                style: GoogleFonts.inter(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildImpactMetric(
+                  "Food Saved",
+                  "${foodSavedKg.toStringAsFixed(1)} kg",
+                  Icons.restaurant_menu,
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 50,
+                color: Colors.white.withOpacity(0.3),
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              Expanded(
+                child: _buildImpactMetric(
+                  "CO₂ Prevented",
+                  "${co2SavedKg.toStringAsFixed(1)} kg",
+                  Icons.cloud_done_outlined,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImpactMetric(String label, String value, IconData icon) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Colors.white70, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: Colors.white70,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: GoogleFonts.inter(
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+      ],
     );
   }
 

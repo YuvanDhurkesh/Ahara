@@ -9,6 +9,11 @@ const buyerProfileSchema = new mongoose.Schema(
 
         dietaryPreferences: [{ type: String, enum: ["vegetarian", "vegan", "non_veg", "jain"] }],
 
+        impact: {
+            foodSavedKg: { type: Number, default: 0 },
+            co2SavedKg: { type: Number, default: 0 }
+        },
+
         stats: {
             totalOrders: { type: Number, default: 0 },
             cancelledOrders: { type: Number, default: 0 }

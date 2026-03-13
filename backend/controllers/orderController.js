@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const Listing = require("../models/Listing");
 const Notification = require("../models/Notification");
 const VolunteerProfile = require("../models/VolunteerProfile");
+const BuyerProfile = require("../models/BuyerProfile");
 const User = require("../models/User");
 const Message = require("../models/Message");
 const mongoose = require("mongoose");
@@ -506,6 +507,7 @@ exports.updateOrder = async (req, res) => {
         if (updates.status === 'delivered' || updates.status === 'cancelled') {
             try {
                 await recomputeBuyerTrustScore(order.buyerId);
+                await recomputeBuyerImpact(order.buyerId);
                 await recomputeSellerTrustScore(order.sellerId);
                 if (order.volunteerId) {
                     await recomputeVolunteerTrustScore(order.volunteerId);
@@ -1134,6 +1136,30 @@ async function recomputeBuyerTrustScore(buyerId) {
     }
 }
 
+// Recompute buyer personal impact based on completed orders
+async function recomputeBuyerImpact(buyerId) {
+    try {
+        if (!buyerId) return;
+        const orders = await Order.find({ buyerId, status: { $in: ['delivered', 'completed'] } });
+
+        let totalQuantity = 0;
+        for (const o of orders) {
+            totalQuantity += (o.quantityOrdered || 1);
+        }
+
+        const foodSavedKg = totalQuantity * 0.5;
+        const co2SavedKg = foodSavedKg * 2.5;
+
+        await BuyerProfile.findOneAndUpdate(
+            { userId: buyerId },
+            { $set: { "impact.foodSavedKg": foodSavedKg, "impact.co2SavedKg": co2SavedKg } },
+            { upsert: true }
+        );
+    } catch (err) {
+        console.error('recomputeBuyerImpact error', err);
+    }
+}
+
 // Recompute seller trust score based on orders received
 async function recomputeSellerTrustScore(sellerId) {
     try {
@@ -1359,6 +1385,7 @@ exports.verifyOtp = async (req, res) => {
             // Recompute trust scores after successful delivery
             try {
                 await recomputeBuyerTrustScore(order.buyerId);
+                await recomputeBuyerImpact(order.buyerId);
                 await recomputeSellerTrustScore(order.sellerId);
                 if (order.volunteerId) {
                     await recomputeVolunteerTrustScore(order.volunteerId);
@@ -1382,6 +1409,7 @@ exports.verifyOtp = async (req, res) => {
 
 // expose helper methods for testing/other modules
 exports.recomputeBuyerTrustScore = recomputeBuyerTrustScore;
+exports.recomputeBuyerImpact = recomputeBuyerImpact;
 exports.recomputeSellerTrustScore = recomputeSellerTrustScore;
 exports.recomputeVolunteerTrustScore = recomputeVolunteerTrustScore;
 
