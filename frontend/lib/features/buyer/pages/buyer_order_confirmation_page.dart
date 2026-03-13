@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../shared/styles/app_colors.dart';
 import 'buyer_dashboard_page.dart';
+import 'buyer_order_details_page.dart';
 
 class BuyerOrderConfirmationPage extends StatelessWidget {
   final Map<String, dynamic> order;
@@ -251,8 +252,11 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                const BuyerDashboardPage(initialIndex: 2),
+                            builder: (_) => BuyerOrderDetailsPage(
+                              order: order['order'] is Map<String, dynamic>
+                                  ? order['order']
+                                  : order,
+                            ),
                           ),
                           (route) => false,
                         );
@@ -265,7 +269,7 @@ class BuyerOrderConfirmationPage extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        'View My Orders',
+                        'View Order',
                         style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
