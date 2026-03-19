@@ -300,6 +300,46 @@ class BuyerFoodDetailPage extends StatelessWidget {
                 ),
               ),
             ),
+            if (listing?['isSurpriseBag'] == true)
+              Positioned(
+                bottom: 24,
+                left: 24,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.inventory_2_outlined,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "SURPRISE BAG",
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -356,7 +396,7 @@ class BuyerFoodDetailPage extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          name,
+          listing?['isSurpriseBag'] == true ? "Surprise Bag" : name,
           style: GoogleFonts.cormorantInfant(
             fontSize: 36,
             fontWeight: FontWeight.w700,
@@ -364,6 +404,33 @@ class BuyerFoodDetailPage extends StatelessWidget {
             letterSpacing: -0.5,
           ),
         ),
+        if (listing?['isSurpriseBag'] == true) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4A00E0).withOpacity(0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF4A00E0).withOpacity(0.1)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.help_outline, color: Color(0xFF4A00E0), size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    "This bag contains a mystery selection of surplus items from today's stock.",
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: AppColors.textDark.withOpacity(0.8),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -559,9 +559,31 @@ class _BuyerHomePageState extends State<BuyerHomePage> {
                     errorBuilder: (context, error, stackTrace) => Container(height: 180, width: double.infinity, color: AppColors.textLight.withOpacity(0.05), child: Icon(Icons.image_not_supported_outlined, color: AppColors.textLight.withOpacity(0.2), size: 32)),
                   ),
                 ),
-                if (isFree)
+                if (listing['isSurpriseBag'] == true)
                   Positioned(
                     top: 12, left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)]),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.inventory_2_outlined, color: Colors.white, size: 12),
+                          SizedBox(width: 4),
+                          Text(
+                            "SURPRISE BAG",
+                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                if (isFree)
+                  Positioned(
+                    top: listing['isSurpriseBag'] == true ? 44 : 12, left: 12,
                     child: Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10)), child: Text(AppLocalizations.of(context)!.translate("FREE"), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900))),
                   ),
                 if (rating > 0)

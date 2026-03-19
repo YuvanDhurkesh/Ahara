@@ -1099,6 +1099,29 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                   ),
                 ),
               ),
+              if (listing['isSurpriseBag'] == true)
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)]),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.inventory_2_outlined, color: Colors.white, size: 12),
+                        SizedBox(width: 4),
+                        Text(
+                          "SURPRISE BAG",
+                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               Positioned(
                 top: 12,
                 right: 12,
@@ -1170,7 +1193,7 @@ class _BuyerBrowsePageState extends State<BuyerBrowsePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      listing['isSurpriseBag'] == true ? "Surprise Bag" : name,
                       style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

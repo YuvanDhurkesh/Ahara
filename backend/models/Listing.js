@@ -42,6 +42,7 @@ const listingSchema = new mongoose.Schema(
         },
         // Safety & Lifecycle
         isSafetyValidated: { type: Boolean, default: false },
+        isSurpriseBag: { type: Boolean, default: false },
         safetyStatus: { type: String, enum: ["validated", "rejected", "pending"], default: "pending" },
         safetyRejectionReason: String,
         safetyThreshold: Date

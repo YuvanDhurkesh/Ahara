@@ -40,6 +40,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
   XFile? _pickedXFile;
   final ImagePicker _picker = ImagePicker();
   String _dietaryType = "vegetarian";
+  bool _isSurpriseBag = false;
 
   // Rescue Window state
   bool _rescueWindowEnabled = false;
@@ -75,6 +76,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
       if (l.businessType != null) {
         _businessType = l.businessType!;
       }
+      _isSurpriseBag = l.isSurpriseBag;
     }
 
     _foodNameController.addListener(_onFoodNameChanged);
@@ -334,6 +336,7 @@ class _CreateListingPageState extends State<CreateListingPage> {
           "sellerProfileId": realSellerProfileId,
           "foodName": _foodNameController.text,
           "foodType": _selectedFoodType.name,
+          "isSurpriseBag": _isSurpriseBag,
           "dietaryType": _dietaryType,
           "category": "cooked",
           "quantityText": "${_quantityController.text} ${_selectedUnit}",
@@ -461,6 +464,8 @@ class _CreateListingPageState extends State<CreateListingPage> {
                     ),
                     const SizedBox(height: 24),
                     _buildSectionTitle("Basic Information"),
+                    const SizedBox(height: 16),
+                    _buildSurpriseBagToggle(),
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _foodNameController,
@@ -665,6 +670,64 @@ class _CreateListingPageState extends State<CreateListingPage> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildSurpriseBagToggle() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.inventory_2_outlined, color: AppColors.primary, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Surprise Bag Mode",
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                Text(
+                  "Mystery mix of surplus items",
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: AppColors.textLight.withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _isSurpriseBag,
+            activeColor: AppColors.primary,
+            onChanged: (v) {
+              setState(() {
+                _isSurpriseBag = v;
+                if (_isSurpriseBag && _foodNameController.text.isEmpty) {
+                  _foodNameController.text = "Surprise Bag";
+                }
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 
