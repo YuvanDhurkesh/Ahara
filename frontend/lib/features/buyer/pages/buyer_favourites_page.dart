@@ -468,9 +468,19 @@ class _BuyerFavouritesPageState extends State<BuyerFavouritesPage> {
                     ),
                   ),
                 ),
-                title: Text(
-                  listing['foodName'] ?? "Unnamed Item",
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                title: Row(
+                  children: [
+                    if (listing['isSurpriseBag'] == true) ...[
+                      const Icon(Icons.inventory_2_outlined, color: Color(0xFF4A00E0), size: 16),
+                      const SizedBox(width: 8),
+                    ],
+                    Expanded(
+                      child: Text(
+                        listing['isSurpriseBag'] == true ? "Surprise Bag" : (listing['foodName'] ?? "Unnamed Item"),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ),
+                  ],
                 ),
                 subtitle: Text(
                   isFree ? AppLocalizations.of(context)!.translate("FREE") : "₹$price",

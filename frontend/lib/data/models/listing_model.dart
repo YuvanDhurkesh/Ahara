@@ -48,6 +48,7 @@ class Listing {
   final bool isFssaiVerified;
   final String? fssaiCertificateUrl;
   final String? sellerName;
+  final bool isSurpriseBag;
 
   Listing({
     required this.id,
@@ -73,6 +74,7 @@ class Listing {
     this.isFssaiVerified = false,
     this.fssaiCertificateUrl,
     this.sellerName,
+    this.isSurpriseBag = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -100,6 +102,7 @@ class Listing {
       'isFssaiVerified': isFssaiVerified,
       'fssaiCertificateUrl': fssaiCertificateUrl,
       'sellerName': sellerName,
+      'isSurpriseBag': isSurpriseBag,
     };
   }
 
@@ -180,6 +183,7 @@ class Listing {
       isFssaiVerified: isFssaiVerified,
       fssaiCertificateUrl: fssaiCertificateUrl,
       sellerName: sellerName,
+      isSurpriseBag: json['isSurpriseBag'] == true,
     );
   }
 
