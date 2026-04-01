@@ -246,7 +246,13 @@ describe('Listing Controller - relistListing', () => {
     });
 
     it('should relist a listing and restore quantity', async () => {
-        const original = { _id: 'l1', totalQuantity: 10 };
+        const original = { 
+            _id: 'l1', 
+            totalQuantity: 10,
+            pricing: { 
+                toObject: () => ({ originalPrice: 100, discountedPrice: 50, isFree: false }) 
+            }
+        };
         const relisted = { _id: 'l1', status: 'active', remainingQuantity: 10 };
 
         Listing.findById.mockResolvedValue(original);
