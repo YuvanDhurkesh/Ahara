@@ -291,24 +291,38 @@ exports.getCompletedListings = async (req, res) => {
 exports.relistListing = async (req, res) => {
     try {
         const { id } = req.params;
-        const { pickupWindow } = req.body;
-
+        const { pickupWindow, totalQuantity, pricing } = req.body;
+        
         if (!pickupWindow || !pickupWindow.from || !pickupWindow.to) {
             return res.status(400).json({ error: "pickupWindow with from and to is required" });
         }
 
-        // Get the original listing to restore totalQuantity
+        // Get the original listing
         const originalListing = await Listing.findById(id);
         if (!originalListing) {
             return res.status(404).json({ error: "Listing not found" });
         }
+
+        // Use provided quantity or fallback to original totalQuantity
+        const newTotalQuantity = totalQuantity !== undefined ? Number(totalQuantity) : originalListing.totalQuantity;
+        if (isNaN(newTotalQuantity)) {
+            return res.status(400).json({ error: "totalQuantity must be a number" });
+        }
+
+        // Handle Pricing overrides
+        const finalPricing = {
+            ...originalListing.pricing.toObject(),
+            ...(pricing || {})
+        };
 
         const updatedListing = await Listing.findByIdAndUpdate(
             id,
             {
                 pickupWindow,
                 status: "active",
-                remainingQuantity: originalListing.totalQuantity
+                totalQuantity: newTotalQuantity,
+                remainingQuantity: newTotalQuantity,
+                pricing: finalPricing
             },
             { new: true, runValidators: true }
         );

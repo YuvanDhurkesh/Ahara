@@ -444,7 +444,7 @@ class BackendService {
 
   static Future<void> relistListing(
     String id,
-    Map<String, dynamic> pickupWindow,
+    Map<String, dynamic> data,
   ) async {
     final url = Uri.parse("$baseUrl/listings/relist/$id");
 
@@ -454,7 +454,7 @@ class BackendService {
         "Content-Type": "application/json",
         "ngrok-skip-browser-warning": "true",
       },
-      body: jsonEncode({"pickupWindow": pickupWindow}),
+      body: jsonEncode(data),
     );
 
     if (response.statusCode != 200) {
