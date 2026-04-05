@@ -1050,6 +1050,11 @@ class BackendService {
       return imageUrl;
     }
 
+    // INTERCEPT BACKEND BUG: The remote backend mistakenly prepends a '/' to Cloudinary HTTP URLs.
+    if (imageUrl.startsWith('/http://') || imageUrl.startsWith('/https://')) {
+      return imageUrl.substring(1); // Strips the leading slash to fix the URL!
+    }
+
     // If it's a relative path, prepend the base URL
     if (imageUrl.startsWith('/')) {
       return "$baseUrl$imageUrl";
@@ -1064,10 +1069,24 @@ class BackendService {
       return false;
     }
 
-    // Filter out old SVG generator URLs (DiceBear/Placeholder)
+    // Filter out old SVG generator URLs (DiceBear/Placeholder) and dead services
     if (imageUrl.contains('dicebear.com') ||
-        imageUrl.contains('placeholder.com')) {
+        imageUrl.contains('placeholder.com') ||
+        imageUrl.contains('source.unsplash.com') ||
+        imageUrl.contains('loremflickr.com')) {
       return false;
+    }
+
+    // Unsplash purged all legacy 11-character photo IDs.
+    // If we receive one from the hosted backend, mark it invalid!
+    if (imageUrl.contains('images.unsplash.com/photo-')) {
+      final parts = imageUrl.split('photo-');
+      if (parts.length > 1) {
+        final idPart = parts[1].split('?').first; // Get just the ID part before query params
+        if (idPart.length < 20) {
+          return false;
+        }
+      }
     }
 
     try {
@@ -1082,101 +1101,30 @@ class BackendService {
 
   static String generateFoodImageUrl(String foodName, [String? category]) {
     final String name = foodName.toLowerCase();
-    final String cat = (category ?? "").toLowerCase();
 
-    // Pool keys matching backend imageGenerator.js
-    const List<String> order = [
-      'biryani',
-      'rice',
-      'pizza',
-      'burger',
-      'sandwich',
-      'pasta',
-      'noodles',
-      'bread',
-      'roti',
-      'naan',
-      'curry',
-      'dal',
-      'idli',
-      'dosa',
-      'sambar',
-      'sabzi',
-      'salad',
-      'soup',
-      'fruit',
-      'cake',
-      'sweet',
-      'dessert',
-      'milk',
-      'eggs',
-      'dairy',
-      'steak',
-      'sushi',
-      'taco',
-      'vegetables',
-      'snack',
-      'coffee',
-      'juice',
-      'tea',
-      'meal',
-    ];
-
-    String? catKey;
-    for (final key in order) {
-      if (name.contains(key)) {
-        catKey = key;
-        break;
-      }
+    // 1. Safe default for empty strings
+    if (name.trim().isEmpty) {
+      return "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&fit=crop";
     }
 
-    if (catKey == null && cat.isNotEmpty) {
-      for (final key in order) {
-        if (cat.contains(key)) {
-          catKey = key;
-          break;
-        }
-      }
+    // 2. Curated safe photos perfectly known to work (long UUIDs)
+    if (name.contains("biryani")) {
+      return "https://images.unsplash.com/photo-1563379091339-03246963d96c?w=800&q=80&fit=crop";
+    }
+    if (name.contains("pizza")) {
+      return "https://images.unsplash.com/photo-1548365328-9f547fb0953d?w=800&q=80&fit=crop";
+    }
+    if (name.contains("burger")) {
+      return "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80&fit=crop";
+    }
+    if (name.contains("salad")) {
+      return "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80&fit=crop";
     }
 
-    // High-quality Unsplash pool for matched categories (mirroring backend)
-    final Map<String, List<String>> pool = {
-      'biryani': ['bMfxMCmCHbU', 'QzljZB_Vfe4', 'gI4VrRpSBo0'],
-      'rice': ['bMfxMCmCHbU', 'VkUBDMb8Bxs', 'E3qRz4sNqBE'],
-      'curry': ['1BaBOGSiF1k', 'YnQbEzYhJo', 'k0rX4hQqOxo', 'In9-3R6Wp00'],
-      'bread': ['8PZJpMPjVbQ', 'ot0nBwh9Rcg', 'Fd9pV5GWjlc'],
-      'pizza': ['oU6KZTXhuvk', 'bELvIg_KZGU', 'yszTabh9ux0'],
-      'pasta': ['SqYmTDQYMjo', 'R4-LCEj0-E', '48p194Y08NM'],
-      'noodles': ['R4-LCEj0-E', '48p194Y08NM', 'ot0nBwh9Rcg'],
-      'burger': ['So5iBhQnBmk', 'MMGP4kHH-5g', 'uQs1802D0CQ'],
-      'salad': ['IGfIGP5ONV0', '9H9oEGNa9ps', 'YJdCZba0TYE'],
-      'fruit': ['IGfIGP5ONV0', 'YnQbEzYhJo', 'a2XpxdFb2l8'],
-      'dessert': ['SxIYUGd6cFo', '85zVPGWtWxI', '3iqxDmGOi4g'],
-      'meal': [
-        '1BaBOGSiF1k',
-        'bMfxMCmCHbU',
-        'So5iBhQnBmk',
-        'ot0nBwh9Rcg',
-        'oU6KZTXhuvk',
-      ],
-    };
-
-    final seed = foodName.codeUnits.fold<int>(
-      0,
-      (prev, element) => prev + element,
-    );
-
-    if (catKey != null && pool.containsKey(catKey)) {
-      final ids = pool[catKey]!;
-      final id = ids[seed % ids.length];
-      return "https://images.unsplash.com/photo-$id?w=800&q=80&fit=crop&auto=format";
-    }
-
-    // Fallback to LoremFlickr for specific names
-    final formattedName = name
-        .replaceAll(RegExp(r'[^a-z ]'), '')
-        .trim()
-        .replaceAll(' ', ',');
-    return "https://loremflickr.com/800/600/food,$formattedName?lock=${seed % 1000}";
+    // 3. Dynamic search with Pollinations AI for all other foods (Noodles, Curry, Coffee, etc)
+    final cleaned = name.replaceAll(RegExp(r'[^a-zA-Z0-9 ]'), '').replaceAll(' ', ',');
+    
+    // Pollinations generates beautiful dynamic images without 404s.
+    return "https://image.pollinations.ai/prompt/delicious%20$cleaned%20food?width=800&height=600&nologo=true";
   }
 }
