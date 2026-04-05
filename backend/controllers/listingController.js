@@ -15,7 +15,9 @@ async function ensureListingHasImage(listing) {
 
     const isDeadUnsplash = listingObj.images &&
         listingObj.images.length > 0 &&
-        listingObj.images[0].includes('pMW4jzELQCw');
+        (listingObj.images[0].includes('pMW4jzELQCw') ||
+            listingObj.images[0].includes('source.unsplash.com') ||
+            listingObj.images[0].includes('loremflickr.com'));
 
     if (!listingObj.images || listingObj.images.length === 0 || isOldGenerator || isDeadUnsplash) {
         const defaultImageUrl = generateDefaultImageUrl(listingObj.foodName, listingObj.category);
@@ -292,7 +294,7 @@ exports.relistListing = async (req, res) => {
     try {
         const { id } = req.params;
         const { pickupWindow, totalQuantity, pricing } = req.body;
-        
+
         if (!pickupWindow || !pickupWindow.from || !pickupWindow.to) {
             return res.status(400).json({ error: "pickupWindow with from and to is required" });
         }

@@ -1,8 +1,3 @@
-/**
- * Generate a high-quality default image URL for listings that have no photo.
- * Uses curated Unsplash photo IDs for common categories and LoremFlickr for specialized names.
- */
-
 // pool of hand-picked Unsplash photo IDs (high-quality, food-accurate)
 const CATEGORY_PHOTOS = {
   biryani: ['bMfxMCmCHbU', 'QzljZB_Vfe4', 'gI4VrRpSBo0'],
@@ -66,26 +61,38 @@ function resolveCategory(name = '') {
   return null;
 }
 
-function generateDefaultImageUrl(foodName = 'food', category = 'food') {
-  // Try matching food name first, then category
+const generateFoodImageUrl = (foodName = '', category = '') => {
+  const name = foodName.toLowerCase();
+
+  if (!name.trim()) {
+    return "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&fit=crop";
+  }
+
+  // STEP 1: curated categories (Restored all 34 working categories)
   let catKey = resolveCategory(foodName);
   if (!catKey) catKey = resolveCategory(category);
 
-  // 1. If we have a hand-picked curated pool, use it for best quality
   if (catKey && CATEGORY_PHOTOS[catKey]) {
     const pool = CATEGORY_PHOTOS[catKey];
     const photoId = pool[hashCode(foodName) % pool.length];
     return `https://images.unsplash.com/photo-${photoId}?w=800&q=80&fit=crop&auto=format`;
   }
 
-  // 2. Fallback to LoremFlickr for specialized names
-  const name = foodName.toLowerCase().replace(/[^a-z ]/g, '').trim();
-  const formattedName = name.split(' ').join(',');
-  const seed = hashCode(foodName) % 1000;
+  // STEP 2: dynamic search fallback
+  const cleaned = name.replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, ",");
 
-  return `https://loremflickr.com/800/600/food,${formattedName}?lock=${seed}`;
-}
+  // Since source.unsplash.com is returning 404s dynamically, we use a perfectly stable, beautiful fallback Unsplash food image
+  // To simulate dynamic but safely:
+  const fallbacks = [
+    '1546069901-ba9599a7e63c',
+    '1504674900247-0877df9cc836',
+    '1493770348161-369560ae357d',
+    '1473093295043-cdd812d0e601',
+    '1490818387583-1b0ba689a7f3'
+  ];
+  const safeId = fallbacks[hashCode(foodName) % fallbacks.length];
 
-module.exports = { generateDefaultImageUrl };
+  return `https://images.unsplash.com/photo-${safeId}?w=800&q=80&fit=crop&auto=format&seed=${cleaned}`;
+};
 
-module.exports = { generateDefaultImageUrl };
+module.exports = { generateDefaultImageUrl: generateFoodImageUrl };
